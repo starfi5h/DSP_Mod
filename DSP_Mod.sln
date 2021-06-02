@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSP_Mod", "DSP_Mod\DSP_Mod.csproj", "{E89F7AA3-2A8E-4BFD-B579-7B47674C833A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E89F7AA3-2A8E-4BFD-B579-7B47674C833A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E89F7AA3-2A8E-4BFD-B579-7B47674C833A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E89F7AA3-2A8E-4BFD-B579-7B47674C833A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E89F7AA3-2A8E-4BFD-B579-7B47674C833A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F736FB2-6083-4B67-9413-2D104C919DAB}
+	EndGlobalSection
+EndGlobal
