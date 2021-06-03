@@ -14,7 +14,6 @@ Select the Dyson swarm/layer number and the Add button will switch to Modify but
 Click it to open the modify panel, you can change the radius, angle, rotation speed (layer only) of that orbit.\
 Enter -1 in the rotation speed input field to restore the default rotation speed for that radius.\
 Deselect the orbit number to make the Modify button switchs back to the Add button.
-\
 
 ## Configuration
 
@@ -26,6 +25,7 @@ Deselect the orbit number to make the Modify button switchs back to the Add butt
 
 ##### option
 - EditNonemptySphere : Allow to modify a layer which is not empty
+
 **Warning : Changing the radius of a constructed layer orbit might damage the save file.**
 
 ----
@@ -36,7 +36,6 @@ Deselect the orbit number to make the Modify button switchs back to the Add butt
 按下后会打开修改面板，可修改该轨道的半径、角度、旋转速度(限戴森球层)。\
 在旋转速度的栏位输入-1可以回到该半径的预设旋转速度。\
 取消选取轨道号码使修改按钮切换回新增按钮。
-\
 
 ## 设置
 
@@ -48,6 +47,7 @@ Deselect the orbit number to make the Modify button switchs back to the Add butt
 
 #### 选项
 - EditNonemptySphere : 允许修改非空壳层轨道
+
 **警告 : 修改已建有节点的戴森球层的半径可能会损坏存档**
 
 ----
