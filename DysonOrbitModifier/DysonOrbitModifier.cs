@@ -23,17 +23,17 @@ namespace DysonOrbitModifier
                 harmony.PatchAll(typeof(DysonOrbitUI));
                 ModTranslate.Init();
                 configBool = new ConfigEntry<bool>[] {
-                    Config.Bind<bool>("option", "EditNonemptySphere", false, "Allow to modify the layer with nodes/允許修改非空層軌道")};
+                    Config.Bind<bool>("option", "EditNonemptySphere", false, "Allow to modify a layer which is not empty \n允許修改非空殼層軌道")};
                 configFloat = new ConfigEntry<float>[]{
-                     Config.Bind<float>("parameter", "minRadiusMultiplier", 1.0f, "最小軌道半徑的倍率"),
-                     Config.Bind<float>("parameter", "maxRadiusMultiplier", 1.0f, "最大轨道半径的倍率"),
-                     Config.Bind<float>("parameter", "maxAngularSpeed", 10.0f, "最大角速度")
+                     Config.Bind<float>("modify panel setting", "minRadiusMultiplier", 1.0f, "Multiplier of minimum radius \n最小軌道半徑的倍率"),
+                     Config.Bind<float>("modify panel setting", "maxRadiusMultiplier", 1.0f, "Multiplier of maximum radius \n最大轨道半径的倍率"),
+                     Config.Bind<float>("modify panel setting", "maxAngularSpeed", 10.0f, "Maximum rotation speed \n最大旋轉速度")
                 };
                 DysonOrbitUI.EditNonemptySphere = configBool[0].Value;
                 DysonOrbitUI.minOrbitRadiusMultiplier = configFloat[0].Value;
                 DysonOrbitUI.maxOrbitRadiusMultiplier = configFloat[1].Value;
                 DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
-                logger.LogDebug($"EditNonemptySphere:{configBool[0].Value}, minRadiusX:{configFloat[0].Value}, maxRadiuX:{configFloat[1].Value}, maxAngularSpeed:{configFloat[2].Value}");
+                logger.LogDebug($"EditNonemptySphere:{configBool[0].Value} Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(0,{configFloat[2].Value})");
 
             }
             catch (Exception e)
@@ -70,7 +70,7 @@ namespace DysonOrbitModifier
             TranslateDict.Add("Add Layer", "新增层级");
             TranslateDict.Add("Modify Orbit", "修改轨道");
             TranslateDict.Add("Modify Layer", "修改层级");
-            TranslateDict.Add("Orbit angular speed", "角速度");
+            TranslateDict.Add("Rotation speed", "旋轉速度");
         }
     }
 }

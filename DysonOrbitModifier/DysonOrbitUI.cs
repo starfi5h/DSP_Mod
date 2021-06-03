@@ -67,7 +67,7 @@ namespace DysonOrbitModifier
                 }
                 if (!modText0)
                 {
-                    CreateObject(ref obj, dir + "bar-label", "bar-label-3", new Vector3(-230f, 74f, 0f), "Orbit angular speed".Translate());
+                    CreateObject(ref obj, dir + "bar-label", "bar-label-3", new Vector3(-230f, 74f, 0f), "Rotation speed".Translate());
                     modText0 = obj.GetComponent<Text>();
                 }
 
@@ -116,10 +116,9 @@ namespace DysonOrbitModifier
         {
             sliderEventLock = true;
             string val = modInput0.text;
-            float result;
             if (val == "-1") //Reset angular speed to original value using current radius
                 modSlider0.value = Mathf.Sqrt(that.viewDysonSphere.gravity / that.addSlider0.value) / that.addSlider0.value * 57.29578f;
-            else if (float.TryParse(val, out result))
+            else if (float.TryParse(val, out float result))
                 modSlider0.value = Mathf.Clamp(result, modSlider0.minValue, modSlider0.maxValue);
             modInput0.text = modSlider0.value.ToString();
             sliderEventLock = false;
@@ -132,6 +131,11 @@ namespace DysonOrbitModifier
             typeof(UIDysonPanel).GetMethod("UpdateSelectionVisibleChange", flags).Invoke(instance, args);
         }
 
+        public static void ConvertQuaternion(Quaternion rotation, out float inclination, out float longitude)
+        {
+            inclination = rotation.eulerAngles.z == 0 ? 0 : 360 - rotation.eulerAngles.z;
+            longitude = rotation.eulerAngles.y == 0 ? 0 : 360 - rotation.eulerAngles.y;
+        }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnAddOkClick")]
         public static void UIDysonPanel_OnAddOkClick(UIDysonPanel __instance)
@@ -139,14 +143,17 @@ namespace DysonOrbitModifier
             try
             {
                 float radius = __instance.addSlider0.value;
-                Quaternion rotation = Quaternion.Euler(0.0f, -__instance.addSlider2.value, -__instance.addSlider1.value);
+                float inclination = __instance.addSlider1.value;
+                float longitude = __instance.addSlider2.value;
+                Quaternion rotation = Quaternion.Euler(0.0f, -longitude, -inclination);
                 float angularSpeed = modSlider0.value;
-                logger.LogInfo($"New Parameter: ({radius}, {__instance.addSlider1.value}, {__instance.addSlider2.value}, {angularSpeed})");
+                logger.LogInfo($"New Parameter: ({radius}, {inclination}, {longitude}, {angularSpeed})");
 
                 if (modOrbitMode)
                 {
                     int id = __instance.orbitSelected;
-                    logger.LogInfo($"Old Orbit [{id}]: ({__instance.viewDysonSphere.swarm.orbits[id].radius}, {__instance.viewDysonSphere.swarm.orbits[id].rotation.eulerAngles})");
+                    ConvertQuaternion(__instance.viewDysonSphere.swarm.orbits[id].rotation, out inclination, out longitude);
+                    logger.LogInfo($"Old Orbit [{id}]: ({__instance.viewDysonSphere.swarm.orbits[id].radius}, {inclination}, {longitude})");
                     modOrbitMode = false;
                     __instance.viewDysonSphere.swarm.orbits[id].radius = radius;
                     __instance.viewDysonSphere.swarm.orbits[id].rotation = rotation;
@@ -156,12 +163,14 @@ namespace DysonOrbitModifier
                 {
                     int id = __instance.layerSelected;
                     DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(id);
-                    logger.LogInfo($"Old Layer [{id}]: ({layer.orbitRadius}, {layer.orbitRotation.eulerAngles}, {layer.orbitAngularSpeed})");
+                    ConvertQuaternion(layer.orbitRotation, out inclination, out longitude);
+                    logger.LogInfo($"Old Layer [{id}]: ({layer.orbitRadius}, {inclination}, {longitude}, {layer.orbitAngularSpeed})");
                     modLayerMode = false;
                     __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitRadius = radius;
                     __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitRotation = rotation;
                     __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitAngularSpeed = angularSpeed;
                 }
+                modSlider0.value = 0;
             }
             catch (Exception e)
             {
@@ -190,9 +199,10 @@ namespace DysonOrbitModifier
             UpdateSelectionVisibleChange(__instance);
 
             SailOrbit orbit = __instance.viewDysonSphere.swarm.orbits[__instance.orbitSelected];
-            __instance.addSlider0.value = orbit.radius;
-            __instance.addSlider1.value = orbit.rotation.eulerAngles.z == 0 ? 0 : 360 - orbit.rotation.eulerAngles.z;
-            __instance.addSlider2.value = orbit.rotation.eulerAngles.y == 0 ? 0 : 360 - orbit.rotation.eulerAngles.y;
+            ConvertQuaternion(orbit.rotation, out float inclination, out float longitude);
+            __instance.addSlider0.value = orbit.radius;            
+            __instance.addSlider1.value = inclination;
+            __instance.addSlider2.value = longitude;
 
             __instance.addInput0.text = __instance.addSlider0.value.ToString("0");
             __instance.addInput1.text = __instance.addSlider1.value.ToString("0.0##");
@@ -220,9 +230,10 @@ namespace DysonOrbitModifier
             UpdateSelectionVisibleChange(__instance);
 
             DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(__instance.layerSelected);
+            ConvertQuaternion(layer.orbitRotation, out float inclination, out float longitude);
             __instance.addSlider0.value = layer.orbitRadius;
-            __instance.addSlider1.value = layer.orbitRotation.eulerAngles.z == 0 ? 0 : 360 - layer.orbitRotation.eulerAngles.z;
-            __instance.addSlider2.value = layer.orbitRotation.eulerAngles.y == 0 ? 0 : 360 - layer.orbitRotation.eulerAngles.y;
+            __instance.addSlider1.value = inclination;
+            __instance.addSlider2.value = longitude;
             sliderEventLock = true; //preserve original angularSpeed
             modSlider0.value = layer.orbitAngularSpeed;
             sliderEventLock = false;
@@ -309,6 +320,15 @@ namespace DysonOrbitModifier
                     __instance.addPanelErrorTip.offset.x = (float)(139.0 + (double)__instance.addSlider0.normalizedValue * 230.0);
                     __instance.addPanelErrorTip.SetText(__instance.addPanelError);
                 }
+
+                /*
+                DysonSphere sphere = __instance.viewDysonSphere;
+                for (int i = sphere.layerCount-2; i >= 0; i--)
+                {
+                    sphere.layersSorted[i].orbitRotation = sphere.layersSorted[i + 1].currentRotation * sphere.layersSorted[i].currentRotation;
+                }
+                sphere.modelRenderer.RebuildModels();
+                */
             }
         }
 
@@ -354,7 +374,7 @@ namespace DysonOrbitModifier
 
                 if (modLayerMode)
                 {
-                    __instance.addTitleText.text = ""; //"Modify Layer"
+                    __instance.addTitleText.text = ""; //Hide Title so that it won't block silder
                     __instance.addPanel.SetActive(true);
                     __instance.orbitPreview._Close();
                     __instance.layerPreview._Open();
@@ -397,13 +417,13 @@ namespace DysonOrbitModifier
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnSwarmOrbitButtonClick")]
-        public static void UIDysonPanel_OnSwarmOrbitButtonClick(UIDysonPanel __instance)
+        public static void UIDysonPanel_OnSwarmOrbitButtonClick()
         {
             modOrbitMode = modLayerMode = false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnShellLayerButtonClick")]
-        public static void UIDysonPanel_OnShellLayerButtonClick(UIDysonPanel __instance)
+        public static void UIDysonPanel_OnShellLayerButtonClick()
         {
             modOrbitMode = modLayerMode = false;
         }
@@ -420,7 +440,7 @@ namespace DysonOrbitModifier
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void UIDysonPanel__Close(UIDysonPanel __instance)
+        public static void UIDysonPanel__Close()
         {
             modOrbitMode = modLayerMode = false;
             that = null;
