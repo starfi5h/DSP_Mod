@@ -96,6 +96,7 @@
     <Compile Include="DysonOrbitUI.cs" />
     <Compile Include="DysonOrbitModifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SphereLogic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

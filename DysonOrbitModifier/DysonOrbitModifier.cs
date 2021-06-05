@@ -35,6 +35,8 @@ namespace DysonOrbitModifier
                 DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
                 logger.LogDebug($"EditNonemptySphere:{configBool[0].Value} Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(0,{configFloat[2].Value})");
 
+                DysonOrbitUI.logger = logger;
+                SphereLogic.logger = logger;
             }
             catch (Exception e)
             {

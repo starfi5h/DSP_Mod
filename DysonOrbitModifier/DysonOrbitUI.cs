@@ -28,7 +28,7 @@ namespace DysonOrbitModifier
         public static bool sliderEventLock;
         public static UIDysonPanel that;
 
-        public static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("DysonOrbitModifier");
+        public static ManualLogSource logger;
 
         public static void Free()
         {
@@ -147,28 +147,16 @@ namespace DysonOrbitModifier
                 float longitude = __instance.addSlider2.value;
                 Quaternion rotation = Quaternion.Euler(0.0f, -longitude, -inclination);
                 float angularSpeed = modSlider0.value;
-                logger.LogInfo($"New Parameter: ({radius}, {inclination}, {longitude}, {angularSpeed})");
 
                 if (modOrbitMode)
                 {
-                    int id = __instance.orbitSelected;
-                    ConvertQuaternion(__instance.viewDysonSphere.swarm.orbits[id].rotation, out inclination, out longitude);
-                    logger.LogInfo($"Old Orbit [{id}]: ({__instance.viewDysonSphere.swarm.orbits[id].radius}, {inclination}, {longitude})");
                     modOrbitMode = false;
-                    __instance.viewDysonSphere.swarm.orbits[id].radius = radius;
-                    __instance.viewDysonSphere.swarm.orbits[id].rotation = rotation;
-                    __instance.viewDysonSphere.swarm.orbits[id].up = rotation * Vector3.up;
+                    SphereLogic.ChangeSwarm(__instance.viewDysonSphere, __instance.orbitSelected, radius, rotation);
                 }
                 else if (modLayerMode)
                 {
-                    int id = __instance.layerSelected;
-                    DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(id);
-                    ConvertQuaternion(layer.orbitRotation, out inclination, out longitude);
-                    logger.LogInfo($"Old Layer [{id}]: ({layer.orbitRadius}, {inclination}, {longitude}, {layer.orbitAngularSpeed})");
                     modLayerMode = false;
-                    __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitRadius = radius;
-                    __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitRotation = rotation;
-                    __instance.viewDysonSphere.GetLayer(__instance.layerSelected).orbitAngularSpeed = angularSpeed;
+                    SphereLogic.ChangeLayer(__instance.viewDysonSphere, __instance.layerSelected, radius, rotation, angularSpeed);
                 }
                 modSlider0.value = 0;
             }
@@ -199,7 +187,7 @@ namespace DysonOrbitModifier
             UpdateSelectionVisibleChange(__instance);
 
             SailOrbit orbit = __instance.viewDysonSphere.swarm.orbits[__instance.orbitSelected];
-            ConvertQuaternion(orbit.rotation, out float inclination, out float longitude);
+            SphereLogic.ConvertQuaternion(orbit.rotation, out float inclination, out float longitude);
             __instance.addSlider0.value = orbit.radius;            
             __instance.addSlider1.value = inclination;
             __instance.addSlider2.value = longitude;
@@ -230,7 +218,7 @@ namespace DysonOrbitModifier
             UpdateSelectionVisibleChange(__instance);
 
             DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(__instance.layerSelected);
-            ConvertQuaternion(layer.orbitRotation, out float inclination, out float longitude);
+            SphereLogic.ConvertQuaternion(layer.orbitRotation, out float inclination, out float longitude);
             __instance.addSlider0.value = layer.orbitRadius;
             __instance.addSlider1.value = inclination;
             __instance.addSlider2.value = longitude;
@@ -246,41 +234,6 @@ namespace DysonOrbitModifier
             return false;
         }
 
-
-        public static int CheckSwarmRadius(DysonSphere sphere, float orbitRadius)
-        {
-            foreach (var planet in sphere.starData.planets)
-            {
-                if (planet.orbitAround > 0)
-                    continue;
-                if (Mathf.Abs(planet.orbitRadius * 40000.0f - orbitRadius) < 2199.95f)
-                    return -2;
-            }
-            return 0;
-        }
-
-        public static int CheckLayerRadius(DysonSphere sphere, int layerId, float orbitRadius)
-        {
-            foreach (var planet in sphere.starData.planets)
-            {
-                if (planet.orbitAround > 0)
-                    continue;
-                if (Mathf.Abs(planet.orbitRadius * 40000.0f - orbitRadius) < 2199.95f)
-                    return -2;
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                if (sphere.layersSorted[i] != null && Mathf.Abs(sphere.layersSorted[i].orbitRadius - orbitRadius) < 999.95f)
-                {
-                    if (sphere.layersIdBased[layerId].orbitRadius == sphere.layersSorted[i].orbitRadius)
-                        continue;
-                    else
-                        return -1;
-                }
-            }
-            return 0;
-        }
-
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnLateUpdate")]
         public static void UIDysonPanel__OnLateUpdate(UIDysonPanel __instance)
         {
@@ -289,7 +242,7 @@ namespace DysonOrbitModifier
                 int status = 0;
                 if (modOrbitMode)
                 {
-                    status = CheckSwarmRadius(__instance.viewDysonSphere, __instance.addSlider0.value);
+                    status = SphereLogic.CheckSwarmRadius(__instance.viewDysonSphere, __instance.addSlider0.value);
                     __instance.addSlider0Fg.color = status == 0 ? __instance.normalColor3 : __instance.redColor3;
                     Quaternion quaternion = Quaternion.Euler(0.0f, -__instance.addSlider2.value, -__instance.addSlider1.value);
                     __instance.orbitPreview.state = status == 0 ? 0 : 1;
@@ -298,7 +251,7 @@ namespace DysonOrbitModifier
                 }
                 else if (modLayerMode)
                 {
-                    status = CheckLayerRadius(__instance.viewDysonSphere, __instance.layerSelected, __instance.addSlider0.value);
+                    status = SphereLogic.CheckLayerRadius(__instance.viewDysonSphere, __instance.layerSelected, __instance.addSlider0.value);
                     __instance.addSlider0Fg.color = status == 0 ? __instance.normalColor3 : __instance.redColor3;
                     __instance.layerPreview.state = status == 0 ? 0 : 1;
                     Quaternion quaternion = Quaternion.Euler(0.0f, -__instance.addSlider2.value, -__instance.addSlider1.value);
@@ -320,15 +273,6 @@ namespace DysonOrbitModifier
                     __instance.addPanelErrorTip.offset.x = (float)(139.0 + (double)__instance.addSlider0.normalizedValue * 230.0);
                     __instance.addPanelErrorTip.SetText(__instance.addPanelError);
                 }
-
-                /*
-                DysonSphere sphere = __instance.viewDysonSphere;
-                for (int i = sphere.layerCount-2; i >= 0; i--)
-                {
-                    sphere.layersSorted[i].orbitRotation = sphere.layersSorted[i + 1].currentRotation * sphere.layersSorted[i].currentRotation;
-                }
-                sphere.modelRenderer.RebuildModels();
-                */
             }
         }
 
