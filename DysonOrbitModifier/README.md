@@ -1,6 +1,7 @@
 # DysonOrbitModifier
 
-![DysonOrbitModifier Demo](https://github.com/starfi5h/DSP_Mod/blob/master/DysonOrbitModifier/DysonOrbitModifier.gif?raw=true)
+![DysonOrbitModifier Demo 1](https://github.com/starfi5h/DSP_Mod/blob/master/DysonOrbitModifier/demo2.gif?raw=true)
+![DysonOrbitModifier Demo 2](https://github.com/starfi5h/DSP_Mod/blob/master/DysonOrbitModifier/demo3.gif?raw=true)
 
 This mod let you view and change parameters of a existing orbit without deleting it.  
 You can also edit parameter in configuration to make a bigger dyson sphere. (unsafe)  
