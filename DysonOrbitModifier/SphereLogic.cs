@@ -6,15 +6,17 @@ using UnityEngine.UI;
 using System.Reflection;
 using UnityEngine.Events;
 using BepInEx.Logging;
-
+using System.Collections.Generic;
 
 namespace DysonOrbitModifier
 {
+
     class SphereLogic
     {
 
         public static ManualLogSource logger;
-
+        public static bool moveStructure;
+        public static bool correctOnChange;
 
         public static int CheckSwarmRadius(DysonSphere sphere, float orbitRadius)
         {
@@ -50,7 +52,6 @@ namespace DysonOrbitModifier
             return 0;
         }
 
-
         public static void ConvertQuaternion(Quaternion rotation, out float inclination, out float longitude)
         {
             inclination = rotation.eulerAngles.z == 0 ? 0 : 360 - rotation.eulerAngles.z;
@@ -70,23 +71,219 @@ namespace DysonOrbitModifier
 
         public static void ChangeLayer(DysonSphere sphere, int id, float radius, Quaternion rotation, float angularSpeed)
         {
-            ConvertQuaternion(sphere.GetLayer(id).orbitRotation, out float inclination, out float longitude);
-            logger.LogInfo($"Previous Layer[{id}]: ({sphere.GetLayer(id).orbitRadius}, {inclination}, {longitude}, {sphere.GetLayer(id).orbitAngularSpeed})");
-            sphere.GetLayer(id).orbitRadius = radius;
-            sphere.GetLayer(id).orbitRotation = rotation;
-            sphere.GetLayer(id).orbitAngularSpeed = angularSpeed;
-            ConvertQuaternion(sphere.GetLayer(id).orbitRotation, out inclination, out longitude);
-            logger.LogInfo($" Current Layer[{id}]: ({sphere.GetLayer(id).orbitRadius}, {inclination}, {longitude}, {angularSpeed})");
+            DysonSphereLayer layer = sphere.GetLayer(id);
+            
+            (layer.orbitRadius, radius) = (radius, layer.orbitRadius);
+            (layer.orbitRotation, rotation) = (rotation, layer.orbitRotation);
+            (layer.orbitAngularSpeed, angularSpeed) = (angularSpeed, layer.orbitAngularSpeed);
+            //Quaternion currentRotation = layer.currentRotation;
+            layer.currentRotation = layer.orbitRotation * Quaternion.Euler(0f, -layer.currentAngle, 0f); //Update Rotation
+            layer.nextRotation = layer.orbitRotation * Quaternion.Euler(0f, -layer.currentAngle - layer.orbitAngularSpeed * 0.016666668f, 0f);
+
+
+            ConvertQuaternion(rotation, out float inclination, out float longitude);
+            logger.LogInfo($"Previous Layer[{id}]: ({radius}, {inclination}, {longitude}, {angularSpeed})");
+            ConvertQuaternion(layer.orbitRotation, out inclination, out longitude);
+            logger.LogInfo($" Current Layer[{id}]: ({layer.orbitRadius}, {inclination}, {longitude}, {angularSpeed})");
+
+            if (moveStructure && radius != layer.orbitRadius)
+            {
+                MoveStructure(sphere, id);
+                if (correctOnChange)
+                    ValueCorrection(sphere.GetLayer(id));
+            }
+            else
+                SyncNodeBuffer(sphere, id);
+            
         }
 
 
+        public static void MoveStructure(DysonSphere sphere, int layerId)
+        {
+            DysonSphereLayer layer = sphere.GetLayer(layerId);
+            MoveNodes(layer);
+            SyncNodeBuffer(sphere, layerId);
+            MoveFrames(layer);
+            sphere.CheckAutoNodes(); //clear inactive node
+            for (int count = sphere.autoNodeCount; count < 8; ++count)
+                sphere.PickAutoNode(); //add rocket target node
+            sphere.modelRenderer.RebuildModels();
+            MoveShell(layer);
+        }
+
+        public static void SyncNodeBuffer(DysonSphere sphere, int layerId)
+        {
+            DysonSphereLayer layer = sphere.GetLayer(layerId);
+            for (int i = 0; i < layer.nodeCursor; i++)
+            {
+                DysonNode node = layer.nodePool[i];
+                if (node != null && node.id == i)
+                {
+                    sphere.nrdPool[node.rid].pos = node.pos;
+                    sphere.nrdPool[node.rid].angularVel = layer.orbitAngularSpeed;
+                    sphere.nrdPool[node.rid].layerRot = layer.currentRotation; //value set at sphere.GameTick() 
+                }
+            }
+            sphere.nrdBuffer.SetData(sphere.nrdPool);
+        }
+
+        public static void MoveNodes(DysonSphereLayer layer)
+        {
+            for (int i = 0; i < layer.nodeCursor; i++)
+            {
+                DysonNode node = layer.nodePool[i];
+                if (node != null && node.id == i)
+                {
+                    Vector3 pos = node.pos;
+                    node.pos = node.pos.normalized * layer.orbitRadius;
+                    logger.LogDebug($"Node [{i}]: pos {pos}->{node.pos}");
+                }
+            }            
+        }
+
+        public static void MoveFrames(DysonSphereLayer layer)
+        {
+            for (int i = 0; i < layer.frameCursor; i++)
+            {
+                DysonFrame frame = layer.framePool[i];
+                if (frame != null && frame.id == i)
+                {
+                    int spMax = frame.spMax;
+                    int spReqOrderA = frame.nodeA.spReqOrder;
+                    int spReqOrderB = frame.nodeB.spReqOrder;
+
+                    frame.spMax = frame.segCount * 10;
+                    frame.nodeA.RecalcSpReq();
+                    frame.nodeB.RecalcSpReq();
+
+                    string str = $"Frame[{i}]: spMax {spMax}->{frame.spMax}; ";
+                    str += $"ReqSP nodeA[{frame.nodeA.id}]:{spReqOrderA}->{frame.nodeA.spReqOrder}, nodeB[{frame.nodeB.id}]:{spReqOrderB}->{frame.nodeB.spReqOrder}";
+                    logger.LogDebug(str);
+
+                    frame.segPoints = null; //Reset private field segPoints to recalculate position
+                }
+            }
+        }
+
+        public static void MoveShell(DysonSphereLayer layer)
+        {
+
+            List<int> nodeIds = new List<int>(6);
+            List<int> nodecps = new List<int>(6);
+            //List<uint> vertcps = new List<uint>(6); //vertcps, vertexCount will change when radius change
+
+            for (int sid = 0; sid < layer.shellCursor; sid++)
+            {
+                DysonShell shell = layer.shellPool[sid];
+                if (shell == null || sid != shell.id)
+                    continue;
+
+                nodeIds.Clear();
+                nodecps.Clear();
+                //vertcps.Clear();
+                for (int n = 0; n < shell.nodes.Count; n++)
+                {
+                    nodeIds.Add(shell.nodes[n].id);
+                }
+                for (int n = 0; n < shell.nodes.Count + 1; n++) //nodecps.Count = this.nodes.Count + 1, the last one is sum
+                {
+                    nodecps.Add(shell.nodecps[n]);
+                    shell.nodecps[n] = 0;                    
+                }
+                Array.Clear(shell.vertcps, 0, shell.vertcps.Length);
+                int vertexCount = shell.vertexCount;
+                int protoId = shell.protoId; //material
+
+                layer.RemoveDysonShell(shell.id);
+                //logger.LogDebug($"[{i}] v:{vertexCount} cp:[{string.Join(",", nodeIds.ToArray())}] cp({string.Join(",", nodecps.ToArray())}) ");
 
 
+                int id = layer.NewDysonShell(protoId, nodeIds);
+                shell = layer.shellPool[id];
+                //logger.LogDebug($"[{id}] v:{shell.vertexCount}");
 
+                //Fill back cell point
+                for (int index = 0; index < shell.nodes.Count; index++)
+                {
+                    int cp;
+                    for (cp = nodecps[index]; cp > 0 ; cp--)
+                    {
+                        if (!shell.Construct(index))
+                            break;
+                    }
+                    //logger.LogDebug($"[{index}] old_cp:{nodecps[index]} new_cp:{shell.nodecps[index]} remain_cp:{cp}");
+                    shell.nodecps[index] += cp; //Store for future change
+                }
+                logger.LogDebug($"Shell[{sid}]:Vertex {vertexCount}->{shell.vertexCount}; Total CP {nodecps[shell.nodes.Count]}->{shell.nodecps[shell.nodes.Count]}");
+                shell.nodecps[shell.nodes.Count] = nodecps[shell.nodes.Count]; //Store for future change
+            }
 
+        }
 
+        //Cut extra structe points and cell points
+        public static void ValueCorrection(DysonSphereLayer layer)
+        {
+            logger.LogDebug($"ValueCorrection {layer.id}");
+            for (int fid = 0; fid < layer.frameCursor; fid++)
+            {
+                DysonFrame frame = layer.framePool[fid];
+                if (frame == null || frame.id != fid)
+                    continue;
 
+                int halfMax = frame.spMax >> 1;
+                
+                if (frame.spA > halfMax)
+                {
+                    frame.spA = halfMax;
+                    frame.nodeA.RecalcSpReq();
+                }
+                if (frame.spB > halfMax)
+                {
+                    frame.spB = halfMax;
+                    frame.nodeB.RecalcSpReq();
+                }
+            }
 
+            for (int sid = 0; sid < layer.shellCursor; sid++)
+            {
+                DysonShell shell = layer.shellPool[sid];
+                if (shell == null || shell.id != sid)
+                    continue;
+
+                shell.nodecps[shell.nodes.Count] = 0;
+                for (int index = 0; index < shell.nodes.Count; index++)
+                {
+                    int cpMax = (shell.vertsqOffset[index + 1] - shell.vertsqOffset[index]) * 2;
+                    if (shell.nodecps[index] > cpMax)
+                    {
+                        shell.nodecps[index] = cpMax;
+                        shell.nodes[index].RecalcCpReq();
+                    }
+                    shell.nodecps[shell.nodes.Count] += shell.nodecps[index];
+                }
+
+            }
+        }           
+    
+    }
+    class DebugEntity : BaseUnityPlugin
+    {
+        public static ManualLogSource logger;
+       
+        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereLayer), "NewDysonNode")]
+        public static void DysonSphereLayer_NewDysonNode(DysonSphereLayer __instance, int __result)
+        {
+            logger.LogDebug($"Add Node [{__result}]: {__instance.nodePool[__result].pos}");
+        }
+        
+
+        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereLayer), "RemoveDysonNode", new Type[] {typeof(int) })]
+        public static void DysonSphereLayer_RemoveDysonNode(DysonSphereLayer __instance, int nodeId)
+        {
+            logger.LogDebug($"Rvm Node [{nodeId}]: {__instance.nodePool[nodeId].pos}");
+        }
+
+        
 
     }
 }

@@ -14,7 +14,6 @@ namespace DysonOrbitModifier
 {
     class DysonOrbitUI : BaseUnityPlugin
     {
-        public static bool EditNonemptySphere;
         public static float minOrbitRadiusMultiplier;
         public static float maxOrbitRadiusMultiplier;
         public static float maxOrbitAngularSpeed;
@@ -40,6 +39,8 @@ namespace DysonOrbitModifier
                 Destroy(modText0.gameObject);
             that = null;
         }
+
+
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
         public static void UIDysonPanel__OnOpen(UIDysonPanel __instance)
@@ -123,19 +124,19 @@ namespace DysonOrbitModifier
             modInput0.text = modSlider0.value.ToString();
             sliderEventLock = false;
         }
-
-        public static void UpdateSelectionVisibleChange(UIDysonPanel instance)
+        
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "OnAddSlider0Change")]
+        public static void UIDysonPanel_OnAddSlider0Change(UIDysonPanel __instance)
         {
-            var flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
-            var args = new object[0];
-            typeof(UIDysonPanel).GetMethod("UpdateSelectionVisibleChange", flags).Invoke(instance, args);
+            sliderEventLock = true;
+            if (modSlider0 != null)
+            {
+                modSlider0.value = Mathf.Sqrt(__instance.viewDysonSphere.gravity / __instance.addSlider0.value) / __instance.addSlider0.value * 57.29578f; //change angular speed along with radius
+                modInput0.text = modSlider0.value.ToString();
+            }
+            sliderEventLock = false;
         }
 
-        public static void ConvertQuaternion(Quaternion rotation, out float inclination, out float longitude)
-        {
-            inclination = rotation.eulerAngles.z == 0 ? 0 : 360 - rotation.eulerAngles.z;
-            longitude = rotation.eulerAngles.y == 0 ? 0 : 360 - rotation.eulerAngles.y;
-        }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnAddOkClick")]
         public static void UIDysonPanel_OnAddOkClick(UIDysonPanel __instance)
@@ -164,7 +165,7 @@ namespace DysonOrbitModifier
             {
                 logger.LogError(e);
             }
-            UpdateSelectionVisibleChange(__instance);
+            __instance.UpdateSelectionVisibleChange();
         }
 
 
@@ -184,7 +185,7 @@ namespace DysonOrbitModifier
             __instance.shellSelected = 0;
             modOrbitMode = !modOrbitMode;
             modLayerMode = false;
-            UpdateSelectionVisibleChange(__instance);
+            __instance.UpdateSelectionVisibleChange();
 
             SailOrbit orbit = __instance.viewDysonSphere.swarm.orbits[__instance.orbitSelected];
             SphereLogic.ConvertQuaternion(orbit.rotation, out float inclination, out float longitude);
@@ -215,7 +216,7 @@ namespace DysonOrbitModifier
             __instance.shellSelected = 0;
             modLayerMode = !modLayerMode;
             modOrbitMode = false;
-            UpdateSelectionVisibleChange(__instance);
+            __instance.UpdateSelectionVisibleChange();
 
             DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(__instance.layerSelected);
             SphereLogic.ConvertQuaternion(layer.orbitRotation, out float inclination, out float longitude);
@@ -330,19 +331,15 @@ namespace DysonOrbitModifier
                     __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
                     __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
 
-                    if (!EditNonemptySphere)
-                    {
-                        DysonSphereLayer layer = __instance.viewDysonSphere.GetLayer(__instance.layerSelected);
-                        __instance.addOkButton.button.interactable = layer.nodeCount == 0 && layer.frameCount == 0 && layer.shellCount == 0;
-                        if (!__instance.addOkButton.button.interactable)
-                            __instance.addOkButton.GetComponentInChildren<Text>().text = "Nonempty".Translate();
-                    }
                 }
                 else
                 {
-                    modSlider0?.gameObject.SetActive(false);
-                    modInput0?.gameObject.SetActive(false);
-                    modText0?.gameObject.SetActive(false);
+                    if (modSlider0 != null)
+                    {
+                        modSlider0?.gameObject.SetActive(false);
+                        modInput0?.gameObject.SetActive(false);
+                        modText0?.gameObject.SetActive(false);
+                    }
                     __instance.addOkButton.button.interactable = true;
                 }
 
@@ -384,10 +381,20 @@ namespace DysonOrbitModifier
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void UIDysonPanel__Close()
+        public static void UIDysonPanel__Close(UIDysonPanel __instance)
         {
             modOrbitMode = modLayerMode = false;
             that = null;
+            /*
+            for (int i = 1; i < __instance.viewDysonSphere.layersIdBased.Length; i++)
+            {
+                DysonSphereLayer layer = __instance.viewDysonSphere.layersIdBased[i];
+                if (layer != null && layer.id == i && layer.nodeCount != 0)
+                {
+                    SphereLogic.ValueCorrection(layer);
+                }
+            }
+            */
         }
 
     }

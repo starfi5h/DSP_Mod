@@ -3,7 +3,7 @@
 ![DysonOrbitModifier Demo](https://github.com/starfi5h/DSP_Mod/blob/master/DysonOrbitModifier/DysonOrbitModifier.gif?raw=true)
 
 This mod let you view and change parameters of a existing orbit without deleting it.  
-You can also edit parameter in configuration to make bigger dyson sphere. (unsafe)  
+You can also edit parameter in configuration to make a bigger dyson sphere. (unsafe)  
 Save the game before editing orbits in case of potential crush.  
 
 
@@ -17,18 +17,27 @@ Deselect the orbit number to make the Modify button switchs back to the Add butt
 
 ## Configuration
 
+Run the game one time to generate .cfg file. Restart the game to make the changes take effect.
 
-##### modify panel setting
+
+####   modify panel setting
 - minRadiusMultiplier : Multiplier of default minimum radius
 - maxRadiusMultiplier : Multiplier of default maximum radius
 - maxAngularSpeed : Maximum rotation speed
 
-##### option
-- EditNonemptySphere : Allow to modify a layer which is not empty
-
-**Warning : Changing the radius of a constructed layer orbit might damage the save file.**
+####   option
+- moveStructure : Move objects on the shell to the same radius when the radius is changed. Default : true.  
+  It is not recommended to disable this option,  cause a shell with different level objects may break in the future game patch.
+- correctOnChange : Remove exceeding Structure Point/Cell Point right after entities are moved. Default : true.  
+  When changing into a smaller radius, the existing SP/CP in each component may exceed their limits.  
+  Disable will let SP/CP stay at the original value until save and reload.
 
 ----
+# 修改戴森球轨道
+
+查看/修改现有轨道的参数，例如修改無法被删除的第一轨道。  
+也可以调整设置的倍率来建造比原本限制更大的戴森球，但可能有风险。  
+此MOD会修改游戏数据，使用前请先存档以防可能的游戏错误。  
 
 ## 使用方法
 
@@ -39,23 +48,32 @@ Deselect the orbit number to make the Modify button switchs back to the Add butt
 
 ## 设置
 
+.cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
+管理器安装: 左边选项Config editor -> 找到starfi5h.plugin.DysonOrbitModifier -> Edit Config  
+手动安装: 更改BepInEx\config\com.starfi5h.plugin.DysonOrbitModifier.cfg文件 
 
-#### 修改面板设置
+####   修改面板设置
 - minRadiusMultiplier : 最小轨道半径的倍率
 - maxRadiusMultiplier : 最大轨道半径的倍率
 - maxAngularSpeed : 最大旋转速度
 
-#### 选项
-- EditNonemptySphere : 允许修改非空壳层轨道
-
-**警告 : 修改已建有节点的戴森球层的半径可能会损坏存档**
+####   选项
+- moveStructure : 当轨道半径改变时，将壳上的物体移至相同半径的位置。  
+  不建议禁用这个选项，因为在未来的游戏更新中，有不同高度物体的戴森壳可能会损坏存档。
+- correctOnChange : 移动物体后，立即移除超出的结构点数/细胞点数。  
+  将半径调小时，每个组件中已有的结构点数(SP)/细胞点数(CP)可能超过它们的上限。
+  禁用这个选项将让SP/CP保持在改变之前的数值，直到存档和重新加载。
+ 
 
 ----
 
 ## Changelog
 
+#### V1.1.0
+\- Implement structure moving function.
+
 #### v1.0.0  
-Initial Release  
+\- Initial Release  
 
 ----
 

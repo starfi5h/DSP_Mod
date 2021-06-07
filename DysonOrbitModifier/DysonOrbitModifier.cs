@@ -7,7 +7,7 @@ using BepInEx.Logging;
 
 namespace DysonOrbitModifier
 {
-    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.1.0")]
     public class DysonOrbitModifier : BaseUnityPlugin
     {
         private Harmony harmony;
@@ -21,22 +21,28 @@ namespace DysonOrbitModifier
             {
 
                 harmony.PatchAll(typeof(DysonOrbitUI));
+                //harmony.PatchAll(typeof(DebugEntity));
                 ModTranslate.Init();
+
                 configBool = new ConfigEntry<bool>[] {
-                    Config.Bind<bool>("option", "EditNonemptySphere", false, "Allow to modify a layer which is not empty \n允許修改非空殼層軌道")};
+                    Config.Bind<bool>("option", "moveStructure", true, "Move objects on the shell to the same radius when the radius is changed. \n当轨道半径改变时，将壳上的物体移至相同半径的位置。"),
+                    Config.Bind<bool>("option", "correctOnChange", true, "Remove exceeding Structure Point/Cell Point right after entities are moved. \n移动物体后，立即移除超出的结构点数/细胞点数。")
+                };
                 configFloat = new ConfigEntry<float>[]{
                      Config.Bind<float>("modify panel setting", "minRadiusMultiplier", 1.0f, "Multiplier of minimum radius \n最小軌道半徑的倍率"),
                      Config.Bind<float>("modify panel setting", "maxRadiusMultiplier", 1.0f, "Multiplier of maximum radius \n最大轨道半径的倍率"),
                      Config.Bind<float>("modify panel setting", "maxAngularSpeed", 10.0f, "Maximum rotation speed \n最大旋轉速度")
                 };
-                DysonOrbitUI.EditNonemptySphere = configBool[0].Value;
+                SphereLogic.moveStructure = configBool[0].Value;
+                SphereLogic.correctOnChange = configBool[1].Value;
                 DysonOrbitUI.minOrbitRadiusMultiplier = configFloat[0].Value;
                 DysonOrbitUI.maxOrbitRadiusMultiplier = configFloat[1].Value;
                 DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
-                logger.LogDebug($"EditNonemptySphere:{configBool[0].Value} Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(0,{configFloat[2].Value})");
+                logger.LogDebug($"moveStructure:({configBool[0].Value}) correctOnChange:({configBool[1].Value}) Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(,{configFloat[2].Value})");
 
                 DysonOrbitUI.logger = logger;
                 SphereLogic.logger = logger;
+                DebugEntity.logger = logger;
             }
             catch (Exception e)
             {
@@ -67,7 +73,6 @@ namespace DysonOrbitModifier
             TranslateDict.Clear();
             TranslateDict.Add("Create", "创造");
             TranslateDict.Add("Modify", "修改");
-            TranslateDict.Add("Nonempty", "非空层");
             TranslateDict.Add("Add Orbit", "新增轨道");
             TranslateDict.Add("Add Layer", "新增层级");
             TranslateDict.Add("Modify Orbit", "修改轨道");
