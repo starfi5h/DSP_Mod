@@ -266,24 +266,5 @@ namespace DysonOrbitModifier
         }           
     
     }
-    class DebugEntity : BaseUnityPlugin
-    {
-        public static ManualLogSource logger;
-       
-        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereLayer), "NewDysonNode")]
-        public static void DysonSphereLayer_NewDysonNode(DysonSphereLayer __instance, int __result)
-        {
-            logger.LogDebug($"Add Node [{__result}]: {__instance.nodePool[__result].pos}");
-        }
-        
 
-        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereLayer), "RemoveDysonNode", new Type[] {typeof(int) })]
-        public static void DysonSphereLayer_RemoveDysonNode(DysonSphereLayer __instance, int nodeId)
-        {
-            logger.LogDebug($"Rvm Node [{nodeId}]: {__instance.nodePool[nodeId].pos}");
-        }
-
-        
-
-    }
 }

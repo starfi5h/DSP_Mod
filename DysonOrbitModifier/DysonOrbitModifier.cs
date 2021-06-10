@@ -19,9 +19,10 @@ namespace DysonOrbitModifier
             harmony = new Harmony("com.starfi5h.plugin.DysonOrbitModifier");
             try
             {
+                DysonOrbitUI.logger = logger;
+                SphereLogic.logger = logger;
 
                 harmony.PatchAll(typeof(DysonOrbitUI));
-                //harmony.PatchAll(typeof(DebugEntity));
                 ModTranslate.Init();
 
                 configBool = new ConfigEntry<bool>[] {
@@ -40,9 +41,6 @@ namespace DysonOrbitModifier
                 DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
                 logger.LogDebug($"moveStructure:({configBool[0].Value}) correctOnChange:({configBool[1].Value}) Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(,{configFloat[2].Value})");
 
-                DysonOrbitUI.logger = logger;
-                SphereLogic.logger = logger;
-                DebugEntity.logger = logger;
             }
             catch (Exception e)
             {
@@ -55,7 +53,7 @@ namespace DysonOrbitModifier
             configBool = null;
             configFloat = null;
             DysonOrbitUI.Free();
-            harmony.UnpatchSelf();  // For ScriptEngine hot-reloading
+            harmony.UnpatchSelf();  
         }
     }
     public static class ModTranslate

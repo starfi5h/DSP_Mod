@@ -5,6 +5,8 @@
 
 # custom
 [Ll]ibs/
+TestMod/
+TestingMod/
 
 # User-specific files
 *.rsuser
