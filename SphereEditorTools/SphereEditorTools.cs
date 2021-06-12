@@ -14,18 +14,20 @@ using UnityEngine.UI;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "0.1.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "0.2.0")]
     public class SphereEditorTools : BaseUnityPlugin
     {
-        private Harmony _harmony;
+        private Harmony harmony;
 
         public void Start()
         {
-            _harmony = new Harmony("com.starfi5h.plugin.SphereEditorTools");
+            harmony = new Harmony("com.starfi5h.plugin.SphereEditorTools");
             try
             {
-                _harmony.PatchAll(typeof(EditorPanel));
                 Log.Init(Logger);
+                harmony.PatchAll(typeof(EditorPanel));
+                harmony.PatchAll(typeof(HideLayer));
+                harmony.PatchAll(typeof(HideLayerClose));                
             }
             catch (Exception e)
             {
@@ -35,7 +37,7 @@ namespace SphereEditorTools
         }
         public void OnDestroy()
         {
-            _harmony.UnpatchSelf();
+            harmony.UnpatchSelf();
             EditorPanel.Free();
         }
     }

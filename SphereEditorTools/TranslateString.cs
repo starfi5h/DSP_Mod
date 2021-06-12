@@ -8,7 +8,7 @@ namespace SphereEditorTools
 {
     class TranslateString
     {
-        public static string layer =>
-            Localization.language == Language.zhCN ? "层级" : "Layer".Translate();
+        public static string Layer =>
+            Localization.language == Language.zhCN ? "层级" : "LAYER".Translate();
     }
 }

@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-
-using BepInEx;
+﻿using BepInEx;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
 
 namespace SphereEditorTools
 {
@@ -31,19 +22,16 @@ namespace SphereEditorTools
             dysnoPanel = __instance;
         }
 
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectedLayerUI")]
-        public static bool UIDysonPanel_UpdateSelectedLayerUI()
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectedLayerUI")] //Use posfix in case other mods want to patch it
+        public static void UIDysonPanel_UpdateSelectedLayerUI(UIDysonPanel __instance)
         {
-            return false; //Skip Layer nodes checking in Update(), layerRmvButton.button.interactable remains same
-        }
+            __instance.layerRmvButton.button.interactable = true; //Ignore Layer nodes checking in Update(), layerRmvButton.button.interactable always true
+        }        
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
         public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance)
         {
-            __instance.layerRmvButton.button.interactable = (__instance.layerSelected > 0); //Enable remove objects on layer 1
-            if (dysnoPanel != null)
-                Log.LogDebug($"{dysnoPanel.layerSelected}");
+            __instance.layerRmvButton.button.interactable = (__instance.layerSelected > 0); //Enable to remove objects on layer 1
         }
 
 
@@ -58,8 +46,8 @@ namespace SphereEditorTools
                 storedLayerId = dysnoPanel.layerSelected; //layerSelected may change by brush select
                 
                 var messagebox = UIMessageBox.Show(
-                    "删除".Translate() + TranslateString.layer, //Remove Layer
-                    "删除".Translate() + " " + TranslateString.layer + " [" + dysnoPanel.layerSelected + "] ?",
+                    "删除".Translate() + " " + TranslateString.Layer, //Remove Layer
+                    "删除".Translate() + " " + TranslateString.Layer + " [" + dysnoPanel.layerSelected + "] ?",
                     "否".Translate(), "是".Translate(), 2,
                     null, new UIMessageBox.Response(RemoveLayer));
                 var go = GameObject.Find("UI Root/Always on Top/Overlay Canvas - Top/Dyson Editor Top");
@@ -112,6 +100,5 @@ namespace SphereEditorTools
                 dysnoPanel.UpdateSelectionVisibleChange();
             }
         }
-
     }
 }
