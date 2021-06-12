@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMod", "TestMod\TestMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingMod", "TestingMod\TestingMod.csproj", "{0A606F92-2D9F-4131-9213-AB49382036E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "SphereEditorTools\SphereEditorTools.csproj", "{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{0A606F92-2D9F-4131-9213-AB49382036E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A606F92-2D9F-4131-9213-AB49382036E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A606F92-2D9F-4131-9213-AB49382036E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

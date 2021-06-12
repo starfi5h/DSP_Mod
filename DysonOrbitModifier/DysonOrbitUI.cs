@@ -75,9 +75,9 @@ namespace DysonOrbitModifier
             }
             catch (Exception e)
             {
+                logger.LogError("UI Component load error");
                 logger.LogError(e.ToString());
-            }
-            logger.LogDebug("UI Component loaded.");
+            }            
         }
 
         // credit to https://github.com/fezhub/DSP-Mods/blob/main/DSP_SphereProgress/SphereProgress.cs
