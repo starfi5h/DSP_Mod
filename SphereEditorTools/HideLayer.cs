@@ -1,43 +1,53 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using UnityEngine;
 
 namespace SphereEditorTools
 {
     class HideLayer : BaseUnityPlugin
     {
         static int viewLayerId;
-        static bool hideOtherLayers;
+        static bool hideOtherLayers;       
         static DysonSphereLayer[] focusLayer;
         static DysonSphereLayer[] tmpLayers;
         static DysonSphere sphere;
+        static int hideMode;
 
-
-        public static void Reset(string str)
+        static public void ToggleMode()
         {
-            Log.LogDebug("Reset from" + str);
+            hideMode = (hideMode + 1) % 3;
+            GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(hideMode < 2);
+            Log.LogDebug($"Toggle HideMode {hideMode}");
+        }
+        
+
+        public static void Free(string str)
+        {
+            Log.LogDebug($"{str} : Reset visible status.");
             hideOtherLayers = false;
             viewLayerId = 0;
             focusLayer = null;
             tmpLayers = null;
-            if (sphere != null)
-                sphere.modelRenderer.RebuildModels();
+            //sphere?.modelRenderer?.RebuildModels();
             sphere = null;
+            hideMode = 0;
         }
+
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
         public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance)
         {
             int id = __instance.layerSelected;
-            Log.LogDebug($"Layer {viewLayerId} -> {id}");
+            if (sphere == null || sphere != __instance.viewDysonSphere)
+            {
+                sphere = __instance.viewDysonSphere;
+                focusLayer = new DysonSphereLayer[1];
+                tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
+            }
 
             if (!__instance.showAllLayers)
             {
-                if (sphere == null)
-                {
-                    sphere = __instance.viewDysonSphere;
-                    focusLayer = new DysonSphereLayer[1];
-                    tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
-                }
+
                 if (viewLayerId != id)
                 {
                     focusLayer[0] = __instance.viewDysonSphere.layersIdBased[id]; //switch with layersSorted
@@ -84,12 +94,12 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "RebuildModels")]
         public static void RebuildModels_Prefix(DysonSphereSegmentRenderer __instance)
         {
-            Log.LogDebug($"RebuildModels Hide:{hideOtherLayers} ViewLayer:{viewLayerId} ");
+            Log.LogDebug($"RebuildModels ShowAll[{!hideOtherLayers}] ViewLayer[{viewLayerId}] ");
 
             if (hideOtherLayers)
             {
                 if (__instance.dysonSphere != sphere)
-                    Reset("RebuildModels");
+                    Free("RebuildModels");
                 else
                     (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased); //switch layersIdBased
             }
@@ -122,12 +132,12 @@ namespace SphereEditorTools
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "DrawModels")]
-        public static void DysonSphereSegmentRenderer_DrawModels_Prefix(DysonSphereSegmentRenderer __instance, int mask)
+        public static void DysonSphereSegmentRenderer_DrawModels_Prefix(DysonSphereSegmentRenderer __instance)
         {
             if (hideOtherLayers)
             {
                 if (__instance.dysonSphere != sphere)
-                    Reset("DrawModels");
+                    Free("DrawModels");
                 else
                     (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased); //switch layersIdBased
             }
@@ -135,30 +145,36 @@ namespace SphereEditorTools
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "DrawModels")]
-        public static void DysonSphereSegmentRenderer_DrawModels_Postfix(DysonSphereSegmentRenderer __instance, int mask)
+        public static void DysonSphereSegmentRenderer_DrawModels_Postfix(DysonSphereSegmentRenderer __instance)
         {
             if (hideOtherLayers)
                 (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased);
         }
 
+
+
+        
+        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "DrawPost")]
+        public static bool DysonSwarm_DrawPost()
+        {
+            return sphere == null || hideMode <= 0;
+        }
+        
+        
+
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
         public static void UIDysonPanel_SetViewStar(UIDysonPanel __instance)
         {
-
-            Log.LogDebug($"SetViewStar Hide:{hideOtherLayers} ViewLayer:{viewLayerId} ");
-
+            Free("SetViewStar");
         }
 
 
-
-    }
-
-    class HideLayerClose : BaseUnityPlugin
-    {
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void UIDysonPanel__OnClose(UIDysonPanel __instance)
+        public static void UIDysonPanel__OnClose()
         {
-            HideLayer.Reset("Close");
+            if (SphereEditorTools.EnableHideLayerOutside.Value == false)
+                Free("Close");
         }
+
     }
 }
