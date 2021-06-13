@@ -176,14 +176,14 @@ namespace DysonOrbitModifier
                 nodeIds.Clear();
                 nodecps.Clear();
                 //vertcps.Clear();
-                for (int n = 0; n < shell.nodes.Count; n++)
+                for (int index = 0; index < shell.nodes.Count; index++)
                 {
-                    nodeIds.Add(shell.nodes[n].id);
+                    nodeIds.Add(shell.nodes[index].id);
                 }
-                for (int n = 0; n < shell.nodes.Count + 1; n++) //nodecps.Count = this.nodes.Count + 1, the last one is sum
+                for (int index = 0; index < shell.nodes.Count + 1; index++) //nodecps.Count = this.nodes.Count + 1, the last one is sum
                 {
-                    nodecps.Add(shell.nodecps[n]);
-                    shell.nodecps[n] = 0;                    
+                    nodecps.Add(shell.nodecps[index]);
+                    shell.nodecps[index] = 0;                    
                 }
                 Array.Clear(shell.vertcps, 0, shell.vertcps.Length);
                 int vertexCount = shell.vertexCount;
@@ -195,7 +195,6 @@ namespace DysonOrbitModifier
 
                 int id = layer.NewDysonShell(protoId, nodeIds);
                 shell = layer.shellPool[id];
-                //logger.LogDebug($"[{id}] v:{shell.vertexCount}");
 
                 //Fill back cell point
                 for (int index = 0; index < shell.nodes.Count; index++)
@@ -207,6 +206,7 @@ namespace DysonOrbitModifier
                             break;
                     }
                     //logger.LogDebug($"[{index}] old_cp:{nodecps[index]} new_cp:{shell.nodecps[index]} remain_cp:{cp}");
+                    shell.nodes[index].RecalcCpReq();
                     shell.nodecps[index] += cp; //Store for future change
                 }
                 logger.LogDebug($"Shell[{sid}]:Vertex {vertexCount}->{shell.vertexCount}; Total CP {nodecps[shell.nodes.Count]}->{shell.nodecps[shell.nodes.Count]}");

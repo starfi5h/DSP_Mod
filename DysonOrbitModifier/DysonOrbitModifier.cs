@@ -8,7 +8,7 @@ using HarmonyLib;
 
 namespace DysonOrbitModifier
 {
-    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.1.1")]
+    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.2.0")]
     public class DysonOrbitModifier : BaseUnityPlugin
     {
         private Harmony harmony;

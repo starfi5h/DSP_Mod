@@ -31,7 +31,7 @@ Run the game one time to generate `.cfg` file. Restart the game to make the chan
       It is not recommended to disable this option,  cause a shell with different level objects may break in the future game patch.  
     - `correctOnChange` : Remove exceeding Structure Point/Cell Point right after entities are moved. (Default : `true`)
       When changing into a smaller radius, the existing SP/CP in each component may exceed their limits.  
-      Disable it will let SP/CP stay at the original value until editor panel is closed. (unsafe)  
+      Disable it will let SP/CP stay at the original value until editor panel is closed.  
 
 ----
 # 修改戴森球轨道
@@ -63,7 +63,7 @@ Run the game one time to generate `.cfg` file. Restart the game to make the chan
     不建议禁用这个选项，因为在未来的游戏更新中，有不同高度物体的戴森壳可能会损坏存档。
     - `correctOnChange` : 移动物体后，立即移除超出的结构点数/细胞点数。(Default : `true`)  
     将半径调小时，每个组件中已有的结构点数(SP)/细胞点数(CP)可能超过它们的上限。
-    禁用这个选项将让SP/CP保持在改变之前的数值，直到离开编辑面板。(不安全)  
+    禁用这个选项将让SP/CP保持在改变之前的数值，直到离开编辑面板。  
  
 
 ----
@@ -71,8 +71,7 @@ Run the game one time to generate `.cfg` file. Restart the game to make the chan
 ## Changelog
 
 #### V1.2.0  
-\- Bug : CP request is abormal when correctOnChange is turn off and stored CP exceed CpMax.  
-   Now the mod will do a check and correct stored CP when closing editor panel.  
+\- Bugfix : CP request will calculate correctly when changing the radius now.  
 
 #### V1.1.0
 \- Implement structure moving function.
