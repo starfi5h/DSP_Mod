@@ -10,5 +10,30 @@ namespace SphereEditorTools
     {
         public static string Layer =>
             Localization.language == Language.zhCN ? "层级" : "LAYER".Translate();
+
+        public static string HideMode(int mode)
+        {
+            if (Localization.language == Language.zhCN)
+            {
+                switch (mode)
+                {
+                    case 0: return "正常显示";
+                    case 1: return "隐藏太阳帆";
+                    case 2: return "隐藏太阳帆&恒星";
+                    default: return "";
+                }
+            }
+            else
+            {
+                switch (mode)
+                {
+                    case 0: return "Normal".Translate();
+                    case 1: return "Hide swarm".Translate();
+                    case 2: return "Hide swarm & star".Translate();
+                    default: return "";
+                }
+            }
+        }
+
     }
 }

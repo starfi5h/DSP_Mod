@@ -81,9 +81,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comm.cs" />
     <Compile Include="HideLayer.cs" />
     <Compile Include="TranslateString.cs" />
-    <Compile Include="EditorPanel.cs" />
+    <Compile Include="DeleteLayer.cs" />
     <Compile Include="SphereEditorTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
