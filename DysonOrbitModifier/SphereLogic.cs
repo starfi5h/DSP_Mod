@@ -1,19 +1,14 @@
-﻿using BepInEx;
-using HarmonyLib;
-using System;
-using UnityEngine;
-using UnityEngine.UI;
-using System.Reflection;
-using UnityEngine.Events;
-using BepInEx.Logging;
+﻿using System;
 using System.Collections.Generic;
+using BepInEx.Logging;
+using UnityEngine;
+
 
 namespace DysonOrbitModifier
 {
 
     class SphereLogic
     {
-
         public static ManualLogSource logger;
         public static bool moveStructure;
         public static bool correctOnChange;
@@ -223,7 +218,9 @@ namespace DysonOrbitModifier
         //Cut extra structe points and cell points
         public static void ValueCorrection(DysonSphereLayer layer)
         {
-            logger.LogDebug($"ValueCorrection {layer.id}");
+            int correctSpCount = 0;
+            int correctCpCount = 0;
+            
             for (int fid = 0; fid < layer.frameCursor; fid++)
             {
                 DysonFrame frame = layer.framePool[fid];
@@ -236,11 +233,13 @@ namespace DysonOrbitModifier
                 {
                     frame.spA = halfMax;
                     frame.nodeA.RecalcSpReq();
+                    correctSpCount++;
                 }
                 if (frame.spB > halfMax)
                 {
                     frame.spB = halfMax;
                     frame.nodeB.RecalcSpReq();
+                    correctSpCount++;
                 }
             }
 
@@ -258,13 +257,17 @@ namespace DysonOrbitModifier
                     {
                         shell.nodecps[index] = cpMax;
                         shell.nodes[index].RecalcCpReq();
+                        correctCpCount++;
                     }
-                    shell.nodecps[shell.nodes.Count] += shell.nodecps[index];
+                    shell.nodecps[shell.nodes.Count] += shell.nodecps[index];                    
                 }
 
             }
-        }           
-    
+
+            if ((correctSpCount + correctCpCount) > 0 )
+                logger.LogDebug($"ValueCorrection layer[{layer.id}] : SP[{correctSpCount}] CP[{correctCpCount}]");
+        }
+
     }
 
 }

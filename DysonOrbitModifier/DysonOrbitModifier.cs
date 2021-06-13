@@ -1,13 +1,14 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
+
 
 namespace DysonOrbitModifier
 {
-    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.1.0")]
+    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.1.1")]
     public class DysonOrbitModifier : BaseUnityPlugin
     {
         private Harmony harmony;
@@ -17,35 +18,29 @@ namespace DysonOrbitModifier
         internal void Awake()
         {
             harmony = new Harmony("com.starfi5h.plugin.DysonOrbitModifier");
-            try
-            {
-                DysonOrbitUI.logger = logger;
-                SphereLogic.logger = logger;
 
-                harmony.PatchAll(typeof(DysonOrbitUI));
-                ModTranslate.Init();
+            DysonOrbitUI.logger = logger;
+            SphereLogic.logger = logger;
 
-                configBool = new ConfigEntry<bool>[] {
-                    Config.Bind<bool>("option", "moveStructure", true, "Move objects on the shell to the same radius when the radius is changed. \n当轨道半径改变时，将壳上的物体移至相同半径的位置。"),
-                    Config.Bind<bool>("option", "correctOnChange", true, "Remove exceeding Structure Point/Cell Point right after entities are moved. \n移动物体后，立即移除超出的结构点数/细胞点数。")
-                };
-                configFloat = new ConfigEntry<float>[]{
-                     Config.Bind<float>("modify panel setting", "minRadiusMultiplier", 1.0f, "Multiplier of minimum radius \n最小軌道半徑的倍率"),
-                     Config.Bind<float>("modify panel setting", "maxRadiusMultiplier", 1.0f, "Multiplier of maximum radius \n最大轨道半径的倍率"),
-                     Config.Bind<float>("modify panel setting", "maxAngularSpeed", 10.0f, "Maximum rotation speed \n最大旋轉速度")
-                };
-                SphereLogic.moveStructure = configBool[0].Value;
-                SphereLogic.correctOnChange = configBool[1].Value;
-                DysonOrbitUI.minOrbitRadiusMultiplier = configFloat[0].Value;
-                DysonOrbitUI.maxOrbitRadiusMultiplier = configFloat[1].Value;
-                DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
-                logger.LogDebug($"moveStructure:({configBool[0].Value}) correctOnChange:({configBool[1].Value}) Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(,{configFloat[2].Value})");
+            harmony.PatchAll(typeof(DysonOrbitUI));
+            ModTranslate.Init();
 
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e.ToString());
-            }
+            configBool = new ConfigEntry<bool>[] {
+                Config.Bind<bool>("option", "moveStructure", true, "Move objects on the shell to the same radius when the radius is changed. \n当轨道半径改变时，将壳上的物体移至相同半径的位置。"),
+                Config.Bind<bool>("option", "correctOnChange", true, "Remove exceeding Structure Point/Cell Point right after entities are moved. \n移动物体后，立即移除超出的结构点数/细胞点数。")
+            };
+            configFloat = new ConfigEntry<float>[]{
+                Config.Bind<float>("modify panel setting", "minRadiusMultiplier", 1.0f, "Multiplier of minimum radius \n最小軌道半徑的倍率"),
+                Config.Bind<float>("modify panel setting", "maxRadiusMultiplier", 1.0f, "Multiplier of maximum radius \n最大轨道半径的倍率"),
+                Config.Bind<float>("modify panel setting", "maxAngularSpeed", 10.0f, "Maximum rotation speed \n最大旋轉速度")
+            };
+            SphereLogic.moveStructure = configBool[0].Value;
+            SphereLogic.correctOnChange = configBool[1].Value;
+            DysonOrbitUI.minOrbitRadiusMultiplier = configFloat[0].Value;
+            DysonOrbitUI.maxOrbitRadiusMultiplier = configFloat[1].Value;
+            DysonOrbitUI.maxOrbitAngularSpeed = configFloat[2].Value;
+            //logger.LogDebug($"moveStructure:({configBool[0].Value}) correctOnChange:({configBool[1].Value}) Radius:({configFloat[0].Value},{configFloat[1].Value}) AngularSpeed:(,{configFloat[2].Value})");
+
         }
 
         internal void OnDestroy()
