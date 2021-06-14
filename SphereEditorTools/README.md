@@ -26,16 +26,16 @@ Run the game one time to generate .cfg file. Restart the game to make the change
 Manual download .cfg file loaction: `BepInEx\config\com.starfi5h.plugin.SphereEditorTools.cfg`  
 If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), go to Config editor to change the cfg file.  
 
-- General
-|        | Default | Description |
+- General  
+|Name| Default | Description |
 | :----- | :------ | :---------- |
 | `EnableDeleteLayer`      | true  | Enable deletion of a constructed layer. |
 | `EnableToolboxHotkey`    | true  | Switch between build plan tools with hotkeys. |
 | `EnableHideLayer`        | true  | Hide unselected layers when not showing all layers. |
 | `EnableHideOutside` | false | Apply visibility changes to the game world temporarily. |
   
-- Hotkeys
-|| Default | Description |
+- Hotkeys  
+|Name| Default | Description |
 | :-------------- | :------ | :------------ |
 | Toolbox|
 | `KeySelect`     | 1       | Inspect |
@@ -81,16 +81,16 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 管理器安装: 左边选项Config editor -> 找到`starfi5h.plugin.SphereEditorTools` -> Edit Config  
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.SphereEditorTools.cfg`文件 
 
-- 功能选项
-|        | 默认 | 描述|
+- 功能选项  
+|.| 默认 | 描述|
 | :----- | :------ | :---------- |
 | `EnableDeleteLayer`      | true  | 启用已建立层级删除功能 |
 | `EnableToolboxHotkey`    | true  | 启用工具箱热键 |
 | `EnableHideLayer`        | true  | 启用层级隐藏功能 |
 | `EnableHideOutside`      | false | 使隐藏效果暂时套用至外界 |
   
-- 热键
-|| 默认 | 描述 |
+- 热键  
+|.| 默认 | 描述 |
 | :-------------- | :------ | :------------ |
 | 工具箱 |
 | `KeySelect`     | 1       | 查看 |
