@@ -82,5 +82,5 @@ Run the game one time to generate `.cfg` file. Restart the game to make the chan
 ----
 
 #### Acknowledgements
-All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.
+All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  
 Icon from https://freeicons.io/logos/cog-configuration-gear-settings-icon-38149
