@@ -23,7 +23,7 @@ namespace SphereEditorTools
 
         public static void Free(string str)
         {
-            Log.LogDebug($"{str} : Reset visible status.");
+            Log.LogDebug($"{str} : Reset visibility status.");
             hideOtherLayers = false;
             viewLayerId = 0;
             focusLayer = null;
@@ -39,9 +39,14 @@ namespace SphereEditorTools
             int id = __instance.layerSelected;
             if (sphere == null || sphere != __instance.viewDysonSphere)
             {
+                //Log.LogDebug($"visible change{ __instance.viewDysonSphere }");
                 sphere = __instance.viewDysonSphere;
                 focusLayer = new DysonSphereLayer[1];
                 tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
+                hideOtherLayers = false;
+                viewLayerId = 0;
+                //hideMode = 0;
+                __instance.viewDysonSphere.modelRenderer.RebuildModels();
             }
 
             if (!__instance.showAllLayers)
@@ -94,7 +99,7 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "RebuildModels")]
         public static void RebuildModels_Prefix(DysonSphereSegmentRenderer __instance)
         {
-            //Log.LogDebug($"RebuildModels ShowAll[{!hideOtherLayers}] ViewLayer[{viewLayerId}] ");
+            //Log.LogDebug($"RebuildModels HideOther[{hideOtherLayers}] ViewLayer[{viewLayerId}] ");
 
             if (hideOtherLayers)
             {
@@ -156,16 +161,18 @@ namespace SphereEditorTools
             return hideMode <= 0;
         }
 
+        /*
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
         public static void UIDysonPanel_SetViewStar()
         {
             Free("SetViewStar");
         }
+        */
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
         public static void UIDysonPanel__OnClose()
         {
-            if (SphereEditorTools.EnableHideLayerOutside.Value == false)
+            if (SphereEditorTools.EnableHideOutside.Value == false)
                 Free("Close");
         }
 

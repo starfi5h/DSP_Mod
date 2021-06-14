@@ -75,7 +75,7 @@ namespace SphereEditorTools
                         __instance.showAllLayers = !__instance.showAllLayers;
                         __instance.UpdateSelectionVisibleChange();
                     }
-                    else if (Input.GetKeyDown(SphereEditorTools.KeyToggleHideMode.Value))
+                    else if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
                     {
                         HideLayer.ToggleMode();
                     }

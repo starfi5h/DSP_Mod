@@ -29,7 +29,7 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectedLayerUI")] //Use posfix in case other mods want to patch it
         public static void UIDysonPanel_UpdateSelectedLayerUI(UIDysonPanel __instance)
         {
-            __instance.layerRmvButton.button.interactable = true; //Ignore Layer nodes checking in Update(), layerRmvButton.button.interactable always true
+            __instance.layerRmvButton.button.interactable = (__instance.layerSelected > 0); //Ignore Layer nodes checking in Update()
         }        
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
@@ -69,7 +69,7 @@ namespace SphereEditorTools
         {
             GameMain.UnlockFullscreenPauseOneFrame();
             DysonSphereLayer layer = dysnoPanel.viewDysonSphere.GetLayer(storedLayerId);
-            Log.LogDebug($"Remove layer {layer.id}");
+            Log.LogDebug($"Remove layer[{layer.id}]");
             if (layer != null)
             {
 
