@@ -96,7 +96,7 @@
   <ItemGroup>
     <Compile Include="Comm.cs" />
     <Compile Include="HideLayer.cs" />
-    <Compile Include="SymmetricTool.cs" />
+    <Compile Include="SymmetryTool.cs" />
     <Compile Include="TranslateString.cs" />
     <Compile Include="DeleteLayer.cs" />
     <Compile Include="SphereEditorTools.cs" />

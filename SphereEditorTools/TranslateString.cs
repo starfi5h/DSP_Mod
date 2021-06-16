@@ -35,5 +35,13 @@ namespace SphereEditorTools
             }
         }
 
+        public static string SymmetricTool =>
+            Localization.language == Language.zhCN ? "对称工具" : "Symmetry".Translate();
+
+        public static string Rotation =>
+            Localization.language == Language.zhCN ? "旋转" : "Rotation".Translate();
+        public static string Mirror =>
+            Localization.language == Language.zhCN ? "镜像" : "Mirror".Translate();
+
     }
 }

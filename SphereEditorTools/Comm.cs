@@ -12,10 +12,29 @@ namespace SphereEditorTools
         static string infoString;
         static int infoCounter;
 
+        public static bool symmetricMode; //switch on/off
+        public static bool mirrorMode;    //switch on/off
+        public static int radialCount = 1;    //start from 1
+
         public static void SetInfoString(string str, int counter)
         {
             infoString = str;
             infoCounter = counter;
+        }
+
+        public static void ShowSymmetricToolStatus()
+        {
+            string str;
+            if (symmetricMode)
+            {
+                 str = String.Format("{0} {1}:{2,-2} {3}:{4}", TranslateString.SymmetricTool, 
+                    TranslateString.Rotation, radialCount, TranslateString.Mirror, mirrorMode ? "ON" : "OFF");                
+            }
+            else
+            {
+                str = String.Format("{0} OFF", TranslateString.SymmetricTool);
+            }
+            SetInfoString(str, 120);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateOthers")]
@@ -81,27 +100,48 @@ namespace SphereEditorTools
                     }
                 }
 
-                if (true)
+                if (SphereEditorTools.EnableSymmetryTool.Value)
                 {
                     if (Input.GetKeyDown("tab"))
                     {
-                        SymmetricTool.SymmetricMode = !SymmetricTool.SymmetricMode;
+                        SymmetryTool.SymmetricMode = !SymmetryTool.SymmetricMode;
+                        symmetricMode = !symmetricMode;
+                        if (symmetricMode)
+                        {
+                            SymmetryTool.ChangeParameters(mirrorMode, radialCount);
+                        }
+                        else
+                        {
+                            SymmetryTool.ChangeParameters(false, 1);
+                        }
+                        ShowSymmetricToolStatus();
+
                     }
                     else if (Input.GetKeyDown("m"))
                     {
-                        SymmetricTool.ChangeParameters(!SymmetricTool.MirrorMode, SymmetricTool.RadialCount);                        
+                        symmetricMode = true;
+                        mirrorMode = !mirrorMode;
+                        SymmetryTool.ChangeParameters(mirrorMode, radialCount);
+                        ShowSymmetricToolStatus();
                     }
                     
                     else if (Input.GetKeyDown("[+]"))
                     {
-                        if (SymmetricTool.RadialCount < 30)
-                            SymmetricTool.ChangeParameters(SymmetricTool.MirrorMode, SymmetricTool.RadialCount+1);
+                        symmetricMode = true;
+                        if (SymmetryTool.rdialCount < 30)
+                        {
+                            SymmetryTool.ChangeParameters(mirrorMode, ++radialCount);
+
+                        }
+                        ShowSymmetricToolStatus();
                     }
                     else if (Input.GetKeyDown("[-]"))
                     {
+                        symmetricMode = true;
                         Log.LogDebug("[-]");
-                        if (SymmetricTool.RadialCount > 1)
-                            SymmetricTool.ChangeParameters(SymmetricTool.MirrorMode, SymmetricTool.RadialCount-1);
+                        if (radialCount > 1)
+                            SymmetryTool.ChangeParameters(mirrorMode, --radialCount);
+                        ShowSymmetricToolStatus();
                     }
                 }
 

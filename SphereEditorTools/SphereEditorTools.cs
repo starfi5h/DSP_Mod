@@ -24,6 +24,7 @@ namespace SphereEditorTools
         public static ConfigEntry<bool> EnableToolboxHotkey;
         public static ConfigEntry<bool> EnableHideLayer;
         public static ConfigEntry<bool> EnableHideOutside;
+        public static ConfigEntry<bool> EnableSymmetryTool;
 
         public static ConfigEntry<String> KeySelect;
         public static ConfigEntry<String> KeyNode;
@@ -41,6 +42,8 @@ namespace SphereEditorTools
             EnableToolboxHotkey     = Config.Bind<bool>("- General -", "EnableToolboxHotkey", true, "Switch between build plan tools with hotkeys.\n启用工具箱热键");
             EnableHideLayer         = Config.Bind<bool>("- General -", "EnableHideLayer", true, "Hide unselected layers when not showing all layers.\n启用层级隐藏功能");
             EnableHideOutside       = Config.Bind<bool>("- General -", "EnableHideOutside", false, "Apply visibility changes to the game world temporarily.\n使隐藏效果暂时套用至外界");
+            EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
+
 
             KeySelect               = Config.Bind<String>("Hotkeys - Toolbox", "KeySelect", "1", "Inspect / 查看");
             KeyNode                 = Config.Bind<String>("Hotkeys - Toolbox", "KeyNode", "2", "Build Node / 修建节点");
@@ -66,8 +69,8 @@ namespace SphereEditorTools
                 TryPatch(typeof(DeleteLayer));
             if (EnableHideLayer.Value)
                 TryPatch(typeof(HideLayer));
-
-            TryPatch(typeof(SymmetricTool));
+            if (EnableSymmetryTool.Value)
+                TryPatch(typeof(SymmetryTool));
 
             if (errorMessage != "")
             {
@@ -94,7 +97,7 @@ namespace SphereEditorTools
             harmony.UnpatchSelf();
             DeleteLayer.Free();
             HideLayer.Free("Unpatch");
-            SymmetricTool.Free();
+            SymmetryTool.Free();
         }
     }
 
