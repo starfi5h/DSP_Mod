@@ -67,6 +67,8 @@ namespace SphereEditorTools
             if (EnableHideLayer.Value)
                 TryPatch(typeof(HideLayer));
 
+            TryPatch(typeof(SymmetricTool));
+
             if (errorMessage != "")
             {
                 errorMessage = "Load Error: " + errorMessage;
@@ -92,6 +94,7 @@ namespace SphereEditorTools
             harmony.UnpatchSelf();
             DeleteLayer.Free();
             HideLayer.Free("Unpatch");
+            SymmetricTool.Free();
         }
     }
 

@@ -80,6 +80,32 @@ namespace SphereEditorTools
                         HideLayer.ToggleMode();
                     }
                 }
+
+                if (true)
+                {
+                    if (Input.GetKeyDown("tab"))
+                    {
+                        SymmetricTool.SymmetricMode = !SymmetricTool.SymmetricMode;
+                    }
+                    else if (Input.GetKeyDown("m"))
+                    {
+                        SymmetricTool.ChangeParameters(!SymmetricTool.MirrorMode, SymmetricTool.RadialCount);                        
+                    }
+                    
+                    else if (Input.GetKeyDown("[+]"))
+                    {
+                        if (SymmetricTool.RadialCount < 30)
+                            SymmetricTool.ChangeParameters(SymmetricTool.MirrorMode, SymmetricTool.RadialCount+1);
+                    }
+                    else if (Input.GetKeyDown("[-]"))
+                    {
+                        Log.LogDebug("[-]");
+                        if (SymmetricTool.RadialCount > 1)
+                            SymmetricTool.ChangeParameters(SymmetricTool.MirrorMode, SymmetricTool.RadialCount-1);
+                    }
+                }
+
+
             }      
 
         
