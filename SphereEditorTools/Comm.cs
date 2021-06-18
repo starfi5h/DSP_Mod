@@ -104,7 +104,6 @@ namespace SphereEditorTools
                 {
                     if (Input.GetKeyDown("tab"))
                     {
-                        SymmetryTool.SymmetricMode = !SymmetryTool.SymmetricMode;
                         symmetricMode = !symmetricMode;
                         if (symmetricMode)
                         {
@@ -128,7 +127,7 @@ namespace SphereEditorTools
                     else if (Input.GetKeyDown("[+]"))
                     {
                         symmetricMode = true;
-                        if (SymmetryTool.rdialCount < 30)
+                        if (radialCount < 60)
                         {
                             SymmetryTool.ChangeParameters(mirrorMode, ++radialCount);
 

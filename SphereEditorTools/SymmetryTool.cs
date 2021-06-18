@@ -20,7 +20,6 @@ namespace SphereEditorTools
     {
         static int tick;
 
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(UIDysonBrush_Node), "_OnUpdate")]
         [HarmonyPatch(typeof(UIDysonBrush_Frame), "_OnUpdate")]
@@ -30,10 +29,12 @@ namespace SphereEditorTools
             if (Input.GetMouseButtonDown(0))
                 Debug.Log("Pressed primary button.");
 
-            if (tick == 0)
+            
+            //if (tick == 0)
             {
                 //Log.LogDebug("test");
             }
+            
 
             //tick = (tick+1)%30;            
         }
@@ -41,10 +42,13 @@ namespace SphereEditorTools
         
         static bool overwrite;
 
-        //static int downButton; //0: prime 1:second -1:none
         static Vector3 castPoint;
-        static bool resultCast;
+        static float castRadius;
         static bool resultSnap;
+        
+        static Vector3 currentPoint;
+        static float castDist;
+        static Vector3 rayOrigin;
 
         static List<UIDysonBrush>[] brushes;
         static UIDysonPanel dysnoPanel;
@@ -55,21 +59,13 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
         public static void Init(UIDysonPanel __instance)
         {
-            try
+            dysnoPanel = __instance;
+            brushes = new List<UIDysonBrush>[dysnoPanel.brushes.Length];
+            for (int i = 0; i < brushes.Length; i++)
             {
-                dysnoPanel = __instance;
-                brushes = new List<UIDysonBrush>[dysnoPanel.brushes.Length];
-                for (int i = 0; i < brushes.Length; i++)
-                {
-                    brushes[i] = new List<UIDysonBrush>();
-                    brushes[i].Add(null); //placeholder for original brush
-                }
+                brushes[i] = new List<UIDysonBrush>();
+                brushes[i].Add(null); //placeholder for original brush
             }
-            catch (Exception e)
-            {
-                Log.LogError(e);
-            }
-
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
@@ -111,36 +107,66 @@ namespace SphereEditorTools
                     brushes[i][t]?.gameObject.SetActive(false);
                 }
             }
-
-            Log.LogDebug($"{brushes[(int)BrushMode.Node].Count} {mirrorMode} {rdialCount}");
+            Log.LogDebug($"ChangeParameters C:{brushes[(int)BrushMode.Node].Count} M:{mirrorMode} R:{rdialCount}");
             
         }
-
 
         static void AddBrushes()
         {
             //GameObject brushesGroup = ((UIDysonBrush_Node)dysnoPanel.brushes[(int)BrushMode.Node]).preview.transform.parent.parent.gameObject;
-            //Log.LogDebug("Add Brushes");
-
-            int id;         
+            int id;
             
             id = (int)BrushMode.Node;
             UIDysonBrush_Node brushNode = (UIDysonBrush_Node)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);            
             brushes[id].Add(brushNode);
-            //Log.LogDebug($"brush: {brushNode}");
             foreach (Transform child in brushNode.gameObject.transform)
                 Destroy(child.gameObject);
             brushNode._OnInit();
-            //Log.LogDebug($"preview: {brushNode.preview} {brushNode.previewMesh} {brushNode.previewRenderer}");
 
-            //brushNode.RecalcCollides(new Vector3(0,0,0));
+            id = (int)BrushMode.FrameGeo;
+            UIDysonBrush_Frame brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushes[id].Add(brushFrame);
+            foreach (Transform child in brushFrame.gameObject.transform)
+                Destroy(child.gameObject);
+            brushFrame._OnInit();
+            brushFrame.isEuler = false;
+
+            id = (int)BrushMode.FrameEuler;
+            brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushes[id].Add(brushFrame);
+            foreach (Transform child in brushFrame.gameObject.transform)
+                Destroy(child.gameObject);
+            brushFrame._OnInit();
+            brushFrame.isEuler = true;
+
+
+            id = (int)BrushMode.Shell;
+            UIDysonBrush_Shell brushShell = (UIDysonBrush_Shell)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushes[id].Add(brushShell);
+            foreach (Transform child in brushShell.gameObject.transform)
+                Destroy(child.gameObject);
+            brushShell._OnInit();
+
+            id = (int)BrushMode.Remove;
+            UIDysonBrush_Remove brushRemove = (UIDysonBrush_Remove)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushes[id].Add(brushRemove);
+            foreach (Transform child in brushRemove.gameObject.transform)
+                Destroy(child.gameObject);
+            brushRemove._OnInit();
+
+
+            id = (int)BrushMode.Select;
+            UIDysonBrush_Select brushSelect = (UIDysonBrush_Select)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushes[id].Add(brushSelect);
+            foreach (Transform child in brushSelect.gameObject.transform)
+                Destroy(child.gameObject);
+            brushSelect._OnInit();
 
         }
 
 
-
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")]
-        static void wee_OnUpdate()
+        static void Brushes_OnUpdate()
         {
             try
             {                
@@ -154,16 +180,39 @@ namespace SphereEditorTools
 
                     overwrite = true;
                     Vector3 pos = castPoint;
+                    Quaternion currentRotation = Quaternion.identity;
+                    if (currentPoint != Vector3.zero)
+                    {
+                        Ray ray = dysnoPanel.screenCamera.ScreenPointToRay(Input.mousePosition);
+                        castRadius = (float)(ray.origin.magnitude / (rayOrigin.magnitude * 0.00025));
+                        bool front = Vector3.Dot(ray.direction, currentPoint) < 0f ? true : false;
+                        for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
+                        {
+                            DysonSphereLayer layer2 = front ? sphere.layersSorted[i] : sphere.layersSorted[sphere.layersSorted.Length - 1 - i];
+                            if (layer2 != null && Mathf.Abs(layer2.orbitRadius - castRadius) < 1E-08)
+                            {
+                                currentRotation = layer2.currentRotation;
+                                pos = Quaternion.Inverse(currentRotation) * currentPoint;
+                                break;
+                            }
+                        }                            
+                    }
+
 
                     for (int i = 0; i < dysnoPanel.brushes.Length; i++)
                     {
                         //Log.LogDebug($"{i} {dysnoPanel.brushMode} {i == (int)dysnoPanel.brushMode} {dysnoPanel.brushMode == BrushMode.Node}");
-                        if (i == (int)dysnoPanel.brushMode && dysnoPanel.brushMode == BrushMode.Node)
+
+                        if (brushes[i].Count <= 1)
+                            continue;
+
+                        if (i == (int)dysnoPanel.brushMode)
                         {
                             for (int t = 1; t < rdialCount; t++)
                             {
                                 //Log.LogDebug($"{t} {castPoint}");
                                 castPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
+                                currentPoint = currentRotation * castPoint;
                                 brushes[i][t].SetDysonSphere(sphere); //May change in future game patch?
                                 brushes[i][t].layer = layer;                                
                                 brushes[i][t]._Open();
@@ -179,6 +228,7 @@ namespace SphereEditorTools
                                 {
                                     //Log.LogDebug($"{t} {castPoint}");
                                     castPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
+                                    currentPoint = currentRotation * castPoint;
                                     brushes[i][t].SetDysonSphere(sphere); //May change in future game patch?
                                     brushes[i][t].layer = layer;
                                     brushes[i][t].active = true;
@@ -199,6 +249,7 @@ namespace SphereEditorTools
                     }
                     overwrite = false;
                     dysnoPanel.brushError =  errorText;
+                    currentPoint = Vector3.zero;
 
                     //Log.LogDebug("S End");
                 }                
@@ -206,8 +257,10 @@ namespace SphereEditorTools
             catch (Exception e)
             {
                 Log.LogError(e);
+                ChangeParameters(false, 1); //Exist sysmetry mode
             }
             //tick = (tick + 1) % 1;
+            tick = (tick + 1) % 600;
         }
 
 
@@ -222,10 +275,15 @@ namespace SphereEditorTools
 
         #region Overwrite
 
+
+
+
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(UIDysonBrush_Node), "_OnUpdate")]
         [HarmonyPatch(typeof(UIDysonBrush_Frame), "_OnUpdate")]
         [HarmonyPatch(typeof(UIDysonBrush_Shell), "_OnUpdate")]
+        [HarmonyPatch(typeof(UIDysonBrush_Select), "_OnUpdate")]
+        [HarmonyPatch(typeof(UIDysonBrush_Remove), "_OnUpdate")]
         public static IEnumerable<CodeInstruction> Transpiler_OnUpdate(IEnumerable<CodeInstruction> instructions)
         {
             
@@ -234,9 +292,7 @@ namespace SphereEditorTools
 
             var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap");
             var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
-            //var methodMouseDown = typeof(Input).GetMethod("GetMouseButtonDown");
-
-            //Log.LogDebug("Patch");
+            var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
 
             try
             {
@@ -244,24 +300,20 @@ namespace SphereEditorTools
                 {
                     if (code[i].operand is MethodInfo mi)
                     {
-                        /*
-                        if (code[i].opcode == OpCodes.Call && mi == methodMouseDown)
+                        
+                        if (code[i].opcode == OpCodes.Call && mi == methodRayCastSphere)
                         {
-                            code[i].operand = typeof(SymmetricTool).GetMethod("Overwrite_GetMouseButtonDown");
-                            //Log.LogDebug($"[{i}]  Replce GetMouseButtonDown {code[i].operand}");
-                        }
-                        */
+                            code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RayCastSphere");
+                        }                        
                         if (code[i].opcode == OpCodes.Callvirt && mi == methodRaySnap)
                         {
                             code[i].opcode = OpCodes.Call;
                             code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RaySnap");
-                            //Log.LogDebug($"[{i}]  Replce RaySnap {code[i].operand}");
                         }
                         else if (code[i].opcode == OpCodes.Callvirt && mi == methodRayCast)
                         {
                             code[i].opcode = OpCodes.Call;
                             code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RayCast");
-                            //Log.LogDebug($"[{i}]  Replce RayCast {code[i].operand}");
                         }
                     }
                 }
@@ -270,35 +322,57 @@ namespace SphereEditorTools
             {
                 Log.LogError(e);
                 code = backup;
-                Log.LogWarning("Use backup");
+                Log.LogWarning("Restore backup IL");
 
             }
-            //Log.LogDebug("Restore code");
             return code.AsEnumerable();
         }
 
-        /*
-        public static bool Overwrite_GetMouseButtonDown(int button)
+        public static bool Overwrite_RayCastSphere(Vector3 origin, Vector3 dir, float length, Vector3 center, float radius, out RCHCPU rch)
         {
             if (overwrite)
             {
-                return button == downButton;
+                rch.point = Vector3.zero;
+                rch.normal = Vector3.zero;
+                if (origin == rayOrigin && center==currentPoint)
+                {
+                    rch.dist = castDist; //only use dist 
+                    return true;
+                }
+                rch.dist = 0f;
+                return false;
             }
-            bool result = Input.GetMouseButtonDown(button);
+
+            bool result = Phys.RayCastSphere(origin, dir, length, center, radius, out rch);
             if (result == true)
-                downButton = button;
+            {
+                rayOrigin = origin;
+                currentPoint = center;
+                castDist = rch.dist;
+            }
             return result;
         }
-        */
+
+
+
         public static bool Overwrite_RayCast(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, Quaternion rotation, float radius, out Vector3 cast, bool front = true)
         {
             if (overwrite)
             {
-                cast = castPoint;
-                return resultCast;
+                if (radius == castRadius)
+                {
+                    cast = castPoint;
+                    return true;
+                }
+                cast = Vector3.zero;
+                return false;
             }
-            resultCast = uidysonDrawingGrid.RayCast(lookRay, rotation, radius, out cast, front);
-            castPoint = cast;
+            bool resultCast = uidysonDrawingGrid.RayCast(lookRay, rotation, radius, out cast, front);
+            if (resultCast == true)
+            {
+                castRadius = radius;
+                castPoint = cast;
+            }
             return resultCast;
         }
 
@@ -312,6 +386,12 @@ namespace SphereEditorTools
             resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap);
             castPoint = snap;
             return resultSnap;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Shell), "AddNodeGizmo")]
+        public static bool Overwrite_AddNodeGizmo()
+        {
+            return !overwrite; //if overwrite is on, skip AddNodeGizmo()
         }
 
         #endregion
