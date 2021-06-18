@@ -14,75 +14,23 @@ using BrushMode = UIDysonPanel.EBrushMode;
 
 namespace SphereEditorTools 
 {
-
-
     class SymmetryTool : BaseUnityPlugin
     {
-        static int tick;
+        static UIDysonPanel dysnoPanel;
+        static List<UIDysonBrush>[] brushes;
+        static int brushId;
+        static bool mirrorMode;
+        static int rdialCount; //start from 1
 
-
-        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphere), "UpdateStates", new Type[] { typeof(DysonShell), typeof(uint), typeof(bool), typeof(bool) })]
-        public static void Wee(DysonShell shell, uint state, bool add, bool remove)
-        {
-            if (tick % 60 == 1)
-            {
-                Log.LogDebug($"Shell id{shell.id} state{shell.state} new state {state} {add}{remove}");
-            }
-        }
-
-
-
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedNode")]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedFrame")]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedShell")]
-        public static bool Overwrite_SetSelected()
-        {
-            if (overwrite)
-            {
-                //Log.LogDebug("Block Overwrite_SetSelected");
-                return false;
-            }
-            return true;
-        }
-
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(UIDysonBrush_Node), "_OnUpdate")]
-        [HarmonyPatch(typeof(UIDysonBrush_Frame), "_OnUpdate")]
-        [HarmonyPatch(typeof(UIDysonBrush_Shell), "_OnUpdate")]
-        public static void KeyLogger()
-        {
-            if (Input.GetMouseButtonDown(0))
-                Debug.Log("Pressed primary button.");
-
-            
-            //if (tick == 0)
-            {
-                //Log.LogDebug("test");
-            }
-            
-
-            //tick = (tick+1)%30;            
-        }
-
-        
         static bool overwrite;
-
         static Vector3 dataPoint; //store in sphere data, normalized
         static float castRadius;
         static bool resultSnap;
-        
         static Vector3 clickPoint; //currentRoation * dataPoint
         static float castDist;
         static Vector3 rayOrigin;
 
-        static List<UIDysonBrush>[] brushes;
-        static UIDysonPanel dysnoPanel;
-
-        static bool mirrorMode;
-        static int rdialCount; //start from 1
+        static int tick;
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
         public static void Init(UIDysonPanel __instance)
@@ -105,18 +53,19 @@ namespace SphereEditorTools
                 {
                     foreach (var brush in brushes[i])
                     {
+                        brush?._OnClose();
                         if (brush?.gameObject != null)
                             Destroy(brush?.gameObject);
                     }
                 }
                 brushes = null;
             }
-            Log.LogDebug("Free");
+            Comm.SymmetricMode = false;
         }
 
         public static void ChangeParameters(bool newMirrorMode, int newRadialCount)
         {
-            int previewCount = rdialCount * (mirrorMode ? 2 : 1);
+            int activeBrushCount = rdialCount * (mirrorMode ? 2 : 1);
             mirrorMode = newMirrorMode;
             rdialCount = newRadialCount;
             int newCount = rdialCount * (mirrorMode ? 2 : 1);
@@ -126,21 +75,20 @@ namespace SphereEditorTools
             }
             for (int i = 0; i < brushes.Length; i++)
             {
-                if (brushes[i].Count < previewCount)
+                if (brushes[i].Count < activeBrushCount)
                     continue;
-                for (int t = newCount; t < previewCount; t++) //Set extra as unactive
+                for (int t = newCount; t < activeBrushCount; t++) //Set extra as unactive
                 {
-                    brushes[i][t]?._Close();
+                    brushes[i][t]?._OnClose();
                     brushes[i][t]?.gameObject.SetActive(false);
                 }
             }
-            Log.LogDebug($"ChangeParameters C:{brushes[(int)BrushMode.Node].Count} M:{mirrorMode} R:{rdialCount}");
+            //Log.LogDebug($"ChangeParameters C:{brushes[(int)BrushMode.Node].Count} M:{mirrorMode} R:{rdialCount}");
             
         }
 
         static void AddBrushes()
         {
-            //GameObject brushesGroup = ((UIDysonBrush_Node)dysnoPanel.brushes[(int)BrushMode.Node]).preview.transform.parent.parent.gameObject;
             int id;
             
             id = (int)BrushMode.Node;
@@ -191,16 +139,24 @@ namespace SphereEditorTools
 
         }
 
-
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")]
         static void Brushes_OnUpdate()
         {
             try
-            {                
-
-                if (rdialCount * (mirrorMode ? 2 : 1) > 1) //symmetric mode on
+            {
+                int activeBrushCount = rdialCount * (mirrorMode ? 2 : 1);
+                if (activeBrushCount > 1) //symmetric mode on
                 {
-                    //Log.LogDebug("S Start");
+                    if (brushId != (int)dysnoPanel.brushMode)
+                    {
+                        foreach (var brush in brushes[brushId])
+                        {
+                            brush?._OnClose(); //Clean previous brushes
+                            brush?.gameObject.SetActive(false);
+                        }
+                        brushId = (int)dysnoPanel.brushMode;
+                    }
+
                     DysonSphere sphere = dysnoPanel.viewDysonSphere;
                     DysonSphereLayer layer = sphere?.GetLayer(dysnoPanel.layerSelected);
                     string errorText = dysnoPanel.brushError;
@@ -208,25 +164,6 @@ namespace SphereEditorTools
                     overwrite = true;
                     Vector3 pos = dataPoint;
                     Quaternion currentRotation = Quaternion.identity;
-                    /*
-                    if (clickPoint != Vector3.zero)
-                    {
-                        Ray ray = dysnoPanel.screenCamera.ScreenPointToRay(Input.mousePosition);
-                        castRadius = (float)(ray.origin.magnitude / (rayOrigin.magnitude * 0.00025));
-                        bool front = Vector3.Dot(ray.direction, clickPoint) < 0f ? true : false;
-                        for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
-                        {
-                            DysonSphereLayer layer2 = front ? sphere.layersSorted[i] : sphere.layersSorted[sphere.layersSorted.Length - 1 - i];
-                            if (layer2 != null && Mathf.Abs(layer2.orbitRadius - castRadius) < 1E-08)
-                            {
-                                castRadius = layer2.orbitRadius;
-                                currentRotation = layer2.currentRotation;
-                                pos = Quaternion.Inverse(currentRotation) * clickPoint;
-                                break;
-                            }
-                        }                            
-                    }
-                    */
                     if (clickPoint != Vector3.zero)
                     {
                         DysonNode nodeGizmo;
@@ -234,101 +171,59 @@ namespace SphereEditorTools
                             nodeGizmo = ((UIDysonBrush_Select)dysnoPanel.brushes[(int)BrushMode.Select]).castNodeGizmo;
                         else
                             nodeGizmo = ((UIDysonBrush_Remove)dysnoPanel.brushes[(int)BrushMode.Remove]).castNodeGizmo;
-
                         if (nodeGizmo != null)
                         {
                             DysonSphereLayer layer2 = sphere.GetLayer(nodeGizmo.layerId);
                             castRadius = 0; //Don't select frame and shell.
-                            currentRotation = layer2.currentRotation;
-                            pos = nodeGizmo.pos.normalized;
-                            //pos = Quaternion.Inverse(currentRotation) * clickPoint;
-                            if (tick%60 == 1)
-                                Log.LogDebug($"nodeGizmo {nodeGizmo.layerId} {nodeGizmo.pos}");
+                            currentRotation = layer2.currentRotation;                            
+                            pos = Quaternion.Inverse(currentRotation) * clickPoint; //or nodeGizmo.pos.normalized for precise fix position
                         }
                     }
 
-
-                    for (int i = 0; i < dysnoPanel.brushes.Length; i++)
+                    if (brushes[brushId].Count >= activeBrushCount)
                     {
-                        //Log.LogDebug($"{i} {dysnoPanel.brushMode} {i == (int)dysnoPanel.brushMode} {dysnoPanel.brushMode == BrushMode.Node}");
-
-                        if (brushes[i].Count <= 1) //Empty Brush
-                            continue;
-
-                        if (i == (int)dysnoPanel.brushMode)
+                        for (int t = 1; t < rdialCount; t++)
                         {
-                            for (int t = 1; t < rdialCount; t++)
+                            dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
+                            clickPoint = currentRotation * dataPoint;
+                            brushes[brushId][t].SetDysonSphere(sphere); //May change in future game patch?
+                            brushes[brushId][t].layer = layer;                                
+                            brushes[brushId][t]._Open();
+                            brushes[brushId][t].gameObject.SetActive(true);
+                            brushes[brushId][t]._OnUpdate();
+                                
+                        }
+                        if (mirrorMode)
+                        {
+                            pos.y = -pos.y;
+                            for (int t = rdialCount; t < 2 * rdialCount; t++)
                             {
                                 dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
                                 clickPoint = currentRotation * dataPoint;
-                                brushes[i][t].SetDysonSphere(sphere); //May change in future game patch?
-                                brushes[i][t].layer = layer;                                
-                                brushes[i][t]._Open();
-                                brushes[i][t].gameObject.SetActive(true);
-                                brushes[i][t]._OnUpdate();
-                                
-                            }
-                            if (mirrorMode)
-                            {
-                                pos.y = -pos.y;
-                                for (int t = rdialCount; t < 2 * rdialCount; t++)
-                                {
-                                    dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
-                                    clickPoint = currentRotation * dataPoint;
-                                    brushes[i][t].SetDysonSphere(sphere); //May change in future game patch?
-                                    brushes[i][t].layer = layer;
-                                    brushes[i][t].active = true;
-                                    brushes[i][t]._Open();
-                                    brushes[i][t].gameObject.SetActive(true);
-                                    brushes[i][t]._OnUpdate();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (var brush in brushes[i]) {
-                                brush?._OnClose();
-                                brush?.gameObject.SetActive(false);
+                                brushes[brushId][t].SetDysonSphere(sphere); //May change in future game patch?
+                                brushes[brushId][t].layer = layer;
+                                brushes[brushId][t].active = true;
+                                brushes[brushId][t]._Open();
+                                brushes[brushId][t].gameObject.SetActive(true);
+                                brushes[brushId][t]._OnUpdate();
                             }
                         }
                     }
                     overwrite = false;
                     dysnoPanel.brushError =  errorText;
                     clickPoint = Vector3.zero;
-
-                    //Log.LogDebug("S End");
                 }                
             }
             catch (Exception e)
             {
                 Log.LogError(e);
+                Comm.SetInfoString(TranslateString.SymmetricTool + " Error. The function is now disable", 120);
                 ChangeParameters(false, 1); //Exist sysmetry mode
             }
-            //tick = (tick + 1) % 1;
             tick = (tick + 1) % 600;
         }
 
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonBrush_Node), "_OnUpdate")]
-        public static void Node_OnUpdate(UIDysonBrush_Node __instance)
-        {
-            //if (tick == 0)
-            //    Log.LogDebug(__instance.preview.transform.position);
-        }
-
-
-
         #region Overwrite
-
-
-
-
-
-
-
-
-
-
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(UIDysonBrush_Node), "_OnUpdate")]
@@ -374,7 +269,7 @@ namespace SphereEditorTools
             {
                 Log.LogError(e);
                 code = backup;
-                Log.LogWarning("Restore backup IL");
+                Log.LogWarning("Transpiler failed. Restore backup IL");
 
             }
             return code.AsEnumerable();
@@ -404,9 +299,6 @@ namespace SphereEditorTools
             }
             return result;
         }
-
-
-
         public static bool Overwrite_RayCast(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, Quaternion rotation, float radius, out Vector3 cast, bool front = true)
         {
             if (overwrite)
@@ -446,21 +338,15 @@ namespace SphereEditorTools
             return !overwrite; //if overwrite is on, skip AddNodeGizmo()
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedNode")]
+        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedFrame")]
+        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedShell")]
+        public static bool Overwrite_SetSelected()
+        {
+            return !overwrite; //if overwrite is on, skip SetSelected() on dyson panel
+        }
+
         #endregion
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

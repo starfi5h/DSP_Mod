@@ -12,9 +12,9 @@ namespace SphereEditorTools
         static string infoString;
         static int infoCounter;
 
-        public static bool symmetricMode; //switch on/off
-        public static bool mirrorMode;    //switch on/off
-        public static int radialCount = 1;    //start from 1
+        public static bool SymmetricMode; //switch on/off
+        static bool mirrorMode;    //switch on/off
+        static int radialCount = 1;    //start from 1
 
         public static void SetInfoString(string str, int counter)
         {
@@ -25,7 +25,7 @@ namespace SphereEditorTools
         public static void ShowSymmetricToolStatus()
         {
             string str;
-            if (symmetricMode)
+            if (SymmetricMode)
             {
                  str = String.Format("{0} {1}:{2,-2} {3}:{4}", TranslateString.SymmetricTool, 
                     TranslateString.Rotation, radialCount, TranslateString.Mirror, mirrorMode ? "ON" : "OFF");                
@@ -104,8 +104,8 @@ namespace SphereEditorTools
                 {
                     if (Input.GetKeyDown("tab"))
                     {
-                        symmetricMode = !symmetricMode;
-                        if (symmetricMode)
+                        SymmetricMode = !SymmetricMode;
+                        if (SymmetricMode)
                         {
                             SymmetryTool.ChangeParameters(mirrorMode, radialCount);
                         }
@@ -118,7 +118,7 @@ namespace SphereEditorTools
                     }
                     else if (Input.GetKeyDown("m"))
                     {
-                        symmetricMode = true;
+                        SymmetricMode = true;
                         mirrorMode = !mirrorMode;
                         SymmetryTool.ChangeParameters(mirrorMode, radialCount);
                         ShowSymmetricToolStatus();
@@ -126,7 +126,7 @@ namespace SphereEditorTools
                     
                     else if (Input.GetKeyDown("[+]"))
                     {
-                        symmetricMode = true;
+                        SymmetricMode = true;
                         if (radialCount < 60)
                         {
                             SymmetryTool.ChangeParameters(mirrorMode, ++radialCount);
@@ -136,7 +136,7 @@ namespace SphereEditorTools
                     }
                     else if (Input.GetKeyDown("[-]"))
                     {
-                        symmetricMode = true;
+                        SymmetricMode = true;
                         Log.LogDebug("[-]");
                         if (radialCount > 1)
                             SymmetryTool.ChangeParameters(mirrorMode, --radialCount);
