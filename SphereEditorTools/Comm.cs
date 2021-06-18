@@ -102,21 +102,17 @@ namespace SphereEditorTools
 
                 if (SphereEditorTools.EnableSymmetryTool.Value)
                 {
-                    if (Input.GetKeyDown("tab"))
+                    if (Input.GetKeyDown(SphereEditorTools.KeySymmetryTool.Value))
                     {
                         SymmetricMode = !SymmetricMode;
                         if (SymmetricMode)
-                        {
                             SymmetryTool.ChangeParameters(mirrorMode, radialCount);
-                        }
                         else
-                        {
                             SymmetryTool.ChangeParameters(false, 1);
-                        }
                         ShowSymmetricToolStatus();
 
                     }
-                    else if (Input.GetKeyDown("m"))
+                    else if (Input.GetKeyDown(SphereEditorTools.KeyMirroring.Value))
                     {
                         SymmetricMode = true;
                         mirrorMode = !mirrorMode;
@@ -124,20 +120,16 @@ namespace SphereEditorTools
                         ShowSymmetricToolStatus();
                     }
                     
-                    else if (Input.GetKeyDown("[+]"))
+                    else if (Input.GetKeyDown(SphereEditorTools.KeyRotationInc.Value))
                     {
                         SymmetricMode = true;
                         if (radialCount < 60)
-                        {
                             SymmetryTool.ChangeParameters(mirrorMode, ++radialCount);
-
-                        }
                         ShowSymmetricToolStatus();
                     }
-                    else if (Input.GetKeyDown("[-]"))
+                    else if (Input.GetKeyDown(SphereEditorTools.KeyRotationDec.Value))
                     {
                         SymmetricMode = true;
-                        Log.LogDebug("[-]");
                         if (radialCount > 1)
                             SymmetryTool.ChangeParameters(mirrorMode, --radialCount);
                         ShowSymmetricToolStatus();

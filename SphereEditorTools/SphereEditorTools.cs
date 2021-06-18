@@ -32,9 +32,14 @@ namespace SphereEditorTools
         public static ConfigEntry<String> KeyFrameEuler;
         public static ConfigEntry<String> KeyShell;
         public static ConfigEntry<String> KeyRemove;
-        public static ConfigEntry<String> KeyGrid;
-        public static ConfigEntry<String> KeyHideMode;
+        public static ConfigEntry<String> KeyGrid;        
         public static ConfigEntry<String> KeyShowAllLayers;
+        public static ConfigEntry<String> KeyHideMode;
+        public static ConfigEntry<String> KeySymmetryTool;
+        public static ConfigEntry<String> KeyMirroring;
+        public static ConfigEntry<String> KeyRotationInc;
+        public static ConfigEntry<String> KeyRotationDec;
+
 
         private void BindConfig()
         {
@@ -52,8 +57,15 @@ namespace SphereEditorTools
             KeyShell                = Config.Bind<String>("Hotkeys - Toolbox", "KeyShell", "5", "Build Shell / 修建壳");
             KeyRemove               = Config.Bind<String>("Hotkeys - Toolbox", "KeyRemove", "x", "Remove / 移除");
             KeyGrid                 = Config.Bind<String>("Hotkeys - Toolbox", "KeyGrid", "r", "Toggle Grid / 切换网格");
+
             KeyShowAllLayers        = Config.Bind<String>("Hotkeys - Visibility", "KeyShowAllLayers", "`", "Toggle show all layers mode / 显示所有层");
             KeyHideMode             = Config.Bind<String>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle swarm & star hide mode / 切换太阳帆与恒星隐藏模式");
+
+            KeySymmetryTool         = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeySymmetryTool", "tab", "Toggle symmetry tool / 开关对称建造工具");
+            KeyMirroring            = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
+            KeyRotationInc          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase rotational symmetry level / 增加旋转对称的个数");
+            KeyRotationDec          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease rotational symmetry level / 减少旋转对称的个数");
+
         }
 
         public void Start()

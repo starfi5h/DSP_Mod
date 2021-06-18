@@ -166,17 +166,19 @@ namespace SphereEditorTools
                     Quaternion currentRotation = Quaternion.identity;
                     if (clickPoint != Vector3.zero)
                     {
-                        DysonNode nodeGizmo;
-                        if (dysnoPanel.brushMode == BrushMode.Select)
-                            nodeGizmo = ((UIDysonBrush_Select)dysnoPanel.brushes[(int)BrushMode.Select]).castNodeGizmo;
-                        else
-                            nodeGizmo = ((UIDysonBrush_Remove)dysnoPanel.brushes[(int)BrushMode.Remove]).castNodeGizmo;
-                        if (nodeGizmo != null)
+                        Ray ray = dysnoPanel.screenCamera.ScreenPointToRay(Input.mousePosition);
+                        castRadius = (float)(ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
+                        bool front = Vector3.Dot(ray.direction, clickPoint) < 0f ? true : false; //true : clickPoint is toward camera
+                        for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
                         {
-                            DysonSphereLayer layer2 = sphere.GetLayer(nodeGizmo.layerId);
-                            castRadius = 0; //Don't select frame and shell.
-                            currentRotation = layer2.currentRotation;                            
-                            pos = Quaternion.Inverse(currentRotation) * clickPoint; //or nodeGizmo.pos.normalized for precise fix position
+                            DysonSphereLayer layer2 = sphere.layersSorted[front ? i : sphere.layersSorted.Length - 1 - i];
+                            if (layer2 != null && Mathf.Abs(layer2.orbitRadius - castRadius) < 1.0f)
+                            {
+                                castRadius = 0; //Don't select frame and shell.
+                                currentRotation = layer2.currentRotation;
+                                pos = Quaternion.Inverse(currentRotation) * clickPoint;
+                                break;
+                            }
                         }
                     }
 
