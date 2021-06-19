@@ -1,7 +1,7 @@
 {
     "name": "SphereEditorTools",
-    "description": "Improve the function of dyson sphere editor. 改进戴森球编辑器的功能。",
-    "version_number": "1.0.0",
+    "description": "Enhance the function of dyson sphere editor. Feature: Hotkeys, symmetric tool. 强化戴森球编辑器，增加自订热键、对称建设工具等功能。",
+    "version_number": "1.1.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.5"]
 }

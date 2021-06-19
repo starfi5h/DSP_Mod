@@ -14,7 +14,7 @@ namespace SphereEditorTools
 
         public static bool SymmetricMode; //switch on/off
         static bool mirrorMode;    //switch on/off
-        static int radialCount = 1;    //start from 1
+        static int radialCount = 1;    //range 1 - 60
 
         public static void SetInfoString(string str, int counter)
         {
@@ -135,12 +135,7 @@ namespace SphereEditorTools
                         ShowSymmetricToolStatus();
                     }
                 }
-
-
-            }      
-
-        
+            }
         }
-
     }
 }

@@ -1,24 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
 
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "1.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "1.1.0")]
     public class SphereEditorTools : BaseUnityPlugin
     {
-        private Harmony harmony;
-        string errorMessage;
+        Harmony harmony;
+        public static string ErrorMessage;
 
         public static ConfigEntry<bool> EnableDeleteLayer;
         public static ConfigEntry<bool> EnableToolboxHotkey;
@@ -39,7 +32,6 @@ namespace SphereEditorTools
         public static ConfigEntry<String> KeyMirroring;
         public static ConfigEntry<String> KeyRotationInc;
         public static ConfigEntry<String> KeyRotationDec;
-
 
         private void BindConfig()
         {
@@ -63,8 +55,8 @@ namespace SphereEditorTools
 
             KeySymmetryTool         = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeySymmetryTool", "tab", "Toggle symmetry tool / 开关对称建造工具");
             KeyMirroring            = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
-            KeyRotationInc          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase rotational symmetry level / 增加旋转对称的个数");
-            KeyRotationDec          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease rotational symmetry level / 减少旋转对称的个数");
+            KeyRotationInc          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
+            KeyRotationDec          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
 
         }
 
@@ -74,7 +66,7 @@ namespace SphereEditorTools
             
             BindConfig();
             Log.Init(Logger);
-            errorMessage = "";
+            ErrorMessage = "";
 
             TryPatch(typeof(Comm));
             if (EnableDeleteLayer.Value)
@@ -84,10 +76,10 @@ namespace SphereEditorTools
             if (EnableSymmetryTool.Value)
                 TryPatch(typeof(SymmetryTool));
 
-            if (errorMessage != "")
+            if (ErrorMessage != "")
             {
-                errorMessage = "Load Error: " + errorMessage;
-                Comm.SetInfoString(errorMessage, 600);
+                ErrorMessage = "Load Error: " + ErrorMessage;
+                Comm.SetInfoString(ErrorMessage, 600);
             }
         }
 
@@ -99,7 +91,7 @@ namespace SphereEditorTools
             }
             catch (Exception e)
             {
-                errorMessage += type.Name + " ";
+                ErrorMessage += type.Name + " ";
                 Logger.LogError($"Patch {type.Name} error");
                 Logger.LogError(e);
             }
@@ -112,9 +104,6 @@ namespace SphereEditorTools
             SymmetryTool.Free();
         }
     }
-
-
-
     public static class Log
     {
         private static ManualLogSource _logger;

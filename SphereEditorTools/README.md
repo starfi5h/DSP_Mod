@@ -1,20 +1,28 @@
 # SphereEditorTools
 
+![SphereEditorTools Demo 1](https://github.com/starfi5h/DSP_Mod/blob/master/SphereEditorTools/img/demo1.gif?raw=true)
+
 A QoL mod aims to improve dyson sphere editing experience.  
 
 ## Feature  
 
 ### Custom Hotkeys
 When the building plan toolbox is displayed, you can use the hotkeys to switch between different tools.  
-Hotkeys is customizable in configuration, key name can be found in [unity manual](https://docs.unity3d.com/Manual/class-InputManager.html).  
+All hotkeys used in this mod are customizable in configuration, key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html).  
+
+### Symmetric Building Tool
+You can now build or remove multiple entities at once!  
+Symmetric tool can be toggle with `tab`.  There are two types of symmetry in the tool:   
+Mirror symmetry: When it is switch on (hotkey `m`), It will create corresponding reflections on the other side of the equator.  
+Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 60.  
 
 ### Delete Layer
 You can now dismantle the whole constructed layer with delete button.  
-Deleting Layer 1 will deconstruct the objects on the layer without removing it.  
+Deleting Layer 1 will deconstruct all the objects on the layer, leaving only an empty layer.  
 
 ### Hide Layer
 Toggle by "Show All Layer" button. When it is unchecked, only selected layer will be visible, other layers will be hidden.  
-You can also use hotkey `KeyHideMode` (default `h`) to hide dyson swarm and the star.  
+You can also use hotkey `h` to hide dyson swarm and the star.  
 If `EnableHideOutside` is enable, those objects will temporarily retain their visibility settings until reopening dyson editor or viewing another dyson sphere.
 
 ## Installation
@@ -48,10 +56,11 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 |Visibility|
 | `KeyShowAllLayers` | `    | Toggle show all layers mode |
 | `KeyHideMode`      | h    | Toggle swarm & star hide mode |
-
-
-## TODO
-- Symmetric building tool
+| Symmetry Tool |
+| `KeySymmetryTool`  | tab  | Toggle symmetry tool |
+| `KeyMirroring`     | m    | Toggle mirroring |
+| `KeyRotationInc`   | [+]  | Increase the degree of rotational symmetry |
+| `KeyRotationDec`   | [-]  | Decrease the degree of rotational symmetry |
 
 ----
 # 戴森球加強编辑工具
@@ -61,14 +70,23 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 ## 功能  
 
 ### 自定义热键
-当工具箱显示时，可以用热键来切换不同的建造工具。热键可以在设置中自定义，键名可以在[Unity手册](https://docs.unity3d.com/Manual/class-InputManager.html)中找到。
+当工具箱显示时，可以用热键来切换不同的建造工具。其他功能也可以用热键操控。  
+这个MOD用到的热键都可以在设置中自定义，键名可以在[Unity手册 - Input Manager](https://docs.unity3d.com/cn/2021.1/Manual/class-InputManager.html)中找到。
+
+
+### 对称建设工具  
+
+启用后，可以用热键`tab`開關，开启时能同时用多个笔刷建造或拆除。  
+镜像对称以赤道面對稱，开启时(`m`)会在赤道另一侧半球产生对应的笔刷。  
+旋转对称以自转轴对称，数值表示在同一个纬线上有多少个笔刷，范围在1-60(数字键盘`[+][-]`增减)。  
+
 
 ### 删除层级
 已建立层级可以用删除按钮一键拆除。删除层级1只会将该层上的所有物件拆除，层级仍会保留。
 
 ### 隐藏层级
-通过 "显示所有图层 "按钮进行切换。按钮没有勾选时，只有选取的层是可见的，其他层将被隐藏。  
-热键`KeyHideMode`(默认`h`)可以隐藏太阳帆与恒星。  
+通过"显示所有层"按钮进行切换。按钮没有勾选时，只有选取的层是可见的，其他层将被隐藏。  
+热键`h`可以隐藏太阳帆与恒星。  
 `EnableHideOutside`启用时，这些物件会暂时保留隐藏的设定直到再次打开编辑器页面或查看另一个戴森球。
 
 ## 安装
@@ -100,16 +118,21 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyShell`      | 5       | 修建壳 |
 | `KeyRemove`     | x       | 移除 |
 | `KeyGrid`       | r       | 切换网格 |
-|可见度|
+| 可见度 |
 | `KeyShowAllLayers` | `    | 切换显示所有层 |
 | `KeyHideMode`      | h    | 切换太阳帆与恒星隐藏模式 |
- 
-## 未来计画
-- 对称建设工具
+| 对称工具 |
+| `KeySymmetryTool`  | tab  | 开关对称建造工具 |
+| `KeyMirroring`     | m    | 开关镜像对称 |
+| `KeyRotationInc`   | [+]  | 增加旋转对称的个数 |
+| `KeyRotationDec`   | [-]  | 减少旋转对称的个数 |
 
 ----
 
 ## Changelog
+
+#### v1.1.0
+\- Add symmetric tool. Game version 0.7.18.7189  
 
 #### v1.0.0  
 \- Initial Release. Game version 0.7.18.7103  
@@ -118,4 +141,3 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 #### Acknowledgements
 All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  
-Icon by [Mithun Raj](https://freeicons.io/geometric-ui-icons-2/vector-pen-icon-9873#)  

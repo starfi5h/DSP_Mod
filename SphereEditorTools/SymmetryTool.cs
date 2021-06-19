@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -239,12 +237,12 @@ namespace SphereEditorTools
             var code = instructions.ToList();
             var backup = new List<CodeInstruction>(code);
 
-            var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap");
-            var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
-            var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
-
             try
             {
+                var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap");
+                var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
+                var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
+
                 for (int i = 0; i < code.Count; i++)
                 {
                     if (code[i].operand is MethodInfo mi)
@@ -272,8 +270,8 @@ namespace SphereEditorTools
                 Log.LogError(e);
                 code = backup;
                 Log.LogWarning("Transpiler failed. Restore backup IL");
-
-            }
+                SphereEditorTools.ErrorMessage += "SymmetryTool ";
+            }            
             return code.AsEnumerable();
         }
 

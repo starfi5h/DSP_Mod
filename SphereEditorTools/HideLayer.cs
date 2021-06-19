@@ -1,4 +1,8 @@
-﻿using BepInEx;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 
@@ -17,13 +21,13 @@ namespace SphereEditorTools
         {
             hideMode = (hideMode + 1) % 3;
             GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(hideMode < 2);
-            Log.LogDebug($"Toggle HideMode {hideMode}");
+            //Log.LogDebug($"Toggle HideMode {hideMode}");
             Comm.SetInfoString(TranslateString.HideMode(hideMode), 120);
-        }        
+        }
 
         public static void Free(string str)
         {
-            Log.LogDebug($"{str} : Reset visibility status.");
+            //Log.LogDebug($"{str} : Reset visibility status.");
             hideOtherLayers = false;
             viewLayerId = 0;
             focusLayer = null;
@@ -32,14 +36,13 @@ namespace SphereEditorTools
             hideMode = 0;
         }
 
-
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
         public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance)
         {
             int id = __instance.layerSelected;
             if (sphere == null || sphere != __instance.viewDysonSphere)
             {
-                //Log.LogDebug($"visible change{ __instance.viewDysonSphere }");
+                //Log.LogDebug($"Reset visibility status.");
                 sphere = __instance.viewDysonSphere;
                 focusLayer = new DysonSphereLayer[1];
                 tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
@@ -66,7 +69,7 @@ namespace SphereEditorTools
                 hideOtherLayers = !__instance.showAllLayers;
                 __instance.viewDysonSphere.modelRenderer.RebuildModels();
             }
-            //Log.LogDebug($"UpdateSelection ShowAll[{!hideOtherLayers}] ViewLayer[{viewLayerId}]");
+            //Log.LogDebug($"UpdateSelection ShowAll[{!hideOtherLayers}] ViewLayer[{viewLayerId}] {focusLayer[0]} {String.Join(",",tmpLayers.ToList())}");
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Remove), "_OnUpdate")]
@@ -100,7 +103,6 @@ namespace SphereEditorTools
         public static void RebuildModels_Prefix(DysonSphereSegmentRenderer __instance)
         {
             //Log.LogDebug($"RebuildModels HideOther[{hideOtherLayers}] ViewLayer[{viewLayerId}] ");
-
             if (hideOtherLayers)
             {
                 if (__instance.dysonSphere != sphere)
@@ -160,20 +162,21 @@ namespace SphereEditorTools
         {
             return hideMode <= 0;
         }
-
-        /*
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
+        
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
         public static void UIDysonPanel_SetViewStar()
         {
             Free("SetViewStar");
-        }
-        */
+        }        
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void UIDysonPanel__OnClose()
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
+        public static void UIDysonPanel__OnClose(UIDysonPanel __instance)
         {
             if (SphereEditorTools.EnableHideOutside.Value == false)
+            {
                 Free("Close");
+                __instance.viewDysonSphere.modelRenderer.RebuildModels();
+            }
         }
 
     }
