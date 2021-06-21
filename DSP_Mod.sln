@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingMod", "TestingMod\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "SphereEditorTools\SphereEditorTools.csproj", "{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResetSaveData", "ResetSaveData\ResetSaveData.csproj", "{322C197A-5A6C-459E-971A-119018B5CB1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{322C197A-5A6C-459E-971A-119018B5CB1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{322C197A-5A6C-459E-971A-119018B5CB1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{322C197A-5A6C-459E-971A-119018B5CB1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{322C197A-5A6C-459E-971A-119018B5CB1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
