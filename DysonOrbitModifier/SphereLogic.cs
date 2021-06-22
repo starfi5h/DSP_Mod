@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
+using HarmonyLib;
 using UnityEngine;
 
 
@@ -10,7 +11,8 @@ namespace DysonOrbitModifier
     class SphereLogic
     {
         public static ManualLogSource logger;
-        public static bool moveStructure;
+        public static bool syncPosition;
+        public static bool syncAltitude;
         public static bool correctOnChange;
 
         public static int CheckSwarmRadius(DysonSphere sphere, float orbitRadius)
@@ -71,9 +73,6 @@ namespace DysonOrbitModifier
             (layer.orbitRadius, radius) = (radius, layer.orbitRadius);
             (layer.orbitRotation, rotation) = (rotation, layer.orbitRotation);
             (layer.orbitAngularSpeed, angularSpeed) = (angularSpeed, layer.orbitAngularSpeed);
-            //Quaternion currentRotation = layer.currentRotation;
-            layer.currentRotation = layer.orbitRotation * Quaternion.Euler(0f, -layer.currentAngle, 0f); //Update Rotation
-            layer.nextRotation = layer.orbitRotation * Quaternion.Euler(0f, -layer.currentAngle - layer.orbitAngularSpeed * 0.016666668f, 0f);
 
 
             ConvertQuaternion(rotation, out float inclination, out float longitude);
@@ -81,22 +80,28 @@ namespace DysonOrbitModifier
             ConvertQuaternion(layer.orbitRotation, out inclination, out longitude);
             logger.LogInfo($" Current Layer[{id}]: ({layer.orbitRadius}, {inclination}, {longitude}, {angularSpeed})");
 
-            if (moveStructure && radius != layer.orbitRadius)
+
+            if ((syncPosition || rotation == layer.orbitRotation) && (!syncAltitude || radius == layer.orbitRadius)) //node.pos is not changed
             {
-                MoveStructure(sphere, id);
-                if (correctOnChange)
-                    ValueCorrection(sphere.GetLayer(id));
+                SyncNodeBuffer(sphere, id);
             }
             else
-                SyncNodeBuffer(sphere, id);
+            {
+                Quaternion previousRotation = layer.currentRotation;
+                layer.currentAngle = syncPosition || (layer.orbitRotation == rotation) ? layer.currentAngle : 0; //if syncPosition is false and orbitRotation is changed, angle set to 0
+                layer.currentRotation = layer.orbitRotation * Quaternion.Euler(0f, -layer.currentAngle, 0f); //Update Rotation
+                MoveStructure(sphere, id, previousRotation);
+                if (radius != layer.orbitRadius)
+                    ValueCorrection(sphere.GetLayer(id));
+            }                
             
         }
 
 
-        public static void MoveStructure(DysonSphere sphere, int layerId)
+        public static void MoveStructure(DysonSphere sphere, int layerId, Quaternion previousRotation)
         {
             DysonSphereLayer layer = sphere.GetLayer(layerId);
-            MoveNodes(layer);
+            MoveNodes(layer, previousRotation);
             SyncNodeBuffer(sphere, layerId);
             MoveFrames(layer);
             sphere.CheckAutoNodes(); //clear inactive node
@@ -116,13 +121,13 @@ namespace DysonOrbitModifier
                 {
                     sphere.nrdPool[node.rid].pos = node.pos;
                     sphere.nrdPool[node.rid].angularVel = layer.orbitAngularSpeed;
-                    sphere.nrdPool[node.rid].layerRot = layer.currentRotation; //value set at sphere.GameTick() 
+                    //sphere.nrdPool[node.rid].layerRot = layer.currentRotation; //value set at sphere.GameTick() 
                 }
             }
             sphere.nrdBuffer.SetData(sphere.nrdPool);
         }
 
-        public static void MoveNodes(DysonSphereLayer layer)
+        public static void MoveNodes(DysonSphereLayer layer, Quaternion previousRotation)
         {
             for (int i = 0; i < layer.nodeCursor; i++)
             {
@@ -130,7 +135,10 @@ namespace DysonOrbitModifier
                 if (node != null && node.id == i)
                 {
                     Vector3 pos = node.pos;
-                    node.pos = node.pos.normalized * layer.orbitRadius;
+                    if (!syncPosition)
+                        node.pos = Quaternion.Inverse(layer.currentRotation) * previousRotation * node.pos;
+                    if (syncAltitude)
+                        node.pos = node.pos.normalized * layer.orbitRadius;
                     logger.LogDebug($"Node [{i}]: pos {pos}->{node.pos}");
                 }
             }            
@@ -268,6 +276,38 @@ namespace DysonOrbitModifier
                 logger.LogDebug($"ValueCorrection layer[{layer.id}] : SP[{correctSpCount}] CP[{correctCpCount}]");
         }
 
+    }
+
+    class HierarchicalRotation
+    {
+        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "GameTick")]
+        public static bool DysonSphere_GameTick(DysonSphere __instance, long gameTick)
+        {
+            Quaternion parentCurrentRotation = Quaternion.identity;
+            Quaternion parentNextRotation = Quaternion.identity;
+            for (int i = 9; i >= 0; i--)
+            {
+                if (__instance.layersSorted[i] != null)
+                {
+                    __instance.layersSorted[i].GameTick(gameTick);
+                    __instance.layersSorted[i].currentRotation = parentCurrentRotation * __instance.layersSorted[i].currentRotation;
+                    __instance.layersSorted[i].nextRotation = parentNextRotation * __instance.layersSorted[i].nextRotation;
+                    parentCurrentRotation = __instance.layersSorted[i].currentRotation;
+                    parentNextRotation = __instance.layersSorted[i].nextRotation;
+                }
+            }
+            for (int j = 1; j < __instance.nrdCursor; j++)
+            {
+                int layerId = __instance.nrdPool[j].layerId;
+                DysonSphereLayer layer = __instance.layersIdBased[layerId];
+                if (layerId != 0)
+                    __instance.nrdPool[j].layerRot = (layer != null) ? layer.currentRotation : Quaternion.identity;
+            }
+            __instance.nrdBuffer.SetData(__instance.nrdPool);
+            __instance.RocketGameTick();
+            __instance.swarm.GameTick(gameTick);
+            return false;
+        }
     }
 
 }

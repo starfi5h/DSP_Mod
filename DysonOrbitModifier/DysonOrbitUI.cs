@@ -68,12 +68,12 @@ namespace DysonOrbitModifier
                     CreateObject(ref obj, dir + "bar-label", "bar-label-3", new Vector3(-230f, 74f, 0f), "Rotation speed".Translate());
                     modText0 = obj.GetComponent<Text>();
                 }
-
             }
             catch (Exception e)
             {
                 logger.LogError("UI Component load error");
                 logger.LogError(e.ToString());
+                throw new Exception("DysonOrbitModifier: UI Component load error\n" + e.ToString());
             }            
         }
 
@@ -124,21 +124,21 @@ namespace DysonOrbitModifier
         
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "OnAddSlider0Change")]
         public static void UIDysonPanel_OnAddSlider0Change(UIDysonPanel __instance)
-        {
-            sliderEventLock = true;
+        {            
             if (modSlider0 != null)
             {
+                sliderEventLock = true;
                 modSlider0.value = Mathf.Sqrt(__instance.viewDysonSphere.gravity / __instance.addSlider0.value) / __instance.addSlider0.value * 57.29578f; //change angular speed along with radius
                 modInput0.text = modSlider0.value.ToString();
-            }
-            sliderEventLock = false;
+                sliderEventLock = false;
+            }            
         }
 
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnAddOkClick")]
         public static void UIDysonPanel_OnAddOkClick(UIDysonPanel __instance)
         {
-            try
+            if (modSlider0 != null)
             {
                 float radius = __instance.addSlider0.value;
                 float inclination = __instance.addSlider1.value;
@@ -157,12 +157,8 @@ namespace DysonOrbitModifier
                     SphereLogic.ChangeLayer(__instance.viewDysonSphere, __instance.layerSelected, radius, rotation, angularSpeed);
                 }
                 modSlider0.value = 0;
+                __instance.UpdateSelectionVisibleChange();
             }
-            catch (Exception e)
-            {
-                logger.LogError(e);
-            }
-            __instance.UpdateSelectionVisibleChange();
         }
 
 
@@ -340,20 +336,11 @@ namespace DysonOrbitModifier
         }
 
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnAddCancelClick")]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIDysonPanel), "OnAddCancelClick")]
+        [HarmonyPatch(typeof(UIDysonPanel), "OnSwarmOrbitButtonClick")]
+        [HarmonyPatch(typeof(UIDysonPanel), "OnShellLayerButtonClick")]
         public static void UIDysonPanel_OnAddCancelClick()
-        {
-            modOrbitMode = modLayerMode = false;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnSwarmOrbitButtonClick")]
-        public static void UIDysonPanel_OnSwarmOrbitButtonClick()
-        {
-            modOrbitMode = modLayerMode = false;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnShellLayerButtonClick")]
-        public static void UIDysonPanel_OnShellLayerButtonClick()
         {
             modOrbitMode = modLayerMode = false;
         }
