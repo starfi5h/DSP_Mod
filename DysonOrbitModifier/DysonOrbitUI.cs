@@ -1,5 +1,4 @@
 ﻿// Dyson Sphere Program is developed by Youthcat Studio and published by Gamera Game.
-
 using System;
 using BepInEx;
 using BepInEx.Logging;
@@ -7,7 +6,6 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-
 
 namespace DysonOrbitModifier
 {
@@ -24,10 +22,10 @@ namespace DysonOrbitModifier
         public static InputField modInput0;
         public static Text modText0;
         public static bool sliderEventLock;
+        public static Toggle syncToggle;
         public static UIDysonPanel that;
 
         public static ManualLogSource logger;
-
         public static void Free()
         {
             if (modSlider0)
@@ -36,6 +34,10 @@ namespace DysonOrbitModifier
                 Destroy(modInput0.gameObject);
             if (modText0)
                 Destroy(modText0.gameObject);
+            if (syncToggle)
+            {
+                Destroy(syncToggle.gameObject.transform.parent.gameObject);
+            }
             that = null;
         }
 
@@ -47,11 +49,13 @@ namespace DysonOrbitModifier
             {
                 that = __instance;
                 GameObject obj = null;
-                string dir = "UI Root/Always on Top/Overlay Canvas - Top/Dyson Editor Top/info-group/screen-group/add-panel/";
+                string dir = "UI Root/Always on Top/Overlay Canvas - Top/Dyson Editor Top/info-group/screen-group/add-panel";
+                Transform parent = GameObject.Find(dir).transform;
 
                 if (!modSlider0)
                 {
-                    CreateObject(ref obj, dir + "bar-slider-1", "bar-slider-3", new Vector3(-120f, 59f, 0f));
+                    obj = GameObject.Find(dir + "/bar-slider-1");
+                    CreateObject(ref obj, parent, "bar-slider-3", new Vector3(-120f, 59f, 0f));
                     modSlider0 = obj.GetComponent<Slider>();
                     modSlider0.maxValue = maxOrbitAngularSpeed;
                     modSlider0.minValue = 0.0f;
@@ -59,14 +63,26 @@ namespace DysonOrbitModifier
                 }
                 if (!modInput0)
                 {
-                    CreateObject(ref obj, dir + "bar-value-1", "bar-value-3", new Vector3(230f, 59f, 0f));
+                    obj = GameObject.Find(dir + "/bar-value-1");
+                    CreateObject(ref obj, parent, "bar-value-3", new Vector3(230f, 59f, 0f));
                     modInput0 = obj.GetComponent<InputField>();
                     modInput0.onEndEdit.AddListener(new UnityAction<string>(delegate { OnModInput0ValueEnd(); }));
                 }
                 if (!modText0)
                 {
-                    CreateObject(ref obj, dir + "bar-label", "bar-label-3", new Vector3(-230f, 74f, 0f), "Rotation speed".Translate());
+                    obj = GameObject.Find(dir + "/bar-label");
+                    CreateObject(ref obj, parent, "bar-label-3", new Vector3(-230f, 74f, 0f), "Rotation speed".LocalTranslate());
                     modText0 = obj.GetComponent<Text>();
+                }
+                if (!syncToggle)
+                {
+                    obj = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
+                    CreateObject(ref obj, parent, "sync", new Vector3(160f, -45f, 0f), "Sync".LocalTranslate());
+                    obj = obj.transform.Find("CheckBox").gameObject;
+                    obj.transform.localPosition = new Vector3(35f, 5f, 0);
+                    syncToggle = obj.GetComponent<Toggle>();
+                    syncToggle.onValueChanged.AddListener(new UnityAction<bool>(delegate { OnSyncToggleChanged(); }));
+                    syncToggle.isOn = true;
                 }
             }
             catch (Exception e)
@@ -78,24 +94,31 @@ namespace DysonOrbitModifier
         }
 
         // credit to https://github.com/fezhub/DSP-Mods/blob/main/DSP_SphereProgress/SphereProgress.cs
-
-        public static void CreateObject(ref GameObject obj, string path, string name, Vector3 lPos, String text = "")
+        public static void CreateObject(ref GameObject obj, Transform parent, string name, Vector3 lPos, String text = "")
         {
 
-            GameObject target = GameObject.Find(path);
+            GameObject target = obj;
             if (target == null)
             {
-                logger.LogWarning(path + " : Object not found");
+                logger.LogWarning(name + " : Object not found");
                 return;
             }
-            obj = Instantiate(target, target.transform.parent);
+            obj = Instantiate(target, parent);
             obj.transform.localPosition = lPos;
             obj.name = name;
             if (text != "")
             {
-                obj.GetComponentInChildren<Text>().text = text.Translate();
-                obj.GetComponentInChildren<Localizer>().stringKey = text.Translate();
+                obj.GetComponentInChildren<Text>().text = text.LocalTranslate();
+                obj.GetComponentInChildren<Localizer>().stringKey = text.LocalTranslate();
             }
+        }
+
+        public static void OnSyncToggleChanged()
+        {
+            SphereLogic.syncPosition = syncToggle.isOn;
+            SphereLogic.syncAltitude = syncToggle.isOn;
+            SphereLogic.syncSwarm = syncToggle.isOn;
+            //logger.LogDebug(syncToggle.isOn);
         }
 
         public static void OnModSlider0Change()
@@ -134,7 +157,6 @@ namespace DysonOrbitModifier
             }            
         }
 
-
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnAddOkClick")]
         public static void UIDysonPanel_OnAddOkClick(UIDysonPanel __instance)
         {
@@ -160,8 +182,6 @@ namespace DysonOrbitModifier
                 __instance.UpdateSelectionVisibleChange();
             }
         }
-
-
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnSwarmOrbitAddClick")]
         public static bool UIDysonPanel_OnSwarmOrbitAddClick(UIDysonPanel __instance)
@@ -192,7 +212,6 @@ namespace DysonOrbitModifier
 
             return false;
         }
-
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnShellLayerAddClick")]
         public static bool UIDysonPanel_OnShellLayerAddClick(UIDysonPanel __instance)
@@ -270,71 +289,78 @@ namespace DysonOrbitModifier
             }
         }
 
-
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
         public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance, UIButton ___orbitAddButton, UIButton ___layerAddButton)
         {
-            //logger.LogDebug("UpdateSelectionVisibleChange swarm:[" + __instance.orbitSelected + "] layer:[" + __instance.layerSelected + "]");
-            if (__instance.orbitSelected == 0)
-                ___orbitAddButton.GetComponentInChildren<Text>().text = "Add Orbit".Translate();
-            else
-            {
-                ___orbitAddButton.GetComponentInChildren<Text>().text = "Modify Orbit".Translate();
-                ___orbitAddButton.button.interactable = true;
-            }
-            if (__instance.layerSelected == 0)
-                ___layerAddButton.GetComponentInChildren<Text>().text = "Add Layer".Translate();
-            else
-            {
-                ___layerAddButton.GetComponentInChildren<Text>().text = "Modify Layer".Translate();
-                ___layerAddButton.button.interactable = true;
-            }
-
-            if (modOrbitMode)
-            {
-                __instance.addTitleText.text = "Modify Orbit".Translate();
-                __instance.addPanel.SetActive(true);
-                __instance.orbitPreview._Open();
-                __instance.layerPreview._Close();
-                ___orbitAddButton.highlighted = true;
-                __instance.addOkButton.GetComponentInChildren<Text>().text = "Modify".Translate();
-                __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
-                __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
-            }
-            else if (!modLayerMode)
-            {
-                __instance.addOkButton.GetComponentInChildren<Text>().text = "Create".Translate();
-                __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius;
-                __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius;
-            }
-
-            if (modLayerMode)
-            {
-                __instance.addTitleText.text = ""; //Hide Title so that it won't block silder
-                __instance.addPanel.SetActive(true);
-                __instance.orbitPreview._Close();
-                __instance.layerPreview._Open();
-                ___layerAddButton.highlighted = true;
-                __instance.addOkButton.GetComponentInChildren<Text>().text = "Modify".Translate();
-                modSlider0.gameObject.SetActive(true);
-                modInput0.gameObject.SetActive(true);
-                modText0.gameObject.SetActive(true);
-                __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
-                __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
-
-            }
-            else
-            {
-                if (modSlider0 != null)
+            try { 
+                //logger.LogDebug("UpdateSelectionVisibleChange swarm:[" + __instance.orbitSelected + "] layer:[" + __instance.layerSelected + "]");
+                if (__instance.orbitSelected == 0)
+                ___orbitAddButton.GetComponentInChildren<Text>().text = "Add orbit".LocalTranslate();
+                else
                 {
-                    modSlider0?.gameObject.SetActive(false);
-                    modInput0?.gameObject.SetActive(false);
-                    modText0?.gameObject.SetActive(false);
+                    ___orbitAddButton.GetComponentInChildren<Text>().text = "Edit orbit".LocalTranslate();
+                    ___orbitAddButton.button.interactable = true;
                 }
-                __instance.addOkButton.button.interactable = true;
+                if (__instance.layerSelected == 0)
+                    ___layerAddButton.GetComponentInChildren<Text>().text = "Add layer".LocalTranslate();
+                else
+                {
+                    ___layerAddButton.GetComponentInChildren<Text>().text = "Edit orbit".LocalTranslate();
+                    ___layerAddButton.button.interactable = true;
+                }
+
+                if (modOrbitMode)
+                {
+                    __instance.addTitleText.text = "Edit orbit".LocalTranslate();
+                    __instance.addPanel.SetActive(true);
+                    __instance.orbitPreview._Open();
+                    __instance.layerPreview._Close();
+                    ___orbitAddButton.highlighted = true;
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Edit".LocalTranslate();
+                    __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
+                    __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
+                    syncToggle?.gameObject.transform.parent.gameObject.SetActive(true);
+                }
+                else if (!modLayerMode)
+                {
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Create".LocalTranslate();
+                    __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius;
+                    __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius;
+                    syncToggle?.gameObject.transform.parent.gameObject.SetActive(false);
+                }
+
+                if (modLayerMode)
+                {
+                    __instance.addTitleText.text = ""; //Hide Title so that it won't block silder
+                    __instance.addPanel.SetActive(true);
+                    __instance.orbitPreview._Close();
+                    __instance.layerPreview._Open();
+                    ___layerAddButton.highlighted = true;
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Edit".LocalTranslate();
+                    modSlider0.gameObject.SetActive(true);
+                    modInput0.gameObject.SetActive(true);
+                    modText0.gameObject.SetActive(true);
+                    __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
+                    __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
+                    syncToggle?.gameObject.transform.parent.gameObject.SetActive(true);
+                }
+                else
+                {
+                    if (modSlider0 != null)
+                    {
+                        modSlider0?.gameObject.SetActive(false);
+                        modInput0?.gameObject.SetActive(false);
+                        modText0?.gameObject.SetActive(false);
+
+                    }
+                    __instance.addOkButton.button.interactable = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex);
             }
         }
-
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(UIDysonPanel), "OnAddCancelClick")]

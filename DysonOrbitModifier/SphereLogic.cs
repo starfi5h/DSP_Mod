@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
-
 namespace DysonOrbitModifier
 {
-
     class SphereLogic
     {
         public static ManualLogSource logger;
         public static bool syncPosition;
         public static bool syncAltitude;
+        public static bool syncSwarm;
         public static bool correctOnChange;
 
         public static int CheckSwarmRadius(DysonSphere sphere, float orbitRadius)
@@ -55,15 +58,47 @@ namespace DysonOrbitModifier
             longitude = rotation.eulerAngles.y == 0 ? 0 : 360 - rotation.eulerAngles.y;
         }
 
-        public static void ChangeSwarm(DysonSphere sphere, int id, float radius, Quaternion rotation)
+        public static void ChangeSwarm(DysonSphere sphere, int orbitId, float radius, Quaternion rotation)
         {
-            ConvertQuaternion(sphere.swarm.orbits[id].rotation, out float inclination, out float longitude);
-            logger.LogInfo($"Previous Swarm[{id}]: ({sphere.swarm.orbits[id].radius}, {inclination}, {longitude})");
-            sphere.swarm.orbits[id].radius = radius;
-            sphere.swarm.orbits[id].rotation = rotation;
-            sphere.swarm.orbits[id].up = rotation * Vector3.up;
-            ConvertQuaternion(sphere.swarm.orbits[id].rotation, out inclination, out longitude);
-            logger.LogInfo($" Current Swarm[{id}]: ({sphere.swarm.orbits[id].radius}, {inclination}, {longitude})");
+            DysonSwarm swarm = sphere.swarm;
+            ConvertQuaternion(sphere.swarm.orbits[orbitId].rotation, out float inclination, out float longitude);
+            logger.LogInfo($"Previous Swarm[{orbitId}]: ({sphere.swarm.orbits[orbitId].radius}, {inclination}, {longitude})");
+
+            if (syncSwarm) {
+                int count = 0;
+                Vector3 up = rotation * Vector3.up;
+                Quaternion inverse = Quaternion.Inverse(swarm.orbits[orbitId].rotation);
+                double k = Math.Sqrt((double)sphere.gravity / radius);
+                swarm.sailPoolForSave = new DysonSail[swarm.sailCapacity];
+                swarm.swarmBuffer.GetData(swarm.sailPoolForSave, 0, 0, swarm.sailCursor);
+                for (int i = 0; i < swarm.sailCursor; i++)
+                {
+                    if (swarm.sailPoolForSave[i].st != orbitId)
+                        continue;
+                    DysonSail ss = swarm.sailPoolForSave[i];
+                    VectorLF3 posLF = new VectorLF3(ss.px, ss.py, ss.pz);
+                    posLF = rotation * inverse * posLF.normalized * radius;
+                    VectorLF3 velLF = VectorLF3.Cross(posLF, up).normalized * k;
+                    ss.px = (float)posLF.x;
+                    ss.py = (float)posLF.y;
+                    ss.pz = (float)posLF.z;
+                    ss.vx = (float)velLF.x;
+                    ss.vy = (float)velLF.y;
+                    ss.vz = (float)velLF.z;
+                    swarm.sailPoolForSave[i] = ss;
+                    count++;
+                }
+                swarm.swarmBuffer.SetData(swarm.sailPoolForSave, 0, 0, swarm.sailCapacity);
+                swarm.sailPoolForSave = null;
+                logger.LogDebug($"Change sails: {count}");
+            }
+
+            swarm.orbits[orbitId].radius = radius;
+            swarm.orbits[orbitId].rotation = rotation;
+            swarm.orbits[orbitId].up = rotation * Vector3.up;
+
+            ConvertQuaternion(sphere.swarm.orbits[orbitId].rotation, out inclination, out longitude);
+            logger.LogInfo($" Current Swarm[{orbitId}]: ({sphere.swarm.orbits[orbitId].radius}, {inclination}, {longitude})");
         }
 
         public static void ChangeLayer(DysonSphere sphere, int id, float radius, Quaternion rotation, float angularSpeed)
@@ -129,6 +164,7 @@ namespace DysonOrbitModifier
 
         public static void MoveNodes(DysonSphereLayer layer, Quaternion previousRotation)
         {
+            int count = 0;
             for (int i = 0; i < layer.nodeCursor; i++)
             {
                 DysonNode node = layer.nodePool[i];
@@ -139,9 +175,11 @@ namespace DysonOrbitModifier
                         node.pos = Quaternion.Inverse(layer.currentRotation) * previousRotation * node.pos;
                     if (syncAltitude)
                         node.pos = node.pos.normalized * layer.orbitRadius;
-                    logger.LogDebug($"Node [{i}]: pos {pos}->{node.pos}");
+                    //logger.LogDebug($"Node [{i}]: pos {pos}->{node.pos}");
+                    count++;
                 }
-            }            
+            }
+            logger.LogDebug($"Node count: {count}");
         }
 
         public static void MoveFrames(DysonSphereLayer layer)
@@ -170,10 +208,8 @@ namespace DysonOrbitModifier
 
         public static void MoveShell(DysonSphereLayer layer)
         {
-
             List<int> nodeIds = new List<int>(6);
             List<int> nodecps = new List<int>(6);
-            //List<uint> vertcps = new List<uint>(6); //vertcps, vertexCount will change when radius change
 
             for (int sid = 0; sid < layer.shellCursor; sid++)
             {
@@ -183,7 +219,6 @@ namespace DysonOrbitModifier
 
                 nodeIds.Clear();
                 nodecps.Clear();
-                //vertcps.Clear();
                 for (int index = 0; index < shell.nodes.Count; index++)
                 {
                     nodeIds.Add(shell.nodes[index].id);
@@ -199,8 +234,6 @@ namespace DysonOrbitModifier
 
                 layer.RemoveDysonShell(shell.id);
                 //logger.LogDebug($"[{i}] v:{vertexCount} cp:[{string.Join(",", nodeIds.ToArray())}] cp({string.Join(",", nodecps.ToArray())}) ");
-
-
                 int id = layer.NewDysonShell(protoId, nodeIds);
                 shell = layer.shellPool[id];
 
@@ -278,36 +311,76 @@ namespace DysonOrbitModifier
 
     }
 
-    class HierarchicalRotation
+    class ChainedRotation
     {
-        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "GameTick")]
-        public static bool DysonSphere_GameTick(DysonSphere __instance, long gameTick)
+        internal static bool enable;
+        internal static List<Tuple<int, int>> sequenceList;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameMain), "Resume")]
+        public static void GameMain_Resume()
         {
-            Quaternion parentCurrentRotation = Quaternion.identity;
-            Quaternion parentNextRotation = Quaternion.identity;
-            for (int i = 9; i >= 0; i--)
+            DysonOrbitModifier.Config.Reload();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(DysonSphere), "GameTick")]
+        static IEnumerable<CodeInstruction> DysonSphere_GameTick_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            //change roation after DysonLayer.GameTick(int) done in for loop
+            var code = instructions.ToList();
+            var backup = new List<CodeInstruction>(code);
+            try
             {
-                if (__instance.layersSorted[i] != null)
+                
+                int targetIndex = 0;
+                for (int i = 0; i < code.Count; i++)
                 {
-                    __instance.layersSorted[i].GameTick(gameTick);
-                    __instance.layersSorted[i].currentRotation = parentCurrentRotation * __instance.layersSorted[i].currentRotation;
-                    __instance.layersSorted[i].nextRotation = parentNextRotation * __instance.layersSorted[i].nextRotation;
-                    parentCurrentRotation = __instance.layersSorted[i].currentRotation;
-                    parentNextRotation = __instance.layersSorted[i].nextRotation;
+                    if (targetIndex == 0 && code[i].opcode == OpCodes.Callvirt && (MethodInfo)code[i].operand == AccessTools.Method(typeof(DysonSphereLayer), "GameTick"))
+                        targetIndex = -1; //stage 1
+                    if (targetIndex == -1 && code[i].opcode == OpCodes.Blt)
+                    {
+                        targetIndex = i; //stage 2
+                        break;
+                    }
+                }
+                Debug.Log($"target: {targetIndex}");
+                var codeToInsert = new List<CodeInstruction>();
+                codeToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
+                codeToInsert.Add(new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(ChainedRotation), "ChangeLayersRotaiton")));
+                code.InsertRange(targetIndex + 1, codeToInsert);
+
+                for (int i = 0; i < code.Count; i++)
+                    Debug.Log($"{i,2}  {code[i].opcode.ToString()} {code[i].operand?.ToString()}");
+            }
+            catch (Exception e)
+            {                
+                code = backup;
+                SphereLogic.logger.LogError(e);
+                SphereLogic.logger.LogWarning("Transpiler failed. Restore original IL");
+            }
+            return code.AsEnumerable();     
+        }
+
+        static int count = 0;
+        static void ChangeLayersRotaiton(DysonSphere sphere)
+        {
+            count = (++count)%6000;
+            if (enable)
+            {
+                foreach (var tuple in sequenceList)
+                {
+                    DysonSphereLayer layer1 = sphere.GetLayer(tuple.Item1);
+                    DysonSphereLayer layer2 = sphere.GetLayer(tuple.Item2);
+                    if (layer1 != null && layer2 != null)
+                    {
+                        layer2.currentRotation = layer1.currentRotation * layer2.currentRotation;
+                        layer2.nextRotation = layer1.nextRotation * layer2.nextRotation;
+                    }
+                    if (count == 0)
+                        SphereLogic.logger.LogDebug($"{tuple.Item1} {tuple.Item2}");
                 }
             }
-            for (int j = 1; j < __instance.nrdCursor; j++)
-            {
-                int layerId = __instance.nrdPool[j].layerId;
-                DysonSphereLayer layer = __instance.layersIdBased[layerId];
-                if (layerId != 0)
-                    __instance.nrdPool[j].layerRot = (layer != null) ? layer.currentRotation : Quaternion.identity;
-            }
-            __instance.nrdBuffer.SetData(__instance.nrdPool);
-            __instance.RocketGameTick();
-            __instance.swarm.GameTick(gameTick);
-            return false;
         }
     }
+
 
 }
