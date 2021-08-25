@@ -15,14 +15,13 @@ namespace SphereEditorTools
         static DysonSphereLayer[] focusLayer;
         static DysonSphereLayer[] tmpLayers;
         static DysonSphere sphere;
-        static int hideMode;
+        static int displayMode;
 
-        static public void ToggleMode()
+        static public void SetDisplayMode(int mode)
         {
-            hideMode = (hideMode + 1) % 3;
-            GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(hideMode < 2);
-            //Log.LogDebug($"Toggle HideMode {hideMode}");
-            Comm.SetInfoString(TranslateString.HideMode(hideMode), 120);
+            displayMode = mode; //0:normal 1,3: hide swarm 2,3: hide star
+            GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(displayMode < 2);
+            Comm.SetInfoString(Stringpool.DisplayMode[displayMode], 120);
         }
 
         public static void Free(string str)
@@ -33,7 +32,7 @@ namespace SphereEditorTools
             focusLayer = null;
             tmpLayers = null;
             sphere = null;
-            hideMode = 0;
+            displayMode = 0;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
@@ -160,7 +159,7 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "DrawPost")]
         public static bool DysonSwarm_DrawPost()
         {
-            return hideMode <= 0;
+            return displayMode%2 == 0;
         }
         
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
@@ -170,7 +169,7 @@ namespace SphereEditorTools
         }        
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void UIDysonPanel__OnClose(UIDysonPanel __instance)
+        public static void OnClose(UIDysonPanel __instance)
         {
             if (SphereEditorTools.EnableHideOutside.Value == false)
             {

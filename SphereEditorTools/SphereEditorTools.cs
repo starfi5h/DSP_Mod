@@ -32,6 +32,8 @@ namespace SphereEditorTools
         public static ConfigEntry<String> KeyMirroring;
         public static ConfigEntry<String> KeyRotationInc;
         public static ConfigEntry<String> KeyRotationDec;
+        public static ConfigEntry<String> KeyLayerCopy;
+        public static ConfigEntry<String> KeyLayerPaste;
 
         private void BindConfig()
         {
@@ -58,6 +60,9 @@ namespace SphereEditorTools
             KeyRotationInc          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
             KeyRotationDec          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
 
+            KeyLayerCopy            = Config.Bind<String>("Hotkeys - Layer", "KeyLayerCopy", "home", "Copy the selected layer / 复制选定的层级");
+            KeyLayerPaste           = Config.Bind<String>("Hotkeys - Layer", "KeyLayerPaste", "end", "Paste to the selected layer / 粘贴到选定的层级");
+
         }
 
         public void Start()
@@ -67,8 +72,11 @@ namespace SphereEditorTools
             BindConfig();
             Log.Init(Logger);
             ErrorMessage = "";
+            Log.LogDebug(KeyLayerCopy.Value);
 
-            TryPatch(typeof(Comm));
+            TryPatch(typeof(UIWindow));
+            
+            TryPatch(typeof(Comm));            
             if (EnableDeleteLayer.Value)
                 TryPatch(typeof(DeleteLayer));
             if (EnableHideLayer.Value)
@@ -83,6 +91,7 @@ namespace SphereEditorTools
             }
         }
 
+
         public void TryPatch(Type type)
         {
             try
@@ -96,10 +105,16 @@ namespace SphereEditorTools
                 Logger.LogError(e);
             }
         }
+
+        public void OnGUI()
+        {
+            UIWindow.OnGUI();
+        }
+
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
-            DeleteLayer.Free();
+            Comm.Free();
             HideLayer.Free("Unpatch");
             SymmetryTool.Free();
         }

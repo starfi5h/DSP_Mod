@@ -1,27 +1,20 @@
-﻿using System;
-using BepInEx;
+﻿using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 
-
-
 namespace SphereEditorTools
 {
-
     class DeleteLayer : BaseUnityPlugin
     {
-        public static UIDysonPanel dysnoPanel;
-        public static int storedLayerId;
+        static UIDysonPanel dysnoPanel;
+        static int storedLayerId;
 
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void Free()
+        public static void OnClose()
         {
             dysnoPanel = null;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
-        public static void UIDysonPanel__OnOpen(UIDysonPanel __instance)
+        public static void OnOpen(UIDysonPanel __instance)
         {
             dysnoPanel = __instance;
         }
@@ -38,7 +31,6 @@ namespace SphereEditorTools
             __instance.layerRmvButton.button.interactable = (__instance.layerSelected > 0); //Enable to remove objects on layer 1
         }
 
-
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "OnShellLayerRemoveClick")]
         public static bool OnShellLayerRemoveClick(int obj)
         {
@@ -50,8 +42,8 @@ namespace SphereEditorTools
                 storedLayerId = dysnoPanel.layerSelected; //layerSelected may change by brush select
                 
                 var messagebox = UIMessageBox.Show(
-                    "删除".Translate() + " " + TranslateString.Layer, //Remove Layer
-                    "删除".Translate() + " " + TranslateString.Layer + " [" + dysnoPanel.layerSelected + "] ?",
+                    "删除".Translate() + " " + Stringpool.LAYER, //Remove Layer
+                    "删除".Translate() + " " + Stringpool.LAYER + " [" + dysnoPanel.layerSelected + "] ?",
                     "否".Translate(), "是".Translate(), 2,
                     null, new UIMessageBox.Response(RemoveLayer));
                 var go = GameObject.Find("UI Root/Always on Top/Overlay Canvas - Top/Dyson Editor Top");
@@ -105,8 +97,4 @@ namespace SphereEditorTools
             }
         }
     }
-
-
-
-
 }

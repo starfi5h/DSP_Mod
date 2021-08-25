@@ -17,7 +17,7 @@ namespace SphereEditorTools
         static UIDysonPanel dysnoPanel;
         static List<UIDysonBrush>[] brushes;
         static int brushId;
-        static bool mirrorMode;
+        static int mirrorMode; // 0~2
         static int rdialCount; //start from 1
 
         static bool overwrite;
@@ -61,12 +61,12 @@ namespace SphereEditorTools
             Comm.SymmetricMode = false;
         }
 
-        public static void ChangeParameters(bool newMirrorMode, int newRadialCount)
+        public static void ChangeParameters(int newMirrorMode, int newRadialCount)
         {
-            int activeBrushCount = rdialCount * (mirrorMode ? 2 : 1);
+            int activeBrushCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
             mirrorMode = newMirrorMode;
             rdialCount = newRadialCount;
-            int newCount = rdialCount * (mirrorMode ? 2 : 1);
+            int newCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
             while (brushes[(int)BrushMode.Node].Count < newCount)
             {
                 AddBrushes();
@@ -137,12 +137,12 @@ namespace SphereEditorTools
 
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")] //TODO: Fix UIDysonBrush_Node collision detection
         static void Brushes_OnUpdate()
         {
             try
             {
-                int activeBrushCount = rdialCount * (mirrorMode ? 2 : 1);
+                int activeBrushCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
                 if (activeBrushCount > 1) //symmetric mode on
                 {
                     if (brushId != (int)dysnoPanel.brushMode)
@@ -193,9 +193,14 @@ namespace SphereEditorTools
                             brushes[brushId][t]._OnUpdate();
                                 
                         }
-                        if (mirrorMode)
+                        if (mirrorMode > 0)
                         {
                             pos.y = -pos.y;
+                            if (mirrorMode == 2) //Antipodal point
+                            {
+                                pos.x = -pos.x;
+                                pos.z = -pos.z;
+                            }
                             for (int t = rdialCount; t < 2 * rdialCount; t++)
                             {
                                 dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
@@ -217,8 +222,8 @@ namespace SphereEditorTools
             catch (Exception e)
             {
                 Log.LogError(e);
-                Comm.SetInfoString(TranslateString.SymmetricTool + " Error. The function is now disable", 120);
-                ChangeParameters(false, 1); //Exist sysmetry mode
+                Comm.SetInfoString(Stringpool.SymmetricTool + " Error. The function is now disable", 120);
+                ChangeParameters(0, 1); //Exist sysmetry mode
             }
             tick = (tick + 1) % 600;
         }

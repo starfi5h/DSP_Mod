@@ -9,12 +9,32 @@ namespace SphereEditorTools
 {
     class Comm : BaseUnityPlugin
     {
+        public static UIDysonPanel dysnoPanel;
         static string infoString;
         static int infoCounter;
 
-        public static bool SymmetricMode; //switch on/off
-        static bool mirrorMode;    //switch on/off
-        static int radialCount = 1;    //range 1 - 60
+        public static int DisplayMode;     //0~3
+        public static bool SymmetricMode;  //switch on/off
+        public static int MirrorMode;      //0~2
+        public static int RadialCount = 1; //range 1 - 60
+
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
+        public static void Init(UIDysonPanel __instance)
+        {
+            dysnoPanel = __instance;
+            Stringpool.Set();
+            UIWindow.OnOpen(dysnoPanel);
+            DeleteLayer.OnOpen(dysnoPanel);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
+        public static void Free()
+        {
+            dysnoPanel = null;
+            UIWindow.OnClose();
+            DeleteLayer.OnClose();
+        }
+
 
         public static void SetInfoString(string str, int counter)
         {
@@ -27,12 +47,12 @@ namespace SphereEditorTools
             string str;
             if (SymmetricMode)
             {
-                 str = String.Format("{0} {1}:{2,-2} {3}:{4}", TranslateString.SymmetricTool, 
-                    TranslateString.Rotation, radialCount, TranslateString.Mirror, mirrorMode ? "ON" : "OFF");                
+                 str = String.Format("{0} {1}:{2,-2} {3}:{4}", Stringpool.SymmetricTool,
+                    Stringpool.Rotation, RadialCount, Stringpool.Mirror, Stringpool.MirrorModes[MirrorMode]);                
             }
             else
             {
-                str = String.Format("{0} OFF", TranslateString.SymmetricTool);
+                str = String.Format("{0} OFF", Stringpool.SymmetricTool);
             }
             SetInfoString(str, 120);
         }
@@ -85,6 +105,22 @@ namespace SphereEditorTools
                                 layer.gridMode = (layer.gridMode + 1) % 3; //0: No Grid, 1: Graticule, 2: Geometric
                         }
                     }
+                
+                    if (Input.GetKeyDown(SphereEditorTools.KeyLayerCopy.Value))
+                    {
+                        Log.LogDebug("copy!");
+                        if (CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected)))
+                            SetInfoString("Copy successed!", 120);
+                        else
+                            SetInfoString("Copy failed!", 120);
+
+                    }
+                    else if (Input.GetKeyDown(SphereEditorTools.KeyLayerPaste.Value))
+                    {
+                        Log.LogDebug("paste");
+                        CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);
+                    }
+                
                 }
                 if (SphereEditorTools.EnableHideLayer.Value)
                 {
@@ -96,7 +132,8 @@ namespace SphereEditorTools
                     }
                     else if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
                     {
-                        HideLayer.ToggleMode();
+                        DisplayMode = (DisplayMode + 1) % 4;
+                        HideLayer.SetDisplayMode(DisplayMode);
                     }
                 }
 
@@ -106,32 +143,32 @@ namespace SphereEditorTools
                     {
                         SymmetricMode = !SymmetricMode;
                         if (SymmetricMode)
-                            SymmetryTool.ChangeParameters(mirrorMode, radialCount);
+                            SymmetryTool.ChangeParameters(MirrorMode, RadialCount);
                         else
-                            SymmetryTool.ChangeParameters(false, 1);
+                            SymmetryTool.ChangeParameters(0, 1);
                         ShowSymmetricToolStatus();
 
                     }
                     else if (Input.GetKeyDown(SphereEditorTools.KeyMirroring.Value))
                     {
                         SymmetricMode = true;
-                        mirrorMode = !mirrorMode;
-                        SymmetryTool.ChangeParameters(mirrorMode, radialCount);
+                        MirrorMode = (MirrorMode + 1) % 3;
+                        SymmetryTool.ChangeParameters(MirrorMode, RadialCount);
                         ShowSymmetricToolStatus();
                     }
                     
                     else if (Input.GetKeyDown(SphereEditorTools.KeyRotationInc.Value))
                     {
                         SymmetricMode = true;
-                        if (radialCount < 60)
-                            SymmetryTool.ChangeParameters(mirrorMode, ++radialCount);
+                        if (RadialCount < 60)
+                            SymmetryTool.ChangeParameters(MirrorMode, ++RadialCount);
                         ShowSymmetricToolStatus();
                     }
                     else if (Input.GetKeyDown(SphereEditorTools.KeyRotationDec.Value))
                     {
                         SymmetricMode = true;
-                        if (radialCount > 1)
-                            SymmetryTool.ChangeParameters(mirrorMode, --radialCount);
+                        if (RadialCount > 1)
+                            SymmetryTool.ChangeParameters(MirrorMode, --RadialCount);
                         ShowSymmetricToolStatus();
                     }
                 }
