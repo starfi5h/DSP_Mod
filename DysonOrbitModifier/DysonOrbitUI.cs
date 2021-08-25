@@ -71,13 +71,13 @@ namespace DysonOrbitModifier
                 if (!modText0)
                 {
                     obj = GameObject.Find(dir + "/bar-label");
-                    CreateObject(ref obj, parent, "bar-label-3", new Vector3(-230f, 74f, 0f), "Rotation speed".LocalTranslate());
+                    CreateObject(ref obj, parent, "bar-label-3", new Vector3(-230f, 74f, 0f), Stringpool.Rotation_speed);
                     modText0 = obj.GetComponent<Text>();
                 }
                 if (!syncToggle)
                 {
                     obj = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
-                    CreateObject(ref obj, parent, "sync", new Vector3(160f, -45f, 0f), "Sync".LocalTranslate());
+                    CreateObject(ref obj, parent, "sync", new Vector3(160f, -45f, 0f), Stringpool.Sync);
                     obj = obj.transform.Find("CheckBox").gameObject;
                     obj.transform.localPosition = new Vector3(35f, 5f, 0);
                     syncToggle = obj.GetComponent<Toggle>();
@@ -108,8 +108,8 @@ namespace DysonOrbitModifier
             obj.name = name;
             if (text != "")
             {
-                obj.GetComponentInChildren<Text>().text = text.LocalTranslate();
-                obj.GetComponentInChildren<Localizer>().stringKey = text.LocalTranslate();
+                obj.GetComponentInChildren<Text>().text = text;
+                obj.GetComponentInChildren<Localizer>().stringKey = text;
             }
         }
 
@@ -295,35 +295,35 @@ namespace DysonOrbitModifier
             try { 
                 //logger.LogDebug("UpdateSelectionVisibleChange swarm:[" + __instance.orbitSelected + "] layer:[" + __instance.layerSelected + "]");
                 if (__instance.orbitSelected == 0)
-                ___orbitAddButton.GetComponentInChildren<Text>().text = "Add orbit".LocalTranslate();
+                ___orbitAddButton.GetComponentInChildren<Text>().text = Stringpool.Add_orbit;
                 else
                 {
-                    ___orbitAddButton.GetComponentInChildren<Text>().text = "Edit orbit".LocalTranslate();
+                    ___orbitAddButton.GetComponentInChildren<Text>().text = Stringpool.Edit_orbit;
                     ___orbitAddButton.button.interactable = true;
                 }
                 if (__instance.layerSelected == 0)
-                    ___layerAddButton.GetComponentInChildren<Text>().text = "Add layer".LocalTranslate();
+                    ___layerAddButton.GetComponentInChildren<Text>().text = Stringpool.Add_layer;
                 else
                 {
-                    ___layerAddButton.GetComponentInChildren<Text>().text = "Edit orbit".LocalTranslate();
+                    ___layerAddButton.GetComponentInChildren<Text>().text = Stringpool.Edit_orbit;
                     ___layerAddButton.button.interactable = true;
                 }
 
                 if (modOrbitMode)
                 {
-                    __instance.addTitleText.text = "Edit orbit".LocalTranslate();
+                    __instance.addTitleText.text = Stringpool.Edit_orbit;
                     __instance.addPanel.SetActive(true);
                     __instance.orbitPreview._Open();
                     __instance.layerPreview._Close();
                     ___orbitAddButton.highlighted = true;
-                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Edit".LocalTranslate();
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = Stringpool.Edit;
                     __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius * minOrbitRadiusMultiplier;
                     __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius * maxOrbitRadiusMultiplier;
                     syncToggle?.gameObject.transform.parent.gameObject.SetActive(true);
                 }
                 else if (!modLayerMode)
                 {
-                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Create".LocalTranslate();
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = Stringpool.Create;
                     __instance.addSlider0.minValue = __instance.viewDysonSphere.minOrbitRadius;
                     __instance.addSlider0.maxValue = __instance.viewDysonSphere.maxOrbitRadius;
                     syncToggle?.gameObject.transform.parent.gameObject.SetActive(false);
@@ -336,7 +336,7 @@ namespace DysonOrbitModifier
                     __instance.orbitPreview._Close();
                     __instance.layerPreview._Open();
                     ___layerAddButton.highlighted = true;
-                    __instance.addOkButton.GetComponentInChildren<Text>().text = "Edit".LocalTranslate();
+                    __instance.addOkButton.GetComponentInChildren<Text>().text = Stringpool.Edit;
                     modSlider0.gameObject.SetActive(true);
                     modInput0.gameObject.SetActive(true);
                     modText0.gameObject.SetActive(true);

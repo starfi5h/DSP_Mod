@@ -1,7 +1,7 @@
 # DysonOrbitModifier
 
 ![Demo 1 sync v.s. not sync ](https://github.com/starfi5h/DSP_Mod/raw/master/DysonOrbitModifier/img/demo1.gif?raw=true)  
-![Demo 2 ](https://github.com/starfi5h/DSP_Mod/raw/master/DysonOrbitModifier/img/demo2.gif?raw=true) `chainedRotation` = true  
+![Demo 2 visual effect](https://github.com/starfi5h/DSP_Mod/raw/master/DysonOrbitModifier/img/demo2.gif?raw=true) `chainedRotation` = true  
 
 This mod lets you view and change parameters of a created orbit without deleting it.  
 You can also edit settings in configuration to make a bigger dyson sphere.  
@@ -74,6 +74,9 @@ Run the game one time to generate `.cfg` file. Pause and resume the game to make
 ----
 
 ## Changelog
+
+#### V1.4.1
+\- Fix a string error.
 
 #### V1.4.0
 \- Add UI sync toggle to replace config options. Game Version 0.8.20.7996  

@@ -320,6 +320,7 @@ namespace DysonOrbitModifier
         public static void GameMain_Resume()
         {
             DysonOrbitModifier.Config.Reload();
+            Stringpool.Set();
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(DysonSphere), "GameTick")]
@@ -342,14 +343,10 @@ namespace DysonOrbitModifier
                         break;
                     }
                 }
-                Debug.Log($"target: {targetIndex}");
                 var codeToInsert = new List<CodeInstruction>();
                 codeToInsert.Add(new CodeInstruction(OpCodes.Ldarg_0));
                 codeToInsert.Add(new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(ChainedRotation), "ChangeLayersRotaiton")));
                 code.InsertRange(targetIndex + 1, codeToInsert);
-
-                for (int i = 0; i < code.Count; i++)
-                    Debug.Log($"{i,2}  {code[i].opcode.ToString()} {code[i].operand?.ToString()}");
             }
             catch (Exception e)
             {                
@@ -360,10 +357,8 @@ namespace DysonOrbitModifier
             return code.AsEnumerable();     
         }
 
-        static int count = 0;
         static void ChangeLayersRotaiton(DysonSphere sphere)
         {
-            count = (++count)%6000;
             if (enable)
             {
                 foreach (var tuple in sequenceList)
@@ -375,8 +370,6 @@ namespace DysonOrbitModifier
                         layer2.currentRotation = layer1.currentRotation * layer2.currentRotation;
                         layer2.nextRotation = layer1.nextRotation * layer2.nextRotation;
                     }
-                    if (count == 0)
-                        SphereLogic.logger.LogDebug($"{tuple.Item1} {tuple.Item2}");
                 }
             }
         }

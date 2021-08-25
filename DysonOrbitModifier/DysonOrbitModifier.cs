@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace DysonOrbitModifier
 {
-    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.4.0")]
+    [BepInPlugin("com.starfi5h.plugin.DysonOrbitModifier", "DysonOrbitModifier", "1.4.1")]
     public class DysonOrbitModifier : BaseUnityPlugin
     {
         private Harmony harmony;
@@ -36,11 +36,11 @@ namespace DysonOrbitModifier
             chainedRotation = Config.Bind<bool>("visual", "chainedRotation", false, "Let layers rotate chained together.\n让壳层连锁转动。可以用下面的字串指定连锁的顺序。");
             chainedSequence = Config.Bind<string>("visual", "chainedSquence", "5-4, 4-3, 3-2, 2-1", "In each pair, the rotaion of former layer (a) will apply to the latter one (b).\nFormat: layer1a-layer1b, layer2a-layer2b, ...");
 
+            Stringpool.Set();
             ChangeSetting(null, null);
             Config.ConfigReloaded += ChangeSetting;
             harmony.PatchAll(typeof(DysonOrbitUI));
             harmony.PatchAll(typeof(ChainedRotation));
-            ModTranslate.Init();            
         }
 
         private void ChangeSetting(object sender, EventArgs eventArgs)
@@ -53,17 +53,18 @@ namespace DysonOrbitModifier
             ChainedRotation.enable = chainedRotation.Value;
             if (ChainedRotation.enable)
             {
-                Logger.LogDebug("ChainedRotation enable");
                 try
                 {
+                    string str = "ChainedRotation enable. Pair: ";
                     foreach (var x in chainedSequence.Value.Split(','))
                     {
                         var y = x.Split('-');
                         int a = int.Parse(y[0].Trim());
                         int b = int.Parse(y[y.Length - 1].Trim());
                         ChainedRotation.sequenceList.Add(new Tuple<int, int>(a, b));
-                        Logger.LogDebug($"{a}-{b}");
+                        str += $"({a}-{b})";
                     }
+                    Logger.LogDebug(str);
                 }
                 catch (Exception ex)
                 {
@@ -82,31 +83,5 @@ namespace DysonOrbitModifier
         }
     }
 
-    public static class ModTranslate
-    {
-        private static Dictionary<string, string> TranslateDict = new Dictionary<string, string>();
 
-        //擴充方法
-        internal static string LocalTranslate(this string s)
-        {
-            if (Localization.language == Language.zhCN)
-                return TranslateDict[s];
-            else if (TranslateDict[s].Translate() != TranslateDict[s]) //Translation plugin
-                return TranslateDict[s].Translate();
-            else //Default: English
-                return s; 
-        }
-
-        public static void Init()
-        {
-            TranslateDict.Clear();
-            TranslateDict.Add("Create", "创建");
-            TranslateDict.Add("Edit", "编辑");
-            TranslateDict.Add("Add orbit", "新建轨道");
-            TranslateDict.Add("Add layer", "新建层级");
-            TranslateDict.Add("Edit orbit", "编辑轨道");
-            TranslateDict.Add("Rotation speed", "旋轉速度"); //new
-            TranslateDict.Add("Sync", "同步"); //new
-        }
-    }
 }
