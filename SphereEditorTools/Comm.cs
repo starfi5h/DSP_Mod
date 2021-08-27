@@ -1,5 +1,4 @@
 ﻿using System;
-using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 
@@ -7,32 +6,61 @@ using BrushMode = UIDysonPanel.EBrushMode;
 
 namespace SphereEditorTools
 {
-    class Comm : BaseUnityPlugin
+    class Comm
     {
         public static UIDysonPanel dysnoPanel;
         static string infoString;
         static int infoCounter;
 
-        public static int DisplayMode;     //0~3
-        public static bool SymmetricMode;  //switch on/off
-        public static int MirrorMode;      //0~2
+        public static int DisplayMode;     //Swarm(bit1), Star(bit2)
+        public static bool SymmetricMode = true;  //switch on/off
+        public static int MirrorMode;      //None(0), Equatorial(1), Antipodal(2)
         public static int RadialCount = 1; //range 1 - 60
+
+        static bool showAllOrbits = true, showAllLayers = true;
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
         public static void Init(UIDysonPanel __instance)
         {
             dysnoPanel = __instance;
             Stringpool.Set();
-            UIWindow.OnOpen(dysnoPanel);
+            if (SphereEditorTools.EnableGUI.Value)
+                UIWindow.OnOpen(dysnoPanel);
             DeleteLayer.OnOpen(dysnoPanel);
+            if (SphereEditorTools.EnableHideLayer.Value)
+            {
+                HideLayer.SetDisplayMode(DisplayMode);
+                HideLayer.SetMask(HideLayer.EnableMask);
+                dysnoPanel.showAllOrbits = showAllOrbits;
+                dysnoPanel.showAllLayers = showAllLayers;
+                dysnoPanel.UpdateSelectionVisibleChange();
+            }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void Free()
+        public static void Free(UIDysonPanel __instance)
         {
             dysnoPanel = null;
-            UIWindow.OnClose();
+            if (SphereEditorTools.EnableGUI.Value)
+                UIWindow.OnClose();
             DeleteLayer.OnClose();
+            showAllOrbits = __instance.showAllOrbits;
+            showAllLayers = __instance.showAllLayers;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameMain), "End")]
+        public static void OnGameEnd()
+        {
+            if (SphereEditorTools.EnableGUI.Value)
+            {
+                UIWindow.SaveWindowPos();
+            }
+            if (SphereEditorTools.EnableHideLayer.Value)
+            {
+                SphereEditorTools.EnableHideOutside.Value = HideLayer.EnableOutside;
+            }
+            SphereEditorTools.Config.Save();
+            Log.LogDebug("Save config");
         }
 
 
@@ -55,6 +83,16 @@ namespace SphereEditorTools
                 str = String.Format("{0} OFF", Stringpool.SymmetricTool);
             }
             SetInfoString(str, 120);
+        }
+
+        public static void SetSymmetricMode(bool state)
+        {           
+            SymmetricMode = state;
+            if (SymmetricMode)
+                SymmetryTool.ChangeParameters(MirrorMode, RadialCount);
+            else
+                SymmetryTool.ChangeParameters(0, 1);
+            ShowSymmetricToolStatus();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateOthers")]
@@ -107,20 +145,9 @@ namespace SphereEditorTools
                     }
                 
                     if (Input.GetKeyDown(SphereEditorTools.KeyLayerCopy.Value))
-                    {
-                        Log.LogDebug("copy!");
-                        if (CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected)))
-                            SetInfoString("Copy successed!", 120);
-                        else
-                            SetInfoString("Copy failed!", 120);
-
-                    }
+                        CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected));
                     else if (Input.GetKeyDown(SphereEditorTools.KeyLayerPaste.Value))
-                    {
-                        Log.LogDebug("paste");
-                        CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);
-                    }
-                
+                        CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);                
                 }
                 if (SphereEditorTools.EnableHideLayer.Value)
                 {
@@ -134,6 +161,7 @@ namespace SphereEditorTools
                     {
                         DisplayMode = (DisplayMode + 1) % 4;
                         HideLayer.SetDisplayMode(DisplayMode);
+                        SetInfoString(Stringpool.DisplayMode[DisplayMode], 120);
                     }
                 }
 
@@ -141,13 +169,7 @@ namespace SphereEditorTools
                 {
                     if (Input.GetKeyDown(SphereEditorTools.KeySymmetryTool.Value))
                     {
-                        SymmetricMode = !SymmetricMode;
-                        if (SymmetricMode)
-                            SymmetryTool.ChangeParameters(MirrorMode, RadialCount);
-                        else
-                            SymmetryTool.ChangeParameters(0, 1);
-                        ShowSymmetricToolStatus();
-
+                        SetSymmetricMode(!SymmetricMode);                        
                     }
                     else if (Input.GetKeyDown(SphereEditorTools.KeyMirroring.Value))
                     {

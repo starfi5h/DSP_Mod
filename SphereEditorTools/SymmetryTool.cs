@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 
@@ -12,7 +11,7 @@ using BrushMode = UIDysonPanel.EBrushMode;
 
 namespace SphereEditorTools 
 {
-    class SymmetryTool : BaseUnityPlugin
+    class SymmetryTool : MonoBehaviour
     {
         static UIDysonPanel dysnoPanel;
         static List<UIDysonBrush>[] brushes;
@@ -37,8 +36,10 @@ namespace SphereEditorTools
             brushes = new List<UIDysonBrush>[dysnoPanel.brushes.Length];
             for (int i = 0; i < brushes.Length; i++)
             {
-                brushes[i] = new List<UIDysonBrush>();
-                brushes[i].Add(null); //placeholder for original brush
+                brushes[i] = new List<UIDysonBrush>
+                {
+                    null //placeholder for original brush
+                };
             }
         }
 
@@ -137,8 +138,8 @@ namespace SphereEditorTools
 
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")] //TODO: Fix UIDysonBrush_Node collision detection
-        static void Brushes_OnUpdate()
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")]
+        public static void Brushes_OnUpdate()
         {
             try
             {
@@ -165,8 +166,8 @@ namespace SphereEditorTools
                     if (clickPoint != Vector3.zero)
                     {
                         Ray ray = dysnoPanel.screenCamera.ScreenPointToRay(Input.mousePosition);
-                        castRadius = (float)(ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
-                        bool front = Vector3.Dot(ray.direction, clickPoint) < 0f ? true : false; //true : clickPoint is toward camera
+                        castRadius = (ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
+                        bool front = Vector3.Dot(ray.direction, clickPoint) < 0f; //true : clickPoint is toward camera
                         for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
                         {
                             DysonSphereLayer layer2 = sphere.layersSorted[front ? i : sphere.layersSorted.Length - 1 - i];
@@ -217,6 +218,7 @@ namespace SphereEditorTools
                     overwrite = false;
                     dysnoPanel.brushError =  errorText;
                     clickPoint = Vector3.zero;
+                    dataPoint = Vector3.zero;
                 }                
             }
             catch (Exception e)
@@ -227,6 +229,16 @@ namespace SphereEditorTools
             }
             tick = (tick + 1) % 600;
         }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Node), "RecalcCollides")]
+        public static void ForceUpdate(UIDysonBrush_Node __instance)
+        {
+            if (Input.GetMouseButtonDown(0))
+            { //on left-click
+                __instance.lastCalcPos = Vector3.zero; //force to check again
+            }
+        }
+
 
         #region Overwrite
 

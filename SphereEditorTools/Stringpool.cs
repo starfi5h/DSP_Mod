@@ -6,8 +6,10 @@ namespace SphereEditorTools
     {
         public static string Tool;
         public static string Display_options;
+        public static string Affect_outside;
         public static string Star;
         public static string Swarm;
+        public static string Mask;
 
         public static string Mirror_symmetry;
         public static string None;
@@ -41,8 +43,10 @@ namespace SphereEditorTools
 
                 Tool = "工具";
                 Display_options = "显示选项";
+                Affect_outside = "套用至外界";
                 Star = "恒星";
                 Swarm = "太阳帆";
+                Mask = "遮罩";
 
                 Mirror_symmetry = "镜像对称";
                 None = "无";
@@ -66,8 +70,10 @@ namespace SphereEditorTools
 
                 Tool = "Tool".Translate();
                 Display_options = "Display options".Translate();
+                Affect_outside = "Affect outside".Translate();
                 Star = "Star".Translate();
                 Swarm = "Swarm".Translate();
+                Mask = "Mask".Translate();
 
                 Mirror_symmetry = "Mirror symmetry".Translate();
                 None = "None".Translate();

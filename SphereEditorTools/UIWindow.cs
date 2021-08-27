@@ -1,39 +1,63 @@
-﻿using BepInEx;
-using HarmonyLib;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 
 namespace SphereEditorTools
 {
-    class UIWindow : BaseUnityPlugin
+    class UIWindow
     {
         static UIDysonPanel dysnoPanel;
-        static bool isShow;
+        public static bool isShow;
         static bool isMin;
 
-        static Rect normalSize = new Rect(0, 0, 250f, 275f);
+        static Rect normalSize = new Rect(0, 0, 250f, 270f);
         static Rect miniSize = new Rect(0, 0, 75f, 20f);
-        private static Rect windowRect = new Rect(100f, 100f, 250f, 275f);
-        static HighStopwatch watch = new HighStopwatch();
-        static int count;
+        private static Rect windowRect = new Rect(300f, 250f, 250f, 270f); //(250f, 275f) in future
+        static GUIStyle textStyle;
+
+
+        public static void LoadWindowPos()
+        {
+            try
+            {
+                var token = SphereEditorTools.WindowPosition.Value.Split(',');
+                int x = int.Parse(token[0].Trim());
+                int y = int.Parse(token[token.Length - 1].Trim());
+                windowRect.x = x;
+                windowRect.y = y;
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning("WindowPos parse error, use defualt position (300, 250)");
+                Log.LogWarning(ex);
+            }
+        }
+
+        public static void SaveWindowPos()
+        {
+            string posString = $"{windowRect.x}, {windowRect.y}";
+            SphereEditorTools.WindowPosition.Value = posString;
+        }
+
+
+        public static void OnOpen(UIDysonPanel __instance)
+        {
+            isShow = true;
+            dysnoPanel = __instance;
+        }
+ 
+        public static void OnClose()
+        {
+            isShow = false;
+            dysnoPanel = null;
+        }
 
         public static void OnGUI()
         {
-            watch.Begin();
-
-            if (isShow)
-            {
-                if (isMin)
-                    windowRect = GUI.Window(1297890671, windowRect, MinWindowFun, Stringpool.Tool);
-                else
-                    windowRect = GUI.Window(1297890671, windowRect, NormalWindowFun, Stringpool.Tool);
-            }
-            
-            count = count + 1;
-            if (count == 600)
-            {
-                Log.LogDebug($"OnGUI: {watch.duration,10}");
-                count = 0;
-            }
+            if (isMin)
+                windowRect = GUI.Window(1297890671, windowRect, MinWindowFun, Stringpool.Tool);
+            else
+                windowRect = GUI.Window(1297890671, windowRect, NormalWindowFun, Stringpool.Tool);
+            EatInputInRect(windowRect);
         }
 
         static void MinWindowFun(int id)
@@ -54,16 +78,12 @@ namespace SphereEditorTools
             GUI.DragWindow();
         }
 
-        static string stringToEdit = "";
-
-
         static void NormalWindowFun(int id)
         {
             bool tmpBool;
             int tmpInt;
             string tmpString;
 
-            #region upper-right buttons
             GUILayout.BeginArea(new Rect(windowRect.width - 27f, 1f, 25f, 16f));
             if (GUILayout.Button("▲"))
             {
@@ -74,136 +94,138 @@ namespace SphereEditorTools
                 return;
             }
             GUILayout.EndArea();
-            #endregion
 
-            GUILayout.BeginVertical(UnityEngine.GUI.skin.box);
+            GUILayout.BeginVertical(UnityEngine.GUI.skin.box); //Display options
             {
-                GUILayout.Label(Stringpool.Display_options);
                 GUILayout.BeginHorizontal();
-
-                tmpBool = GUILayout.Toggle(Comm.DisplayMode % 2 == 0, Stringpool.Swarm);
-                if (tmpBool != (Comm.DisplayMode % 2 == 0)) 
+                GUILayout.Label(Stringpool.Display_options);
+                HideLayer.EnableOutside = GUILayout.Toggle(HideLayer.EnableOutside, Stringpool.Affect_outside);
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                tmpBool = Comm.DisplayMode % 2 == 0;
+                if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Swarm)) 
                 {
                     Comm.DisplayMode ^= 1;
                     HideLayer.SetDisplayMode(Comm.DisplayMode);
                 }
-                tmpBool = GUILayout.Toggle(Comm.DisplayMode < 2, Stringpool.Star);
-                if (tmpBool != (Comm.DisplayMode < 2))
+                tmpBool = Comm.DisplayMode < 2;
+                if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Star))
                 {
                     Comm.DisplayMode ^= 2;
                     HideLayer.SetDisplayMode(Comm.DisplayMode);
                 }
-                tmpBool = GUILayout.Toggle(true, "Mask");
-                if (tmpBool)
+                if (HideLayer.EnableMask != GUILayout.Toggle(HideLayer.EnableMask, Stringpool.Mask))
                 {
-                    //TODO: black-mask
+                    HideLayer.SetMask(!HideLayer.EnableMask);
                 }
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
 
-            GUILayout.BeginVertical(UnityEngine.GUI.skin.box);
+            GUILayout.BeginVertical(UnityEngine.GUI.skin.box); //Symmetry Tool
             {
-                GUILayout.Label(Stringpool.Mirror_symmetry);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(Stringpool.Mirror_symmetry, GUILayout.MinWidth(180));
+                if (GUILayout.Toggle(Comm.SymmetricMode, "", GUILayout.Width(20)) != Comm.SymmetricMode)
+                    Comm.SetSymmetricMode(!Comm.SymmetricMode);
+                GUILayout.EndHorizontal();
                 tmpInt = GUILayout.Toolbar(Comm.MirrorMode, Stringpool.MirrorModes);
                 if (tmpInt != Comm.MirrorMode)
                 {
                     Comm.MirrorMode = tmpInt;
                     SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
+                    Comm.SymmetricMode = true;
                 }
-                GUILayout.Label(Stringpool.Rotation_symmetry);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(Stringpool.Rotation_symmetry, GUILayout.MinWidth(180));
+                if (GUILayout.Toggle(Comm.SymmetricMode, "", GUILayout.Width(20)) != Comm.SymmetricMode)
+                    Comm.SetSymmetricMode(!Comm.SymmetricMode);
+                GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("<<"))
                 {
                     Comm.RadialCount = 1;
                     SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
+                    Comm.SymmetricMode = true;
                 }
                 if (GUILayout.Button("-"))
                 {
                     if (Comm.RadialCount > 1)
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, --Comm.RadialCount);
+                    Comm.SymmetricMode = true;
                 }
-                tmpString = GUILayout.TextField(Comm.RadialCount.ToString(), 3, GUILayout.MinWidth(35));
+                if (textStyle == null)
+                {
+                    textStyle = new GUIStyle(GUI.skin.textField)
+                    {
+                        alignment = TextAnchor.MiddleCenter
+                    };
+                }
+                tmpString = GUILayout.TextField(Comm.RadialCount.ToString(), 3, textStyle, GUILayout.MinWidth(35));
                 if (int.TryParse(tmpString, out tmpInt))
                 {
                     if (tmpInt != Comm.RadialCount && tmpInt < 60 && tmpInt > 0)
                     {
                         Comm.RadialCount = tmpInt;
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
+                        Comm.SymmetricMode = true;
                     }
                 }
                 if (GUILayout.Button("+"))
                 {
                     if (Comm.RadialCount < 60)
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, ++Comm.RadialCount);
+                    Comm.SymmetricMode = true;
                 }
                 if (GUILayout.Button(">>"))
                 {
                     Comm.RadialCount = 60;
                     SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
+                    Comm.SymmetricMode = true;
                 }
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
 
-            GUILayout.BeginVertical(UnityEngine.GUI.skin.box);
+            
+            GUILayout.BeginVertical(UnityEngine.GUI.skin.box); //Layer copy
             {
-                GUILayout.Label(Stringpool.Layer_copying);
+                GUILayout.Label(Stringpool.Layer_copying + CopyLayer.Name());
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button(Stringpool.Copy))
                 {
-                    Log.LogDebug("Copy");
                     CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected));
                 }
 
                 if (GUILayout.Button(Stringpool.Clear))
-                    Log.LogDebug("Clear");
+                {
+                    CopyLayer.Clear();
+                }
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button(Stringpool.Paste1))
                 {
-                    Log.LogDebug("Paste1");
                     CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);
                 }
                 if (GUILayout.Button(Stringpool.Paste2))
                 {
-                    Log.LogDebug("Paste2");
                     CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 1);
                 }
                 GUILayout.EndHorizontal();
             }
-            GUILayout.EndVertical();
+            GUILayout.EndVertical();            
 
             GUI.DragWindow();
         }
 
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnUpdate")]
-        public static void DysonSphere_Export_Prefix(HighStopwatch __state)
+        public static void EatInputInRect(Rect eatRect)
         {
-            if (count == 10)
-                Log.LogDebug($"{__state.duration,10}s");
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnUpdate")]
-        public static void DysonSphere_Import_Prefix(out HighStopwatch __state)
-        {
-            __state = new HighStopwatch();
-            __state.Begin();
-        }
-
-
-        public static void OnOpen(UIDysonPanel __instance)
-        {
-            isShow = true;
-            dysnoPanel = __instance;
-        }
-
-        public static void OnClose()
-        {
-            isShow = false;
-            dysnoPanel = null;
+            if (!(Input.GetMouseButton(0) || Input.GetMouseButtonDown(0))) //Eat only when left-click
+                return;
+            if (eatRect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
+                Input.ResetInputAxes();
         }
 
     }
+
 }

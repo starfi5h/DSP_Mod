@@ -1,10 +1,9 @@
-﻿using BepInEx;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
 
 namespace SphereEditorTools
 {
-    class DeleteLayer : BaseUnityPlugin
+    class DeleteLayer
     {
         static UIDysonPanel dysnoPanel;
         static int storedLayerId;

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using UnityEngine;
 
 namespace SphereEditorTools
@@ -12,9 +8,17 @@ namespace SphereEditorTools
     {
         static LayerData layerData;
 
-
-
-
+        public static string Name()
+        {
+            if (layerData == null)
+                return "";
+            else
+                return $": {layerData.name}";
+        }
+        public static void Clear()
+        {
+            layerData = null;
+        }
         public static bool TryCopy(DysonSphereLayer layer)
         {
             if (layer == null)
@@ -26,21 +30,23 @@ namespace SphereEditorTools
 
         public static bool TryPaste(DysonSphereLayer layer, int mode)
         {
-            if (layer == null || (layer.nodeCount > 0 || layer.frameCount > 0 || layer.shellCount > 0))
+            if (layerData == null || layer == null)
+            {
+                Comm.SetInfoString("Paste failed! No data", 120);
+                return false;
+            }
+            if (layer.nodeCount > 0 || layer.frameCount > 0 || layer.shellCount > 0)
             {
                 Comm.SetInfoString("Paste failed! Target layer needs to be empty.", 120);
                 return false;
             }
-            if (layerData == null)
-            {
-                Comm.SetInfoString("Paste failed! No copied layer data", 120);
-                return false;
-            }
+            string title = Stringpool.Paste + " " + Stringpool.LAYER;
+            string content = $"{Stringpool.Paste} {layerData.name} to {Stringpool.LAYER}[{layer.id}] ?";
             var messagebox = UIMessageBox.Show(
-                Stringpool.Paste + " " + Stringpool.LAYER, //Remove Layer
-                Stringpool.Paste + " " + Stringpool.LAYER + " [" + layer.id + "] ?",
+                title,
+                content,
                 "否".Translate(), "是".Translate(), 2,
-                null, new UIMessageBox.Response(() => layerData.Paste(layer, 0)));
+                null, new UIMessageBox.Response(() => Paste(layer, mode)));
             var go = GameObject.Find("UI Root/Always on Top/Overlay Canvas - Top/Dyson Editor Top");
             if (go != null)
             {
@@ -50,15 +56,23 @@ namespace SphereEditorTools
             return true;
         }
 
-
+        static void Paste(DysonSphereLayer layer, int mode)
+        {
+            layerData.Paste(layer, mode);
+            Comm.dysnoPanel.layerSelected = layer.id;
+            Comm.dysnoPanel.nodeSelected = 0;
+            Comm.dysnoPanel.frameSelected = 0;
+            Comm.dysnoPanel.shellSelected = 0;
+            Comm.dysnoPanel.UpdateSelectionVisibleChange();
+        }
 
 
 
         [Serializable]
         public class LayerData
         {
-            public String name;
-            public Quaternion currentRotation;
+            public string name;
+            public Vector3 rotation;
             public List<Node> nodes;
             public List<Frame> frames;
             public List<Shell> shells;
@@ -67,7 +81,7 @@ namespace SphereEditorTools
                 public Node(DysonNode node)
                 {
                     protoId = node.protoId;
-                    pos = node.pos;
+                    pos = node.pos.normalized;
                 }
                 public int protoId;
                 public Vector3 pos;
@@ -76,7 +90,7 @@ namespace SphereEditorTools
             {
                 public Frame(DysonFrame frame)
                 {
-                    protoId = frame.protoId;
+                    protoId = 0;
                     nodeAId = frame.nodeA.id;
                     nodeBId = frame.nodeB.id;
                     euler = frame.euler;
@@ -93,9 +107,7 @@ namespace SphereEditorTools
                     protoId = shell.protoId;
                     nodeIds = new List<int>();
                     for (int i = 0; i < shell.nodes.Count; i++)
-                    {
                         nodeIds.Add(shell.nodes[i].id);
-                    }
                 }
                 public int protoId;
                 public List<int> nodeIds;
@@ -108,9 +120,8 @@ namespace SphereEditorTools
                 shells = new List<Shell>();
             }
             public void Copy(DysonSphereLayer layer)
-            {
-                name = layer.id.ToString();
-                currentRotation = layer.currentRotation;
+            {                
+                rotation = layer.currentRotation.eulerAngles;
                 nodes.Clear();
                 frames.Clear();
                 shells.Clear();
@@ -138,48 +149,50 @@ namespace SphereEditorTools
                         frames.Add(frame0);
                     }
                 }
-                return;
-                for (int sid = 0; sid < layer.shellCursor; sid++)
+                for (int i = 0; i < layer.shellCursor; i++)
                 {
-                    DysonShell shell = layer.shellPool[sid];
-                    if (shell != null || sid == shell.id)
+                    DysonShell shell = layer.shellPool[i];
+                    if (shell != null && shell.id == i)
                     {
                         Shell shell0 = new Shell(shell);
-                        for (int i = 0; i < shell.nodes.Count; i++)
-                        {
-                            Log.LogDebug($"{shell0.nodeIds[i]} {nodeIndex.TryGetValue(shell0.nodeIds[i], out _)}");
-                            //shell0.nodeIds[i] = nodeIndex[shell0.nodeIds[i]];
-                        }
+                        for (int k = 0; k < shell.nodes.Count; k++)
+                            shell0.nodeIds[k] = nodeIndex[shell0.nodeIds[k]];
                         shells.Add(shell0);
                     }
                 }
+
+                name = $"[{layer.id}] - N{nodes.Count},F{frames.Count},S{shells.Count}";
             }
 
             public void Paste(DysonSphereLayer layer, int mode)
             {
-                Log.LogDebug($"Paste {layer.id} Mode {mode}");
-                Dictionary<int, int> nodeIndex = new Dictionary<int, int>(); 
-
+                //Log.LogDebug($"Paste {layer.id} Mode {mode}");
+                int[] nodeIndex = new int[nodes.Count];
+                layer.gridMode = 0;
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    Vector3 pos = nodes[i].pos * layer.orbitRadius; //Snap to grid
+                    Vector3 pos = layer.orbitRadius * nodes[i].pos; //Snap to grid
                     if (mode == 1)
-                        pos = Quaternion.Inverse(layer.currentRotation) * currentRotation * pos;
+                        pos = Quaternion.Inverse(layer.currentRotation) * Quaternion.Euler(rotation) * pos; //Restore roation
                     nodeIndex[i] = layer.NewDysonNode(nodes[i].protoId, pos); //storeId -> newId
-                    Log.LogDebug(nodeIndex[i]);
+                    if (nodeIndex[i] <= 0)
+                        Log.LogWarning($"Add node {i} unsuccess");
                 }
                 for (int i = 0; i < frames.Count; i++)
                 {
                     int nodeAId = nodeIndex[frames[i].nodeAId];
                     int nodeBId = nodeIndex[frames[i].nodeBId];
-                    layer.NewDysonFrame(frames[i].protoId, nodeAId, nodeBId, frames[i].euler);
+                    if (layer.NewDysonFrame(frames[i].protoId, nodeAId, nodeBId, frames[i].euler) <= 0)
+                        Log.LogWarning($"Add frame {i} unsuccess");
                 }
+                var nodeIds = new List<int>();
                 for (int i = 0; i < shells.Count; i++)
                 {
-                    var nodeIds = new List<int>();
+                    nodeIds.Clear();
                     for (int j = 0; j < shells[i].nodeIds.Count; j++)
                         nodeIds.Add(nodeIndex[shells[i].nodeIds[j]]);
-                    layer.NewDysonShell(shells[i].protoId, nodeIds);
+                    if (layer.NewDysonShell(shells[i].protoId, nodeIds) <= 0)
+                        Log.LogWarning($"Add shell {i} unsuccess");
                 }
             }
         }

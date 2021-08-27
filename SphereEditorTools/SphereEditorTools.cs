@@ -7,76 +7,78 @@ using HarmonyLib;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "1.1.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "1.2.0")]
     public class SphereEditorTools : BaseUnityPlugin
     {
         Harmony harmony;
-        public static string ErrorMessage;
-
+        internal static string ErrorMessage;
+        internal static new ConfigFile Config;
         public static ConfigEntry<bool> EnableDeleteLayer;
         public static ConfigEntry<bool> EnableToolboxHotkey;
         public static ConfigEntry<bool> EnableHideLayer;
         public static ConfigEntry<bool> EnableHideOutside;
         public static ConfigEntry<bool> EnableSymmetryTool;
-
-        public static ConfigEntry<String> KeySelect;
-        public static ConfigEntry<String> KeyNode;
-        public static ConfigEntry<String> KeyFrameGeo;
-        public static ConfigEntry<String> KeyFrameEuler;
-        public static ConfigEntry<String> KeyShell;
-        public static ConfigEntry<String> KeyRemove;
-        public static ConfigEntry<String> KeyGrid;        
-        public static ConfigEntry<String> KeyShowAllLayers;
-        public static ConfigEntry<String> KeyHideMode;
-        public static ConfigEntry<String> KeySymmetryTool;
-        public static ConfigEntry<String> KeyMirroring;
-        public static ConfigEntry<String> KeyRotationInc;
-        public static ConfigEntry<String> KeyRotationDec;
-        public static ConfigEntry<String> KeyLayerCopy;
-        public static ConfigEntry<String> KeyLayerPaste;
+        public static ConfigEntry<bool> EnableGUI;
+        public static ConfigEntry<string> WindowPosition;
+        public static ConfigEntry<string> KeySelect;
+        public static ConfigEntry<string> KeyNode;
+        public static ConfigEntry<string> KeyFrameGeo;
+        public static ConfigEntry<string> KeyFrameEuler;
+        public static ConfigEntry<string> KeyShell;
+        public static ConfigEntry<string> KeyRemove;
+        public static ConfigEntry<string> KeyGrid;        
+        public static ConfigEntry<string> KeyShowAllLayers;
+        public static ConfigEntry<string> KeyHideMode;
+        public static ConfigEntry<string> KeySymmetryTool;
+        public static ConfigEntry<string> KeyMirroring;
+        public static ConfigEntry<string> KeyRotationInc;
+        public static ConfigEntry<string> KeyRotationDec;
+        public static ConfigEntry<string> KeyLayerCopy;
+        public static ConfigEntry<string> KeyLayerPaste;
 
         private void BindConfig()
         {
+            
             EnableDeleteLayer       = Config.Bind<bool>("- General -", "EnableDeleteLayer", true, "Enable deletion of a constructed layer.\n启用已建立层级删除功能");
             EnableToolboxHotkey     = Config.Bind<bool>("- General -", "EnableToolboxHotkey", true, "Switch between build plan tools with hotkeys.\n启用工具箱热键");
             EnableHideLayer         = Config.Bind<bool>("- General -", "EnableHideLayer", true, "Hide unselected layers when not showing all layers.\n启用层级隐藏功能");
             EnableHideOutside       = Config.Bind<bool>("- General -", "EnableHideOutside", false, "Apply visibility changes to the game world temporarily.\n使隐藏效果暂时套用至外界");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
 
+            EnableGUI               = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
+            WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
 
-            KeySelect               = Config.Bind<String>("Hotkeys - Toolbox", "KeySelect", "1", "Inspect / 查看");
-            KeyNode                 = Config.Bind<String>("Hotkeys - Toolbox", "KeyNode", "2", "Build Node / 修建节点");
-            KeyFrameGeo             = Config.Bind<String>("Hotkeys - Toolbox", "KeyFrameGeo", "3", "Build Frame(Geodesic) / 修建测地线框架");
-            KeyFrameEuler           = Config.Bind<String>("Hotkeys - Toolbox", "KeyFrameEuler", "4", "Build Frame(Euler) / 修建经纬度框架");
-            KeyShell                = Config.Bind<String>("Hotkeys - Toolbox", "KeyShell", "5", "Build Shell / 修建壳");
-            KeyRemove               = Config.Bind<String>("Hotkeys - Toolbox", "KeyRemove", "x", "Remove / 移除");
-            KeyGrid                 = Config.Bind<String>("Hotkeys - Toolbox", "KeyGrid", "r", "Toggle Grid / 切换网格");
+            KeySelect               = Config.Bind<string>("Hotkeys - Toolbox", "KeySelect", "1", "Inspect / 查看");
+            KeyNode                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyNode", "2", "Build Node / 修建节点");
+            KeyFrameGeo             = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameGeo", "3", "Build Frame(Geodesic) / 修建测地线框架");
+            KeyFrameEuler           = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameEuler", "4", "Build Frame(Euler) / 修建经纬度框架");
+            KeyShell                = Config.Bind<string>("Hotkeys - Toolbox", "KeyShell", "5", "Build Shell / 修建壳");
+            KeyRemove               = Config.Bind<string>("Hotkeys - Toolbox", "KeyRemove", "x", "Remove / 移除");
+            KeyGrid                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyGrid", "r", "Toggle Grid / 切换网格");
 
-            KeyShowAllLayers        = Config.Bind<String>("Hotkeys - Visibility", "KeyShowAllLayers", "`", "Toggle show all layers mode / 显示所有层");
-            KeyHideMode             = Config.Bind<String>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle swarm & star hide mode / 切换太阳帆与恒星隐藏模式");
+            KeyShowAllLayers        = Config.Bind<string>("Hotkeys - Visibility", "KeyShowAllLayers", "`", "Toggle show all layers mode / 显示所有层");
+            KeyHideMode             = Config.Bind<string>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle swarm & star hide mode / 切换太阳帆与恒星隐藏模式");
 
-            KeySymmetryTool         = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeySymmetryTool", "tab", "Toggle symmetry tool / 开关对称建造工具");
-            KeyMirroring            = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
-            KeyRotationInc          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
-            KeyRotationDec          = Config.Bind<String>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
+            KeySymmetryTool         = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeySymmetryTool", "tab", "Toggle symmetry tool / 开关对称建造工具");
+            KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
+            KeyRotationInc          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
+            KeyRotationDec          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
 
-            KeyLayerCopy            = Config.Bind<String>("Hotkeys - Layer", "KeyLayerCopy", "home", "Copy the selected layer / 复制选定的层级");
-            KeyLayerPaste           = Config.Bind<String>("Hotkeys - Layer", "KeyLayerPaste", "end", "Paste to the selected layer / 粘贴到选定的层级");
+            KeyLayerCopy            = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerCopy", "page up", "Copy the selected layer / 复制选定的层级");
+            KeyLayerPaste           = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerPaste", "page down", "Paste to the selected layer / 粘贴到选定的层级");
 
         }
 
         public void Start()
         {
             harmony = new Harmony("com.starfi5h.plugin.SphereEditorTools");
-            
+            Config = base.Config;
             BindConfig();
             Log.Init(Logger);
-            ErrorMessage = "";
-            Log.LogDebug(KeyLayerCopy.Value);
-
-            TryPatch(typeof(UIWindow));
             
-            TryPatch(typeof(Comm));            
+            TryPatch(typeof(Comm));
+            if (EnableGUI.Value)
+                UIWindow.LoadWindowPos();
             if (EnableDeleteLayer.Value)
                 TryPatch(typeof(DeleteLayer));
             if (EnableHideLayer.Value)
@@ -84,13 +86,8 @@ namespace SphereEditorTools
             if (EnableSymmetryTool.Value)
                 TryPatch(typeof(SymmetryTool));
 
-            if (ErrorMessage != "")
-            {
-                ErrorMessage = "Load Error: " + ErrorMessage;
-                Comm.SetInfoString(ErrorMessage, 600);
-            }
+             HideLayer.EnableOutside = EnableHideOutside.Value;
         }
-
 
         public void TryPatch(Type type)
         {
@@ -100,21 +97,24 @@ namespace SphereEditorTools
             }
             catch (Exception e)
             {
-                ErrorMessage += type.Name + " ";
                 Logger.LogError($"Patch {type.Name} error");
                 Logger.LogError(e);
+                throw new Exception($"SphereEditorTools: {type.Name} patch error. Disable this function in the config file.\n" + e.ToString());
             }
         }
 
+        //readonly static HighStopwatch watch = new HighStopwatch();
         public void OnGUI()
         {
-            UIWindow.OnGUI();
+            //watch.Begin();
+            if (UIWindow.isShow)
+                UIWindow.OnGUI();
+            //Log.LogPeriod($"OnGUI: {watch.duration,10}");
         }
 
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
-            Comm.Free();
             HideLayer.Free("Unpatch");
             SymmetryTool.Free();
         }
@@ -132,5 +132,11 @@ namespace SphereEditorTools
             _logger.LogInfo(obj);
         public static void LogDebug(object obj) =>
             _logger.LogDebug(obj);
+
+        public static void LogPeriod(object obj)
+        {
+            if (GameMain.gameTick % 600 == 0)
+                _logger.LogDebug(obj);
+        }
     }
 }

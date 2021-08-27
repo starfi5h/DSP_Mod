@@ -1,6 +1,7 @@
 # SphereEditorTools
 
-![SphereEditorTools Demo 1](https://github.com/starfi5h/DSP_Mod/blob/master/SphereEditorTools/img/demo1.gif?raw=true)
+![Symmetric Building Tool](https://github.com/starfi5h/DSP_Mod/blob/master/SphereEditorTools/img/demo1.gif?raw=true)
+![Copy and hide layers with GUI](https://github.com/starfi5h/DSP_Mod/blob/master/SphereEditorTools/img/demo2.gif?raw=true)
 
 A QoL mod aims to improve dyson sphere editing experience.  
 
@@ -17,13 +18,17 @@ Mirror symmetry: When it is switch on (hotkey `m`), It will create corresponding
 Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 60.  
 
 ### Delete Layer
-You can now dismantle the whole constructed layer with delete button.  
+You can now dismantle the whole constructed layer with the delete button.  
 Deleting Layer 1 will deconstruct all the objects on the layer, leaving only an empty layer.  
+
+### Copy Layer
+Copy a single layer to another empty layer. Hotkey `Page Up` for copying and `Page Down` for pasting.  
 
 ### Hide Layer
 Toggle by "Show All Layer" button. When it is unchecked, only selected layer will be visible, other layers will be hidden.  
 You can also use hotkey `h` to hide dyson swarm and the star.  
-If `EnableHideOutside` is enable, those objects will temporarily retain their visibility settings until reopening dyson editor or viewing another dyson sphere.
+When `EnableHideOutside` is enabled, those objects will temporarily retain their visibility settings and affect outside world until reopening dyson editor or viewing another dyson sphere.  
+When mask is enabled in the GUI window, a black mask will appear and block the inside part of the Dyson sphere.
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manual download the file and put `SphereEditorTools.dll` in `BepInEx/plugins` folder.
@@ -40,12 +45,19 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableDeleteLayer`      | true  | Enable deletion of a constructed layer. |
 | `EnableToolboxHotkey`    | true  | Switch between build plan tools with hotkeys. |
 | `EnableHideLayer`        | true  | Hide unselected layers when not showing all layers. |
-| `EnableHideOutside` | false | Apply visibility changes to the game world temporarily. |
-  
+| `EnableHideOutside`      | false | Apply visibility changes to the game world temporarily. |
+| `EnableSymmetryTool`      | true | Enable mirror and rotation symmetry of building tools. |
+
+### GUI
+|| Default | Description |
+| :----- | :------ | :---------- |
+| `EnableGUI`      | true  | Show a simple window to use the tools. |
+| `WindowPosition` | 300, 250 | Position of the window. Format: x,y |
+
 ### Hotkeys  
 || Default | Description |
 | :-------------- | :------ | :------------ |
-| Toolbox|
+| Toolbox |
 | `KeySelect`     | 1       | Inspect |
 | `KeyNode`       | 2       | Build Node |
 | `KeyFrameGeo`   | 3       | Build Frame(Geodesic) |
@@ -53,7 +65,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyShell`      | 5       | Build Shell |
 | `KeyRemove`     | x       | Remove |
 | `KeyGrid`       | r       | Toggle Grid |
-|Visibility|
+| Visibility |
 | `KeyShowAllLayers` | `    | Toggle show all layers mode |
 | `KeyHideMode`      | h    | Toggle swarm & star hide mode |
 | Symmetry Tool |
@@ -61,9 +73,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyMirroring`     | m    | Toggle mirroring |
 | `KeyRotationInc`   | [+]  | Increase the degree of rotational symmetry |
 | `KeyRotationDec`   | [-]  | Decrease the degree of rotational symmetry |
+| Copy & paste |
+| `KeyLayerCopy`   | page up  | Copy the selected layer |
+| `KeyLayerPaste`   | page down  | Paste to the selected layer |
 
 ----
-# 戴森球加強编辑工具
+# 画球辅助工具
 
 增加戴森球编辑器的功能，改善画球的游戏体验。  
 
@@ -82,12 +97,16 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 
 ### 删除层级
-已建立层级可以用删除按钮一键拆除。删除层级1只会将该层上的所有物件拆除，层级仍会保留。
+已建立层级可以用删除按钮一键拆除。删除层级1只会将该层上的所有物件拆除，层级仍会保留。  
+
+### 復制层级
+將單個层级複製到另一個空的层级。 熱鍵`Page Up`復制，`Page Down`粘貼。  
 
 ### 隐藏层级
 通过"显示所有层"按钮进行切换。按钮没有勾选时，只有选取的层是可见的，其他层将被隐藏。  
 热键`h`可以隐藏太阳帆与恒星。  
-`EnableHideOutside`启用时，这些物件会暂时保留隐藏的设定直到再次打开编辑器页面或查看另一个戴森球。
+`EnableHideOutside`启用时，这些物件会暂时保留隐藏的设定直到再次打开编辑器页面或查看另一个戴森球。  
+在操作窗口中啟用遮罩後，會出現一個黑色遮罩並擋住戴森球體的背部部分。
 
 ## 安装
 通过管理器[r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/)，或者手动下载文件并将`SphereEditorTools.dll`放入`BepInEx/plugins`文件夹。
@@ -106,7 +125,14 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableToolboxHotkey`    | true  | 启用工具箱热键 |
 | `EnableHideLayer`        | true  | 启用层级隐藏功能 |
 | `EnableHideOutside`      | false | 使隐藏效果暂时套用至外界 |
+| `EnableSymmetryTool`     | true  | 启用对称建造工具(镜像/旋转) |
   
+### GUI
+|| Default | Description |
+| :----- | :------ | :---------- |
+| `EnableGUI`      | true  | 启用图形操作窗口 |
+| `WindowPosition` | 300, 250 | 窗口的位置 格式: x,y |
+	
 ### 热键  
 || 默认 | 描述 |
 | :-------------- | :------ | :------------ |
@@ -126,16 +152,27 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyMirroring`     | m    | 开关镜像对称 |
 | `KeyRotationInc`   | [+]  | 增加旋转对称的个数 |
 | `KeyRotationDec`   | [-]  | 减少旋转对称的个数 |
+| 复制粘贴 |
+| `KeyLayerCopy`   | page up  | 复制选定的层级 |
+| `KeyLayerPaste`   | page down  | 粘贴到选定的层级 |
+
 
 ----
 
 ## Changelog
 
+#### v1.2.0
+\- Add a small GUI window. (Game version 0.8.20.8092)   
+\- Add mask, single layer copy & paste function  
+\- Mirror mode has 3 options now: None, Equatorial, Antipodal  
+\- Fix flicker issue of symmetric tool  
+\- Fix node brushes building condition check  
+
 #### v1.1.0
-\- Add symmetric tool. Game version 0.7.18.7189  
+\- Add symmetric tool. (Game version 0.7.18.7189)  
 
 #### v1.0.0  
-\- Initial Release. Game version 0.7.18.7103  
+\- Initial Release. (Game version 0.7.18.7103)  
 
 ----
 
