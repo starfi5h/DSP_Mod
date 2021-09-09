@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "Sphere
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResetSaveData", "ResetSaveData\ResetSaveData.csproj", "{322C197A-5A6C-459E-971A-119018B5CB1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoUpload", "NoUpload\NoUpload.csproj", "{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{322C197A-5A6C-459E-971A-119018B5CB1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{322C197A-5A6C-459E-971A-119018B5CB1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{322C197A-5A6C-459E-971A-119018B5CB1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
