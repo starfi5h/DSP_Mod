@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResetSaveData", "ResetSaveD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoUpload", "NoUpload\NoUpload.csproj", "{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMilestone", "NoMilestone\NoMilestone.csproj", "{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8299ED1-7118-4F48-AA2A-B1A4CB11D7E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

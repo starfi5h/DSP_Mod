@@ -1,0 +1,7 @@
+{
+    "name": "No Milestone",
+    "description": "Prevents milestone and achievement pop-up windows from appearing",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod",
+		"dependencies": ["xiaoye97-BepInEx-5.4.11"]
+}
