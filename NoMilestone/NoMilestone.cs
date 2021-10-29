@@ -4,7 +4,7 @@ using HarmonyLib;
 
 namespace NoMilestone
 {
-    [BepInPlugin("com.starfi5h.plugin.NoMilestone", "NoMilestone", "1.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.NoMilestone", "NoMilestone", "1.0.2")]
     public class NoMilestone : BaseUnityPlugin
     {
         Harmony harmony;
@@ -59,10 +59,10 @@ namespace NoMilestone
             __result &= NoMilestone.AchievementActive.Value;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(MilestoneLogic), "active", MethodType.Getter)]
-        internal static void MilestoneLogic_active(ref bool __result)
+        [HarmonyPrefix, HarmonyPatch(typeof(MilestoneLogic), "GameTick")]
+        internal static bool MilestoneLogic_active()
         {
-            __result &= NoMilestone.MilestoneActive.Value;
+            return NoMilestone.MilestoneActive.Value;
         }
     }    
 }
