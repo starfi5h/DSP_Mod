@@ -7,18 +7,21 @@ Prevents milestone and achievement pop-up windows from appearing.
 Run the game one time to generate `.cfg` file. Pause and resume the game to make the changes take effect.
 
 - `Active`  
-Activate/Deactivate achievement system or milestone system.
+Activate/Deactivate achievement system or milestone system. (Default:`true`)  
 
 - `Pop-up`  
-Enable/Disable pop-up window of achievement or milestone.
+Enable/Disable pop-up window of achievement or milestone. (Default:`false`)  
 
 
 ----
 
 ## Changelog
 
-#### v1.0.0  
-\- Initial Release. (Game Version 0.8.22)
+#### v1.0.2
+\- Fix compatibility. (Game Version 0.8.22.9331)
+
+#### v1.0.1  
+\- Initial release. (Game Version 0.8.22.8915)
 
 ----
 
