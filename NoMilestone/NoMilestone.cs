@@ -53,8 +53,8 @@ namespace NoMilestone
             return NoMilestone.MilestonePopup.Value;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(AchievementSystem), "active", MethodType.Getter)]
-        internal static void AchievementSystem_active(ref bool __result)
+        [HarmonyPostfix, HarmonyPatch(typeof(AchievementLogic), "active", MethodType.Getter)]
+        internal static void AchievementLogic_active(ref bool __result)
         {
             __result &= NoMilestone.AchievementActive.Value;
         }

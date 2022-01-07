@@ -17,6 +17,9 @@ Enable/Disable pop-up window of achievement or milestone. (Default:`false`)
 
 ## Changelog
 
+#### v1.0.3
+\- Fix compatibility. (Game Version 0.8.23.9808)
+
 #### v1.0.2
 \- Fix compatibility. (Game Version 0.8.22.9331)
 
