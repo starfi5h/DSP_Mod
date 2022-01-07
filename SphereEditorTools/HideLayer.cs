@@ -14,6 +14,7 @@ namespace SphereEditorTools
         public static bool EnableMask;
         static GameObject blackmask;
         public static bool EnableOutside;
+        static bool guard = true;
 
         public static void Free(string str)
         {
@@ -32,10 +33,33 @@ namespace SphereEditorTools
             }
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
-        public static void UIDysonPanel_SetViewStar()
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
+        public static void UIDysonPanel_OnOpen_Prefix()
         {
-            Free("SetViewStar");
+            guard = false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
+        public static void UIDysonPanel_OnOpen_Postfix(UIDysonPanel __instance)
+        {
+            guard = true;
+            if (sphere == null || sphere != __instance.viewDysonSphere)
+            {
+                //Log.LogDebug($"Reset visibility status.");
+                sphere = __instance.viewDysonSphere;
+                focusLayer = new DysonSphereLayer[1];
+                tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
+                hideOtherLayers = false;
+                viewLayerId = 0;
+                __instance.viewDysonSphere.modelRenderer.RebuildModels();
+            }
+            else
+            {
+                //Original sphere, trigger layer selection
+                __instance.layerSelected = viewLayerId;
+                viewLayerId = 0;
+            }
+            UIDysonPanel_UpdateSelectionVisibleChange(__instance);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
@@ -43,7 +67,12 @@ namespace SphereEditorTools
         {
             if (!EnableOutside)
             {
-                Free("Close");
+                hideOtherLayers = false;
+                if (blackmask != null)
+                {
+                    Destroy(blackmask);
+                    blackmask = null;
+                }
                 __instance.viewDysonSphere.modelRenderer.RebuildModels();
             }
         }
@@ -78,18 +107,9 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
         public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance)
         {
+            if (!guard)
+                return;
             int id = __instance.layerSelected;
-            if (sphere == null || sphere != __instance.viewDysonSphere)
-            {
-                //Log.LogDebug($"Reset visibility status.");
-                sphere = __instance.viewDysonSphere;
-                focusLayer = new DysonSphereLayer[1];
-                tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
-                hideOtherLayers = false;
-                viewLayerId = 0;
-                __instance.viewDysonSphere.modelRenderer.RebuildModels();
-            }
-
             if (!__instance.showAllLayers)
             {
 
