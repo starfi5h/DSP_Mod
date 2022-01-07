@@ -75,9 +75,10 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyRotationDec`   | [-]  | Decrease the degree of rotational symmetry |
 | Copy & paste |
 | `KeyLayerCopy`   | page up  | Copy the selected layer |
-| `KeyLayerPaste`   | page down  | Paste to the selected layer |
-
-PS. The new official Dyson sphere edtior looks pretty awsome!
+| `KeyLayerPaste`   | page down  | Paste to the selected layer |  
+  
+PS. The new official Dyson sphere edtior looks pretty awsome!  
+  
 ----
 # 画球辅助工具
 
@@ -155,10 +156,10 @@ PS. The new official Dyson sphere edtior looks pretty awsome!
 | `KeyRotationDec`   | [-]  | 减少旋转对称的个数 |
 | 复制粘贴 |
 | `KeyLayerCopy`   | page up  | 复制选定的层级 |
-| `KeyLayerPaste`   | page down  | 粘贴到选定的层级 |
+| `KeyLayerPaste`   | page down  | 粘贴到选定的层级 |  
 
 
-PS. 新的官方编辑器看起来很赞，这个MOD可以光荣退役了 :D
+PS. 新的官方编辑器看起来很赞，这个MOD可以光荣退役了 :D  
 
 ----
 
