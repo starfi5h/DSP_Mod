@@ -63,7 +63,7 @@ namespace SphereEditorTools
             Log.LogDebug($"Remove layer[{layer.id}]");
             if (layer != null)
             {
-
+                dysnoPanel.nodeDescPanel.SetDysonNode(null, null, true);
                 for (int index = 1; index < layer.shellCursor; ++index)
                 {
                     DysonShell shell = layer.shellPool[index];
@@ -93,6 +93,8 @@ namespace SphereEditorTools
                 dysnoPanel.frameSelected = 0;
                 dysnoPanel.shellSelected = 0;
                 dysnoPanel.UpdateSelectionVisibleChange();
+                //Eat mouse input
+                Input.ResetInputAxes();
             }
         }
     }

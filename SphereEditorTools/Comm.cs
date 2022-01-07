@@ -15,7 +15,8 @@ namespace SphereEditorTools
         public static int DisplayMode;     //Swarm(bit1), Star(bit2)
         public static bool SymmetricMode = true;  //switch on/off
         public static int MirrorMode;      //None(0), Equatorial(1), Antipodal(2)
-        public static int RadialCount = 1; //range 1 - 60
+        public static int RadialCount = 1; //range 1 - 120
+        public static int MaxRadialCount = 120;
 
         static bool showAllOrbits = true, showAllLayers = true;
 
@@ -182,7 +183,7 @@ namespace SphereEditorTools
                     else if (Input.GetKeyDown(SphereEditorTools.KeyRotationInc.Value))
                     {
                         SymmetricMode = true;
-                        if (RadialCount < 60)
+                        if (RadialCount < MaxRadialCount)
                             SymmetryTool.ChangeParameters(MirrorMode, ++RadialCount);
                         ShowSymmetricToolStatus();
                     }

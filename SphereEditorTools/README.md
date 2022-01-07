@@ -15,7 +15,7 @@ All hotkeys used in this mod are customizable in configuration, key name can be 
 You can now build or remove multiple entities at once!  
 Symmetric tool can be toggle with `tab`.  There are two types of symmetry in the tool:   
 Mirror symmetry: When it is switch on (hotkey `m`), It will create corresponding reflections on the other side of the equator.  
-Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 60.  
+Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 120.  
 
 ### Delete Layer
 You can now dismantle the whole constructed layer with the delete button.  
@@ -27,7 +27,7 @@ Copy a single layer to another empty layer. Hotkey `Page Up` for copying and `Pa
 ### Hide Layer
 Toggle by "Show All Layer" button. When it is unchecked, only selected layer will be visible, other layers will be hidden.  
 You can also use hotkey `h` to hide dyson swarm and the star.  
-When `EnableHideOutside` is enabled, those objects will temporarily retain their visibility settings and affect outside world until reopening dyson editor or viewing another dyson sphere.  
+When `EnableHideOutside` is enabled, those objects will temporarily retain their visibility settings and show the changes in-game until reopening dyson editor or viewing another dyson sphere.  
 When mask is enabled in the GUI window, a black mask will appear and block the inside part of the Dyson sphere.
 
 ## Installation
@@ -77,6 +77,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyLayerCopy`   | page up  | Copy the selected layer |
 | `KeyLayerPaste`   | page down  | Paste to the selected layer |
 
+PS. The new official Dyson sphere edtior looks pretty awsome!
 ----
 # 画球辅助工具
 
@@ -93,7 +94,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 启用后，可以用热键`tab`開關，开启时能同时用多个笔刷建造或拆除。  
 镜像对称以赤道面對稱，开启时(`m`)会在赤道另一侧半球产生对应的笔刷。  
-旋转对称以自转轴对称，数值表示在同一个纬线上有多少个笔刷，范围在1-60(数字键盘`[+][-]`增减)。  
+旋转对称以自转轴对称，数值表示在同一个纬线上有多少个笔刷，范围在1-120(数字键盘`[+][-]`增减)。  
 
 
 ### 删除层级
@@ -157,9 +158,18 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyLayerPaste`   | page down  | 粘贴到选定的层级 |
 
 
+PS. 新的官方编辑器看起来很赞，这个MOD可以光荣退役了 :D
+
 ----
 
 ## Changelog
+
+### v1.2.1
+\- Improve some wording. (Game version 0.8.23.9989)  
+\- Change the maximum degree of rotational symmetry from 60 to 120  
+\- Change "<<" and ">>" GUI buttons to decrease/increase degree by 10  
+\- Fix an error caused by deleting a layer when there is a node under the cursor  
+
 
 #### v1.2.0
 \- Add a small GUI window. (Game version 0.8.20.8092)   

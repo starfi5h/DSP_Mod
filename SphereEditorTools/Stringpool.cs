@@ -43,7 +43,7 @@ namespace SphereEditorTools
 
                 Tool = "工具";
                 Display_options = "显示选项";
-                Affect_outside = "套用至外界";
+                Affect_outside = "同步隱藏設置";
                 Star = "恒星";
                 Swarm = "太阳帆";
                 Mask = "遮罩";
@@ -69,8 +69,8 @@ namespace SphereEditorTools
                 Mirror = "Mirror".Translate();
 
                 Tool = "Tool".Translate();
-                Display_options = "Display options".Translate();
-                Affect_outside = "Affect outside".Translate();
+                Display_options = "Display".Translate();
+                Affect_outside = "Show changes in-game".Translate();
                 Star = "Star".Translate();
                 Swarm = "Swarm".Translate();
                 Mask = "Mask".Translate();

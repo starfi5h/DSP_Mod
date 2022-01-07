@@ -63,7 +63,7 @@ namespace SphereEditorTools
             KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
             KeyRotationInc          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
             KeyRotationDec          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
-
+            
             KeyLayerCopy            = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerCopy", "page up", "Copy the selected layer / 复制选定的层级");
             KeyLayerPaste           = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerPaste", "page down", "Paste to the selected layer / 粘贴到选定的层级");
 
