@@ -9,9 +9,9 @@ namespace SphereEditorTools
         public static bool isShow;
         static bool isMin;
 
-        static Rect normalSize = new Rect(0, 0, 250f, 200f);
+        static Rect normalSize = new Rect(0, 0, 250f, 220f);
         static Rect miniSize = new Rect(0, 0, 75f, 20f);
-        private static Rect windowRect = new Rect(300f, 250f, 250f, 200f);
+        private static Rect windowRect = new Rect(300f, 250f, 250f, 220f);
         static GUIStyle textStyle;
 
 

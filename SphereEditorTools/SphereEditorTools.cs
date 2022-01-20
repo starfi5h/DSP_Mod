@@ -103,7 +103,7 @@ namespace SphereEditorTools
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
-            HideLayer.Free("Unpatch");
+            HideLayer.Free();
             SymmetryTool.Free();
         }
     }
