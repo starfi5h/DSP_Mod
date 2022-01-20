@@ -26,15 +26,12 @@ namespace SphereEditorTools
             Stringpool.Set();
             if (SphereEditorTools.EnableGUI.Value)
                 UIWindow.OnOpen(dysnoPanel);
-            DeleteLayer.OnOpen(dysnoPanel);
-            if (SphereEditorTools.EnableHideLayer.Value)
-            {
-                HideLayer.SetDisplayMode(DisplayMode);
-                HideLayer.SetMask(HideLayer.EnableMask);
-                dysnoPanel.showAllOrbits = showAllOrbits;
-                dysnoPanel.showAllLayers = showAllLayers;
-                dysnoPanel.UpdateSelectionVisibleChange();
-            }
+
+            HideLayer.SetDisplayMode(DisplayMode);
+            HideLayer.SetMask(HideLayer.EnableMask);
+            dysnoPanel.showAllOrbits = showAllOrbits;
+            dysnoPanel.showAllLayers = showAllLayers;
+            dysnoPanel.UpdateSelectionVisibleChange();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
@@ -43,7 +40,6 @@ namespace SphereEditorTools
             dysnoPanel = null;
             if (SphereEditorTools.EnableGUI.Value)
                 UIWindow.OnClose();
-            DeleteLayer.OnClose();
             showAllOrbits = __instance.showAllOrbits;
             showAllLayers = __instance.showAllLayers;
         }
@@ -54,10 +50,6 @@ namespace SphereEditorTools
             if (SphereEditorTools.EnableGUI.Value)
             {
                 UIWindow.SaveWindowPos();
-            }
-            if (SphereEditorTools.EnableHideLayer.Value)
-            {
-                SphereEditorTools.EnableHideOutside.Value = HideLayer.EnableOutside;
             }
             SphereEditorTools.Config.Save();
             Log.LogDebug("Save config");
@@ -149,20 +141,17 @@ namespace SphereEditorTools
                     else if (Input.GetKeyDown(SphereEditorTools.KeyLayerPaste.Value))
                         CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);                
                 }
-                if (SphereEditorTools.EnableHideLayer.Value)
-                {
 
-                    if (Input.GetKeyDown(SphereEditorTools.KeyShowAllLayers.Value))
-                    {
-                        __instance.showAllLayers = !__instance.showAllLayers;
-                        __instance.UpdateSelectionVisibleChange();
-                    }
-                    else if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
-                    {
-                        DisplayMode = (DisplayMode + 1) % 4;
-                        HideLayer.SetDisplayMode(DisplayMode);
-                        SetInfoString(Stringpool.DisplayMode[DisplayMode], 120);
-                    }
+                if (Input.GetKeyDown(SphereEditorTools.KeyShowAllLayers.Value))
+                {
+                    __instance.showAllLayers = !__instance.showAllLayers;
+                    __instance.UpdateSelectionVisibleChange();
+                }
+                else if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
+                {
+                    DisplayMode = (DisplayMode + 1) % 4;
+                    HideLayer.SetDisplayMode(DisplayMode);
+                    SetInfoString(Stringpool.DisplayMode[DisplayMode], 120);
                 }
 
                 if (SphereEditorTools.EnableSymmetryTool.Value)

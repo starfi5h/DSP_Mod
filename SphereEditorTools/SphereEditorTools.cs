@@ -7,16 +7,13 @@ using HarmonyLib;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "1.2.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.0.0")]
     public class SphereEditorTools : BaseUnityPlugin
     {
         Harmony harmony;
         internal static string ErrorMessage;
         internal static new ConfigFile Config;
-        public static ConfigEntry<bool> EnableDeleteLayer;
         public static ConfigEntry<bool> EnableToolboxHotkey;
-        public static ConfigEntry<bool> EnableHideLayer;
-        public static ConfigEntry<bool> EnableHideOutside;
         public static ConfigEntry<bool> EnableSymmetryTool;
         public static ConfigEntry<bool> EnableGUI;
         public static ConfigEntry<string> WindowPosition;
@@ -37,12 +34,8 @@ namespace SphereEditorTools
         public static ConfigEntry<string> KeyLayerPaste;
 
         private void BindConfig()
-        {
-            
-            EnableDeleteLayer       = Config.Bind<bool>("- General -", "EnableDeleteLayer", true, "Enable deletion of a constructed layer.\n启用已建立层级删除功能");
+        {            
             EnableToolboxHotkey     = Config.Bind<bool>("- General -", "EnableToolboxHotkey", true, "Switch between build plan tools with hotkeys.\n启用工具箱热键");
-            EnableHideLayer         = Config.Bind<bool>("- General -", "EnableHideLayer", true, "Hide unselected layers when not showing all layers.\n启用层级隐藏功能");
-            EnableHideOutside       = Config.Bind<bool>("- General -", "EnableHideOutside", false, "Apply visibility changes to the game world temporarily.\n使隐藏效果暂时套用至外界");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
 
             EnableGUI               = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
@@ -79,14 +72,8 @@ namespace SphereEditorTools
             TryPatch(typeof(Comm));
             if (EnableGUI.Value)
                 UIWindow.LoadWindowPos();
-            if (EnableDeleteLayer.Value)
-                TryPatch(typeof(DeleteLayer));
-            if (EnableHideLayer.Value)
-                TryPatch(typeof(HideLayer));
             if (EnableSymmetryTool.Value)
                 TryPatch(typeof(SymmetryTool));
-
-             HideLayer.EnableOutside = EnableHideOutside.Value;
         }
 
         public void TryPatch(Type type)

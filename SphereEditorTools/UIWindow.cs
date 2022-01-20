@@ -99,15 +99,8 @@ namespace SphereEditorTools
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(Stringpool.Display_options);
-                HideLayer.EnableOutside = GUILayout.Toggle(HideLayer.EnableOutside, Stringpool.Affect_outside);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
-                tmpBool = Comm.DisplayMode % 2 == 0;
-                if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Swarm)) 
-                {
-                    Comm.DisplayMode ^= 1;
-                    HideLayer.SetDisplayMode(Comm.DisplayMode);
-                }
                 tmpBool = Comm.DisplayMode < 2;
                 if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Star))
                 {
@@ -195,17 +188,6 @@ namespace SphereEditorTools
                 if (GUILayout.Button(Stringpool.Copy))
                 {
                     CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected));
-                }
-
-                if (GUILayout.Button(Stringpool.Clear))
-                {
-                    CopyLayer.Clear();
-                }
-                GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button(Stringpool.Paste1))
-                {
-                    CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);
                 }
                 if (GUILayout.Button(Stringpool.Paste2))
                 {

@@ -21,8 +21,6 @@ namespace SphereEditorTools
         public static string Layer_copying;
         public static string Copy;
         public static string Paste;
-        public static string Clear;
-        public static string Paste1;
         public static string Paste2;
 
         public static string LAYER;
@@ -57,8 +55,6 @@ namespace SphereEditorTools
                 Layer_copying = "复制层级";
                 Copy = "复制";
                 Paste = "粘贴";
-                Clear = "重设";
-                Paste1 = "粘贴 - 固定网格";
                 Paste2 = "粘贴 - 自由位置";
             }
             else
@@ -84,8 +80,6 @@ namespace SphereEditorTools
                 Layer_copying = "Copying Layer".Translate();
                 Copy = "Copy".Translate();
                 Paste = "Paste".Translate();
-                Clear = "Clear".Translate();
-                Paste1 = "Paste - snap".Translate();
                 Paste2 = "Paste - free".Translate();
             }
             MirrorModes = new String[] { None, Equatorial, Antipodal };
