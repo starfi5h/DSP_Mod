@@ -5,75 +5,16 @@ namespace SphereEditorTools
 {
     class HideLayer : MonoBehaviour
     {
-        static int viewLayerId;
-        static bool hideOtherLayers;
-        static DysonSphereLayer[] focusLayer;
-        static DysonSphereLayer[] tmpLayers;
-        static DysonSphere sphere;
         static int displayMode;
         public static bool EnableMask;
         static GameObject blackmask;
-        public static bool EnableOutside;
-        static bool guard = true;
 
-        public static void Free(string str)
+        public static void Free()
         {
-            //Log.LogDebug($"{str} : Reset visibility status.");
-            hideOtherLayers = false;
-            viewLayerId = 0;
-            focusLayer = null;
-            tmpLayers = null;
-            sphere = null;
-            displayMode = 0;
-            //EnableMask = false;
             if (blackmask != null)
             {
                 Destroy(blackmask);
                 blackmask = null;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
-        public static void UIDysonPanel_OnOpen_Prefix()
-        {
-            guard = false;
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
-        public static void UIDysonPanel_OnOpen_Postfix(UIDysonPanel __instance)
-        {
-            guard = true;
-            if (sphere == null || sphere != __instance.viewDysonSphere)
-            {
-                //Log.LogDebug($"Reset visibility status.");
-                sphere = __instance.viewDysonSphere;
-                focusLayer = new DysonSphereLayer[1];
-                tmpLayers = new DysonSphereLayer[__instance.viewDysonSphere.layersIdBased.Length];
-                hideOtherLayers = false;
-                viewLayerId = 0;
-                __instance.viewDysonSphere.modelRenderer.RebuildModels();
-            }
-            else
-            {
-                //Original sphere, trigger layer selection
-                __instance.layerSelected = viewLayerId;
-                viewLayerId = 0;
-            }
-            UIDysonPanel_UpdateSelectionVisibleChange(__instance);
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
-        public static void OnClose(UIDysonPanel __instance)
-        {
-            if (!EnableOutside)
-            {
-                hideOtherLayers = false;
-                if (blackmask != null)
-                {
-                    Destroy(blackmask);
-                    blackmask = null;
-                }
-                __instance.viewDysonSphere.modelRenderer.RebuildModels();
             }
         }
 
@@ -97,119 +38,14 @@ namespace SphereEditorTools
             EnableMask = enable;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnLateUpdate")]
-        public static void UpdateMask(UIDysonPanel __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(DysonMapCamera), nameof(DysonMapCamera._OnLateUpdate))]
+        public static void UpdateMask(DysonMapCamera __instance)
         {
+            Log.LogPeriod(__instance.editorCamera.transform.rotation);
             if (EnableMask && blackmask != null)
-                blackmask.transform.rotation = __instance.screenCamera.transform.rotation;
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateSelectionVisibleChange")]
-        public static void UIDysonPanel_UpdateSelectionVisibleChange(UIDysonPanel __instance)
-        {
-            if (!guard)
-                return;
-            int id = __instance.layerSelected;
-            if (!__instance.showAllLayers)
             {
-
-                if (viewLayerId != id)
-                {
-                    focusLayer[0] = __instance.viewDysonSphere.layersIdBased[id]; //to switch with layersSorted
-                    tmpLayers[id] = __instance.viewDysonSphere.layersIdBased[id]; //to switch with layersIdBased
-                    tmpLayers[viewLayerId] = null;
-                    viewLayerId = id;
-                    __instance.viewDysonSphere.modelRenderer.RebuildModels();
-                }
-            }
-            if (__instance.showAllLayers == hideOtherLayers)
-            {
-                hideOtherLayers = !__instance.showAllLayers;
-                __instance.viewDysonSphere.modelRenderer.RebuildModels();
-            }
-            //Log.LogDebug($"UpdateSelection ShowAll[{!hideOtherLayers}] ViewLayer[{viewLayerId}] {focusLayer[0]} {String.Join(",",tmpLayers.ToList())}");
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIDysonBrush_Remove), "_OnUpdate")]
-        [HarmonyPatch(typeof(UIDysonBrush_Select), "_OnUpdate")]
-        public static void UIDysonBrush_OnUpdate_Prefix(UIDysonBrush_Remove __instance)
-        {
-            if (hideOtherLayers) //__instance.dysonPanel.layerSelected > 0 && focusLayer != null
-                (__instance.dysonSphere.layersSorted, focusLayer) = (focusLayer, __instance.dysonSphere.layersSorted); //switch layersSorted
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(UIDysonBrush_Remove), "_OnUpdate")]
-        [HarmonyPatch(typeof(UIDysonBrush_Select), "_OnUpdate")]
-        public static void UIDysonBrush_OnUpdate_Postfix(UIDysonBrush_Remove __instance)
-        {
-            if (hideOtherLayers)
-                (__instance.dysonSphere.layersSorted, focusLayer) = (focusLayer, __instance.dysonSphere.layersSorted); //switch back
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "RebuildModels")]
-        public static void RebuildModels_Prefix(DysonSphereSegmentRenderer __instance)
-        {
-            if (hideOtherLayers)
-            {
-                if (__instance.dysonSphere != sphere)
-                    Free("RebuildModels");
-                else
-                    (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased); //switch layersIdBased
+                blackmask.transform.rotation = __instance.editorCamera.transform.rotation;
             }
         }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "RebuildModels")]
-        public static void RebuildModels_Postfix(DysonSphereSegmentRenderer __instance)
-        {
-            if (hideOtherLayers)
-            {
-                (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased);
-                for (int lid = 1; lid <= 10; ++lid)
-                {
-                    DysonSphereLayer layer = __instance.dysonSphere.layersIdBased[lid];
-                    if (layer != null && tmpLayers[lid] == null)
-                    {
-                        for (int i = 0; i < layer.nodeCursor; ++i)
-                            if (layer.nodePool[i] != null && layer.nodePool[i].id == i)
-                                layer.nodePool[i].modelIdx = 0;
-                        for (int i = 0; i < layer.frameCursor; ++i)
-                            if (layer.framePool[i] != null && layer.framePool[i].id == i)
-                            {
-                                layer.framePool[i].modelIdx = 0;
-                                layer.framePool[i].modelCount = 0;
-                            }
-                    }
-                }
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "DrawModels")]
-        public static void DysonSphereSegmentRenderer_DrawModels_Prefix(DysonSphereSegmentRenderer __instance)
-        {
-            if (hideOtherLayers)
-            {
-                if (__instance.dysonSphere != sphere)
-                    Free("DrawModels");
-                else
-                    (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased); //switch layersIdBased
-            }
-            //Log.LogDebug($"Mask {mask}"); //mask : unuse argument?
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereSegmentRenderer), "DrawModels")]
-        public static void DysonSphereSegmentRenderer_DrawModels_Postfix(DysonSphereSegmentRenderer __instance)
-        {
-            if (hideOtherLayers)
-                (__instance.dysonSphere.layersIdBased, tmpLayers) = (tmpLayers, __instance.dysonSphere.layersIdBased);
-        }
-        
-        [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "DrawPost")]
-        public static bool DysonSwarm_DrawPost()
-        {
-            return displayMode%2 == 0;
-        }
-
     }
 }

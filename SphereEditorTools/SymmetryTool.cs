@@ -7,13 +7,13 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 
-using BrushMode = UIDysonPanel.EBrushMode;
+using BrushMode = UIDysonEditor.EBrushMode;
 
 namespace SphereEditorTools 
 {
     class SymmetryTool : MonoBehaviour
     {
-        static UIDysonPanel dysnoPanel;
+        static UIDysonEditor dysnoEditor;
         static List<UIDysonBrush>[] brushes;
         static int brushId;
         static int mirrorMode; // 0~2
@@ -29,11 +29,11 @@ namespace SphereEditorTools
 
         static int tick;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
-        public static void Init(UIDysonPanel __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnOpen")]
+        public static void Init(UIDysonEditor __instance)
         {
-            dysnoPanel = __instance;
-            brushes = new List<UIDysonBrush>[dysnoPanel.brushes.Length];
+            dysnoEditor = __instance;
+            brushes = new List<UIDysonBrush>[dysnoEditor.brushes.Length];
             for (int i = 0; i < brushes.Length; i++)
             {
                 brushes[i] = new List<UIDysonBrush>
@@ -43,7 +43,7 @@ namespace SphereEditorTools
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnClose")]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnClose")]
         public static void Free()
         {
             if (brushes != null)
@@ -91,14 +91,14 @@ namespace SphereEditorTools
             int id;
             
             id = (int)BrushMode.Node;
-            UIDysonBrush_Node brushNode = (UIDysonBrush_Node)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);            
+            UIDysonBrush_Node brushNode = (UIDysonBrush_Node)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);            
             brushes[id].Add(brushNode);
             foreach (Transform child in brushNode.gameObject.transform)
                 Destroy(child.gameObject);
             brushNode._OnInit();
 
             id = (int)BrushMode.FrameGeo;
-            UIDysonBrush_Frame brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            UIDysonBrush_Frame brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushFrame);
             foreach (Transform child in brushFrame.gameObject.transform)
                 Destroy(child.gameObject);
@@ -106,23 +106,22 @@ namespace SphereEditorTools
             brushFrame.isEuler = false;
 
             id = (int)BrushMode.FrameEuler;
-            brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushFrame);
             foreach (Transform child in brushFrame.gameObject.transform)
                 Destroy(child.gameObject);
             brushFrame._OnInit();
             brushFrame.isEuler = true;
 
-
             id = (int)BrushMode.Shell;
-            UIDysonBrush_Shell brushShell = (UIDysonBrush_Shell)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            UIDysonBrush_Shell brushShell = (UIDysonBrush_Shell)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushShell);
             foreach (Transform child in brushShell.gameObject.transform)
                 Destroy(child.gameObject);
             brushShell._OnInit();
 
             id = (int)BrushMode.Remove;
-            UIDysonBrush_Remove brushRemove = (UIDysonBrush_Remove)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            UIDysonBrush_Remove brushRemove = (UIDysonBrush_Remove)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushRemove);
             foreach (Transform child in brushRemove.gameObject.transform)
                 Destroy(child.gameObject);
@@ -130,7 +129,7 @@ namespace SphereEditorTools
 
 
             id = (int)BrushMode.Select;
-            UIDysonBrush_Select brushSelect = (UIDysonBrush_Select)Instantiate(dysnoPanel.brushes[id], dysnoPanel.brushes[id].transform.parent);
+            UIDysonBrush_Select brushSelect = (UIDysonBrush_Select)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushSelect);
             foreach (Transform child in brushSelect.gameObject.transform)
                 Destroy(child.gameObject);
@@ -138,7 +137,7 @@ namespace SphereEditorTools
 
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "UpdateBrushes")]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "UpdateBrushes")]
         public static void Brushes_OnUpdate()
         {
             try
@@ -146,26 +145,50 @@ namespace SphereEditorTools
                 int activeBrushCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
                 if (activeBrushCount > 1) //symmetric mode on
                 {
-                    if (brushId != (int)dysnoPanel.brushMode)
+                    if (brushId != (int)dysnoEditor.brushMode)
                     {
                         foreach (var brush in brushes[brushId])
                         {
                             brush?._OnClose(); //Clean previous brushes
                             brush?.gameObject.SetActive(false);
                         }
-                        brushId = (int)dysnoPanel.brushMode;
+                        brushId = (int)dysnoEditor.brushMode;
                     }
 
-                    DysonSphere sphere = dysnoPanel.viewDysonSphere;
-                    DysonSphereLayer layer = sphere?.GetLayer(dysnoPanel.layerSelected);
-                    string errorText = dysnoPanel.brushError;
+                    //on left-click, update clone brushes texture (protoId) to match with original one
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        foreach (var brush in brushes[brushId])
+                        {
+                            if (brush != null)
+                            {
+                                switch (brushId)
+                                {
+                                    case (int)BrushMode.FrameGeo:
+                                    case (int)BrushMode.FrameEuler:
+                                        UIDysonBrush_Frame uiysonBrush_Frame = brush as UIDysonBrush_Frame;
+                                        uiysonBrush_Frame.frameProtoId = dysnoEditor.frameProtoId;
+                                        break;
+                                    case (int)BrushMode.Shell:
+                                        UIDysonBrush_Shell uiysonBrush_Shell = brush as UIDysonBrush_Shell;
+                                        uiysonBrush_Shell.shellProtoId = dysnoEditor.shellProtoId;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+
+                    DysonSphere sphere = dysnoEditor.selection.viewDysonSphere;
+                    DysonSphereLayer layer = dysnoEditor.selection.singleSelectedLayer;
+                    string errorText = dysnoEditor.controlPanel.toolbox.brushError;
 
                     overwrite = true;
                     Vector3 pos = dataPoint;
                     Quaternion currentRotation = Quaternion.identity;
                     if (clickPoint != Vector3.zero)
                     {
-                        Ray ray = dysnoPanel.screenCamera.ScreenPointToRay(Input.mousePosition);
+                        Ray ray = dysnoEditor.screenCamera.ScreenPointToRay(Input.mousePosition);
                         castRadius = (ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
                         bool front = Vector3.Dot(ray.direction, clickPoint) < 0f; //true : clickPoint is toward camera
                         for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
@@ -187,7 +210,7 @@ namespace SphereEditorTools
                         {
                             dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
                             clickPoint = currentRotation * dataPoint;
-                            brushes[brushId][t].SetDysonSphere(sphere); //May change in future game patch?
+                            brushes[brushId][t].SetDysonSphere(sphere);
                             brushes[brushId][t].layer = layer;                                
                             brushes[brushId][t]._Open();
                             brushes[brushId][t].gameObject.SetActive(true);
@@ -206,7 +229,7 @@ namespace SphereEditorTools
                             {
                                 dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
                                 clickPoint = currentRotation * dataPoint;
-                                brushes[brushId][t].SetDysonSphere(sphere); //May change in future game patch?
+                                brushes[brushId][t].SetDysonSphere(sphere);
                                 brushes[brushId][t].layer = layer;
                                 brushes[brushId][t].active = true;
                                 brushes[brushId][t]._Open();
@@ -216,7 +239,7 @@ namespace SphereEditorTools
                         }
                     }
                     overwrite = false;
-                    dysnoPanel.brushError =  errorText;
+                    dysnoEditor.controlPanel.toolbox.brushError =  errorText;
                     clickPoint = Vector3.zero;
                     dataPoint = Vector3.zero;
                 }                
@@ -356,12 +379,12 @@ namespace SphereEditorTools
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedNode")]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedFrame")]
-        [HarmonyPatch(typeof(UIDysonPanel), "SetSelectedShell")]
+        [HarmonyPatch(typeof(DESelection), "OnNodeClick")]
+        [HarmonyPatch(typeof(DESelection), "OnFrameClick")]
+        [HarmonyPatch(typeof(DESelection), "OnShellClick")]
         public static bool Overwrite_SetSelected()
         {
-            return !overwrite; //if overwrite is on, skip SetSelected() on dyson panel
+            return !overwrite; //if overwrite is on, skip OnXXXXClick() on dyson editor
         }
 
         #endregion

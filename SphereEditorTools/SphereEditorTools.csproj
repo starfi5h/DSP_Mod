@@ -90,7 +90,6 @@
     <Compile Include="HideLayer.cs" />
     <Compile Include="Stringpool.cs" />
     <Compile Include="SymmetryTool.cs" />
-    <Compile Include="DeleteLayer.cs" />
     <Compile Include="SphereEditorTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UIWindow.cs" />

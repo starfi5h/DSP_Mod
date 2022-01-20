@@ -5,13 +5,13 @@ namespace SphereEditorTools
 {
     class UIWindow
     {
-        static UIDysonPanel dysnoPanel;
+        static UIDysonEditor dysnoEditor;
         public static bool isShow;
         static bool isMin;
 
-        static Rect normalSize = new Rect(0, 0, 250f, 270f);
+        static Rect normalSize = new Rect(0, 0, 250f, 220f);
         static Rect miniSize = new Rect(0, 0, 75f, 20f);
-        private static Rect windowRect = new Rect(300f, 250f, 250f, 270f); //(250f, 275f) in future
+        private static Rect windowRect = new Rect(300f, 250f, 250f, 220f);
         static GUIStyle textStyle;
 
 
@@ -39,16 +39,16 @@ namespace SphereEditorTools
         }
 
 
-        public static void OnOpen(UIDysonPanel __instance)
+        public static void OnOpen(UIDysonEditor __instance)
         {
             isShow = true;
-            dysnoPanel = __instance;
+            dysnoEditor = __instance;
         }
  
         public static void OnClose()
         {
             isShow = false;
-            dysnoPanel = null;
+            dysnoEditor = null;
         }
 
         public static void OnGUI()
@@ -99,15 +99,6 @@ namespace SphereEditorTools
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(Stringpool.Display_options);
-                HideLayer.EnableOutside = GUILayout.Toggle(HideLayer.EnableOutside, Stringpool.Affect_outside);
-                GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal();
-                tmpBool = Comm.DisplayMode % 2 == 0;
-                if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Swarm)) 
-                {
-                    Comm.DisplayMode ^= 1;
-                    HideLayer.SetDisplayMode(Comm.DisplayMode);
-                }
                 tmpBool = Comm.DisplayMode < 2;
                 if (tmpBool != GUILayout.Toggle(tmpBool, Stringpool.Star))
                 {
@@ -194,22 +185,11 @@ namespace SphereEditorTools
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button(Stringpool.Copy))
                 {
-                    CopyLayer.TryCopy(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected));
-                }
-
-                if (GUILayout.Button(Stringpool.Clear))
-                {
-                    CopyLayer.Clear();
-                }
-                GUILayout.EndHorizontal();
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button(Stringpool.Paste1))
-                {
-                    CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 0);
+                    CopyLayer.TryCopy(dysnoEditor.selection.singleSelectedLayer);
                 }
                 if (GUILayout.Button(Stringpool.Paste2))
                 {
-                    CopyLayer.TryPaste(dysnoPanel.viewDysonSphere.GetLayer(dysnoPanel.layerSelected), 1);
+                    CopyLayer.TryPaste(dysnoEditor.selection.singleSelectedLayer, 1);
                 }
                 GUILayout.EndHorizontal();
             }
