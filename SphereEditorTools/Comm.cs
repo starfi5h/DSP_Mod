@@ -21,7 +21,6 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnOpen")]
         public static void Init(UIDysonEditor __instance)
         {
-            Log.LogInfo("OnOpen");
             dysonEditor = __instance;
             Stringpool.Set();
             if (SphereEditorTools.EnableGUI.Value)
@@ -34,7 +33,6 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnClose")]
         public static void Free(UIDysonEditor __instance)
         {
-            Log.LogInfo("OnClose");
             dysonEditor = null;
             if (SphereEditorTools.EnableGUI.Value)
                 UIWindow.OnClose();
@@ -84,7 +82,7 @@ namespace SphereEditorTools
             ShowSymmetricToolStatus();
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), nameof(UIDysonEditor.UpdateBrushes))]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), nameof(UIDysonEditor.DrawDysonSphereMap))]
         public static void Update_CheckKeyDown(UIDysonEditor __instance)
         {
 
@@ -122,35 +120,19 @@ namespace SphereEditorTools
                         {
                             __instance.brushMode = __instance.brushMode != BrushMode.Shell ? BrushMode.Shell : BrushMode.Select;
                         }
-                        else if (Input.GetKeyDown(SphereEditorTools.KeyRemove.Value))
-                        {
-                            __instance.brushMode = __instance.brushMode != BrushMode.Remove ? BrushMode.Remove : BrushMode.Select;
-                        }
                         else if (Input.GetKeyDown(SphereEditorTools.KeyGrid.Value))
                         {
                             singleSelectedLayer.gridMode = (singleSelectedLayer.gridMode + 1) % 5; //0: No Grid, 1: Graticule, 2~4: Geometric
                         }
-                    }
-                
-                    if (Input.GetKeyDown(SphereEditorTools.KeyLayerCopy.Value))
-                        CopyLayer.TryCopy(singleSelectedLayer);
-                    else if (Input.GetKeyDown(SphereEditorTools.KeyLayerPaste.Value))
-                        CopyLayer.TryPaste(singleSelectedLayer, 1);                
+                    }         
                 }
 
-                /*
-                if (Input.GetKeyDown(SphereEditorTools.KeyShowAllLayers.Value))
-                {
-                    __instance.showAllLayers = !__instance.showAllLayers;
-                    __instance.UpdateSelectionVisibleChange();
-                }
-                else if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
+                if (Input.GetKeyDown(SphereEditorTools.KeyHideMode.Value))
                 {
                     DisplayMode = (DisplayMode + 1) % 4;
                     HideLayer.SetDisplayMode(DisplayMode);
                     SetInfoString(Stringpool.DisplayMode[DisplayMode], 120);
-                }
-                */
+                }                
 
                 if (SphereEditorTools.EnableSymmetryTool.Value)
                 {

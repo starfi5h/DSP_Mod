@@ -178,23 +178,6 @@ namespace SphereEditorTools
             }
             GUILayout.EndVertical();
 
-            
-            GUILayout.BeginVertical(UnityEngine.GUI.skin.box); //Layer copy
-            {
-                GUILayout.Label(Stringpool.Layer_copying + CopyLayer.Name());
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button(Stringpool.Copy))
-                {
-                    CopyLayer.TryCopy(dysnoEditor.selection.singleSelectedLayer);
-                }
-                if (GUILayout.Button(Stringpool.Paste2))
-                {
-                    CopyLayer.TryPaste(dysnoEditor.selection.singleSelectedLayer, 1);
-                }
-                GUILayout.EndHorizontal();
-            }
-            GUILayout.EndVertical();            
-
             GUI.DragWindow();
         }
 

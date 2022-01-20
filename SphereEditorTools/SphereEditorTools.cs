@@ -22,7 +22,6 @@ namespace SphereEditorTools
         public static ConfigEntry<string> KeyFrameGeo;
         public static ConfigEntry<string> KeyFrameEuler;
         public static ConfigEntry<string> KeyShell;
-        public static ConfigEntry<string> KeyRemove;
         public static ConfigEntry<string> KeyGrid;        
         public static ConfigEntry<string> KeyShowAllLayers;
         public static ConfigEntry<string> KeyHideMode;
@@ -30,8 +29,6 @@ namespace SphereEditorTools
         public static ConfigEntry<string> KeyMirroring;
         public static ConfigEntry<string> KeyRotationInc;
         public static ConfigEntry<string> KeyRotationDec;
-        public static ConfigEntry<string> KeyLayerCopy;
-        public static ConfigEntry<string> KeyLayerPaste;
 
         private void BindConfig()
         {            
@@ -46,19 +43,15 @@ namespace SphereEditorTools
             KeyFrameGeo             = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameGeo", "3", "Build Frame(Geodesic) / 修建测地线框架");
             KeyFrameEuler           = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameEuler", "4", "Build Frame(Euler) / 修建经纬度框架");
             KeyShell                = Config.Bind<string>("Hotkeys - Toolbox", "KeyShell", "5", "Build Shell / 修建壳");
-            KeyRemove               = Config.Bind<string>("Hotkeys - Toolbox", "KeyRemove", "x", "Remove / 移除");
             KeyGrid                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyGrid", "r", "Toggle Grid / 切换网格");
 
-            KeyShowAllLayers        = Config.Bind<string>("Hotkeys - Visibility", "KeyShowAllLayers", "`", "Toggle show all layers mode / 显示所有层");
-            KeyHideMode             = Config.Bind<string>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle swarm & star hide mode / 切换太阳帆与恒星隐藏模式");
+            KeyHideMode             = Config.Bind<string>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle mask & star display mode / 切换遮罩與恒星显示模式");
 
             KeySymmetryTool         = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeySymmetryTool", "tab", "Toggle symmetry tool / 开关对称建造工具");
-            KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring / 开关镜像对称");
+            KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring mode / 切换镜像对称模式");
             KeyRotationInc          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
             KeyRotationDec          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
-            
-            KeyLayerCopy            = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerCopy", "page up", "Copy the selected layer / 复制选定的层级");
-            KeyLayerPaste           = Config.Bind<string>("Hotkeys - Copy & paste", "KeyLayerPaste", "page down", "Paste to the selected layer / 粘贴到选定的层级");
+           
 
         }
 

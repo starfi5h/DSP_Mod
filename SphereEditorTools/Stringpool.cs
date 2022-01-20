@@ -6,9 +6,7 @@ namespace SphereEditorTools
     {
         public static string Tool;
         public static string Display_options;
-        public static string Affect_outside;
         public static string Star;
-        public static string Swarm;
         public static string Mask;
 
         public static string Mirror_symmetry;
@@ -17,11 +15,6 @@ namespace SphereEditorTools
         public static string Antipodal;
         public static string[] MirrorModes;
         public static string Rotation_symmetry;
-
-        public static string Layer_copying;
-        public static string Copy;
-        public static string Paste;
-        public static string Paste2;
 
         public static string LAYER;
         public static string[] DisplayMode;
@@ -41,9 +34,7 @@ namespace SphereEditorTools
 
                 Tool = "工具";
                 Display_options = "显示选项";
-                Affect_outside = "同步隱藏設置";
                 Star = "恒星";
-                Swarm = "太阳帆";
                 Mask = "遮罩";
 
                 Mirror_symmetry = "镜像对称";
@@ -51,11 +42,6 @@ namespace SphereEditorTools
                 Equatorial = "赤道对称";
                 Antipodal = "对跖点";
                 Rotation_symmetry = "旋转对称";
-
-                Layer_copying = "复制层级";
-                Copy = "复制";
-                Paste = "粘贴";
-                Paste2 = "粘贴 - 自由位置";
             }
             else
             {
@@ -66,9 +52,7 @@ namespace SphereEditorTools
 
                 Tool = "Tool".Translate();
                 Display_options = "Display".Translate();
-                Affect_outside = "Show changes in-game".Translate();
                 Star = "Star".Translate();
-                Swarm = "Swarm".Translate();
                 Mask = "Mask".Translate();
 
                 Mirror_symmetry = "Mirror symmetry".Translate();
@@ -76,19 +60,14 @@ namespace SphereEditorTools
                 Equatorial = "Equatorial".Translate();
                 Antipodal = "Antipodal".Translate();
                 Rotation_symmetry = "Rotation symmetry".Translate();
-
-                Layer_copying = "Copying Layer".Translate();
-                Copy = "Copy".Translate();
-                Paste = "Paste".Translate();
-                Paste2 = "Paste - free".Translate();
             }
             MirrorModes = new String[] { None, Equatorial, Antipodal };
             DisplayMode = new String[]
             {
-                Display_options + " : " + Star + "," + Swarm,
                 Display_options + " : " + Star,
-                Display_options + " : " + Swarm,
+                Display_options + " : " + Star + "," + Mask,
                 Display_options + " : " + None,
+                Display_options + " : " + Mask,
             };
         }
     }
