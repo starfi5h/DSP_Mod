@@ -135,7 +135,7 @@ namespace SphereEditorTools
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("<<"))
                 {
-                    Comm.RadialCount = 1;
+                    Comm.RadialCount = Math.Max(Comm.RadialCount - 10, 1);
                     SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
                     Comm.SymmetricMode = true;
                 }
@@ -155,7 +155,7 @@ namespace SphereEditorTools
                 tmpString = GUILayout.TextField(Comm.RadialCount.ToString(), 3, textStyle, GUILayout.MinWidth(35));
                 if (int.TryParse(tmpString, out tmpInt))
                 {
-                    if (tmpInt != Comm.RadialCount && tmpInt < 60 && tmpInt > 0)
+                    if (tmpInt != Comm.RadialCount && tmpInt < Comm.MaxRadialCount && tmpInt > 0)
                     {
                         Comm.RadialCount = tmpInt;
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
@@ -164,13 +164,13 @@ namespace SphereEditorTools
                 }
                 if (GUILayout.Button("+"))
                 {
-                    if (Comm.RadialCount < 60)
+                    if (Comm.RadialCount < Comm.MaxRadialCount)
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, ++Comm.RadialCount);
                     Comm.SymmetricMode = true;
                 }
                 if (GUILayout.Button(">>"))
                 {
-                    Comm.RadialCount = 60;
+                    Comm.RadialCount = Math.Min(Comm.RadialCount + 10, Comm.MaxRadialCount);
                     SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
                     Comm.SymmetricMode = true;
                 }
