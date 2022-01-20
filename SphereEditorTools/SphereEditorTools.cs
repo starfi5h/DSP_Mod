@@ -70,6 +70,7 @@ namespace SphereEditorTools
             Log.Init(Logger);
             
             TryPatch(typeof(Comm));
+            TryPatch(typeof(HideLayer));
             if (EnableGUI.Value)
                 UIWindow.LoadWindowPos();
             if (EnableSymmetryTool.Value)

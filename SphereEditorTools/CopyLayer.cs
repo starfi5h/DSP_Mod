@@ -59,11 +59,7 @@ namespace SphereEditorTools
         static void Paste(DysonSphereLayer layer, int mode)
         {
             layerData.Paste(layer, mode);
-            Comm.dysnoPanel.layerSelected = layer.id;
-            Comm.dysnoPanel.nodeSelected = 0;
-            Comm.dysnoPanel.frameSelected = 0;
-            Comm.dysnoPanel.shellSelected = 0;
-            Comm.dysnoPanel.UpdateSelectionVisibleChange();
+            Comm.dysonEditor.selection.ClearAllSelection();
         }
 
 

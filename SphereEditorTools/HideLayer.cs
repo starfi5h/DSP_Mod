@@ -9,11 +9,8 @@ namespace SphereEditorTools
         public static bool EnableMask;
         static GameObject blackmask;
 
-        public static void Free(string str)
+        public static void Free()
         {
-            //Log.LogDebug($"{str} : Reset visibility status.");
-            displayMode = 0;
-            //EnableMask = false;
             if (blackmask != null)
             {
                 Destroy(blackmask);
@@ -21,16 +18,10 @@ namespace SphereEditorTools
             }
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPanel), "SetViewStar")]
-        public static void UIDysonPanel_SetViewStar()
-        {
-            Free("SetViewStar");
-        }
-
         public static void SetDisplayMode(int mode)
         {
             displayMode = mode; //0:normal 1,3: hide swarm 2,3: hide star
-            //GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(displayMode < 2);            
+            GameObject.Find("UI Root/Dyson Map/Star")?.SetActive(displayMode < 2);            
         }
 
         public static void SetMask(bool enable)
@@ -47,11 +38,14 @@ namespace SphereEditorTools
             EnableMask = enable;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonPanel), "_OnLateUpdate")]
-        public static void UpdateMask(UIDysonPanel __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(DysonMapCamera), nameof(DysonMapCamera._OnLateUpdate))]
+        public static void UpdateMask(DysonMapCamera __instance)
         {
+            Log.LogPeriod(__instance.editorCamera.transform.rotation);
             if (EnableMask && blackmask != null)
-                blackmask.transform.rotation = __instance.screenCamera.transform.rotation;
+            {
+                blackmask.transform.rotation = __instance.editorCamera.transform.rotation;
+            }
         }
     }
 }
