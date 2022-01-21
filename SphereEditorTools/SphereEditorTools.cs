@@ -14,7 +14,9 @@ namespace SphereEditorTools
         internal static string ErrorMessage;
         internal static new ConfigFile Config;
         public static ConfigEntry<bool> EnableToolboxHotkey;
+        public static ConfigEntry<bool> EnableDisplayOptions;
         public static ConfigEntry<bool> EnableSymmetryTool;
+        public static ConfigEntry<bool> EnableOrbitTool;
         public static ConfigEntry<bool> EnableGUI;
         public static ConfigEntry<string> WindowPosition;
         public static ConfigEntry<string> KeySelect;
@@ -33,9 +35,11 @@ namespace SphereEditorTools
         private void BindConfig()
         {            
             EnableToolboxHotkey     = Config.Bind<bool>("- General -", "EnableToolboxHotkey", true, "Switch between build plan tools with hotkeys.\n启用工具箱热键");
+            EnableDisplayOptions    = Config.Bind<bool>("- General -", "EnableDisplayOptions", true, "Enable display control of star and black mask.\n啟用顯示控制(恆星/黑色遮罩)");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
+            EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用殼層軌道工具");
 
-            EnableGUI               = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
+            EnableGUI = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
 
             KeySelect               = Config.Bind<string>("Hotkeys - Toolbox", "KeySelect", "1", "Inspect / 查看");
@@ -63,11 +67,18 @@ namespace SphereEditorTools
             Log.Init(Logger);
             
             TryPatch(typeof(Comm));
-            TryPatch(typeof(HideLayer));
-            if (EnableGUI.Value)
-                UIWindow.LoadWindowPos();
+            if (EnableDisplayOptions.Value)
+                TryPatch(typeof(HideLayer));
             if (EnableSymmetryTool.Value)
                 TryPatch(typeof(SymmetryTool));
+            if (EnableOrbitTool.Value)
+                TryPatch(typeof(EditOrbit));
+
+            if (EnableGUI.Value)
+            {
+                int height = 20 + (EnableDisplayOptions.Value ? 30 : 0) + (EnableSymmetryTool.Value ? 110 : 0) + (EnableOrbitTool.Value ? 60 : 0);
+                UIWindow.LoadWindowPos(height);
+            }
         }
 
         public void TryPatch(Type type)

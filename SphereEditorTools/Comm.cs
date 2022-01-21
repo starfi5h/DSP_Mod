@@ -82,7 +82,7 @@ namespace SphereEditorTools
             ShowSymmetricToolStatus();
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), nameof(UIDysonEditor.DrawDysonSphereMap))]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), nameof(UIDysonEditor.UpdateBrushes))]
         public static void Update_CheckKeyDown(UIDysonEditor __instance)
         {
 

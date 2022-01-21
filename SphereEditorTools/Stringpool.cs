@@ -22,6 +22,11 @@ namespace SphereEditorTools
         public static string Rotation;
         public static string Mirror;
 
+        public static string OrbitTool;
+        public static string AnchorMode;
+        public static string AngularSpeed;
+        public static string Set1;
+        public static string Reset;
 
         public static void Set()
         {
@@ -42,6 +47,12 @@ namespace SphereEditorTools
                 Equatorial = "赤道对称";
                 Antipodal = "对跖点";
                 Rotation_symmetry = "旋转对称";
+
+                OrbitTool = "轨道工具";
+                AnchorMode = "锚定模式";
+                AngularSpeed = "角速度";
+                Set1 = "设置";
+                Reset = "还原";
             }
             else
             {
@@ -60,6 +71,12 @@ namespace SphereEditorTools
                 Equatorial = "Equatorial".Translate();
                 Antipodal = "Antipodal".Translate();
                 Rotation_symmetry = "Rotation symmetry".Translate();
+
+                OrbitTool = "Orbit Tool".Translate();
+                AnchorMode = "Anchor Mode".Translate();
+                AngularSpeed = "Angular Speed".Translate();
+                Set1 = "Set".Translate();
+                Reset = "Reset".Translate();
             }
             MirrorModes = new String[] { None, Equatorial, Antipodal };
             DisplayMode = new String[]

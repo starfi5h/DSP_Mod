@@ -55,7 +55,6 @@ namespace SphereEditorTools
         [HarmonyPostfix, HarmonyPatch(typeof(DysonMapCamera), nameof(DysonMapCamera._OnLateUpdate))]
         public static void UpdateMask(DysonMapCamera __instance)
         {
-            Log.LogPeriod(__instance.editorCamera.transform.rotation);
             if (EnableMask && blackmask != null)
             {
                 blackmask.transform.rotation = __instance.editorCamera.transform.rotation;

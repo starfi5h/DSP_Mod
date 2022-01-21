@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comm.cs" />
+    <Compile Include="EditOrbit.cs" />
     <Compile Include="HideLayer.cs" />
     <Compile Include="Stringpool.cs" />
     <Compile Include="SymmetryTool.cs" />
