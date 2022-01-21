@@ -14,21 +14,16 @@ All hotkeys used in this mod are customizable in configuration, key name can be 
 ### Symmetric Building Tool
 You can now build or remove multiple entities at once!  
 Symmetric tool can be toggle with `tab`.  There are two types of symmetry in the tool:   
-Mirror symmetry: When it is switch on (hotkey `m`), It will create corresponding reflections on the other side of the equator.  
-Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 120.  
+Mirror symmetry: When it is activated (hotkey `m`), it will create corresponding reflections on the other side of the equator.  
+Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 90.  
 
-### Delete Layer
-You can now dismantle the whole constructed layer with the delete button.  
-Deleting Layer 1 will deconstruct all the objects on the layer, leaving only an empty layer.  
+### Orbit Modification Tool
+Anchor Mode: When enabled, the selected layer rotation will stop, the grid orientation will be changed immediately when the orbit is modified and the position of structures will remain unchanged. It can fix the grid misalignment problem.  
+Angular speed: Change the angular speed of selected layer. Input empty string will reset the orbit angular speed.
 
-### Copy Layer
-Copy a single layer to another empty layer. Hotkey `Page Up` for copying and `Page Down` for pasting.  
-
-### Hide Layer
-Toggle by "Show All Layer" button. When it is unchecked, only selected layer will be visible, other layers will be hidden.  
+### Hide Object
+When mask is enabled in the GUI window, a black mask will appear in the background.  
 You can also use hotkey `h` to hide dyson swarm and the star.  
-When `EnableHideOutside` is enabled, those objects will temporarily retain their visibility settings and show the changes in-game until reopening dyson editor or viewing another dyson sphere.  
-When mask is enabled in the GUI window, a black mask will appear and block the inside part of the Dyson sphere.
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manual download the file and put `SphereEditorTools.dll` in `BepInEx/plugins` folder.
@@ -42,16 +37,15 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 ### General  
 || Default | Description |
 | :----- | :------ | :---------- |
-| `EnableDeleteLayer`      | true  | Enable deletion of a constructed layer. |
 | `EnableToolboxHotkey`    | true  | Switch between build plan tools with hotkeys. |
-| `EnableHideLayer`        | true  | Hide unselected layers when not showing all layers. |
-| `EnableHideOutside`      | false | Apply visibility changes to the game world temporarily. |
-| `EnableSymmetryTool`      | true | Enable mirror and rotation symmetry of building tools. |
+| `EnableDisplayOptions`   | true  | Enable display control of star and black mask. |
+| `EnableSymmetryTool`     | true  | Enable mirror and rotation symmetry of building tools. |
+| `EnableToolboxHotkey`    | true  | Enable dyson sphere layer orbit modifiy tool. |
 
 ### GUI
 || Default | Description |
 | :----- | :------ | :---------- |
-| `EnableGUI`      | true  | Show a simple window to use the tools. |
+| `EnableGUI`      | true  | Display a toolbox window. |
 | `WindowPosition` | 300, 250 | Position of the window. Format: x,y |
 
 ### Hotkeys  
@@ -63,21 +57,19 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyFrameGeo`   | 3       | Build Frame(Geodesic) |
 | `KeyFrameEuler` | 4       | Build Frame(Euler) |
 | `KeyShell`      | 5       | Build Shell |
-| `KeyRemove`     | x       | Remove |
 | `KeyGrid`       | r       | Toggle Grid |
 | Visibility |
 | `KeyShowAllLayers` | `    | Toggle show all layers mode |
-| `KeyHideMode`      | h    | Toggle swarm & star hide mode |
+| `KeyHideMode`      | h    | Toggle mask & star hide mode |
 | Symmetry Tool |
 | `KeySymmetryTool`  | tab  | Toggle symmetry tool |
-| `KeyMirroring`     | m    | Toggle mirroring |
+| `KeyMirroring`     | m    | Toggle mirroring mode |
 | `KeyRotationInc`   | [+]  | Increase the degree of rotational symmetry |
 | `KeyRotationDec`   | [-]  | Decrease the degree of rotational symmetry |
 | Copy & paste |
 | `KeyLayerCopy`   | page up  | Copy the selected layer |
 | `KeyLayerPaste`   | page down  | Paste to the selected layer |  
   
-PS. The new official Dyson sphere edtior looks pretty awsome!  
   
 ----
 # 画球辅助工具
@@ -92,23 +84,18 @@ PS. The new official Dyson sphere edtior looks pretty awsome!
 
 
 ### 对称建设工具  
-
 启用后，可以用热键`tab`開關，开启时能同时用多个笔刷建造或拆除。  
 镜像对称以赤道面對稱，开启时(`m`)会在赤道另一侧半球产生对应的笔刷。  
 旋转对称以自转轴对称，数值表示在同一个纬线上有多少个笔刷，范围在1-120(数字键盘`[+][-]`增减)。  
 
+### 轨道修改工具  
+锚定节点：启用后，所选层停止旋转，修改轨道时将会立即改变网格位置，节点位置保持不变。可以修复网格错位问题。  
+角速度：改变所选层的角速度。输入空字符串将重置轨道的角速度。  
 
-### 删除层级
-已建立层级可以用删除按钮一键拆除。删除层级1只会将该层上的所有物件拆除，层级仍会保留。  
+### 隐藏物体  
+在操作窗口中启用遮罩后，会出现一个黑色遮罩并挡住戴森球体的背部部分。  
+热键`h`可以切换恒星和遮罩的显示状态。  
 
-### 復制层级
-將單個层级複製到另一個空的层级。 熱鍵`Page Up`復制，`Page Down`粘貼。  
-
-### 隐藏层级
-通过"显示所有层"按钮进行切换。按钮没有勾选时，只有选取的层是可见的，其他层将被隐藏。  
-热键`h`可以隐藏太阳帆与恒星。  
-`EnableHideOutside`启用时，这些物件会暂时保留隐藏的设定直到再次打开编辑器页面或查看另一个戴森球。  
-在操作窗口中啟用遮罩後，會出現一個黑色遮罩並擋住戴森球體的背部部分。
 
 ## 安装
 通过管理器[r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/)，或者手动下载文件并将`SphereEditorTools.dll`放入`BepInEx/plugins`文件夹。
@@ -123,11 +110,10 @@ PS. The new official Dyson sphere edtior looks pretty awsome!
 ### 功能选项  
 || 默认 | 描述|
 | :----- | :------ | :---------- |
-| `EnableDeleteLayer`      | true  | 启用已建立层级删除功能 |
 | `EnableToolboxHotkey`    | true  | 启用工具箱热键 |
-| `EnableHideLayer`        | true  | 启用层级隐藏功能 |
-| `EnableHideOutside`      | false | 使隐藏效果暂时套用至外界 |
+| `EnableDisplayOptions`   | true  | 启用显示控制(恒星/黑色遮罩) |
 | `EnableSymmetryTool`     | true  | 启用对称建造工具(镜像/旋转) |
+| `EnableOrbitTool`        | true  | 启用壳层轨道工具 |
   
 ### GUI
 || Default | Description |
@@ -144,26 +130,23 @@ PS. The new official Dyson sphere edtior looks pretty awsome!
 | `KeyFrameGeo`   | 3       | 修建测地线框架 |
 | `KeyFrameEuler` | 4       | 修建经纬度框架 |
 | `KeyShell`      | 5       | 修建壳 |
-| `KeyRemove`     | x       | 移除 |
 | `KeyGrid`       | r       | 切换网格 |
 | 可见度 |
-| `KeyShowAllLayers` | `    | 切换显示所有层 |
-| `KeyHideMode`      | h    | 切换太阳帆与恒星隐藏模式 |
+| `KeyHideMode`      | h    | 切换遮罩與恒星顯示模式 |
 | 对称工具 |
 | `KeySymmetryTool`  | tab  | 开关对称建造工具 |
-| `KeyMirroring`     | m    | 开关镜像对称 |
+| `KeyMirroring`     | m    | 切换镜像对称模式 |
 | `KeyRotationInc`   | [+]  | 增加旋转对称的个数 |
 | `KeyRotationDec`   | [-]  | 减少旋转对称的个数 |
-| 复制粘贴 |
-| `KeyLayerCopy`   | page up  | 复制选定的层级 |
-| `KeyLayerPaste`   | page down  | 粘贴到选定的层级 |  
-
-
-PS. 新的官方编辑器看起来很赞，这个MOD可以光荣退役了 :D  
 
 ----
 
 ## Changelog
+
+### v2.0.0 - Adjustment to new editor in 0.9.24  
+\- Remove delete, hide and copy layer functions.  
+\- Add orbit modifiaction tool.  
+
 
 ### v1.2.1
 \- Improve some wording. (Game version 0.8.23.9989)  

@@ -35,9 +35,9 @@ namespace SphereEditorTools
         private void BindConfig()
         {            
             EnableToolboxHotkey     = Config.Bind<bool>("- General -", "EnableToolboxHotkey", true, "Switch between build plan tools with hotkeys.\n启用工具箱热键");
-            EnableDisplayOptions    = Config.Bind<bool>("- General -", "EnableDisplayOptions", true, "Enable display control of star and black mask.\n啟用顯示控制(恆星/黑色遮罩)");
+            EnableDisplayOptions    = Config.Bind<bool>("- General -", "EnableDisplayOptions", true, "Enable display control of star and black mask.\n启用显示控制(恒星/黑色遮罩)");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
-            EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用殼層軌道工具");
+            EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用壳层轨道工具");
 
             EnableGUI = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
@@ -55,8 +55,6 @@ namespace SphereEditorTools
             KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring mode / 切换镜像对称模式");
             KeyRotationInc          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
             KeyRotationDec          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
-           
-
         }
 
         public void Start()

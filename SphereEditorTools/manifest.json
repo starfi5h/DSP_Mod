@@ -1,7 +1,7 @@
 {
     "name": "SphereEditorTools",
-    "description": "Enhance the function of dyson sphere editor. Feature: Hotkeys, symmetric tool, hide objects, single layer copying and deleting. 画球辅助-增加自订热键、对称笔刷、物件隐藏、單層複製與刪除等功能。",
-    "version_number": "1.2.1",
+    "description": "Enhance the function of dyson sphere editor. Feature: Hotkeys, symmetric tool, grid alignment changing. 画球辅助-增加自订热键、对称笔刷、轨道修改、网格移动等功能。",
+    "version_number": "2.0.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
