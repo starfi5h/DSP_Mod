@@ -16,7 +16,7 @@ namespace SphereEditorTools
 
         public static string SpeedInput;
 
-        public static void LoadWindowPos(int height)
+        public static void LoadWindowPos()
         {
             try
             {
@@ -31,6 +31,8 @@ namespace SphereEditorTools
                 Log.LogWarning("WindowPos parse error, use defualt position (300, 250)");
                 Log.LogWarning(ex);
             }
+
+            int height = 20 + (SphereEditorTools.EnableDisplayOptions.Value ? 30 : 0) + (SphereEditorTools.EnableSymmetryTool.Value ? 110 : 0) + (SphereEditorTools.EnableOrbitTool.Value ? 60 : 0);
             normalSize.height = height;
         }
 

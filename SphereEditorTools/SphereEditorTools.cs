@@ -17,6 +17,7 @@ namespace SphereEditorTools
         public static ConfigEntry<bool> EnableDisplayOptions;
         public static ConfigEntry<bool> EnableSymmetryTool;
         public static ConfigEntry<bool> EnableOrbitTool;
+        public static ConfigEntry<bool> EnableVisualEffect;
         public static ConfigEntry<bool> EnableGUI;
         public static ConfigEntry<string> WindowPosition;
         public static ConfigEntry<string> KeySelect;
@@ -31,6 +32,7 @@ namespace SphereEditorTools
         public static ConfigEntry<string> KeyMirroring;
         public static ConfigEntry<string> KeyRotationInc;
         public static ConfigEntry<string> KeyRotationDec;
+        public static ConfigEntry<string> VFXchainedSequence;
 
         private void BindConfig()
         {            
@@ -38,6 +40,7 @@ namespace SphereEditorTools
             EnableDisplayOptions    = Config.Bind<bool>("- General -", "EnableDisplayOptions", true, "Enable display control of star and black mask.\n启用显示控制(恒星/黑色遮罩)");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
             EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用壳层轨道工具");
+            EnableVisualEffect      = Config.Bind<bool>("- General -", "EnableVisualEffect", false, "Enable VFX that make layers rotation synchronized.\n启用视觉效果让壳层连锁转动");
 
             EnableGUI = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
@@ -55,6 +58,8 @@ namespace SphereEditorTools
             KeyMirroring            = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyMirroring", "m", "Toggle mirroring mode / 切换镜像对称模式");
             KeyRotationInc          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationInc", "[+]", "Increase the degree of rotational symmetry / 增加旋转对称的个数");
             KeyRotationDec          = Config.Bind<string>("Hotkeys - Symmetry Tool", "KeyRotationDec", "[-]", "Decrease the degree of rotational symmetry / 减少旋转对称的个数");
+
+            VFXchainedSequence      = Config.Bind<string>("VFX", "VFXchainedSequence", "5-4, 4-3, 3-2, 2-1", "In each pair, the rotaion of former layer (a) will apply to the latter one (b).\nFormat: layer1a-layer1b, layer2a-layer2b, ...\n 用字串指定连锁的顺序");
         }
 
         public void Start()
@@ -71,11 +76,12 @@ namespace SphereEditorTools
                 TryPatch(typeof(SymmetryTool));
             if (EnableOrbitTool.Value)
                 TryPatch(typeof(EditOrbit));
+            if (EnableVisualEffect.Value)
+                TryPatch(typeof(VisualEffect));
 
             if (EnableGUI.Value)
             {
-                int height = 20 + (EnableDisplayOptions.Value ? 30 : 0) + (EnableSymmetryTool.Value ? 110 : 0) + (EnableOrbitTool.Value ? 60 : 0);
-                UIWindow.LoadWindowPos(height);
+                UIWindow.LoadWindowPos();
             }
         }
 

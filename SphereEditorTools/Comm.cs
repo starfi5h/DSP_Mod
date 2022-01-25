@@ -39,6 +39,16 @@ namespace SphereEditorTools
             HideLayer.Free();
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(GameMain), "Resume")]
+        public static void OnResume()
+        {
+            UIWindow.SaveWindowPos();
+            SphereEditorTools.Config.Reload();
+            Stringpool.Set();
+            UIWindow.LoadWindowPos();
+            VisualEffect.LoadSequence();
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(GameMain), "End")]
         public static void OnGameEnd()
         {
