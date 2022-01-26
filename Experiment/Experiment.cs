@@ -17,7 +17,7 @@ namespace Experiment
             harmony = new Harmony("com.starfi5h.plugin.Experiment");
             try
             {
-                harmony.PatchAll(typeof(PatchTest));
+                harmony.PatchAll(typeof(StaionUI));
                 //harmony.PatchAll(typeof(TranspilerTest));
             }
             catch (Exception e)
