@@ -8,10 +8,60 @@ namespace Experiment
 {
     public class PatchTest
     {
+        static int count;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CargoContainer), nameof(CargoContainer.RemoveCargo))]
+        static void RemoveCargo(int index)
+        {
+            Log.Info($"RemoveCargo {index}");
+        }
+
+
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.Resume))]
+        static void Test()
+        {
+            Log.Debug(DSPGame.globalOption.dataUploadToMilkyWay);
+            Log.Debug(DSPGame.milkyWayWebClient.canUploadGame);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(UIAssemblerWindow), nameof(UIAssemblerWindow.OnIncSwitchClick))]
+        internal static void OnIncSwitchClick_Postfix(UIAssemblerWindow __instance)
+        {
+            AssemblerComponent assemblerComponent = __instance.factorySystem.assemblerPool[__instance.assemblerId];
+            Log.Debug($"{assemblerComponent.productive} {assemblerComponent.forceAccMode}");
+        }
+
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FPSController), nameof(FPSController.Update))]
+        internal static void FPSController_Update(FPSController __instance)
+        {
+            if ((GameMain.gameTick & 64) == 1) {
+                Log.Info($"{__instance.fixUPS} {__instance.fixRatio} {__instance.aveDeltaTime}");
+                Log.Info($"{1/__instance.fixUPS} {__instance.fixRatio* __instance.aveDeltaTime} delta:{Time.fixedDeltaTime}");
+            }
+            if (__instance.fixUPS > 0)
+            {
+                Time.fixedDeltaTime = 1 / (float)__instance.fixUPS;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(UISpraycoaterWindow), nameof(UISpraycoaterWindow.OnTakeBackPointerUp))]
+        public static void OnTakeBackPointerUp_Postfix(UISpraycoaterWindow __instance)
+        {
+            SpraycoaterComponent sprayer = __instance.traffic.spraycoaterPool[__instance.spraycoaterId];
+
+            // If pressed on the previous frame
+            Log.Debug($"incCount {sprayer.incCount} extraIncCount {sprayer.extraIncCount} incSprayTimes {sprayer.incSprayTimes}");
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.SetInserterInsertTarget))]
-
         internal static void SetInserterInsertTarget_Prefix(int __0, int __1, int __2)
         {
             Log.Warn($"SetInserterInsertTarget {__0} {__1} {__2}");
