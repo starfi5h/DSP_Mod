@@ -8,7 +8,6 @@ namespace Experiment
 {
     public class PatchTest
     {
-        static int count;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CargoContainer), nameof(CargoContainer.RemoveCargo))]
