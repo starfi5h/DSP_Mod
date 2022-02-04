@@ -20,7 +20,7 @@ namespace Experiment
                 //harmony.PatchAll(typeof(PatchTest));
                 //harmony.PatchAll(typeof(StaionUI));
                 //harmony.PatchAll(typeof(TranspilerTest));
-                harmony.PatchAll(typeof(SoftPause));
+                harmony.PatchAll(typeof(Factory_Patch));
             }
             catch (Exception e)
             {

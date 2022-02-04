@@ -8,16 +8,6 @@ namespace Experiment
 {
     public class PatchTest
     {
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(CargoContainer), nameof(CargoContainer.RemoveCargo))]
-        static void RemoveCargo(int index)
-        {
-            Log.Info($"RemoveCargo {index}");
-        }
-
-
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Resume))]
         static void Test()
