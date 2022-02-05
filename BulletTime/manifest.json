@@ -1,0 +1,7 @@
+{
+    "name": "BulletTime",
+    "description": "Reduce simulation rate to imporve FPS. Let player can move during auto-save.  调整模拟頻率以提高幀數。在自动保存过程中让玩家可以移动。",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod",
+		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
+}
