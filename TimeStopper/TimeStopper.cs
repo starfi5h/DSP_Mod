@@ -17,7 +17,9 @@ namespace TimeStopper
             harmony = new Harmony("com.starfi5h.plugin.Experiment");
             try
             {
-                harmony.PatchAll(typeof(GameMain_Patch));
+                harmony.PatchAll(typeof(GaemSave_Patch));
+
+
             }
             catch (Exception e)
             {
@@ -25,8 +27,19 @@ namespace TimeStopper
             }
         }
 
+        int count;
+
+        public void OnUpdate()
+        {
+            if (count++ % 120 == 0)
+            {
+                GaemSave_Patch.ShowStatus(count % 240 == 0 ? "測試玩家" + " joining the game, please wait" : "");
+            }
+        }
+
         public void OnGUI()
         {
+
         }
 
         public void OnDestroy()
