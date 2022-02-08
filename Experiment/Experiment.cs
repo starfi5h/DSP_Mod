@@ -20,12 +20,15 @@ namespace Experiment
                 //harmony.PatchAll(typeof(PatchTest));
                 //harmony.PatchAll(typeof(StaionUI));
                 //harmony.PatchAll(typeof(TranspilerTest));
-                harmony.PatchAll(typeof(Factory_Patch));
+                harmony.PatchAll(typeof(UIFatalErrorTip_Patch));
             }
             catch (Exception e)
             {
                 Logger.LogError(e);
             }
+            UIFatalErrorTip_Patch._OnCreate_Postfix();
+
+            throw (new Exception("Nebula error\n\n\n"));
         }
 
         public void OnGUI()
@@ -34,6 +37,7 @@ namespace Experiment
 
         public void OnDestroy()
         {
+            UIFatalErrorTip_Patch.Dispose();
             harmony.UnpatchSelf();
         }
     }
