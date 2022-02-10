@@ -8,12 +8,30 @@ namespace Experiment
 {
     public class PatchTest
     {
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIStationWindow), nameof(UIStationWindow._OnOpen))]
+        static void _OnOpen()
+        {
+            UIMessageBox.Show("Pause", "Can't access", null, 1);
+        }
+
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Resume))]
         static void Test()
         {
             Log.Debug(DSPGame.globalOption.dataUploadToMilkyWay);
             Log.Debug(DSPGame.milkyWayWebClient.canUploadGame);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BuildTool_Path), nameof(BuildTool_Path._OnTick))]
+        static void _OnTick(BuildTool_Path __instance)
+        {
+            if (__instance.buildPreviews.Count > 0)
+            {
+                Log.Debug(__instance.buildPreviews.Count);
+            }
         }
 
         [HarmonyPostfix]
@@ -25,8 +43,8 @@ namespace Experiment
         }
 
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(FPSController), nameof(FPSController.Update))]
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(FPSController), nameof(FPSController.Update))]
         internal static void FPSController_Update(FPSController __instance)
         {
             if ((GameMain.gameTick & 64) == 1) {
@@ -49,22 +67,22 @@ namespace Experiment
             Log.Debug($"incCount {sprayer.incCount} extraIncCount {sprayer.extraIncCount} incSprayTimes {sprayer.incSprayTimes}");
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.SetInserterInsertTarget))]
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.SetInserterInsertTarget))]
         internal static void SetInserterInsertTarget_Prefix(int __0, int __1, int __2)
         {
             Log.Warn($"SetInserterInsertTarget {__0} {__1} {__2}");
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.SetInserterPickTarget))]
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.SetInserterPickTarget))]
         internal static void SetInserterPickTarget_Prefix(int __0, int __1, int __2)
         {
             Log.Warn($"SetInserterPickTarget {__0} {__1} {__2}");
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.OnBeltBuilt))]
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.OnBeltBuilt))]
         internal static void OnBeltBuilt_Prefix(PlanetFactory __instance)
         {
             Log.Info($"OnBeltBuilt {__instance.planet.physics}");

@@ -17,7 +17,7 @@ namespace Experiment
             harmony = new Harmony("com.starfi5h.plugin.Experiment");
             try
             {
-                //harmony.PatchAll(typeof(PatchTest));
+                harmony.PatchAll(typeof(PatchTest));
                 //harmony.PatchAll(typeof(StaionUI));
                 //harmony.PatchAll(typeof(TranspilerTest));
                 harmony.PatchAll(typeof(UIFatalErrorTip_Patch));
@@ -28,7 +28,7 @@ namespace Experiment
             }
             UIFatalErrorTip_Patch._OnCreate_Postfix();
 
-            throw (new Exception("Nebula error\n\n\n"));
+            //throw (new Exception("Nebula error\n\n\n"));
         }
 
         public void OnGUI()

@@ -27,13 +27,13 @@ namespace Experiment
                 button = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Dyson Sphere Editor/Dyson Editor Control Panel/hierarchy/layers/blueprint-group/blueprint-2/copy-button");
                 GameObject errorPanel = GameObject.Find("UI Root/Overlay Canvas/Fatal Error/errored-panel/");
                 errorPanel.transform.Find("tip-text-1").GetComponent<Text>().text = Title();
+                GameObject.Destroy(errorPanel.transform.Find("tip-text-1").GetComponent<Localizer>());
                 button = GameObject.Instantiate(button, errorPanel.transform);
                 button.name = "Copy & Close button";
-                button.transform.localPosition = new Vector3(-5, -11, 0);
-                button.GetComponent<RectTransform>().sizeDelta = new Vector2(120, 22);
-                button.transform.Find("text").gameObject.GetComponent<Text>().text = "Copy & Close";
-                Log.Debug(button.GetComponent<UIButton>());
+                button.transform.localPosition = errorPanel.transform.Find("icon").localPosition + new Vector3(30, -35, 0); //-885 -30 //-855 -60
+                button.GetComponent<Image>().color = new Color(0.3113f, 0f, 0.0097f, 0.6f);
                 button.GetComponent<UIButton>().BindOnClickSafe(OnClick);
+                button.GetComponent<UIButton>().tips = new UIButton.TipSettings();
             }
             catch(Exception e)
             {
