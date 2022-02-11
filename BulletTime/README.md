@@ -1,5 +1,6 @@
 # Bullet Time
 
+![Paue Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
 Reduce simulation rate to imporve FPS. Let player can move during auto-save.  
 调整模拟頻率以提高幀數。在自动保存过程中让玩家可以移动。  
 
