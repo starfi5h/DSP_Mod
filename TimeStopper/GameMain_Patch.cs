@@ -81,7 +81,7 @@ namespace BulletTime
             }
             if (Input.GetKeyDown(KeyCode.F10))
             {
-                BulletTime.State.SetPauseMode(!BulletTime.State.Pause);
+                BulletTime.State.SetInteractable(!BulletTime.State.Interactable);
             }
         }
 

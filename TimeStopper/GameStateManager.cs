@@ -8,7 +8,7 @@ namespace BulletTime
     {
         public bool Pause { get; set; }
         public bool AdvanceTick { get; private set; } = true;
-        public bool Interactable { get; set; } = false;
+        public bool Interactable { get; set; } = true;
         public long StoredGameTick { get; set; }
 
         private GameObject timeText;
@@ -82,7 +82,7 @@ namespace BulletTime
         public bool PauseInThisFrame()
         {
             bool pauseThisFrame = Pause;
-            AdvanceTick = GameMain.data.guideComplete;
+            AdvanceTick = GameMain.data.guideComplete && Interactable;
             if (!Pause && sliderValue < 100)
             {
                 timer += skipRatio;
@@ -99,16 +99,14 @@ namespace BulletTime
         private static UIMessageBox displayedMessage;
         public void SetInteractable(bool value)
         {
+            Log.Debug($"Interactable = {value}");
             Interactable = value;
-            if (Interactable)
+            if (!Interactable)
             {
-                UIGame uIGame = UIRoot.instance.uiGame;
-                bool flag = uIGame.isAnyFunctionWindowActive;
-                flag |= uIGame.dysonEditor.active;
-                if (flag)
-                {
-                    UIMessageBox.Show("Read-Only", "Can't interact with UI during auto-save\nPlease wait or press ESC to close the window", null, 0, () => {});
-                }
+                // Exit build mode
+                GameMain.mainPlayer.controller.actionBuild.EscLogic();
+                GameMain.mainPlayer.controller.actionBuild.EscLogic();
+
             }
             else
             {
