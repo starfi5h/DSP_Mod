@@ -5,13 +5,13 @@ Reduce simulation rate to imporve FPS. Let player can move during auto-save.
 
 ## Configuration
 
-Run the game one time to generate `.cfg` file.
+Run the game one time to generate `.cfg` file. Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html). 
 
 - `EnableBackgroundAutosave`  
 Do auto-save in background. (Default:`false`)  
-The game will enter read-only mode during auto-save, game tick and factories will stop. Player can still move and inspect stat, only interaction with factory will be blocked.    
+The game will enter read-only mode during background auto-save, game tick and factories will stop. Player can still move and inspect stat, but can't interaction with factory.    
 在背景执行自动保存。 (预设为关闭)  
-在自动保存的期间，游戏会暂停并进入唯读模式，玩家无法和唯读的工厂互动。  
+在背景自动保存的期间，游戏会暂停并进入唯读模式，玩家无法和唯读的工厂互动。  
 
 
 - `KeyAutosave`  

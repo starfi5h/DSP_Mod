@@ -21,7 +21,7 @@ namespace BulletTime
             State = new GameStateManager();
             harmony = new Harmony("com.starfi5h.plugin.BulletTime");
             EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
-            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "F10", "Hotkey for auto-save\n自动存档的热键");
+            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
 
             try
             {                

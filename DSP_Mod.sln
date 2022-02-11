@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiment", "Experiment\Experiment.csproj", "{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulletTime", "TimeStopper\BulletTime.csproj", "{4813207F-CA55-4857-9EDE-B1C9D2A90373}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulletTime", "BulletTime\BulletTime.csproj", "{4813207F-CA55-4857-9EDE-B1C9D2A90373}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
