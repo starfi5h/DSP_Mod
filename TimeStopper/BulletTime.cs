@@ -3,23 +3,25 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System;
 
-namespace TimeStopper
+namespace BulletTime
 {
-    [BepInPlugin("com.starfi5h.plugin.Experiment", "Experiment", "1.0.0")]
-    public class TimeStopper : BaseUnityPlugin
+    [BepInPlugin("com.starfi5h.plugin.BulletTion", "BulletTion", "1.0.0")]
+    public class BulletTime : BaseUnityPlugin
     {
+        public static GameStateManager State { get; set; }
         Harmony harmony;
 
         public void Start()
         {
             Log.Init(Logger);
+            State = new GameStateManager();
 
-            harmony = new Harmony("com.starfi5h.plugin.Experiment");
+            harmony = new Harmony("com.starfi5h.plugin.BulletTion");
             try
             {
                 harmony.PatchAll(typeof(GaemSave_Patch));
-
-
+                harmony.PatchAll(typeof(GameMain_Patch));
+                harmony.PatchAll(typeof(UIStatisticsWindow_Patch));
             }
             catch (Exception e)
             {
@@ -37,15 +39,11 @@ namespace TimeStopper
             }
         }
 
-        public void OnGUI()
-        {
-
-        }
-
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
-            GameStateManager.Dispose();
+            State.Dispose();
+            UIStatisticsWindow_Patch.Dispose();
         }
     }
 

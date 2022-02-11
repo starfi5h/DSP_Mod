@@ -2,52 +2,118 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TimeStopper
+namespace BulletTime
 {
-    public static class GameStateManager
+    public class GameStateManager
     {
-        public static bool Pause { get; set; }
-        public static bool Interactable { get; set; } = true;
+        public bool Pause { get; set; }
+        public bool AdvanceTick { get; private set; } = true;
+        public bool Interactable { get; set; } = false;
+        public long StoredGameTick { get; set; }
 
-        private static long storedGameTick;
+        private GameObject timeText;
+        private GameObject infoText;
+        private float sliderValue;
+        private float skipRatio;
+        private float timer;
 
-        //private static Text timeText;
-        private static GameObject timeText;
-        private static GameObject infoText;
-
-        public static void Dispose()
+        public void Dispose()
         {
             timeText = null;
             GameObject.Destroy(infoText);
             infoText = null;
+        }        
+
+        public void OnSliderChange(float value)
+        {
+            if (value == 0)
+            {
+                SetPauseMode(true);
+            }
+            else
+            {
+                if (Pause == true)
+                {
+                    SetPauseMode(false);
+                }
+                skipRatio = (100 - value) / 100f;
+                timer = 0;
+            }
+            sliderValue = value;
         }
 
-        public static void SetPauseMode(bool value, ref long gameTick)
+        public void SetPauseMode(bool value)
         {
             if (timeText == null)
             {
                 timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
             }
-            if (infoText == null)
+            if (infoText == null && timeText != null)
             {
                 infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
+                infoText.GetComponent<Text>().text = "Pause";
             }
             if (value)
             {
                 Pause = true;
-                storedGameTick = gameTick;                
-                timeText.SetActive(false);
-                infoText.SetActive(true);
-                infoText.GetComponent<Text>().text = "Pause";
+                if (StoredGameTick == 0)
+                {
+                    StoredGameTick = GameMain.gameTick;
+                }
+                timeText?.SetActive(false);
+                infoText?.SetActive(true);
             }
             else
             {
                 Pause = false;
-                gameTick = storedGameTick;                
-                timeText.SetActive(true);
-                infoText.SetActive(false);
+                if (StoredGameTick != 0)
+                {
+                    GameMain.gameTick = StoredGameTick;
+                    StoredGameTick = 0;
+                }
+                timeText?.SetActive(true);
+                infoText?.SetActive(false);
                 GameMain.gameScenario.abnormalityLogic = new AbnormalityLogic();
                 GameMain.gameScenario.abnormalityLogic.Init(GameMain.gameScenario.gameData);
+            }
+        }
+
+        //Before gameTick, determine whether to pause and whether to advance tick
+        public bool PauseInThisFrame()
+        {
+            bool pauseThisFrame = Pause;
+            AdvanceTick = GameMain.data.guideComplete;
+            if (!Pause && sliderValue < 100)
+            {
+                timer += skipRatio;
+                if (timer >= 1f)
+                {
+                    timer -= 1f;
+                    pauseThisFrame = true;
+                    AdvanceTick = false;
+                }
+            }
+            return pauseThisFrame;
+        }
+
+        private static UIMessageBox displayedMessage;
+        public void SetInteractable(bool value)
+        {
+            Interactable = value;
+            if (Interactable)
+            {
+                UIGame uIGame = UIRoot.instance.uiGame;
+                bool flag = uIGame.isAnyFunctionWindowActive;
+                flag |= uIGame.dysonEditor.active;
+                if (flag)
+                {
+                    UIMessageBox.Show("Read-Only", "Can't interact with UI during auto-save\nPlease wait or press ESC to close the window", null, 0, () => {});
+                }
+            }
+            else
+            {
+                displayedMessage?.FadeOut();
+                displayedMessage = null;
             }
         }
     }

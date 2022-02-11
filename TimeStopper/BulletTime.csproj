@@ -7,8 +7,8 @@
     <ProjectGuid>{4813207F-CA55-4857-9EDE-B1C9D2A90373}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TimeStopper</RootNamespace>
-    <AssemblyName>TimeStopper</AssemblyName>
+    <RootNamespace>BulletTime</RootNamespace>
+    <AssemblyName>BulletTime</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -339,10 +339,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UIStatisticsWindow_Patch.cs" />
     <Compile Include="GaemSave_Patch.cs" />
     <Compile Include="GameMain_Patch.cs" />
     <Compile Include="GameStateManager.cs" />
-    <Compile Include="TimeStopper.cs" />
+    <Compile Include="BulletTime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
