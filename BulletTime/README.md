@@ -1,8 +1,10 @@
 # Bullet Time
 
 ![Paue Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
-Reduce simulation rate to imporve FPS. Let player can move during auto-save.  
-调整模拟頻率以提高幀數。在自动保存过程中让玩家可以移动。  
+- Reduce simulation rate to imporve FPS. (Slider is on performance panel)
+- Let player can move and inspect stat during auto-save.  
+- 调整模拟頻率以提高幀數。  
+- 在自动保存过程中让玩家可以移动。  
 
 ## Configuration
 
@@ -10,21 +12,24 @@ Run the game one time to generate `.cfg` file. Key name can be found in [Unity m
 
 - `EnableBackgroundAutosave`  
 Do auto-save in background. (Default:`false`)  
-The game will enter read-only mode during background auto-save, game tick and factories will stop. Player can still move and inspect stat, but can't interaction with factory.    
+The game will enter read-only mode during background auto-save, game tick and factories will stop. Player can still move and inspect stat, but can't interaction with factory. Test first before using this function.      
 在背景执行自动保存。 (预设为关闭)  
 在背景自动保存的期间，游戏会暂停并进入唯读模式，玩家无法和唯读的工厂互动。  
+使用这项功能时建议先测试一次。  
 
 
 - `KeyAutosave`  
 Hotkey for auto-save. (Default:`F10`)  
 自动存档的热键(预设为F10)  
+  
 
+Warning: Moving too fast in slow motion world may trigger movement abnormal check.
 
 ----
 
 ## Changelog
 
-#### v1.0.0  
+#### v1.0.1  
 \- Initial release. (Game Version 0.9.24.11286)
 
 ----

@@ -87,9 +87,10 @@ namespace BulletTime
         private static void End_Postfix(GameMain __instance)
         {
             BulletTime.State.OnSliderChange(100f);
+            UIStatisticsWindow_Patch.Dispose();
         }
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
         private static void SaveCurrentGame_Prefix()
         {
