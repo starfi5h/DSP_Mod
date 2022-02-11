@@ -51,7 +51,6 @@ namespace BulletTime
                 // The game file is still saving in another thread
                 __instance.saveText.text = "Saving...".Translate();
                 __instance.showTime = 1.8f;
-                //Log.Debug(__instance.showTime);
             }
         }
 
@@ -91,7 +90,7 @@ namespace BulletTime
         {
             if (!BulletTime.State.Interactable)
             {
-                // We can't capture screen shot on worker thread, skip
+                // We can't capture screenshot on worker thread, skip
                 return false;
             }
             return true;

@@ -76,26 +76,11 @@ namespace BulletTime
                 __instance._fullscreenPaused = false;
                 pasueThisFrame = false;
             }
-            if (Input.GetKeyDown(KeyCode.F10))
+            if (Input.GetKeyDown(BulletTime.KeyAutosave.Value))
             {
-                //BulletTime.State.SetInteractable(!BulletTime.State.Interactable);
-                //GameSave.AutoSave();
                 UIAutoSave.lastSaveTick = 0L;
             }
         }
-
-        /*
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
-        private static void Begin_Postfix(GameMain __instance)
-        {
-            if (GameMain.mainPlayer != null)
-            {
-                Log.Debug("player not null!");
-                BulletTime.State.OnSliderChange(50f);
-            }
-        }
-        */
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]

@@ -97,7 +97,6 @@ namespace BulletTime
             return pauseThisFrame;
         }
 
-        private static UIMessageBox displayedMessage;
         public void SetInteractable(bool value)
         {
             Log.Debug($"Interactable = {value}");

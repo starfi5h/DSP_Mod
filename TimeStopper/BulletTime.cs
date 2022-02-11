@@ -10,8 +10,8 @@ namespace BulletTime
     public class BulletTime : BaseUnityPlugin
     {
         public static GameStateManager State { get; set; }
-        public static ConfigEntry<bool> EnableBulletTime;
         public static ConfigEntry<bool> EnableBackgroundAutosave;
+        public static ConfigEntry<string> KeyAutosave;
 
         Harmony harmony;
 
@@ -19,17 +19,23 @@ namespace BulletTime
         {
             Log.Init(Logger);
             State = new GameStateManager();
-
             harmony = new Harmony("com.starfi5h.plugin.BulletTime");
+            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
+            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "F10", "Hotkey for auto-save\n自动存档的热键");
+
             try
-            {
-                harmony.PatchAll(typeof(GameSave_Patch));
+            {                
                 harmony.PatchAll(typeof(GameMain_Patch));
                 harmony.PatchAll(typeof(UIStatisticsWindow_Patch));
+                if (EnableBackgroundAutosave.Value)
+                {
+                    harmony.PatchAll(typeof(GameSave_Patch));
+                }
             }
             catch (Exception e)
             {
                 Logger.LogError(e);
+                throw e;
             }
         }
 
