@@ -340,7 +340,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="UIStatisticsWindow_Patch.cs" />
-    <Compile Include="GaemSave_Patch.cs" />
+    <Compile Include="GameSave_Patch.cs" />
     <Compile Include="GameMain_Patch.cs" />
     <Compile Include="GameStateManager.cs" />
     <Compile Include="BulletTime.cs" />

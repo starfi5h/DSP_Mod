@@ -1,7 +1,4 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 using System.Threading;
 using UnityEngine;
 
@@ -81,7 +78,9 @@ namespace BulletTime
             }
             if (Input.GetKeyDown(KeyCode.F10))
             {
-                BulletTime.State.SetInteractable(!BulletTime.State.Interactable);
+                //BulletTime.State.SetInteractable(!BulletTime.State.Interactable);
+                //GameSave.AutoSave();
+                UIAutoSave.lastSaveTick = 0L;
             }
         }
 
@@ -105,12 +104,35 @@ namespace BulletTime
             BulletTime.State.OnSliderChange(100f);
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
+        private static void SaveCurrentGame_Prefix()
+        {
+            // Save real gameTick
+            if (BulletTime.State.StoredGameTick != 0)
+            {
+                GameMain.gameTick = BulletTime.State.StoredGameTick;
+            }
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
         private static bool GamePauseLogic_Prefix(bool __result)
         {
             if (BulletTime.State.Pause)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DetermineActive))]
+        private static bool DetermineActive_Prefix(bool __result)
+        {
+            // block build tool when in read-only mode
+            if (!BulletTime.State.Interactable)
             {
                 __result = false;
                 return false;
@@ -154,27 +176,26 @@ namespace BulletTime
         private static void PlayerGameTick(long time)
         {            
             Player player = GameMain.data.mainPlayer;
-            Monitor.Enter(player);
+            
             if (BulletTime.State.Interactable)
             {
                 player.controller.cmd.raycast.GameTick();
                 player.GameTick(time);
                 return;
             }
+            // In auto-saving, we need to make sure mecha data is not corrupted
+            Monitor.Enter(player);
             player.mecha.GenerateEnergy(0.016666666666666666);
 
-            // Raycast.GameTick() will stop updating, so clean the remain information
+            player.controller.cmd.raycast.GameTick();
             player.controller.cmd.raycast.castVege.id = 0;
             player.controller.cmd.raycast.castVein.id = 0;
-            player.controller.cmd.raycast.castEntity.id = 0;
-            player.controller.cmd.raycast.castPrebuild.id = 0;
 
             player.controller.GameTick(time);
-            player.gizmo.GameTick();
+            //player.gizmo.GameTick();
             player.orders.GameTick(time);
-
-            //disable drone, lab
             player.mecha.forge.GameTick(time, 0.016666668f);
+
             Monitor.Exit(player);
         }
     }

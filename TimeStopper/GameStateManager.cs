@@ -1,5 +1,4 @@
-﻿using Unity;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace BulletTime
@@ -8,7 +7,7 @@ namespace BulletTime
     {
         public bool Pause { get; set; }
         public bool AdvanceTick { get; private set; } = true;
-        public bool Interactable { get; set; } = true;
+        public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
         public long StoredGameTick { get; set; }
 
         private GameObject timeText;
@@ -59,6 +58,7 @@ namespace BulletTime
                 if (StoredGameTick == 0)
                 {
                     StoredGameTick = GameMain.gameTick;
+                    Log.Info($"Enter pause mode, gameTick = {StoredGameTick}");
                 }
                 timeText?.SetActive(false);
                 infoText?.SetActive(true);
@@ -68,6 +68,7 @@ namespace BulletTime
                 Pause = false;
                 if (StoredGameTick != 0)
                 {
+                    Log.Info($"Exit pause mode, duration: {GameMain.gameTick - StoredGameTick} ticks.");
                     GameMain.gameTick = StoredGameTick;
                     StoredGameTick = 0;
                 }
@@ -105,13 +106,13 @@ namespace BulletTime
             {
                 // Exit build mode
                 GameMain.mainPlayer.controller.actionBuild.EscLogic();
-                GameMain.mainPlayer.controller.actionBuild.EscLogic();
-
+                infoText.GetComponent<Text>().text = "Read-Only";
             }
             else
             {
-                displayedMessage?.FadeOut();
-                displayedMessage = null;
+                GameSave_Patch.isBlocked = false;
+                UIMessageBox.CloseTopMessage();
+                infoText.GetComponent<Text>().text = "Pause";
             }
         }
     }
