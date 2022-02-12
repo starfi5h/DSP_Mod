@@ -66,13 +66,14 @@ namespace BulletTime
                 {
                     HighStopwatch highStopwatch = new HighStopwatch();
                     highStopwatch.Begin();
+                    bool tmp = BulletTime.State.Pause;
                     BulletTime.State.SetPauseMode(true);
                     BulletTime.State.SetInteractable(false);
                     Log.Info("Background Autosave start");
                     bool result = GameSave.AutoSave();
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
                     BulletTime.State.SetInteractable(true);
-                    BulletTime.State.SetPauseMode(false);
+                    BulletTime.State.SetPauseMode(tmp);
                     return () =>
                     {
                         UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
@@ -122,7 +123,7 @@ namespace BulletTime
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Player), nameof(Player.Export))]
-        private static void Player_Prefix(DysonSwarm __instance, BinaryWriter w)
+        private static void Player_Prefix()
         {
             if (!BulletTime.State.Interactable)
             {

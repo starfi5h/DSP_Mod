@@ -103,7 +103,7 @@ namespace BulletTime
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
-        private static bool GamePauseLogic_Prefix(bool __result)
+        private static bool GamePauseLogic_Prefix(ref bool __result)
         {
             if (BulletTime.State.Pause)
             {
@@ -115,7 +115,7 @@ namespace BulletTime
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DetermineActive))]
-        private static bool DetermineActive_Prefix(bool __result)
+        private static bool DetermineActive_Prefix(ref bool __result)
         {
             // block build tool when in read-only mode
             if (!BulletTime.State.Interactable)
@@ -162,20 +162,27 @@ namespace BulletTime
         private static void PlayerGameTick(long time)
         {            
             Player player = GameMain.data.mainPlayer;
-            
+            if (player == null)
+                return;
+
             if (BulletTime.State.Interactable)
             {
-                player.controller.cmd.raycast.GameTick();
+                if (player.controller?.cmd.raycast != null)
+                {
+                    player.controller.cmd.raycast.GameTick();
+                }
                 player.GameTick(time);
                 return;
             }
             // In auto-saving, we need to make sure mecha data is not corrupted
             Monitor.Enter(player);
             player.mecha.GenerateEnergy(0.016666666666666666);
-
-            player.controller.cmd.raycast.GameTick();
-            player.controller.cmd.raycast.castVege.id = 0;
-            player.controller.cmd.raycast.castVein.id = 0;
+            if (player.controller?.cmd.raycast != null)
+            {
+                player.controller.cmd.raycast.GameTick();
+                player.controller.cmd.raycast.castVege.id = 0;
+                player.controller.cmd.raycast.castVein.id = 0;
+            }
 
             player.controller.GameTick(time);
             //player.gizmo.GameTick();
