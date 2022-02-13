@@ -335,6 +335,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Message.cs" />
     <Compile Include="UIFatalErrorTip_Patch.cs" />
     <Compile Include="Experiment.cs" />
     <Compile Include="Factory_Patch.cs" />

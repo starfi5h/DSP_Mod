@@ -22,6 +22,7 @@ namespace Experiment
         {
             Log.Debug(DSPGame.globalOption.dataUploadToMilkyWay);
             Log.Debug(DSPGame.milkyWayWebClient.canUploadGame);
+            Message.DisplayTemporaryWarning("TEST", 5000);
         }
 
         [HarmonyPostfix]

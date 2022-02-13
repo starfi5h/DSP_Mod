@@ -17,16 +17,16 @@ namespace Experiment
             harmony = new Harmony("com.starfi5h.plugin.Experiment");
             try
             {
-                harmony.PatchAll(typeof(PatchTest));
+                //harmony.PatchAll(typeof(PatchTest));
                 //harmony.PatchAll(typeof(StaionUI));
-                //harmony.PatchAll(typeof(TranspilerTest));
-                harmony.PatchAll(typeof(UIFatalErrorTip_Patch));
+                harmony.PatchAll(typeof(TranspilerTest));
+                //harmony.PatchAll(typeof(UIFatalErrorTip_Patch));
             }
             catch (Exception e)
             {
                 Logger.LogError(e);
             }
-            UIFatalErrorTip_Patch._OnCreate_Postfix();
+            //UIFatalErrorTip_Patch._OnCreate_Postfix();
 
             //throw (new Exception("Nebula error\n\n\n"));
         }

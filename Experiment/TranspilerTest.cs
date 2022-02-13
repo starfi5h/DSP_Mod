@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -32,15 +33,15 @@ namespace Experiment
 
 
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.PickupBeltItems))]
+        [HarmonyPatch(typeof(BoneArmor), "Export")]
         static IEnumerable<CodeInstruction> Debug_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             //Log.Info("Before");
             //Print(instructions, 0, 70);
             Log.Info("");
             //Log.Info("After");
-            var code = PickupBeltItems_Transpiler(instructions);
-            Print(code, 75, 90);
+            var code = Export_Transpiler(instructions);
+            Print(code, 105, 125);
             return code;
         }
 
@@ -59,6 +60,26 @@ namespace Experiment
                 return instructions;
             }
         }
+
+
+
+
+
+        //[HarmonyTranspiler]
+        //[HarmonyPatch(typeof(MechaAppearance), "Export")]
+        //[HarmonyPatch(typeof(BoneArmor), "Export")]
+        static IEnumerable<CodeInstruction> Export_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var matcher = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Stream), "Write", new Type[] { typeof(byte[]), typeof(int), typeof(int) })))
+                .Set(OpCodes.Callvirt, AccessTools.Method(typeof(BinaryWriter), "Write", new Type[] { typeof(byte[]), typeof(int), typeof(int) }))
+                .Advance(-8)
+                .RemoveInstruction();
+            return matcher.InstructionEnumeration();
+        }
+
+
+
 
 
         //[HarmonyTranspiler]
