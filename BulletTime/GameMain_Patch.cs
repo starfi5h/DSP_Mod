@@ -48,19 +48,31 @@ namespace BulletTime
 
             PerformanceMonitor.BeginLogicFrame();
             PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
-            GameMain.data.DetermineRelative();
-            if (GameMain.localPlanet != null)
-                GameCamera.instance.FrameLogic();
-            VFInput.UpdateGameStates();
-            UniverseSimulatorGameTick(GameMain.instance.timei);
-            PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
-
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.Player);
-            GameMain.data.DetermineRelative();
-            GameMain.data.mainPlayer.ApplyGamePauseState(true);
-            PlayerGameTick(GameMain.instance.timei);
-            PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
+            
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
+                GameMain.data.DetermineRelative();
+                if (GameMain.localPlanet != null)
+                    GameCamera.instance.FrameLogic();
+                VFInput.UpdateGameStates();
+                UniverseSimulatorGameTick(GameMain.instance.timei);
+                PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
+            }
+            if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
+            {
+                // update player.cmd.raycast
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
+                GameMain.localPlanet.physics.GameTick();
+                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
+            }
+            if (GameMain.mainPlayer != null)
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.Player);
+                GameMain.data.DetermineRelative();
+                GameMain.data.mainPlayer.ApplyGamePauseState(true);
+                PlayerGameTick(GameMain.instance.timei);
+                PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
+            }
             PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
             PerformanceMonitor.EndLogicFrame();
 
@@ -113,20 +125,6 @@ namespace BulletTime
             return true;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DetermineActive))]
-        private static bool DetermineActive_Prefix(ref bool __result)
-        {
-            // block build tool when in read-only mode
-            if (!BulletTime.State.Interactable)
-            {
-                __result = false;
-                return false;
-            }
-            return true;
-        }
-
-
         private static void UniverseSimulatorGameTick(long time)
         {
             UniverseSimulator universe = GameMain.universeSimulator;
@@ -167,25 +165,21 @@ namespace BulletTime
 
             if (BulletTime.State.Interactable)
             {
-                if (player.controller?.cmd.raycast != null)
-                {
-                    player.controller.cmd.raycast.GameTick();
-                }
                 player.GameTick(time);
                 return;
             }
             // In auto-saving, we need to make sure mecha data is not corrupted
             Monitor.Enter(player);
+
             player.mecha.GenerateEnergy(0.016666666666666666);
-            if (player.controller?.cmd.raycast != null)
+            if (player.controller.cmd.raycast != null)
             {
-                player.controller.cmd.raycast.GameTick();
                 player.controller.cmd.raycast.castVege.id = 0;
                 player.controller.cmd.raycast.castVein.id = 0;
             }
 
             player.controller.GameTick(time);
-            //player.gizmo.GameTick();
+            player.gizmo.GameTick();
             player.orders.GameTick(time);
             player.mecha.forge.GameTick(time, 0.016666668f);
 

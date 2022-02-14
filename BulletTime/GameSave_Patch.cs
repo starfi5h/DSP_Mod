@@ -21,7 +21,7 @@ namespace BulletTime
             if (!BulletTime.State.Interactable && !isBlocked)
             {                
                 bool balcklist = __instance.isAnyFunctionWindowActive || __instance.dysonEditor.active;
-                bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active;
+                bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active || __instance.blueprintBrowser.active;
                 if (balcklist && !whitelist)
                 {
                     UIMessageBox.Show("Read-Only", "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window", null, 0, () => { });
@@ -43,6 +43,20 @@ namespace BulletTime
         }
 
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(VFInput), "_buildConfirm", MethodType.Getter)]
+        [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate0", MethodType.Getter)]
+        [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate1", MethodType.Getter)]
+        private static void BuildConfirm_Postfix(ref VFInput.InputValue __result)
+        {
+            // Stop building actions
+            if (!BulletTime.State.Interactable)
+            {
+                __result.onUp = false;
+                __result.onDown = false;
+            }
+        }
+
+        [HarmonyPostfix]
         [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
         private static void OverwriteSaveText(UIAutoSave __instance)
         {            
@@ -60,16 +74,18 @@ namespace BulletTime
         {
             if (BulletTime.State.Interactable)
             {
+                bool tmp = BulletTime.State.Pause;
+                BulletTime.State.SetPauseMode(true);
+                BulletTime.State.SetInteractable(false);
                 // Let's capture screenshot on main thread first
                 GameCamera.CaptureSaveScreenShot();
                 ThreadingHelper.Instance.StartAsyncInvoke(() =>
                 {
                     HighStopwatch highStopwatch = new HighStopwatch();
                     highStopwatch.Begin();
-                    bool tmp = BulletTime.State.Pause;
-                    BulletTime.State.SetPauseMode(true);
-                    BulletTime.State.SetInteractable(false);
-                    Log.Info("Background Autosave start");
+                    // Wait a tick to let game full stop
+                    Thread.Sleep((int)(1000/FPSController.currentUPS));
+                    Log.Info($"Background Autosave start. Sleep: {(int)(1000/FPSController.currentUPS)}ms");
                     bool result = GameSave.AutoSave();
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
                     BulletTime.State.SetInteractable(true);
