@@ -7,8 +7,9 @@ namespace BulletTime
     {
         public bool Pause { get; set; }
         public bool AdvanceTick { get; private set; } = true;
-        public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
         public long StoredGameTick { get; set; }
+        public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
+        public bool LockFactory { get; set; } = false; // Lock all interaction on local planet
 
         private GameObject timeText;
         private GameObject infoText;
@@ -50,7 +51,9 @@ namespace BulletTime
             if (infoText == null && timeText != null)
             {
                 infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
+                infoText.name = "pause info-text";
                 infoText.GetComponent<Text>().text = "Pause";
+                infoText.GetComponent<Text>().enabled = true;
             }
             if (value)
             {
@@ -106,14 +109,32 @@ namespace BulletTime
             Interactable = value;
             if (!Interactable)
             {
-                // Exit build mode
-                GameMain.mainPlayer.controller.actionBuild.EscLogic();
-                infoText.GetComponent<Text>().text = "Read-Only";
+                //infoText.GetComponent<Text>().text = "Read-Only";
             }
             else
             {
                 GameSave_Patch.isBlocked = false;
                 UIMessageBox.CloseTopMessage();
+                //infoText.GetComponent<Text>().text = "Pause";
+            }
+        }
+
+        public void SetLockFactory(bool value)
+        {
+            Log.Debug($"LockFactory = {value}");
+            LockFactory = value;
+            if (LockFactory)
+            {
+                infoText.GetComponent<Text>().text = "Read-Only";
+            }
+            else
+            {                
+                // Close blocking message if it is not dysonEditor
+                if (!UIRoot.instance.uiGame.dysonEditor.active)
+                {
+                    GameSave_Patch.isBlocked = false;
+                    UIMessageBox.CloseTopMessage();
+                }
                 infoText.GetComponent<Text>().text = "Pause";
             }
         }

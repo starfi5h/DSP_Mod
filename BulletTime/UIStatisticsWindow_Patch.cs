@@ -11,15 +11,16 @@ namespace BulletTime
 
         public static void Dispose()
         {
-            GameObject.Destroy(slider?.gameObject);
+            if (slider != null)
+            {
+                slider.onValueChanged.RemoveAllListeners();
+                GameObject.Destroy(slider.gameObject);
+            }
             slider = null;
             text = null;
         }
 
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(UIStatisticsWindow), nameof(UIStatisticsWindow._OnOpen))]
-        private static void OnOpen()
+        public static void Init()
         {
             if (slider == null)
             {
@@ -29,9 +30,10 @@ namespace BulletTime
                 go.name = "RealTickRatioSlider";
                 go.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
                 slider = go.GetComponent<Slider>();
-                text = go.GetComponentInChildren<Text>();
-                slider.value = 100f;
-                slider.onValueChanged.AddListener(value => OnSliderChange(value));                
+                text = go.GetComponentInChildren<Text>();                
+                slider.value = BulletTime.StartingSpeed.Value;
+                slider.onValueChanged.AddListener(value => OnSliderChange(value));
+                OnSliderChange(slider.value);
             }
         }
 

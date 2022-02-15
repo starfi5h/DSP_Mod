@@ -19,15 +19,27 @@ namespace BulletTime
             }
 
             if (!BulletTime.State.Interactable && !isBlocked)
-            {                
-                bool balcklist = __instance.isAnyFunctionWindowActive || __instance.dysonEditor.active;
+            {
+                bool balcklist = __instance.dysonEditor.active || (BulletTime.State.LockFactory && __instance.isAnyFunctionWindowActive);
                 bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active || __instance.blueprintBrowser.active;
                 if (balcklist && !whitelist)
                 {
-                    UIMessageBox.Show("Read-Only", "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window", null, 0, () => { });
+                    ShowMessage("Read-Only", "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window");
                     isBlocked = true;
                 }
             }
+        }
+
+        private static void ShowMessage(string title, string message)
+        {
+            UIMessageBox uimessageBox = UIDialog.CreateDialog("Prefabs/MessageBox VE") as UIMessageBox;
+            uimessageBox.m_TitleText.text = title;
+            uimessageBox.m_MessageText.text = message;
+            uimessageBox.m_Button1.transform.parent.gameObject.SetActive(false);
+            uimessageBox.m_Button2.transform.parent.gameObject.SetActive(false);
+            uimessageBox.m_Button3.transform.parent.gameObject.SetActive(false);
+            uimessageBox.m_IconImage.gameObject.SetActive(false);
+            UIMessageBox.PushMessage(uimessageBox);
         }
 
         [HarmonyPostfix]
@@ -49,7 +61,7 @@ namespace BulletTime
         private static void BuildConfirm_Postfix(ref VFInput.InputValue __result)
         {
             // Stop building actions
-            if (!BulletTime.State.Interactable)
+            if (BulletTime.State.LockFactory)
             {
                 __result.onUp = false;
                 __result.onDown = false;
@@ -113,7 +125,7 @@ namespace BulletTime
             return true;
         }
 
-        static AutoResetEvent autoEvent = new AutoResetEvent(false);
+        static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
         static bool main = true;
 
         [HarmonyPrefix]
@@ -158,5 +170,29 @@ namespace BulletTime
                 Log.Debug("Export player data end");
             }
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
+        private static void PlanetFactory_Prefix(PlanetFactory __instance)
+        {
+            if (!BulletTime.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
+            {
+                Log.Debug("Export local PlanetFactory start");
+                BulletTime.State.SetLockFactory(true);
+                Thread.Sleep((int)(1000 / FPSController.currentUPS));
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
+        private static void PlanetFactory_Postfix(PlanetFactory __instance)
+        {
+            if (!BulletTime.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
+            {                
+                BulletTime.State.SetLockFactory(false);
+                Log.Debug("Export local PlanetFactory end");
+            }
+        }
+
     }
 }

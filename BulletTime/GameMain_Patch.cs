@@ -6,18 +6,6 @@ namespace BulletTime
 {
     class GameMain_Patch
     {
-        /* This is for Nebula multiplayer
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameMain), nameof(GameMain.isFullscreenPaused), MethodType.Setter)]
-        private static void isFullscreenPaused_Postfix()
-        {
-            if (GameStateManager.Pause == true)
-            {
-                GameMain.instance._fullscreenPaused = true;
-            }
-        }
-        */
-
         static bool pasueThisFrame;
 
         [HarmonyPrefix]
@@ -95,11 +83,21 @@ namespace BulletTime
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
-        private static void End_Postfix(GameMain __instance)
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
+        private static void Begin_Postfix()
         {
-            BulletTime.State.OnSliderChange(100f);
+            if (!GameMain.instance.isMenuDemo)
+            {
+                UIStatisticsWindow_Patch.Init();
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
+        private static void End_Postfix()
+        {
             UIStatisticsWindow_Patch.Dispose();
+            BulletTime.State.OnSliderChange(100f);
         }
 
         [HarmonyPrefix]
