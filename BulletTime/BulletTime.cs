@@ -6,7 +6,7 @@ using System;
 
 namespace BulletTime
 {
-    [BepInPlugin("com.starfi5h.plugin.BulletTime", "BulletTime", "1.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.BulletTime", "BulletTime", "1.1.0")]
     public class BulletTime : BaseUnityPlugin
     {
         public static GameStateManager State { get; set; }

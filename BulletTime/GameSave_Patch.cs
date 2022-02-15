@@ -85,16 +85,16 @@ namespace BulletTime
         private static bool AutoSave_Prefix()
         {
             if (BulletTime.State.Interactable)
-            {
-                bool tmp = BulletTime.State.Pause;
-                BulletTime.State.SetPauseMode(true);
-                BulletTime.State.SetInteractable(false);
+            {                
                 // Let's capture screenshot on main thread first
                 GameCamera.CaptureSaveScreenShot();
                 ThreadingHelper.Instance.StartAsyncInvoke(() =>
                 {
                     HighStopwatch highStopwatch = new HighStopwatch();
                     highStopwatch.Begin();
+                    bool tmp = BulletTime.State.Pause;
+                    BulletTime.State.SetPauseMode(true);
+                    BulletTime.State.SetInteractable(false);
                     // Wait a tick to let game full stop
                     Thread.Sleep((int)(1000/FPSController.currentUPS));
                     Log.Info($"Background Autosave start. Sleep: {(int)(1000/FPSController.currentUPS)}ms");
