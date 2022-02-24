@@ -31,16 +31,16 @@ namespace BulletTime
             KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
 
-            Compatibility.NebulaCompat.Enable = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api");                
+            NebulaCompat.Enable = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api");                
 
             try
             {
                 harmony.PatchAll(typeof(GameMain_Patch));
                 if (EnableBackgroundAutosave.Value)
                     harmony.PatchAll(typeof(GameSave_Patch));
-                if (Compatibility.NebulaCompat.Enable)
+                if (NebulaCompat.Enable)
                 {
-                    Compatibility.NebulaCompat.Init(harmony);
+                    NebulaCompat.Init(harmony);
                     harmony.PatchAll(typeof(NebulaPatch));
                 }
             }
@@ -57,9 +57,9 @@ namespace BulletTime
             harmony = null;
             State.Dispose();
             IngameUI.Dispose();
-            if (Compatibility.NebulaCompat.Enable)
+            if (NebulaCompat.Enable)
             {
-                Compatibility.NebulaCompat.Dispose();
+                NebulaCompat.Dispose();
             }
         }
     }

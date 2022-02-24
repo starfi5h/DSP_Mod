@@ -8,21 +8,17 @@ namespace BulletTime
     class GameMain_Patch
     {
         static bool pasueThisFrame;
-        static bool fullscreenPaused;
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
         private static bool FixedUpdate_Prefix(GameMain __instance)
         {
             // If the game is paused already, we run original function
-            if (!GameMain.isRunning || GameMain.isPaused || GameMain.isFullscreenPaused)
+            if (!GameMain.isRunning || GameMain.isPaused)
             {
-                if (NebulaCompat.Enable && NebulaCompat.IsMultiplayerActive)
+                if (!NebulaCompat.IsMultiplayerActive)
                 {
-                    // Overwirte the effect of isFullscreenPaused in MP
-                }
-                else
-                {
+                    // Don't skip in Multiplayer mode
                     return true;
                 }
             }
@@ -32,9 +28,6 @@ namespace BulletTime
             {
                 return true;
             }
-            //fullscreenPaused = __instance._fullscreenPaused;
-            //__instance._fullscreenPaused = true;
-
 
             if (BulletTimePlugin.State.AdvanceTick)
             {
@@ -45,17 +38,16 @@ namespace BulletTime
             __instance.timef_once = __instance.timei_once * 0.016666666666666666;
 
             PerformanceMonitor.BeginLogicFrame();
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);
-            
-            {
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
-                GameMain.data.DetermineRelative();
-                if (GameMain.localPlanet != null)
-                    GameCamera.instance.FrameLogic();
-                VFInput.UpdateGameStates();
-                UniverseSimulatorGameTick(GameMain.instance.timei);
-                PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
-            }
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);            
+
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
+            GameMain.data.DetermineRelative();
+            if (GameMain.localPlanet != null)
+                GameCamera.instance.FrameLogic();
+            VFInput.UpdateGameStates();
+            UniverseSimulatorGameTick();
+            PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
+
             if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
             {
                 // update player.cmd.raycast
@@ -79,11 +71,10 @@ namespace BulletTime
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
-        private static void FixedUpdate_Postfix(GameMain __instance)
+        private static void FixedUpdate_Postfix()
         {
             if (pasueThisFrame)
             {
-                //__instance._fullscreenPaused = fullscreenPaused;
                 pasueThisFrame = false;
             }
             if (Input.GetKeyDown(BulletTimePlugin.KeyAutosave.Value))
@@ -126,6 +117,22 @@ namespace BulletTime
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.LateUpdate))]
+        private static void PlayerController_LateUpdate_Prefix()
+        {
+            if (BulletTimePlugin.State.Pause)
+                GameMain.isFullscreenPaused = false;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.LateUpdate))]
+        private static void PlayerController_LateUpdate_Postfix()
+        {
+            if (BulletTimePlugin.State.Pause)
+                GameMain.isFullscreenPaused = true;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
         private static bool GamePauseLogic_Prefix(ref bool __result)
         {
@@ -137,7 +144,7 @@ namespace BulletTime
             return true;
         }
 
-        private static void UniverseSimulatorGameTick(long time)
+        private static void UniverseSimulatorGameTick()
         {
             UniverseSimulator universe = GameMain.universeSimulator;
             universe.backgroundStars.transform.position = Camera.main.transform.position;

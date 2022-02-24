@@ -44,7 +44,7 @@ namespace Compatibility
         public static void SetIsMultiplayerActive()
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
-            IsClient = IsMultiplayerActive ? NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient : false;
+            IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
         }
 
         public static void SendPacket(PauseEvent pauseEvent)
@@ -153,7 +153,7 @@ namespace Compatibility
 
                 case PauseEvent.Pause:
                     BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("Game pause by host");
+                    //IngameUI.ShowStatus("Game pause by host");
                     Log.Debug("Pause");
                     break;
 

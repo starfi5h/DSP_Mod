@@ -31,9 +31,6 @@ namespace BulletTime
         {
             if (slider == null)
             {
-                // Only host can control slider
-                if (NebulaCompat.Enable && NebulaCompat.IsClient)
-                    return;
                 GameObject go = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/audio/Slider");
                 Transform cpuPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel").transform;
                 go = GameObject.Instantiate(go, cpuPanel);
@@ -45,6 +42,14 @@ namespace BulletTime
                 slider.onValueChanged.AddListener(value => OnSliderChange(value));
                 OnSliderChange(slider.value);
             }
+            // Only host can control slider
+            if (NebulaCompat.Enable && NebulaCompat.IsClient)
+            {
+                slider.gameObject.SetActive(false);
+                Log.Debug("client");
+            }
+            else
+                slider.gameObject.SetActive(true);
         }
 
         private static void OnSliderChange(float value)

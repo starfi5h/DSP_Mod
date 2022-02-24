@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Compatibility;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace BulletTime
@@ -57,17 +58,20 @@ namespace BulletTime
                 if (StoredGameTick == 0)
                 {
                     StoredGameTick = GameMain.gameTick;
-                    Log.Info($"Enter pause mode, gameTick = {StoredGameTick}");
+                    Log.Debug($"Enter pause mode, gameTick = {StoredGameTick}");
+                    if (NebulaCompat.IsClient)
+                        FPSController.SetFixUPS(0);
                 }
                 timeText?.SetActive(false);
                 infoText?.SetActive(true);
+                GameMain.isFullscreenPaused = true;
             }
             else
             {
                 Pause = false;
                 if (StoredGameTick != 0)
                 {
-                    Log.Info($"Exit pause mode, duration: {GameMain.gameTick - StoredGameTick} ticks.");
+                    Log.Debug($"Exit pause mode, duration: {GameMain.gameTick - StoredGameTick} ticks.");
                     GameMain.gameTick = StoredGameTick;
                     StoredGameTick = 0;
                 }
@@ -78,6 +82,7 @@ namespace BulletTime
                     GameMain.gameScenario.abnormalityLogic = new AbnormalityLogic();
                     GameMain.gameScenario.abnormalityLogic.Init(GameMain.gameScenario.gameData);
                 }
+                GameMain.isFullscreenPaused = false;
             }
         }
 
