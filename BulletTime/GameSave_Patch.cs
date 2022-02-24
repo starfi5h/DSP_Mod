@@ -18,9 +18,9 @@ namespace BulletTime
                 return;
             }
 
-            if (!BulletTime.State.Interactable && !isBlocked)
+            if (!BulletTimePlugin.State.Interactable && !isBlocked)
             {
-                bool balcklist = __instance.dysonEditor.active || (BulletTime.State.LockFactory && __instance.isAnyFunctionWindowActive);
+                bool balcklist = __instance.dysonEditor.active || (BulletTimePlugin.State.LockFactory && __instance.isAnyFunctionWindowActive);
                 bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active || __instance.blueprintBrowser.active;
                 if (balcklist && !whitelist)
                 {
@@ -61,7 +61,7 @@ namespace BulletTime
         private static void BuildConfirm_Postfix(ref VFInput.InputValue __result)
         {
             // Stop building actions
-            if (BulletTime.State.LockFactory)
+            if (BulletTimePlugin.State.LockFactory)
             {
                 __result.onUp = false;
                 __result.onDown = false;
@@ -72,7 +72,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
         private static void OverwriteSaveText(UIAutoSave __instance)
         {            
-            if (!BulletTime.State.Interactable)
+            if (!BulletTimePlugin.State.Interactable)
             {
                 // The game file is still saving in another thread
                 __instance.saveText.text = "Saving...".Translate();
@@ -84,7 +84,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameSave), nameof(GameSave.AutoSave))]
         private static bool AutoSave_Prefix()
         {
-            if (BulletTime.State.Interactable)
+            if (BulletTimePlugin.State.Interactable)
             {                
                 // Let's capture screenshot on main thread first
                 GameCamera.CaptureSaveScreenShot();
@@ -92,16 +92,16 @@ namespace BulletTime
                 {
                     HighStopwatch highStopwatch = new HighStopwatch();
                     highStopwatch.Begin();
-                    bool tmp = BulletTime.State.Pause;
-                    BulletTime.State.SetPauseMode(true);
-                    BulletTime.State.SetInteractable(false);
+                    bool tmp = BulletTimePlugin.State.Pause;
+                    BulletTimePlugin.State.SetPauseMode(true);
+                    BulletTimePlugin.State.SetInteractable(false);
                     // Wait a tick to let game full stop
                     Thread.Sleep((int)(1000/FPSController.currentUPS));
                     Log.Info($"Background Autosave start. Sleep: {(int)(1000/FPSController.currentUPS)}ms");
                     bool result = GameSave.AutoSave();
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
-                    BulletTime.State.SetInteractable(true);
-                    BulletTime.State.SetPauseMode(tmp);
+                    BulletTimePlugin.State.SetInteractable(true);
+                    BulletTimePlugin.State.SetPauseMode(tmp);
                     return () =>
                     {
                         UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
@@ -117,7 +117,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.CaptureSaveScreenShot))]
         private static bool CaptureSaveScreenShot_Prefix()
         {
-            if (!BulletTime.State.Interactable)
+            if (!BulletTimePlugin.State.Interactable)
             {
                 // We can't capture screenshot on worker thread, skip
                 return false;
@@ -132,7 +132,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.Export))]
         private static bool Export_Prefix(DysonSwarm __instance, BinaryWriter w)
         {
-            if (!BulletTime.State.Interactable && main)
+            if (!BulletTimePlugin.State.Interactable && main)
             {
                 main = false;
                 autoEvent.Reset();
@@ -153,7 +153,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(Player), nameof(Player.Export))]
         private static void Player_Prefix()
         {
-            if (!BulletTime.State.Interactable)
+            if (!BulletTimePlugin.State.Interactable)
             {
                 Log.Debug("Export player data start");
                 Monitor.Enter(GameMain.data.mainPlayer);
@@ -164,7 +164,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(Player), nameof(Player.Export))]
         private static void Player_Postfix()
         {
-            if (!BulletTime.State.Interactable)
+            if (!BulletTimePlugin.State.Interactable)
             {
                 Monitor.Exit(GameMain.data.mainPlayer);
                 Log.Debug("Export player data end");
@@ -175,10 +175,10 @@ namespace BulletTime
         [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
         private static void PlanetFactory_Prefix(PlanetFactory __instance)
         {
-            if (!BulletTime.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
+            if (!BulletTimePlugin.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
             {
                 Log.Debug("Export local PlanetFactory start");
-                BulletTime.State.SetLockFactory(true);
+                BulletTimePlugin.State.SetLockFactory(true);
                 Thread.Sleep((int)(1000 / FPSController.currentUPS));
             }
         }
@@ -187,9 +187,9 @@ namespace BulletTime
         [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
         private static void PlanetFactory_Postfix(PlanetFactory __instance)
         {
-            if (!BulletTime.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
+            if (!BulletTimePlugin.State.Interactable && __instance.planetId == GameMain.localPlanet?.id)
             {                
-                BulletTime.State.SetLockFactory(false);
+                BulletTimePlugin.State.SetLockFactory(false);
                 Log.Debug("Export local PlanetFactory end");
             }
         }

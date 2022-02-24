@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Threading;
 using UnityEngine;
+using Compatibility;
 
 namespace BulletTime
 {
@@ -15,10 +16,17 @@ namespace BulletTime
             // If the game is paused already, we run original function
             if (!GameMain.isRunning || GameMain.isPaused || GameMain.isFullscreenPaused)
             {
-                return true;
+                if (NebulaCompat.Enable && NebulaCompat.IsMultiplayerActive)
+                {
+                    // Overwirte the effect of isFullscreenPaused in MP
+                }
+                else
+                {
+                    return true;
+                }
             }
 
-            pasueThisFrame = BulletTime.State.PauseInThisFrame();
+            pasueThisFrame = BulletTimePlugin.State.PauseInThisFrame();
             if (!pasueThisFrame)
             {
                 return true;
@@ -26,7 +34,7 @@ namespace BulletTime
             __instance._fullscreenPaused = true;
 
 
-            if (BulletTime.State.AdvanceTick)
+            if (BulletTimePlugin.State.AdvanceTick)
             {
                 __instance.timei += 1L;
                 __instance.timei_once += 1L;
@@ -76,7 +84,7 @@ namespace BulletTime
                 __instance._fullscreenPaused = false;
                 pasueThisFrame = false;
             }
-            if (Input.GetKeyDown(BulletTime.KeyAutosave.Value))
+            if (Input.GetKeyDown(BulletTimePlugin.KeyAutosave.Value))
             {
                 UIAutoSave.lastSaveTick = 0L;
             }
@@ -88,7 +96,11 @@ namespace BulletTime
         {
             if (!GameMain.instance.isMenuDemo)
             {
-                UIStatisticsWindow_Patch.Init();
+                IngameUI.Init();
+            }
+            if (NebulaCompat.Enable)
+            {
+                NebulaCompat.SetIsMultiplayerActive();
             }
         }
 
@@ -96,8 +108,8 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
         private static void End_Postfix()
         {
-            UIStatisticsWindow_Patch.Dispose();
-            BulletTime.State.OnSliderChange(100f);
+            IngameUI.Dispose();
+            BulletTimePlugin.State.OnSliderChange(100f);
         }
 
         [HarmonyPrefix]
@@ -105,9 +117,9 @@ namespace BulletTime
         private static void SaveCurrentGame_Prefix()
         {
             // Save real gameTick
-            if (BulletTime.State.StoredGameTick != 0)
+            if (BulletTimePlugin.State.StoredGameTick != 0)
             {
-                GameMain.gameTick = BulletTime.State.StoredGameTick;
+                GameMain.gameTick = BulletTimePlugin.State.StoredGameTick;
             }
         }
 
@@ -115,7 +127,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
         private static bool GamePauseLogic_Prefix(ref bool __result)
         {
-            if (BulletTime.State.Pause)
+            if (BulletTimePlugin.State.Pause)
             {
                 __result = false;
                 return false;
@@ -161,7 +173,7 @@ namespace BulletTime
             if (player == null)
                 return;
 
-            if (BulletTime.State.Interactable)
+            if (BulletTimePlugin.State.Interactable)
             {
                 player.GameTick(time);
                 return;

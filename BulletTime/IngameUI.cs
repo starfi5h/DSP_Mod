@@ -4,10 +4,11 @@ using UnityEngine.UI;
 
 namespace BulletTime
 {
-    class UIStatisticsWindow_Patch
+    class IngameUI
     {
         private static Slider slider;
         private static Text text;
+        private static Text stateMessage;
 
         public static void Dispose()
         {
@@ -18,6 +19,11 @@ namespace BulletTime
             }
             slider = null;
             text = null;
+            if (stateMessage != null)
+            {
+                GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
+                stateMessage = null;
+            }
         }
 
         public static void Init()
@@ -31,7 +37,7 @@ namespace BulletTime
                 go.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
                 slider = go.GetComponent<Slider>();
                 text = go.GetComponentInChildren<Text>();                
-                slider.value = BulletTime.StartingSpeed.Value;
+                slider.value = BulletTimePlugin.StartingSpeed.Value;
                 slider.onValueChanged.AddListener(value => OnSliderChange(value));
                 OnSliderChange(slider.value);
             }
@@ -47,7 +53,24 @@ namespace BulletTime
             {
                 text.text = $"{(int)value}%";
             }
-            BulletTime.State.OnSliderChange(value);
+            BulletTimePlugin.State.OnSliderChange(value);
+        }
+        
+        public static void ShowStatus(string message)
+        {
+            if (stateMessage == null)
+            {
+                GameObject go = GameObject.Find("UI Root/Overlay Canvas/In Game/Top Tips/Auto Save/content/tip-panel");
+                GameObject statePanel = GameObject.Instantiate(go, go.transform.parent.parent);
+                statePanel.transform.localPosition = new Vector3(0, 300, 0);
+                GameObject.Destroy(statePanel.transform.Find("bg").gameObject);
+                GameObject.Destroy(statePanel.transform.Find("icon").gameObject);
+                GameObject.Destroy(statePanel.transform.Find("glow-1").gameObject);
+                GameObject.Destroy(statePanel.transform.Find("achiev-ban-text").gameObject);
+                stateMessage = statePanel.transform.Find("text").GetComponent<Text>();
+            }
+            stateMessage.transform.GetParent().gameObject.SetActive(message != "");
+            stateMessage.text = message;
         }
     }
 }
