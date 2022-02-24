@@ -10,11 +10,10 @@ namespace BulletTime
         public long StoredGameTick { get; set; }
         public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
         public bool LockFactory { get; set; } = false; // Lock all interaction on local planet
+        public float SkipRatio { get; set; }
 
         private GameObject timeText;
         private GameObject infoText;
-        private float sliderValue;
-        private float skipRatio;
         private float timer;
 
         public void Dispose()
@@ -24,7 +23,7 @@ namespace BulletTime
             infoText = null;
         }        
 
-        public void OnSliderChange(float value)
+        public void SetSpeedRatio(float value)
         {
             if (value == 0)
             {
@@ -32,14 +31,11 @@ namespace BulletTime
             }
             else
             {
-                if (Pause == true)
-                {
+                if (Pause)
                     SetPauseMode(false);
-                }
-                skipRatio = (100 - value) / 100f;
+                SkipRatio = 1 - value;
                 timer = 0;
             }
-            sliderValue = value;
         }
 
         public void SetPauseMode(bool value)
@@ -90,9 +86,9 @@ namespace BulletTime
         {
             bool pauseThisFrame = Pause;
             AdvanceTick = GameMain.data.guideComplete && Interactable;
-            if (!Pause && sliderValue < 100)
+            if (!Pause)
             {
-                timer += skipRatio;
+                timer += SkipRatio;
                 if (timer >= 1f)
                 {
                     timer -= 1f;

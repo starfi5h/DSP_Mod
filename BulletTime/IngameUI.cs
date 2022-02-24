@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Compatibility;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,9 @@ namespace BulletTime
         {
             if (slider == null)
             {
+                // Only host can control slider
+                if (NebulaCompat.Enable && NebulaCompat.IsClient)
+                    return;
                 GameObject go = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/audio/Slider");
                 Transform cpuPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel").transform;
                 go = GameObject.Instantiate(go, cpuPanel);
@@ -48,12 +52,16 @@ namespace BulletTime
             if (value == 0)
             {
                 text.text = "pause";
+                if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                    NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
                 text.text = $"{(int)value}%";
+                if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                    NebulaCompat.SendPacket(PauseEvent.Resume);
             }
-            BulletTimePlugin.State.OnSliderChange(value);
+            BulletTimePlugin.State.SetSpeedRatio(value/100f);
         }
         
         public static void ShowStatus(string message)

@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using Compatibility;
 using HarmonyLib;
 using System;
+using System.Diagnostics;
 
 namespace BulletTime
 {
@@ -13,7 +14,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.1";
+        public const string VERSION = "1.2.0";
 
         public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
@@ -75,6 +76,8 @@ namespace BulletTime
             _logger.LogWarning(obj);
         public static void Info(object obj) =>
             _logger.LogInfo(obj);
+
+        [Conditional("DEBUG")]
         public static void Debug(object obj) =>
             _logger.LogDebug(obj);
 

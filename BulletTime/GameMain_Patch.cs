@@ -8,6 +8,7 @@ namespace BulletTime
     class GameMain_Patch
     {
         static bool pasueThisFrame;
+        static bool fullscreenPaused;
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
@@ -31,7 +32,8 @@ namespace BulletTime
             {
                 return true;
             }
-            __instance._fullscreenPaused = true;
+            //fullscreenPaused = __instance._fullscreenPaused;
+            //__instance._fullscreenPaused = true;
 
 
             if (BulletTimePlugin.State.AdvanceTick)
@@ -81,7 +83,7 @@ namespace BulletTime
         {
             if (pasueThisFrame)
             {
-                __instance._fullscreenPaused = false;
+                //__instance._fullscreenPaused = fullscreenPaused;
                 pasueThisFrame = false;
             }
             if (Input.GetKeyDown(BulletTimePlugin.KeyAutosave.Value))
@@ -109,7 +111,7 @@ namespace BulletTime
         private static void End_Postfix()
         {
             IngameUI.Dispose();
-            BulletTimePlugin.State.OnSliderChange(100f);
+            BulletTimePlugin.State.SetSpeedRatio(1f);
         }
 
         [HarmonyPrefix]
