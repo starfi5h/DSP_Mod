@@ -9,20 +9,20 @@ namespace Compatibility
 {
     public static class NebulaCompat
     {
-        public static bool Enable;
-        public static bool IsMultiplayerActive;
-        public static bool IsClient;
-
-        static Action<int> onPlanetLoadRequest;
-        static Action<int> onPlanetLoadFinished;
+        public static bool Enable { get; set; }
+        public static bool NebulaIsInstalled { get; private set; }
+        public static bool IsMultiplayerActive { get; private set; }
+        public static bool IsClient { get; private set; }
 
         public static void Init(Harmony harmony)
         {
+            NebulaIsInstalled = NebulaModAPI.NebulaIsInstalled;
+            if (!NebulaIsInstalled)
+                return;
+
             NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-            onPlanetLoadRequest = planetId => NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.FactoryRequest, planetId));
-            onPlanetLoadFinished = planetId => NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume, planetId));
-            NebulaModAPI.OnPlanetLoadRequest += onPlanetLoadRequest;
-            NebulaModAPI.OnPlanetLoadFinished += onPlanetLoadFinished;
+            NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
+            NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
 
             System.Type type = AccessTools.TypeByName("NebulaWorld.GameStates.GameStatesManager");
             harmony.Patch(type.GetProperty("RealGameTick").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealGameTick")));
@@ -31,25 +31,41 @@ namespace Compatibility
             System.Type world = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
             harmony.Patch(world.GetMethod("OnPlayerJoining"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnPlayerJoining")));
             harmony.Patch(world.GetMethod("OnAllPlayersSyncCompleted"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnAllPlayersSyncCompleted")));
+            harmony.PatchAll(typeof(NebulaPatch));
 
-            Log.Info("Nebula Compatibility is ready.");            
+            Log.Info("Nebula Compatibility is ready.");
         }
 
         public static void Dispose()
         {
-            NebulaModAPI.OnPlanetLoadRequest -= onPlanetLoadRequest;
-            NebulaModAPI.OnPlanetLoadFinished -= onPlanetLoadFinished;
+            if (NebulaIsInstalled)
+            {
+                NebulaModAPI.OnPlanetLoadRequest -= OnFactoryLoadRequest;
+                NebulaModAPI.OnPlanetLoadFinished -= OnFactoryLoadFinished;
+            }
         }
 
-        public static void SetIsMultiplayerActive()
+        public static void OnGameMainBegin()
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
         }
 
-        public static void SendPacket(PauseEvent pauseEvent)
+        public static void OnFactoryLoadRequest(int planetId)
         {
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(pauseEvent, GameMain.localPlanet?.id ?? 0));
+            if (NebulaModAPI.MultiplayerSession.IsGameLoaded)
+                SendPacket(PauseEvent.FactoryRequest, planetId);
+        }
+
+        public static void OnFactoryLoadFinished(int planetId)
+        {
+            if (NebulaModAPI.MultiplayerSession.IsGameLoaded)
+                SendPacket(PauseEvent.Resume, planetId);
+        }
+
+        public static void SendPacket(PauseEvent pauseEvent, int planetId = 0)
+        {
+            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(pauseEvent, planetId));
         }
     }
 
@@ -66,7 +82,7 @@ namespace Compatibility
         {
             if (!BulletTimePlugin.State.Pause)
                 __result *= (1f - BulletTimePlugin.State.SkipRatio) / 100f;
-            Log.Debug($"{1f - BulletTimePlugin.State.SkipRatio:F3} UPS:{__result}");
+            Log.Dev($"{1f - BulletTimePlugin.State.SkipRatio:F3} UPS:{__result}");
         }
 
         public static void NotifyTickDifference(float delta)
@@ -75,7 +91,7 @@ namespace Compatibility
             {
                 float ratio = Mathf.Clamp(1 + delta / (float)FPSController.currentUPS, 0.01f, 1f);
                 BulletTimePlugin.State.SetSpeedRatio(ratio);
-                Log.Debug($"{delta:F4} RATIO:{ratio}");
+                Log.Dev($"{delta:F4} RATIO:{ratio}");
             }
         }
 
@@ -148,34 +164,30 @@ namespace Compatibility
                 case PauseEvent.Resume:
                     BulletTimePlugin.State.SetPauseMode(false);
                     IngameUI.ShowStatus("");
-                    Log.Debug("Resume");
+                    Log.Dev("Resume");
                     break;
 
                 case PauseEvent.Pause:
                     BulletTimePlugin.State.SetPauseMode(true);
-                    //IngameUI.ShowStatus("Game pause by host");
-                    Log.Debug("Pause");
+                    Log.Dev("Pause");
                     break;
 
                 case PauseEvent.Save:
                     BulletTimePlugin.State.SetPauseMode(true);
                     IngameUI.ShowStatus("Host is saving game...");
-                    Log.Debug("Save");
+                    Log.Dev("Save");
                     break;
 
                 case PauseEvent.FactoryRequest:
                     BulletTimePlugin.State.SetPauseMode(true);
                     IngameUI.ShowStatus($"{packet.Username} arriving {GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName}");
-                    Log.Debug("FactoryRequest");
+                    Log.Dev("FactoryRequest");
                     break;
 
                 default:
-                    Log.Warn("None");
+                    Log.Warn("PauseNotificationPacket: None");
                     break;
             }
         }
     }
-    
-
-
 }

@@ -42,14 +42,8 @@ namespace BulletTime
                 slider.onValueChanged.AddListener(value => OnSliderChange(value));
                 OnSliderChange(slider.value);
             }
-            // Only host can control slider
-            if (NebulaCompat.Enable && NebulaCompat.IsClient)
-            {
-                slider.gameObject.SetActive(false);
-                Log.Debug("client");
-            }
-            else
-                slider.gameObject.SetActive(true);
+            // Only host can have control slider
+            slider.gameObject.SetActive(!NebulaCompat.IsClient);
         }
 
         private static void OnSliderChange(float value)
@@ -64,7 +58,10 @@ namespace BulletTime
             {
                 text.text = $"{(int)value}%";
                 if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                {
                     NebulaCompat.SendPacket(PauseEvent.Resume);
+                    ShowStatus("");
+                }
             }
             BulletTimePlugin.State.SetSpeedRatio(value/100f);
         }

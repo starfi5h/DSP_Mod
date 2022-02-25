@@ -31,7 +31,7 @@ namespace BulletTime
             KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
 
-            NebulaCompat.Enable = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api");                
+            NebulaCompat.Enable = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api");
 
             try
             {
@@ -39,10 +39,7 @@ namespace BulletTime
                 if (EnableBackgroundAutosave.Value)
                     harmony.PatchAll(typeof(GameSave_Patch));
                 if (NebulaCompat.Enable)
-                {
                     NebulaCompat.Init(harmony);
-                    harmony.PatchAll(typeof(NebulaPatch));
-                }
             }
             catch (Exception e)
             {
@@ -76,9 +73,12 @@ namespace BulletTime
             _logger.LogWarning(obj);
         public static void Info(object obj) =>
             _logger.LogInfo(obj);
+        
+        public static void Debug(object obj) =>
+            _logger.LogDebug(obj);
 
         [Conditional("DEBUG")]
-        public static void Debug(object obj) =>
+        public static void Dev(object obj) =>
             _logger.LogDebug(obj);
 
         public static void Print(int period, object obj)

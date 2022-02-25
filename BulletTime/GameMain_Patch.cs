@@ -87,13 +87,13 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         private static void Begin_Postfix()
         {
+            if (NebulaCompat.Enable)
+            {
+                NebulaCompat.OnGameMainBegin();
+            }
             if (!GameMain.instance.isMenuDemo)
             {
                 IngameUI.Init();
-            }
-            if (NebulaCompat.Enable)
-            {
-                NebulaCompat.SetIsMultiplayerActive();
             }
         }
 
@@ -114,22 +114,6 @@ namespace BulletTime
             {
                 GameMain.gameTick = BulletTimePlugin.State.StoredGameTick;
             }
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.LateUpdate))]
-        private static void PlayerController_LateUpdate_Prefix()
-        {
-            if (BulletTimePlugin.State.Pause)
-                GameMain.isFullscreenPaused = false;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.LateUpdate))]
-        private static void PlayerController_LateUpdate_Postfix()
-        {
-            if (BulletTimePlugin.State.Pause)
-                GameMain.isFullscreenPaused = true;
         }
 
         [HarmonyPrefix]
