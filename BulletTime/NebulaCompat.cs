@@ -16,24 +16,32 @@ namespace Compatibility
 
         public static void Init(Harmony harmony)
         {
-            NebulaIsInstalled = NebulaModAPI.NebulaIsInstalled;
-            if (!NebulaIsInstalled)
-                return;
+            try
+            {
+                NebulaIsInstalled = NebulaModAPI.NebulaIsInstalled;
+                if (!NebulaIsInstalled)
+                    return;
 
-            NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-            NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
-            NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
+                NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
+                NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
+                NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
 
-            System.Type type = AccessTools.TypeByName("NebulaWorld.GameStates.GameStatesManager");
-            harmony.Patch(type.GetProperty("RealGameTick").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealGameTick")));
-            harmony.Patch(type.GetProperty("RealUPS").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealUPS")));
-            harmony.Patch(type.GetMethod("NotifyTickDifference"), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("NotifyTickDifference")));
-            System.Type world = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
-            harmony.Patch(world.GetMethod("OnPlayerJoining"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnPlayerJoining")));
-            harmony.Patch(world.GetMethod("OnAllPlayersSyncCompleted"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnAllPlayersSyncCompleted")));
-            harmony.PatchAll(typeof(NebulaPatch));
+                System.Type world = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
+                System.Type type = AccessTools.TypeByName("NebulaWorld.GameStates.GameStatesManager");
+                harmony.Patch(world.GetMethod("OnPlayerJoining"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnPlayerJoining")));
+                harmony.Patch(world.GetMethod("OnAllPlayersSyncCompleted"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnAllPlayersSyncCompleted")));
+                harmony.Patch(type.GetProperty("RealGameTick").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealGameTick")));
+                harmony.Patch(type.GetProperty("RealUPS").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealUPS")));
+                harmony.Patch(type.GetMethod("NotifyTickDifference"), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("NotifyTickDifference")));
+                harmony.PatchAll(typeof(NebulaPatch));
 
-            Log.Info("Nebula Compatibility is ready.");
+                Log.Info("Nebula Compatibility is ready.");
+            }
+            catch (Exception e)
+            {
+                Log.Error("Nebula Compatibility failed!");
+                Log.Error(e);
+            }
         }
 
         public static void Dispose()
@@ -112,13 +120,15 @@ namespace Compatibility
         [HarmonyPrefix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
         private static void SaveCurrentGame_Prefix()
         {
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Save));
+            if (NebulaCompat.IsMultiplayerActive)
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Save));
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
         private static void SaveCurrentGame_Postfix()
         {
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume));
+            if (NebulaCompat.IsMultiplayerActive)
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume));
         }
     }
 

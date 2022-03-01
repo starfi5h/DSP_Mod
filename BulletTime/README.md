@@ -33,7 +33,7 @@ Run autosave in background. (Default:`false`)
 Test first before enabling this function.  
 在背景执行自动保存。 (预设为关闭)  
 在背景自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
-使用这项功能时建议先测试一次。  
+使用这项功能时建议先测试。  
 
 
 - `KeyAutosave`  
@@ -55,7 +55,7 @@ Game speed when the game begin. range:0-100
 
 - When a player is joining or requesting factory data, unfreeze and enter pasue mode (the player can move).  
 - When host is saving or manually entering pause mode, the client will enter pause mode too.  
-- If clients disconnect during pausing, the host can resume the game by changing the slider.  
+- If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
 
 - 当玩家加入、请求工厂数据、存檔時，进入时停模式。
 - 如果客户端在时停期间中断连接，主机可以通过拖动滑块来恢复游戏运行。 
