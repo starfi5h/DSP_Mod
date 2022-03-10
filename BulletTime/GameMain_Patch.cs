@@ -66,7 +66,7 @@ namespace BulletTime
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Player);
                 GameMain.data.DetermineRelative();
-                GameMain.data.mainPlayer.ApplyGamePauseState(true);
+                GameMain.data.mainPlayer.ApplyGamePauseState(false);
                 PlayerGameTick(GameMain.instance.timei);
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
             }
