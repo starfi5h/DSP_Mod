@@ -41,8 +41,9 @@ namespace BulletTime
             PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);            
 
             PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
+            bool flag = GameMain.data.DetermineLocalPlanet();
             GameMain.data.DetermineRelative();
-            if (GameMain.localPlanet != null)
+            if (flag)
                 GameCamera.instance.FrameLogic();
             VFInput.UpdateGameStates();
             UniverseSimulatorGameTick();
@@ -54,6 +55,12 @@ namespace BulletTime
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
                 GameMain.localPlanet.physics.GameTick();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
+            }
+            if (GameMain.data.guideMission != null)
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
+                GameMain.data.guideMission.GameTick();
+                PerformanceMonitor.EndSample(ECpuWorkEntry.Scenario);
             }
             if (GameMain.mainPlayer != null)
             {

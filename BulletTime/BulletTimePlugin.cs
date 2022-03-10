@@ -46,6 +46,7 @@ namespace BulletTime
                 Logger.LogError(e);
                 throw e;
             }
+            //IngameUI.Init();
         }
 
         public void OnDestroy()
