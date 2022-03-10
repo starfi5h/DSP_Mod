@@ -36,6 +36,7 @@ namespace BulletTime
             try
             {
                 harmony.PatchAll(typeof(GameMain_Patch));
+                harmony.PatchAll(typeof(IngameUI));
                 if (EnableBackgroundAutosave.Value)
                     harmony.PatchAll(typeof(GameSave_Patch));
                 if (NebulaCompat.Enable)

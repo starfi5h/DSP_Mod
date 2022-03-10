@@ -29,6 +29,7 @@ namespace BulletTime
             if (value == 0)
             {
                 SetPauseMode(true);
+                SkipRatio = 1f;
             }
             else
             {
