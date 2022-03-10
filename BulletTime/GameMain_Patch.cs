@@ -128,6 +128,14 @@ namespace BulletTime
             return true;
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ABN_MechaPosition), nameof(ABN_MechaPosition.OnGameTick))]
+        private static bool ABN_MechaPosition_Prefix()
+        {
+            // We will skip position check so it will not trigger when exiting pause mode
+            return false;
+        }
+
         private static void UniverseSimulatorGameTick()
         {
             UniverseSimulator universe = GameMain.universeSimulator;

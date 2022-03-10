@@ -77,11 +77,6 @@ namespace BulletTime
                 }
                 timeText?.SetActive(true);
                 infoText?.SetActive(false);
-                if (GameMain.gameScenario != null)
-                {
-                    GameMain.gameScenario.abnormalityLogic = new AbnormalityLogic();
-                    GameMain.gameScenario.abnormalityLogic.Init(GameMain.gameScenario.gameData);
-                }
                 GameMain.isFullscreenPaused = false;
             }
         }
