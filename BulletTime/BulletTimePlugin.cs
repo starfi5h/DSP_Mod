@@ -14,7 +14,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.0";
+        public const string VERSION = "1.2.1";
 
         public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
@@ -47,7 +47,7 @@ namespace BulletTime
                 Logger.LogError(e);
                 throw e;
             }
-            //IngameUI.Init();
+            //IngameUI.Init(); //Only enable in develop mode
         }
 
         public void OnDestroy()
