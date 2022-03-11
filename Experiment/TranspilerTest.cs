@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace Experiment
 {
@@ -33,16 +34,25 @@ namespace Experiment
 
 
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(BoneArmor), "Export")]
+        [HarmonyPatch(typeof(BuildTool_PathAddon), nameof(BuildTool_PathAddon.FindPotentialBelt))]
         static IEnumerable<CodeInstruction> Debug_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            //Log.Info("Before");
-            //Print(instructions, 0, 70);
-            Log.Info("");
-            //Log.Info("After");
-            var code = Export_Transpiler(instructions);
-            Print(code, 105, 125);
-            return code;
+            try
+            {
+                //Log.Info("Before");
+                //Print(instructions, 0, 70);
+                //Log.Info("");
+                //Log.Info("After");
+                var code = FindPotentialBelt_Transpiler(instructions);
+                Print(code, 70, 90);
+                return code;
+            }
+            catch (Exception e)
+            {
+                Log.Error("Transpiler error!");
+                Log.Error(e);
+                return instructions;
+            }
         }
 
         //Move attributes to here when debug is finished
@@ -63,7 +73,15 @@ namespace Experiment
 
 
 
-
+        //[HarmonyPatch(typeof(BuildTool_PathAddon), nameof(BuildTool_PathAddon.FindPotentialBelt))]
+        private static IEnumerable<CodeInstruction> FindPotentialBelt_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            //change Vector3 halfExtents = addonAreaSize[i] * 2f; to Vector3 halfExtents = addonAreaSize[i] * 4f;
+            CodeMatcher matcher = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Ldc_R4 && Mathf.Approximately((float)i.operand, 2f)))
+                .SetOperandAndAdvance(6f);
+            return matcher.InstructionEnumeration();
+        }
 
         //[HarmonyTranspiler]
         //[HarmonyPatch(typeof(MechaAppearance), "Export")]
@@ -77,10 +95,6 @@ namespace Experiment
                 .RemoveInstruction();
             return matcher.InstructionEnumeration();
         }
-
-
-
-
 
         //[HarmonyTranspiler]
         //[HarmonyPatch(nameof(CargoTraffic.PickupBeltItems))]
