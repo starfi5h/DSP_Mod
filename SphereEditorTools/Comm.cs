@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 
@@ -30,6 +31,36 @@ namespace SphereEditorTools
             HideLayer.SetMask(HideLayer.EnableMask);
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDETopFunction), "SetDysonComboBox")]
+        public static bool SetDysonComboBox(UIDETopFunction __instance)
+        {
+            if (!SphereEditorTools.EnableNonemptyList.Value)
+                return true;
+
+            UIComboBox dysonBox = __instance.dysonBox;
+            dysonBox.Items = new List<string>();
+            dysonBox.ItemsData = new List<int>();
+            for (int i = 0; i < __instance.gameData.dysonSpheres.Length; i++)
+            {
+                DysonSphere sphere = __instance.gameData.dysonSpheres[i];
+                if (sphere != null)
+                {
+                    if (sphere.swarm.sailCount > 0 || sphere.totalNodeCount > 0 || i == GameMain.localStar?.index)
+                    {
+                        dysonBox.Items.Add(sphere.starData.displayName);
+                        dysonBox.ItemsData.Add(sphere.starData.index);
+                    }
+                }
+            }
+            if (dysonBox.Items.Count == 0 && __instance.gameData.dysonSpheres[0] != null)
+            {
+                // fail safte, add a least one dyson sphere
+                dysonBox.Items.Add(__instance.gameData.dysonSpheres[0].starData.displayName);
+                dysonBox.ItemsData.Add(__instance.gameData.dysonSpheres[0].starData.index);
+            }
+            return false;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnClose")]
         public static void Free(UIDysonEditor __instance)
         {
@@ -46,7 +77,7 @@ namespace SphereEditorTools
             SphereEditorTools.Config.Reload();
             Stringpool.Set();
             UIWindow.LoadWindowPos();
-            VisualEffect.LoadSequence();
+            //VisualEffect.LoadSequence();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(GameMain), "End")]
