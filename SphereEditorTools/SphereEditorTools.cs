@@ -47,12 +47,12 @@ namespace SphereEditorTools
             EnableGUI = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
 
-            KeySelect               = Config.Bind<string>("Hotkeys - Toolbox", "KeySelect", "1", "Inspect / 查看");
-            KeyNode                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyNode", "2", "Build Node / 修建节点");
-            KeyFrameGeo             = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameGeo", "3", "Build Frame(Geodesic) / 修建测地线框架");
-            KeyFrameEuler           = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameEuler", "4", "Build Frame(Euler) / 修建经纬度框架");
-            KeyShell                = Config.Bind<string>("Hotkeys - Toolbox", "KeyShell", "5", "Build Shell / 修建壳");
-            KeyGrid                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyGrid", "r", "Toggle Grid / 切换网格");
+            KeySelect               = Config.Bind<string>("Hotkeys - Toolbox", "KeySelect", "space", "Inspect / 查看");
+            KeyNode                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyNode", "q", "Build Node / 修建节点");
+            KeyFrameGeo             = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameGeo", "w", "Build Frame(Geodesic) / 修建测地线框架");
+            KeyFrameEuler           = Config.Bind<string>("Hotkeys - Toolbox", "KeyFrameEuler", "e", "Build Frame(Euler) / 修建经纬度框架");
+            KeyShell                = Config.Bind<string>("Hotkeys - Toolbox", "KeyShell", "r", "Build Shell / 修建壳");
+            KeyGrid                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyGrid", "g", "Toggle Grid / 切换网格");
 
             KeyHideMode             = Config.Bind<string>("Hotkeys - Visibility", "KeyHideMode", "h", "Toggle mask & star display mode / 切换遮罩與恒星显示模式");
 

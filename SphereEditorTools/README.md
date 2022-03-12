@@ -41,6 +41,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableDisplayOptions`   | true  | Enable display control of star and black mask. |
 | `EnableSymmetryTool`     | true  | Enable mirror and rotation symmetry of building tools. |
 | `EnableToolboxHotkey`    | true  | Enable dyson sphere layer orbit modifiy tool. |
+| `EnableNonemptyList`     | true  | Dropdown list only shows dysonspheres that are not empty. |
 
 ### GUI
 || Default | Description |
@@ -52,12 +53,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 || Default | Description |
 | :-------------- | :------ | :------------ |
 | Toolbox |
-| `KeySelect`     | 1       | Inspect |
-| `KeyNode`       | 2       | Build Node |
-| `KeyFrameGeo`   | 3       | Build Frame(Geodesic) |
-| `KeyFrameEuler` | 4       | Build Frame(Euler) |
-| `KeyShell`      | 5       | Build Shell |
-| `KeyGrid`       | r       | Toggle Grid |
+| `KeySelect`     | space   | Inspect |
+| `KeyNode`       | q       | Build Node |
+| `KeyFrameGeo`   | w       | Build Frame(Geodesic) |
+| `KeyFrameEuler` | e       | Build Frame(Euler) |
+| `KeyShell`      | r       | Build Shell |
+| `KeyGrid`       | g       | Toggle Grid |
 | Visibility |
 | `KeyShowAllLayers` | `    | Toggle show all layers mode |
 | `KeyHideMode`      | h    | Toggle mask & star hide mode |
@@ -114,6 +115,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableDisplayOptions`   | true  | 启用显示控制(恒星/黑色遮罩) |
 | `EnableSymmetryTool`     | true  | 启用对称建造工具(镜像/旋转) |
 | `EnableOrbitTool`        | true  | 启用壳层轨道工具 |
+| `EnableNonemptyList`     | true  | 下拉列表中仅显示非空的戴森球 |
   
 ### GUI
 || Default | Description |
@@ -125,12 +127,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 || 默认 | 描述 |
 | :-------------- | :------ | :------------ |
 | 工具箱 |
-| `KeySelect`     | 1       | 查看 |
-| `KeyNode`       | 2       | 修建节点 |
-| `KeyFrameGeo`   | 3       | 修建测地线框架 |
-| `KeyFrameEuler` | 4       | 修建经纬度框架 |
-| `KeyShell`      | 5       | 修建壳 |
-| `KeyGrid`       | r       | 切换网格 |
+| `KeySelect`     | space   | 查看 |
+| `KeyNode`       | q       | 修建节点 |
+| `KeyFrameGeo`   | w       | 修建测地线框架 |
+| `KeyFrameEuler` | e       | 修建经纬度框架 |
+| `KeyShell`      | r       | 修建壳 |
+| `KeyGrid`       | g       | 切换网格 |
 | 可见度 |
 | `KeyHideMode`      | h    | 切换遮罩與恒星顯示模式 |
 | 对称工具 |
@@ -142,6 +144,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 ----
 
 ## Changelog
+
+
+### v2.1.0
+\- Add EnableNonemptyList option.  
+\- Change default hotkeys so they won't interfere number input.  
+\- Selecting in symmetry tool now act like pressing LeftCtrl.  
 
 ### v2.0.0 - Adjustment to new editor in 0.9.24  
 \- Remove delete, hide and copy layer functions.  
