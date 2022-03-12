@@ -378,15 +378,39 @@ namespace SphereEditorTools
             return !overwrite; //if overwrite is on, skip AddNodeGizmo()
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(DESelection), "OnNodeClick")]
-        [HarmonyPatch(typeof(DESelection), "OnFrameClick")]
-        [HarmonyPatch(typeof(DESelection), "OnShellClick")]
-        public static bool Overwrite_SetSelected()
+        [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnNodeClick")]
+        public static bool Overwrite_OnNodeClick(DESelection __instance, DysonNode node)
         {
-            return !overwrite; //if overwrite is on, skip OnXXXXClick() on dyson editor
+            if (!overwrite || __instance.selectedNodes == null || node == null)
+                return true;
+
+            // Multiple select as if LeftControl is hold
+            if (!__instance.selectedNodes.Contains(node))
+                __instance.AddNodeSelection(node);
+            return false;
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnFrameClick")]
+        public static bool Overwrite_OnFrameClick(DESelection __instance, DysonFrame frame)
+        {
+            if (!overwrite || __instance.selectedFrames == null || frame == null)
+                return true;
+
+            if (!__instance.selectedFrames.Contains(frame))
+                __instance.AddFrameSelection(frame);
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnShellClick")]
+        public static bool Overwrite_OnFrameClick(DESelection __instance, DysonShell shell)
+        {
+            if (!overwrite || __instance.selectedShells == null || shell == null)
+                return true;
+
+            if (!__instance.selectedShells.Contains(shell))
+                __instance.AddShellSelection(shell);
+            return false;
+        }
         #endregion
     }
 }
