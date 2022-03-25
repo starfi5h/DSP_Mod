@@ -51,7 +51,7 @@ namespace BulletTime
         {
             if (value == 0)
             {
-                text.text = "pause";
+                text.text = "pause".Translate();
                 if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }

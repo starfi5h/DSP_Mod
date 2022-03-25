@@ -24,7 +24,7 @@ namespace BulletTime
                 bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active || __instance.blueprintBrowser.active;
                 if (balcklist && !whitelist)
                 {
-                    ShowMessage("Read-Only", "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window");
+                    ShowMessage("Read-Only".Translate(), "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window".Translate());
                     isBlocked = true;
                 }
             }
@@ -126,15 +126,13 @@ namespace BulletTime
         }
 
         static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
-        static bool main = true;
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.Export))]
         private static bool Export_Prefix(DysonSwarm __instance, BinaryWriter w)
         {
-            if (!BulletTimePlugin.State.Interactable && main)
+            if (!BulletTimePlugin.State.Interactable && ThreadingHelper.Instance.InvokeRequired)
             {
-                main = false;
                 autoEvent.Reset();
                 ThreadingHelper.Instance.StartSyncInvoke(() =>
                 {
@@ -143,7 +141,6 @@ namespace BulletTime
                 });
                 Log.Debug($"Exporting DysonSwarm {__instance.starData.displayName}...");
                 autoEvent.WaitOne(-1);
-                main = true;
                 return false;
             }
             return true;
