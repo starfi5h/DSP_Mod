@@ -2,7 +2,9 @@
 using HarmonyLib;
 using NebulaAPI;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace Compatibility
@@ -17,6 +19,7 @@ namespace Compatibility
         // Pause states
         public static bool IsPlayerJoining { get; set; }
         public static int PendingFactoryCount { get; set; }
+        public static bool DysonSpherePaused { get; set; }
 
 
         public static void Init(Harmony harmony)
@@ -62,6 +65,9 @@ namespace Compatibility
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
+            IsPlayerJoining = false;
+            PendingFactoryCount = 0;
+            DysonSpherePaused = false;
         }
 
         public static void OnFactoryLoadRequest(int planetId)
@@ -125,7 +131,9 @@ namespace Compatibility
         {
             NebulaCompat.IsPlayerJoining = false;
             BulletTimePlugin.State.SetPauseMode(false);
-            IngameUI.ShowStatus("");            
+            IngameUI.ShowStatus("");
+            if (!NebulaCompat.IsClient)
+                NebulaCompat.SendPacket(NebulaCompat.DysonSpherePaused ? PauseEvent.DysonSpherePaused : PauseEvent.DysonSphereResume);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
@@ -153,6 +161,70 @@ namespace Compatibility
             // Disable MechaLab during player joining
             return !NebulaCompat.IsMultiplayerActive || !NebulaCompat.IsPlayerJoining;
         }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDESphereInfo), nameof(UIDESphereInfo._OnInit)), HarmonyAfter("dsp.nebula - multiplayer")]
+        private static void UIDESphereInfo__OnInit()
+        {
+            UIDETopFunction topFunction = UIRoot.instance.uiGame.dysonEditor.controlPanel.topFunction;
+            topFunction.pauseButton.button.interactable = true;
+            SetDysonSpherePasued(NebulaCompat.DysonSpherePaused);
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDETopFunction), nameof(UIDETopFunction._OnLateUpdate))]
+        private static bool UIDETopFunction__OnLateUpdate()
+        {
+            return !NebulaCompat.IsMultiplayerActive;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDETopFunction), nameof(UIDETopFunction.OnPauseButtonClick))]
+        private static bool OnPauseButtonClick()
+        {
+            if (NebulaCompat.IsMultiplayerActive)
+            {
+                SetDysonSpherePasued(!NebulaCompat.DysonSpherePaused);
+                NebulaCompat.SendPacket(NebulaCompat.DysonSpherePaused ? PauseEvent.DysonSpherePaused : PauseEvent.DysonSphereResume);
+                return false;
+            }
+            return true;
+        }
+
+        public static void SetDysonSpherePasued(bool state)
+        {
+            NebulaCompat.DysonSpherePaused = state;
+            UIDETopFunction topFunction = UIRoot.instance.uiGame.dysonEditor.controlPanel.topFunction;
+            topFunction.pauseButton.highlighted = !NebulaCompat.DysonSpherePaused;
+            topFunction.pauseImg.sprite = (NebulaCompat.DysonSpherePaused ? topFunction.pauseSprite : topFunction.playSprite);
+            topFunction.pauseText.text = (NebulaCompat.DysonSpherePaused ? "Dyson sphere is stopped" : "Dyson sphere is rotating").Translate();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(DysonSphereLayer), nameof(DysonSphereLayer.GameTick))]
+        private static IEnumerable<CodeInstruction> DysonSphereLayer_GameTick(IEnumerable<CodeInstruction> instructions, ILGenerator iL)
+        {
+            try
+            {
+                // When DysonSpherePaused is on, skip rotation part and jump to DysonSwarm swarm = this.dysonSphere.swarm;
+                var codeMatcher = new CodeMatcher(instructions, iL)
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(DysonSphereLayer), "dysonSphere")),
+                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(DysonSphere), "swarm"))
+                    )
+                    .CreateLabel(out Label label)
+                    .Start()
+                    .Insert(
+                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NebulaCompat), "DysonSpherePaused")),
+                        new CodeInstruction(OpCodes.Brtrue_S, label)
+                    );
+                return codeMatcher.InstructionEnumeration();
+            }
+            catch (Exception e)
+            {
+                Log.Error("DysonSphereLayer_GameTick Transpiler error");
+                Log.Error(e);
+                return instructions;
+            }
+        }
+
     }
 
     internal class PauseNotificationPacket
@@ -177,7 +249,9 @@ namespace Compatibility
         Pause,
         Save,
         FactoryRequest,
-        FactoryLoaded
+        FactoryLoaded,
+        DysonSpherePaused,
+        DysonSphereResume
     }
 
     [RegisterPacketProcessor]
@@ -227,6 +301,18 @@ namespace Compatibility
                         }
                     }
                     Log.Dev("FactoryLoaded");
+                    break;
+
+                case PauseEvent.DysonSpherePaused:
+                    NebulaPatch.SetDysonSpherePasued(true);
+                    if (IsHost)
+                        NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
+                    break;
+
+                case PauseEvent.DysonSphereResume:
+                    NebulaPatch.SetDysonSpherePasued(false);
+                    if (IsHost)
+                        NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
                     break;
 
                 default:
