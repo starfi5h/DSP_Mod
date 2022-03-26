@@ -122,7 +122,7 @@ namespace Compatibility
         public static bool OnPlayerJoining(string Username)
         {
             NebulaCompat.IsPlayerJoining = true;
-            IngameUI.ShowStatus(Username + " joining the game");
+            IngameUI.ShowStatus(string.Format("{0} joining the game".Translate(), Username));
             BulletTimePlugin.State.SetPauseMode(true);
             return false;
         }
@@ -274,13 +274,13 @@ namespace Compatibility
 
                 case PauseEvent.Save: //Client
                     BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("Host is saving game...");
+                    IngameUI.ShowStatus("Host is saving game...".Translate());
                     Log.Dev("Save");
                     break;
 
                 case PauseEvent.FactoryRequest: //Host, Client
                     BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus($"{packet.Username} arriving {GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName}");
+                    IngameUI.ShowStatus(string.Format("{0} arriving {1}".Translate(), packet.Username, GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName));
                     if (IsHost)
                     {
                         NebulaCompat.PendingFactoryCount++;
