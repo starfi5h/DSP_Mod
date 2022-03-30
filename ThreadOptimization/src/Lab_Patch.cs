@@ -55,6 +55,8 @@ namespace ThreadOptimization
 						Transpilers.EmitDelegate<Func<FactorySystem, bool>>((factorySystem) =>
 						{
 							bool hasLab = false;
+							hasLab = true;
+							/*
 							for (int k = 1; k < factorySystem.labCursor; k++)
 							{
 								if (factorySystem.labPool[k].id == k)
@@ -63,6 +65,7 @@ namespace ThreadOptimization
 									break;
 								}
 							}
+							*/
 							// Skip lock if there is no lab on this planet
 							if (hasLab)
 								Monitor.Enter(GameMain.history);

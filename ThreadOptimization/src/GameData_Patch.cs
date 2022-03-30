@@ -10,9 +10,30 @@ namespace ThreadOptimization
 {
 	class GameData_Patch
     {
+		static int countDown = 10;
+
+		[HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
+		internal static void Begin_Postfix()
+		{
+			countDown = 10;
+		}
+
+		[HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
+		internal static void End_Postfix()
+		{
+			countDown = int.MaxValue;
+		}
+
 		[HarmonyPrefix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick))]
 		internal static bool GameData_Prefix(GameData __instance, long time)
 		{
+			if (countDown > 0)
+			{
+				if (--countDown == 0)
+					Log.Info("Activate");
+				return true;
+			}
+
 			#region origin1
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
 			if (!DSPGame.IsMenuDemo)

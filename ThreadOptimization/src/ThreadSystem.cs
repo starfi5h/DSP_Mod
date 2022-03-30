@@ -20,24 +20,38 @@ namespace ThreadOptimization
     {
         readonly static List<Worker> workers = new List<Worker>();
 		static int count;
+		static bool running;
 
         public static void Schedule(EMission mission, int workerCount)
         {
+			if (running)
+			{
+				Log.Warn($"Schedule({mission}) called before previous jobs finished");
+				Complete();
+			}
+
 			count = workerCount;
+			if (workers.Count < count)
+			{
+				workers.Clear();
+				for (int i = 0; i < count; i++)
+					workers.Add(new Worker(i));
+			}
+
 			for (int i = 0; i < count; i++)
             {
-				if (workers.Count < count)
-					workers.Add(new Worker(i));
 				workers[i].Mission = mission;
 				workers[i].CompleteEvent.Reset();
 				ThreadPool.QueueUserWorkItem(workers[i].Callback);
 			}
+			running = true;
 		}
 
 		public static void Complete()
         {
 			for (int i = 0; i < count; i++)
 				workers[i].CompleteEvent.WaitOne();
+			running = false;
 		}
     }
 
@@ -77,13 +91,17 @@ namespace ThreadOptimization
 
 					default: break;
 				}
-				CompleteEvent.Set();
 				//Log.Debug($"[{Index,2}]: {watch.duration * 1000}");
 			}
 			catch (Exception e)
 			{
 				Log.Error($"Thread Error! mission:{Mission} index:{Index}");
 				Log.Error(e);
+				throw (e);
+			}
+			finally
+            {
+				CompleteEvent.Set();
 			}
 		}
 	}
