@@ -88,8 +88,6 @@ namespace Experiment
 
 			
 
-
-
 			
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Trash);
 			__instance.trashSystem.GameTick(time);
@@ -322,6 +320,8 @@ namespace Experiment
             {
 				try
 				{
+					//var watch = new HighStopwatch();
+					//watch.Begin();
 					switch (Mission)
 					{
 						case EMission.Factory:
@@ -336,13 +336,17 @@ namespace Experiment
 							GameMain.data.statistics.production.factoryStatPool[Index].GameTick(GameMain.gameTick);
 							break;
 					}
-					CompleteEvent.Set();
+					//Log.Debug($"[{Index,2}]: {watch.duration*1000}");
 				}
 				catch (Exception e)
                 {
 					Log.Error($"Thread Error! mission:{Mission} index:{Index}");
 					Log.Error(e);
                 }
+				finally
+                {
+					CompleteEvent.Set();
+				}
 			}
 		}
 
