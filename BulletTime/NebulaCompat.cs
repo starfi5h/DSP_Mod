@@ -115,7 +115,7 @@ namespace Compatibility
             {
                 float ratio = Mathf.Clamp(1 + delta / (float)FPSController.currentUPS, 0.01f, 1f);
                 BulletTimePlugin.State.SetSpeedRatio(ratio);
-                Log.Dev($"{delta:F4} RATIO:{ratio}");
+                //Log.Dev($"{delta:F4} RATIO:{ratio}");
             }
         }
 
@@ -140,17 +140,24 @@ namespace Compatibility
         private static void SaveCurrentGame_Prefix()
         {
             if (NebulaCompat.IsMultiplayerActive)
-                NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Save));
+                NebulaCompat.SendPacket(PauseEvent.Save);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
-        private static void SaveCurrentGame_Postfix()
+        private static void SaveCurrentGame_Postfix(string saveName)
         {
             if (NebulaCompat.IsMultiplayerActive)
             {
-                if (NebulaCompat.PendingFactoryCount == 0 && !NebulaCompat.IsPlayerJoining)
+                if (saveName != GameSave.AutoSaveTmp)
                 {
-                    NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume));
+                    // if it is not autosave (trigger by manual), reset all pause states
+                    NebulaCompat.PendingFactoryCount = 0;
+                    NebulaCompat.IsPlayerJoining = false;
+                }
+
+                if (NebulaCompat.PendingFactoryCount <= 0 && !NebulaCompat.IsPlayerJoining)
+                {
+                    NebulaCompat.SendPacket(PauseEvent.Resume);
                 }
             }
         }
@@ -292,9 +299,12 @@ namespace Compatibility
                 case PauseEvent.FactoryLoaded: //Host
                     if (IsHost)
                     {
+                        // It is possible that FactoryLoaded is return without FactoryRequest
                         NebulaCompat.PendingFactoryCount--;
-                        if (NebulaCompat.PendingFactoryCount == 0 && !NebulaCompat.IsPlayerJoining)
-                        {                            
+                        Log.Debug($"Pending factory: {NebulaCompat.PendingFactoryCount}");
+                        if (NebulaCompat.PendingFactoryCount <= 0 && !NebulaCompat.IsPlayerJoining)
+                        {
+                            NebulaCompat.PendingFactoryCount = 0;
                             BulletTimePlugin.State.SetPauseMode(false);
                             IngameUI.ShowStatus("");
                             NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume));

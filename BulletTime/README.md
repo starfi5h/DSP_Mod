@@ -54,15 +54,19 @@ Game speed when the game begin. range:0-100
 - Players can stop/resume dyson sphere rotation in the editor at top-left button.  
 
 - 当玩家加入、请求工厂数据、存檔時，进入时停模式。
-- 如果客户端在时停期间中断连接，主机可以通过拖动滑块来恢复游戏运行。 
+- 如果客户端中断连接导致游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
 - 玩家可以在编辑器左上角的按钮中停止/恢复戴森球旋转。  
 ----
 
 ## Changelog
 
+#### v1.2.3
+\- Fix Nebula sometimes hangs in pause mode when loading factories. Now manual saving will reset pause states.   
+\- Make block image in background autosave transparent.  
+
 #### v1.2.2
 \- Enable Nebula dyson sphere rotation start/stop button in editor.   
-\- Handle multiple pause events happen at the same time.  
+\- Handle multiple pause events that happen at the same time.  
 
 #### v1.2.1
 \- Show game speed in FPS indicator (Shift + F12)  

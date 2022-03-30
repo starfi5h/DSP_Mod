@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.IO;
 using System.Threading;
+using UnityEngine.UI;
 
 namespace BulletTime
 {
@@ -24,21 +25,33 @@ namespace BulletTime
                 bool whitelist = __instance.statWindow.active || __instance.replicator.active || __instance.mechaWindow.active || __instance.blueprintBrowser.active;
                 if (balcklist && !whitelist)
                 {
-                    ShowMessage("Read-Only".Translate(), "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window".Translate());
+                    if (__instance.dysonEditor.active)
+                        ShowMessage("Read-Only".Translate(), "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window".Translate());
+                    else
+                        ShowMessage();
                     isBlocked = true;
                 }
             }
         }
 
-        private static void ShowMessage(string title, string message)
+        private static void ShowMessage(string title = null, string message = null)
         {
             UIMessageBox uimessageBox = UIDialog.CreateDialog("Prefabs/MessageBox VE") as UIMessageBox;
-            uimessageBox.m_TitleText.text = title;
-            uimessageBox.m_MessageText.text = message;
-            uimessageBox.m_Button1.transform.parent.gameObject.SetActive(false);
-            uimessageBox.m_Button2.transform.parent.gameObject.SetActive(false);
-            uimessageBox.m_Button3.transform.parent.gameObject.SetActive(false);
-            uimessageBox.m_IconImage.gameObject.SetActive(false);
+            if (title!= null && message != null)
+            {
+                uimessageBox.m_TitleText.text = title;
+                uimessageBox.m_MessageText.text = message;
+                uimessageBox.m_Button1.transform.parent.gameObject.SetActive(false);
+                uimessageBox.m_Button2.transform.parent.gameObject.SetActive(false);
+                uimessageBox.m_Button3.transform.parent.gameObject.SetActive(false);
+                uimessageBox.m_IconImage.gameObject.SetActive(false);
+            }
+            else
+            {
+                // Make block image transparent
+                uimessageBox.m_WindowTrans.gameObject.SetActive(false);
+                uimessageBox.gameObject.GetComponent<Image>().color = UnityEngine.Color.clear;
+            }
             UIMessageBox.PushMessage(uimessageBox);
         }
 
