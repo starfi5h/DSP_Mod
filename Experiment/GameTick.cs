@@ -205,23 +205,42 @@ namespace Experiment
 		}
 
 		[HarmonyTranspiler, HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabResearchMode))]
-		internal static IEnumerable<CodeInstruction> GameTickLabResearchMode_Transpiler(IEnumerable<CodeInstruction> instructions)
+		internal static IEnumerable<CodeInstruction> GameTickLabResearchMode_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			// lock(GameMain.history) for whole function
 			try
 			{
-				CodeMatcher matcher = new CodeMatcher(instructions)
-					.Start()
-					.Insert(
-						new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(GameMain), "history")),
-						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter", new Type[] { typeof(object) }))
-					)
+				CodeMatcher matcher = new CodeMatcher(instructions, iLGenerator)
 					.MatchForward(false, new CodeMatch(OpCodes.Ret))
+					.CreateLabel(out Label endLabel)
 					.Insert(
 						new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(GameMain), "history")),
 						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit"))
+					)
+					.Start()					
+					.Insert(
+						new CodeInstruction(OpCodes.Ldarg_0),
+						Transpilers.EmitDelegate<Func<FactorySystem, bool>>((factorySystem) =>
+						{
+							int labCount = 0;
+							for (int k = 1; k < factorySystem.labCursor; k++)
+							{
+								if (factorySystem.labPool[k].id == k)
+									labCount++;
+							}
+							// Skip lock if there is no lab on this planet
+							if (labCount > 0)
+								Monitor.Enter(GameMain.history);
+							return labCount > 0;
+						}),
+						new CodeInstruction(OpCodes.Brfalse, endLabel)
 					);
 
+
+				TranspilerTest.Print(matcher.InstructionEnumeration(), 0, 20);
+				TranspilerTest.Print(matcher.InstructionEnumeration(), 500, 600);
+
+				//return instructions;
 				return matcher.InstructionEnumeration();
 			}
 			catch
@@ -234,6 +253,7 @@ namespace Experiment
 		private static bool DetermineUnlockTech()
         {
 			// From FactorySystem.GameTickLabResearchMode() unlock tech part
+			// Don't run this in Nebula client
 			GameHistoryData history = GameMain.history;
 			int techId = GameMain.history.currentTech;
 			TechProto techProto = LDB.techs.Select(techId);

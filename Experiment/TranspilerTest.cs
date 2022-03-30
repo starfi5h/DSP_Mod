@@ -10,7 +10,7 @@ namespace Experiment
 {
     class TranspilerTest
     {
-        static void Print(IEnumerable<CodeInstruction> instructions, int start, int end)
+        public static void Print(IEnumerable<CodeInstruction> instructions, int start, int end)
         {
             int count = -1;
             foreach (var i in instructions)
