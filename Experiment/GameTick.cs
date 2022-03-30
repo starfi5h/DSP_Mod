@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Threading;
 using Unity;
 using UnityEngine;
@@ -63,7 +64,7 @@ namespace Experiment
 				__instance.factories[j].BeforeGameTick(time);
 				// CreateDysonSphere() has to done in mainthread
 				if (__instance.factories[j].factorySystem != null)
-					__instance.factories[k].factorySystem.CheckBeforeGameTick(); 
+					__instance.factories[j].factorySystem.CheckBeforeGameTick(); 
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 
@@ -136,6 +137,7 @@ namespace Experiment
 			{
 				FactoryWorkers[i].CompleteEvent.WaitOne();
 			}
+			DetermineUnlockTech();
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 
 			#region origin2
@@ -174,22 +176,105 @@ namespace Experiment
 			return false;
 		}
 
-		// Prevent calling Unity API in worker thread
-		static List<Action> Actions;
-
-		[HarmonyPrefix, HarmonyPatch(typeof(GameScenarioLogic), nameof(GameScenarioLogic.NotifyOnUnlockRecipe))]
-		internal static bool NotifyOnUnlockRecipe_Prefix(GameScenarioLogic __instance, int recipeId)
+		[HarmonyTranspiler, HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
+		internal static IEnumerable<CodeInstruction> InternalUpdateResearch_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			if (mainThread.Equals(Thread.CurrentThread)) 
-				return true;
-
-			Actions.Add(() => __instance.NotifyOnUnlockRecipe(recipeId));
-			return false;
+			// Only preserve TechState.hashUploaded value change, skip other changes of TechState
+			// Change: if (ts.hashUploaded >= ts.hashNeeded)
+			// To:     if (ts.hashUploaded >= ts.hashNeeded && fasle)
+			try
+			{
+				CodeMatcher matcher = new CodeMatcher(instructions)
+					.MatchForward(true,
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(TechState), nameof(TechState.hashUploaded))),
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(TechState), nameof(TechState.hashNeeded))),
+						new CodeMatch(OpCodes.Blt) //IL 448
+					);
+				object label = matcher.Instruction.operand;
+				matcher.Advance(1)
+					.InsertAndAdvance(new CodeInstruction(OpCodes.Br, label));
+				return matcher.InstructionEnumeration();
+			}
+			catch
+			{
+				Log.Error("LabComponent.InternalUpdateResearch_Transpiler failed.");
+				return instructions;
+			}
 		}
 
+		[HarmonyTranspiler, HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabResearchMode))]
+		internal static IEnumerable<CodeInstruction> GameTickLabResearchMode_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			// lock(GameMain.history) for whole function
+			try
+			{
+				CodeMatcher matcher = new CodeMatcher(instructions)
+					.Start()
+					.Insert(
+						new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(GameMain), "history")),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter", new Type[] { typeof(object) }))
+					)
+					.MatchForward(false, new CodeMatch(OpCodes.Ret))
+					.Insert(
+						new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(GameMain), "history")),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit"))
+					);
 
+				return matcher.InstructionEnumeration();
+			}
+			catch
+			{
+				Log.Error("FactorySystem.GameTickLabResearchMode_Transpiler failed.");
+				return instructions;
+			}
+		}
 
+		private static bool DetermineUnlockTech()
+        {
+			// From FactorySystem.GameTickLabResearchMode() unlock tech part
+			GameHistoryData history = GameMain.history;
+			int techId = GameMain.history.currentTech;
+			TechProto techProto = LDB.techs.Select(techId);
+			if (techId > 0 && techProto != null && techProto.IsLabTech && GameMain.history.techStates.ContainsKey(techId))
+			{
+				var techState = GameMain.history.techStates[techId];
+				if (techState.hashUploaded >= techState.hashNeeded)
+				{
+					int curLevel = techState.curLevel;
+					if (techState.curLevel >= techState.maxLevel)
+					{
+						techState.curLevel = techState.maxLevel;
+						techState.hashUploaded = techState.hashNeeded;
+						techState.unlocked = true;
+					}
+					else
+					{
+						techState.curLevel++;
+						techState.hashUploaded = 0L;
+						techState.hashNeeded = techProto.GetHashNeeded(techState.curLevel);
+					}
 
+					history.techStates[techId] = techState;
+
+					if (techState.unlocked)
+						for (int l = 0; l < techProto.UnlockRecipes.Length; l++)
+							history.UnlockRecipe(techProto.UnlockRecipes[l]);
+
+					for (int m = 0; m < techProto.UnlockFunctions.Length; m++)
+						history.UnlockTechFunction(techProto.UnlockFunctions[m], techProto.UnlockValues[m], curLevel);
+
+					for (int n = 0; n < techProto.AddItems.Length; n++)
+						history.GainTechAwards(techProto.AddItems[n], techProto.AddItemCounts[n]);
+
+					history.NotifyTechUnlock(techId, curLevel);
+					history.DequeueTech();
+					return true;
+				}				
+			}
+			return false;
+		}
 
 		class Worker
         {
