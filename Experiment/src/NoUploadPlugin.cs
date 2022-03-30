@@ -1,11 +1,10 @@
-﻿using System;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 
 namespace NoUpload
 {
-    [BepInPlugin(MODGUID, MODNAME, VERSION)]
+    //[BepInPlugin(MODGUID, MODNAME, VERSION)]
     public class NoUpload : BaseUnityPlugin
     {
         public const string MODNAME = "NoUpload";
@@ -31,7 +30,7 @@ namespace NoUpload
     {
         [HarmonyPrefix, HarmonyPatch(typeof(MilkyWayWebClient), "Update")]
         public static bool Patch_MilkyWayWebClient_Update()
-        {            
+        {
             return false;
         }
 

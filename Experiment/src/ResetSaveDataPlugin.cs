@@ -1,19 +1,59 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
+
 namespace ResetSaveData
 {
-    class DeleteShell
+    //[BepInPlugin("com.starfi5h.plugin.ResetSaveData", "ResetSaveData", "0.1.0")]
+    public class ResetSaveDataPlugin : BaseUnityPlugin
     {
+        Harmony harmony;
+        internal void Start()
+        {
+            harmony = new Harmony("com.starfi5h.plugin.ResetSaveData");
+            Log.Init(Logger);
+            TryPatch(typeof(DeleteShell));
+        }
+
+        void TryPatch(Type type)
+        {
+            try
+            {
+                harmony.PatchAll(type);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Patch {type.Name} error");
+                Logger.LogError(e);
+            }
+        }
+
+        internal void OnDestroy()
+        {
+            harmony.UnpatchSelf();
+        }
+    }
+
+    public static class Log
+    {
+        private static ManualLogSource _logger;
+        public static void Init(ManualLogSource logger) =>
+            _logger = logger;
+        public static void LogError(object obj) =>
+            _logger.LogError(obj);
+        public static void LogWarning(object obj) =>
+            _logger.LogWarning(obj);
+        public static void LogInfo(object obj) =>
+            _logger.LogInfo(obj);
+        public static void LogDebug(object obj) =>
+            _logger.LogDebug(obj);
+    }
+
+	class DeleteShell
+	{
 		static int version;
 
 		[HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), "Import")]
@@ -27,7 +67,7 @@ namespace ResetSaveData
 		public static void DysonSphere_Import_Prefix(DysonSphere __instance, HighStopwatch __state)
 		{
 			for (int layerId = 1; layerId < __instance.layersIdBased.Length; layerId++)
-            {
+			{
 				if (__instance.layersIdBased[layerId] == null)
 					continue;
 
@@ -35,7 +75,8 @@ namespace ResetSaveData
 				for (int index = 1; index < layer.nodeCursor; ++index)
 				{
 					DysonNode node = layer.nodePool[index];
-					if (node != null && node.id == index) {
+					if (node != null && node.id == index)
+					{
 						node.shells.Clear();
 						node.RecalcCpReq();
 					}
@@ -59,34 +100,34 @@ namespace ResetSaveData
 
 
 		[HarmonyPrefix, HarmonyPatch(typeof(DysonShell), "Import")]
-        public static bool DysonShell_Import_Prefix(DysonShell __instance, BinaryReader r, DysonSphere dysonSphere)
-        {
-            __instance.SetEmpty();
-            int peekChar = r.PeekChar();
-            if (peekChar == 'X')
-            {
+		public static bool DysonShell_Import_Prefix(DysonShell __instance, BinaryReader r, DysonSphere dysonSphere)
+		{
+			__instance.SetEmpty();
+			int peekChar = r.PeekChar();
+			if (peekChar == 'X')
+			{
 				version = (int)peekChar;
 				r.ReadChar();
-                ShellImport_SphereSaveFix_X(__instance, r);
-            }
-            version = r.ReadInt32();
-            if (version == 0)
-            {
+				ShellImport_SphereSaveFix_X(__instance, r);
+			}
+			version = r.ReadInt32();
+			if (version == 0)
+			{
 				ShellImport_0(__instance, r);
 			}
 			else
-            {
+			{
 				ShellImport_1(__instance, r);
-            }
+			}
 			return false;
-        }
+		}
 
 
 
 
 
 		static void ShellImport_1(DysonShell shell, BinaryReader r)
-        {
+		{
 			shell.SetEmpty();
 			shell.id = r.ReadInt32();
 			shell.protoId = r.ReadInt32();
@@ -162,7 +203,7 @@ namespace ResetSaveData
 		}
 
 		static void ShellImport_0(DysonShell shell, BinaryReader r)
-        {
+		{
 			shell.SetEmpty();
 			shell.id = r.ReadInt32();
 			shell.protoId = r.ReadInt32();
@@ -238,42 +279,42 @@ namespace ResetSaveData
 			}
 		}
 
-        static void ShellImport_SphereSaveFix_X(DysonShell shell, BinaryReader r)
-        {
+		static void ShellImport_SphereSaveFix_X(DysonShell shell, BinaryReader r)
+		{
 			shell.SetEmpty();
 			shell.id = r.ReadInt32();
 			shell.protoId = r.ReadInt32();
 			shell.layerId = r.ReadInt32();
 			shell.randSeed = r.ReadInt32();
 			int num = r.ReadInt32();
-            for (int i = 0; i < num; i++)
-            {
-                r.ReadSingle();
-                r.ReadSingle();
-                r.ReadSingle();
-            }
-            int num2 = r.ReadInt32();
-            for (int j = 0; j < num2; j++)
-            {
-                r.ReadInt32();
-            }
-            r.ReadInt32(); //vertexCount
-            r.ReadInt32(); //triangleCount
-            r.ReadInt32(); //vertsLength
-            r.ReadInt32(); //pqArrLength
-            r.ReadInt32(); //trisLength
-            r.ReadInt32(); //vAdjsLength
-            r.ReadInt32(); //vertAttrLength
-            r.ReadInt32(); //vertsqLength
-            r.ReadInt32(); //vertsqOffsetLength
+			for (int i = 0; i < num; i++)
+			{
+				r.ReadSingle();
+				r.ReadSingle();
+				r.ReadSingle();
+			}
+			int num2 = r.ReadInt32();
+			for (int j = 0; j < num2; j++)
+			{
+				r.ReadInt32();
+			}
+			r.ReadInt32(); //vertexCount
+			r.ReadInt32(); //triangleCount
+			r.ReadInt32(); //vertsLength
+			r.ReadInt32(); //pqArrLength
+			r.ReadInt32(); //trisLength
+			r.ReadInt32(); //vAdjsLength
+			r.ReadInt32(); //vertAttrLength
+			r.ReadInt32(); //vertsqLength
+			r.ReadInt32(); //vertsqOffsetLength
 
-            r.ReadInt32();
-            int num5 = r.ReadInt32();
-            for (int num11 = 0; num11 < num5; num11++)
-            {
-                r.ReadInt32();
-            }
-        }
+			r.ReadInt32();
+			int num5 = r.ReadInt32();
+			for (int num11 = 0; num11 < num5; num11++)
+			{
+				r.ReadInt32();
+			}
+		}
 
-    }
+	}
 }

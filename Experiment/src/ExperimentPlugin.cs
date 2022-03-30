@@ -6,7 +6,7 @@ using System;
 namespace Experiment
 {
     [BepInPlugin("com.starfi5h.plugin.Experiment", "Experiment", "1.0.0")]
-    public class Experiment : BaseUnityPlugin
+    public class ExperimentPlugin : BaseUnityPlugin
     {
         Harmony harmony;
 
