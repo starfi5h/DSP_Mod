@@ -9,10 +9,11 @@ namespace Experiment
 {
     class GameTick
     {
-		static List<Worker> Workers = new List<Worker>();
+		static Thread mainThread = System.Threading.Thread.CurrentThread;
+		static List<Worker> FactoryWorkers = new List<Worker>();
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick))]
-        internal static bool GameTick_Prefix(GameData __instance, long time)
+        internal static bool GameData_Prefix(GameData __instance, long time)
         {
             #region origin1
             PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
@@ -59,37 +60,36 @@ namespace Experiment
 			for (int j = 0; j < __instance.factoryCount; j++)
 			{
 				Assert.NotNull(__instance.factories[j]);
-				if (__instance.factories[j] != null)
-				{
-					__instance.factories[j].BeforeGameTick(time);
-				}
+				__instance.factories[j].BeforeGameTick(time);
+				// CreateDysonSphere() has to done in mainthread
+				if (__instance.factories[j].factorySystem != null)
+					__instance.factories[k].factorySystem.CheckBeforeGameTick(); 
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 
-			if (Workers.Count < __instance.factoryCount)
+			if (FactoryWorkers.Count < __instance.factoryCount)
             {
-				Workers.Clear();
+				FactoryWorkers.Clear();
 				for (int i = 0; i < __instance.factoryCount; i++)
                 {
-					Workers.Add(new Worker(i));
+					FactoryWorkers.Add(new Worker(Worker.EMission.Factory, i));
                 }
 			}
 
+			// Assign Factory.GameTick()
 			for (int i = 0; i < __instance.factoryCount; i++)
 			{
-				Workers[i].completeEvent.Reset();
-				ThreadPool.QueueUserWorkItem(Workers[i].waitCallback);
+				FactoryWorkers[i].Mission = Worker.EMission.Factory;
+				FactoryWorkers[i].CompleteEvent.Reset();
+				ThreadPool.QueueUserWorkItem(FactoryWorkers[i].Callback);
 			}
 
-			for (int i = 0; i < __instance.factoryCount; i++)
-			{
-				Workers[i].completeEvent.WaitOne();
-			}
+
 			
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 
 
-			#region origin2
+
+			
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Trash);
 			__instance.trashSystem.GameTick(time);
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Trash);
@@ -128,7 +128,17 @@ namespace Experiment
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalAudio);
 				__instance.localPlanet.audio.GameTick();
 				PerformanceMonitor.EndSample(ECpuWorkEntry.LocalAudio);
+			
 			}
+
+			// Wait for Factory
+			for (int i = 0; i < __instance.factoryCount; i++)
+			{
+				FactoryWorkers[i].CompleteEvent.WaitOne();
+			}
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
+
+			#region origin2
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
 			if (!DSPGame.IsMenuDemo)
 			{
@@ -158,30 +168,74 @@ namespace Experiment
 			return false;
         }
 
+		//[HarmonyPrefix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick))]
+		internal static bool ProductionStatistics_Prefix(ProductionStatistics __instance)
+        {
+			return false;
+		}
+
+		// Prevent calling Unity API in worker thread
+		static List<Action> Actions;
+
+		[HarmonyPrefix, HarmonyPatch(typeof(GameScenarioLogic), nameof(GameScenarioLogic.NotifyOnUnlockRecipe))]
+		internal static bool NotifyOnUnlockRecipe_Prefix(GameScenarioLogic __instance, int recipeId)
+		{
+			if (mainThread.Equals(Thread.CurrentThread)) 
+				return true;
+
+			Actions.Add(() => __instance.NotifyOnUnlockRecipe(recipeId));
+			return false;
+		}
+
+
+
+
 
 		class Worker
         {
-			public int factoryIndex;
-			public WaitCallback waitCallback;
-			public AutoResetEvent completeEvent;
-
-			public Worker(int index)
+			public enum EMission
             {
-				factoryIndex = index;
-				waitCallback = new WaitCallback(ComputerThread);
-				completeEvent = new AutoResetEvent(true);
+				Factory,
+				DysonRocket,
+				FactoryStat
+			}
+
+			public EMission Mission { get; set; }
+			public int Index { get;  }
+			public WaitCallback Callback { get; }
+			public AutoResetEvent CompleteEvent { get; }
+
+			public Worker(EMission mission, int index)
+            {
+				Mission = mission;
+				Index = index;
+				Callback = new WaitCallback(ComputerThread);
+				CompleteEvent = new AutoResetEvent(true);
 			}
 
 			public void ComputerThread(object state = null)
             {
 				try
 				{
-					GameMain.data.factories[factoryIndex].GameTick(GameMain.gameTick);
-					completeEvent.Set();
+					switch (Mission)
+					{
+						case EMission.Factory:
+							GameMain.data.factories[Index].GameTick(GameMain.gameTick);
+							break;
+
+						case EMission.DysonRocket:
+							GameMain.data.dysonSpheres[Index].RocketGameTick();
+							break;
+
+						case EMission.FactoryStat:
+							GameMain.data.statistics.production.factoryStatPool[Index].GameTick(GameMain.gameTick);
+							break;
+					}
+					CompleteEvent.Set();
 				}
 				catch (Exception e)
                 {
-					Log.Error($"Thread Error Exception! index {factoryIndex}");
+					Log.Error($"Thread Error! mission:{Mission} index:{Index}");
 					Log.Error(e);
                 }
 			}
