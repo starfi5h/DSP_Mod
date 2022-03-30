@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiment", "Experiment\Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulletTime", "BulletTime\BulletTime.csproj", "{4813207F-CA55-4857-9EDE-B1C9D2A90373}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreadOptimization", "ThreadOptimization\ThreadOptimization.csproj", "{DFE4BA4F-5B90-4DB4-9F2E-FA4A2A61C456}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{4813207F-CA55-4857-9EDE-B1C9D2A90373}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4813207F-CA55-4857-9EDE-B1C9D2A90373}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4813207F-CA55-4857-9EDE-B1C9D2A90373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE4BA4F-5B90-4DB4-9F2E-FA4A2A61C456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE4BA4F-5B90-4DB4-9F2E-FA4A2A61C456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE4BA4F-5B90-4DB4-9F2E-FA4A2A61C456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE4BA4F-5B90-4DB4-9F2E-FA4A2A61C456}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
