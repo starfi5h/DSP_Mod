@@ -54,6 +54,4 @@ namespace ThreadOptimization
                 _logger.LogDebug(obj);
         }
     }
-
 }
-
