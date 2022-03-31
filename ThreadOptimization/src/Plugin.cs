@@ -5,7 +5,7 @@ using System;
 
 namespace ThreadOptimization
 {
-    [BepInPlugin("com.starfi5h.plugin.ThreadOptimization", "ThreadOptimization", "0.0.1")]
+    [BepInPlugin("com.starfi5h.plugin.ThreadOptimization", "ThreadOptimization", "0.0.3")]
     public class Plugin : BaseUnityPlugin
     {
         Harmony harmony;
@@ -17,7 +17,8 @@ namespace ThreadOptimization
             harmony = new Harmony("com.starfi5h.plugin.ThreadOptimization");
             try
             {
-                harmony.PatchAll(typeof(GameData_Patch));
+                harmony.PatchAll(typeof(ThreadSystem));
+                harmony.PatchAll(typeof(EnhanceMultithread));
                 harmony.PatchAll(typeof(Lab_Patch));
                 harmony.PatchAll(typeof(PerformanceStat_Patch));
             }
@@ -30,6 +31,7 @@ namespace ThreadOptimization
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
+            PerformanceStat_Patch.OnDestory();
         }
     }
 

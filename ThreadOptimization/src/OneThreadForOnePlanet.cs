@@ -1,14 +1,9 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Threading;
-using Unity;
-using UnityEngine;
+﻿/*
+using HarmonyLib;
 
 namespace ThreadOptimization
 {
-    class GameData_Patch
+    class OneThreadForOnePlanet
     {
         static int countDown = 10;
 
@@ -152,3 +147,4 @@ namespace ThreadOptimization
         }
     }
 }
+*/

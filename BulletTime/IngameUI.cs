@@ -45,18 +45,21 @@ namespace BulletTime
             }
             // Only host can have control slider
             slider.gameObject.SetActive(!NebulaCompat.IsClient);
+            BulletTimePlugin.State.ManualPause = false;
         }
 
         private static void OnSliderChange(float value)
         {
             if (value == 0)
             {
+                BulletTimePlugin.State.ManualPause = true;
                 text.text = "pause".Translate();
                 if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
+                BulletTimePlugin.State.ManualPause = false;
                 text.text = $"{(int)value}%";
                 if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
                 {
