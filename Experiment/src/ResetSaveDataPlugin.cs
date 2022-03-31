@@ -100,7 +100,7 @@ namespace ResetSaveData
 
 
 		[HarmonyPrefix, HarmonyPatch(typeof(DysonShell), "Import")]
-		public static bool DysonShell_Import_Prefix(DysonShell __instance, BinaryReader r)
+		public static bool DysonShell_Import_Prefix(DysonShell __instance, BinaryReader r, DysonSphere dysonSphere)
 		{
 			__instance.SetEmpty();
 			int peekChar = r.PeekChar();
