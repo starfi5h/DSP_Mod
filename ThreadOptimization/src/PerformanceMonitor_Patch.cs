@@ -4,7 +4,6 @@ namespace ThreadOptimization
 {
     class PerformanceStat_Patch
     {
-        //[HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnOpen))]
         [HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnInit))]
         internal static void UIPerformancePanel_Alter(UIPerformancePanel __instance)
         {

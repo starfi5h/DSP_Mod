@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using UnityEngine;
 
 namespace ThreadOptimization
 {
@@ -43,6 +44,16 @@ namespace ThreadOptimization
 
         public static void Complete()
         {
+            int num = MultithreadSystem.usedThreadCntSetting;
+            if (num == 0)
+            {
+                num = SystemInfo.processorCount;
+            }
+            if (num > 128)
+            {
+                num = 128;
+            }
+
             for (int i = 0; i < count; i++)
             {
                 workers[i].Wait();
@@ -50,7 +61,7 @@ namespace ThreadOptimization
                 // Calculate time by sum
                 for (int k = 0; k < PerformanceMonitor.timeCostsFrame.Length; k++)
                 {
-                    PerformanceMonitor.timeCostsFrame[k] += workers[i].TimeCostsFrame[k];
+                    PerformanceMonitor.timeCostsFrame[k] += workers[i].TimeCostsFrame[k] / num;
                 }
             }
             running = false;

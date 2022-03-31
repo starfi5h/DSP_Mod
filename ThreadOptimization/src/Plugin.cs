@@ -20,6 +20,10 @@ namespace ThreadOptimization
                 harmony.PatchAll(typeof(GameData_Patch));
                 harmony.PatchAll(typeof(Lab_Patch));
                 harmony.PatchAll(typeof(PerformanceStat_Patch));
+
+#if DEBUG
+                PerformanceStat_Patch.UIPerformancePanel_Alter(UIRoot.instance.uiGame.statWindow.performancePanelUI);
+#endif
             }
             catch (Exception e)
             {
