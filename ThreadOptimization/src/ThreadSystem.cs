@@ -2,9 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Reflection.Emit;
 using Unity;
 using UnityEngine;
-
+using System.Reflection;
 
 namespace ThreadOptimization
 {
@@ -35,14 +36,12 @@ namespace ThreadOptimization
 			{
 				workers.Clear();
 				for (int i = 0; i < count; i++)
-					workers.Add(new Worker(i));
+					workers.Add(new Worker());
 			}
 
 			for (int i = 0; i < count; i++)
             {
-				workers[i].Mission = mission;
-				workers[i].CompleteEvent.Reset();
-				ThreadPool.QueueUserWorkItem(workers[i].Callback);
+				workers[i].Assign(mission, i);
 			}
 			running = true;
 		}
@@ -50,35 +49,62 @@ namespace ThreadOptimization
 		public static void Complete()
         {
 			for (int i = 0; i < count; i++)
-				workers[i].CompleteEvent.WaitOne();
+			{
+				workers[i].Wait();
+
+				// Calculate time by sum
+				for (int k = 0; k < PerformanceMonitor.timeCostsFrame.Length; k++)
+                {
+					PerformanceMonitor.timeCostsFrame[k] += workers[i].TimeCostsFrame[k];
+				}
+			}
 			running = false;
 		}
     }
 
 	class Worker
 	{
-		public EMission Mission { get; set; }
-		public int Index { get; }
-		public WaitCallback Callback { get; }
-		public AutoResetEvent CompleteEvent { get; }
+		public EMission Mission { get; private set; }
+		public int Index { get; private set; }
+		public double[] TimeCostsFrame { get; }
 
-		public Worker(int index)
+		WaitCallback callback;
+		AutoResetEvent completeEvent;
+		readonly HighStopwatch[] clocks;
+
+		public Worker()
 		{
+			callback = new WaitCallback(ComputerThread);
+			completeEvent = new AutoResetEvent(true);
+			clocks = new HighStopwatch[PerformanceMonitor.timeCostsFrame.Length];
+			TimeCostsFrame = new double[PerformanceMonitor.timeCostsFrame.Length];
+			for (int i = 0; i < clocks.Length; i++)
+				clocks[i] = new HighStopwatch();
+		}
+
+		public void Assign(EMission mission, int index)
+        {
+			Mission = mission;
 			Index = index;
-			Callback = new WaitCallback(ComputerThread);
-			CompleteEvent = new AutoResetEvent(true);
+			Array.Clear(TimeCostsFrame, 0, TimeCostsFrame.Length);
+			completeEvent.Reset();
+			ThreadPool.QueueUserWorkItem(callback);
+		}
+
+		public void Wait()
+        {
+			completeEvent.WaitOne();
 		}
 
 		public void ComputerThread(object state = null)
 		{
 			try
 			{
-				//var watch = new HighStopwatch();
-				//watch.Begin();
 				switch (Mission)
 				{
 					case EMission.Factory:
-						GameMain.data.factories[Index].GameTick(GameMain.gameTick);
+						//GameMain.data.factories[Index].GameTick(GameMain.gameTick);
+						PlanetFactory_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
 						break;
 
 					case EMission.DysonRocket:
@@ -91,7 +117,6 @@ namespace ThreadOptimization
 
 					default: break;
 				}
-				//Log.Debug($"[{Index,2}]: {watch.duration * 1000}");
 			}
 			catch (Exception e)
 			{
@@ -101,9 +126,101 @@ namespace ThreadOptimization
 			}
 			finally
             {
-				CompleteEvent.Set();
+				completeEvent.Set();
 			}
 		}
-	}
 
+		private void PlanetFactory_GameTick(PlanetFactory factory, long time)
+		{
+			bool flag = GameMain.localPlanet == factory.planet;
+			BeginSample(ECpuWorkEntry.PowerSystem);
+			if (factory.factorySystem != null)
+			{
+				factory.factorySystem.GameTickBeforePower(time, flag);
+			}
+			if (factory.cargoTraffic != null)
+			{
+				factory.cargoTraffic.GameTickBeforePower(time, flag);
+			}
+			if (factory.transport != null)
+			{
+				factory.transport.GameTickBeforePower(time, flag);
+			}
+			if (factory.powerSystem != null)
+			{
+				factory.powerSystem.GameTick(time, flag, false);
+			}
+			EndSample(ECpuWorkEntry.PowerSystem);
+			if (factory.factorySystem != null)
+			{
+				BeginSample(ECpuWorkEntry.Facility);
+				factory.factorySystem.CheckBeforeGameTick();
+				factory.factorySystem.GameTick(time, flag);
+				BeginSample(ECpuWorkEntry.Lab);
+				factory.factorySystem.GameTickLabProduceMode(time, flag);
+				factory.factorySystem.GameTickLabResearchMode(time, flag);
+				factory.factorySystem.GameTickLabOutputToNext(time, flag);
+				EndSample(ECpuWorkEntry.Lab);
+				EndSample(ECpuWorkEntry.Facility);
+			}
+			BeginSample(ECpuWorkEntry.Transport);
+			if (factory.transport != null)
+			{
+				factory.transport.GameTick(time, flag);
+			}
+			EndSample(ECpuWorkEntry.Transport);
+			BeginSample(ECpuWorkEntry.Storage);
+			if (factory.transport != null)
+			{
+				factory.transport.GameTick_InputFromBelt();
+			}
+			EndSample(ECpuWorkEntry.Storage);
+			BeginSample(ECpuWorkEntry.Inserter);
+			if (factory.factorySystem != null)
+			{
+				factory.factorySystem.GameTickInserters(time, flag);
+			}
+			EndSample(ECpuWorkEntry.Inserter);
+			BeginSample(ECpuWorkEntry.Storage);
+			if (factory.factoryStorage != null)
+			{
+				factory.factoryStorage.GameTick(time, flag);
+			}
+			EndSample(ECpuWorkEntry.Storage);
+			if (factory.cargoTraffic != null)
+			{
+				factory.cargoTraffic.GameTick(time);
+			}
+			BeginSample(ECpuWorkEntry.Storage);
+			if (factory.transport != null)
+			{
+				factory.transport.GameTick_OutputToBelt();
+			}
+			EndSample(ECpuWorkEntry.Storage);
+			if (flag)
+			{
+				BeginSample(ECpuWorkEntry.LocalCargo);
+				if (factory.cargoTraffic != null)
+				{
+					factory.cargoTraffic.PresentCargoPathsSync();
+				}
+				EndSample(ECpuWorkEntry.LocalCargo);
+			}
+			BeginSample(ECpuWorkEntry.Digital);
+			factory.digitalSystem.GameTick(flag);
+			EndSample(ECpuWorkEntry.Digital);
+		}
+
+		private void BeginSample(ECpuWorkEntry logic)
+		{
+			if (PerformanceMonitor.CpuProfilerOn)
+				clocks[(int)logic].Begin();
+		}
+
+		private void EndSample(ECpuWorkEntry logic)
+		{
+			if (PerformanceMonitor.CpuProfilerOn)
+				TimeCostsFrame[(int)logic] += clocks[(int)logic].duration;
+		}
+	}
 }

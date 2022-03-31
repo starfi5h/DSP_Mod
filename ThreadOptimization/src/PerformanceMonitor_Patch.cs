@@ -4,8 +4,9 @@ namespace ThreadOptimization
 {
     class PerformanceStat_Patch
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnOpen))]
-        internal static void UIPerformancePanel_Prefix(UIPerformancePanel __instance)
+        //[HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnOpen))]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnInit))]
+        internal static void UIPerformancePanel_Alter(UIPerformancePanel __instance)
         {
             PerformanceMonitor.cpuWorkLevels[(int)ECpuWorkEntry.DysonSphere] = 2;
             PerformanceMonitor.cpuWorkParents[(int)ECpuWorkEntry.DysonSphere] = ECpuWorkEntry.Factory;
