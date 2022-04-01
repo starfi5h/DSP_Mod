@@ -17,7 +17,7 @@ namespace ThreadOptimization
             harmony = new Harmony("com.starfi5h.plugin.ThreadOptimization");
             try
             {
-                harmony.PatchAll(typeof(EnhanceMultithread));
+                harmony.PatchAll(typeof(OneThreadForOnePlanet));
                 harmony.PatchAll(typeof(Lab_Patch));
                 harmony.PatchAll(typeof(PerformanceStat_Patch));
 
