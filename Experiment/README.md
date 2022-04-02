@@ -1,1 +1,1 @@
-﻿A simple plugin example
+﻿Storage for experimenting mods

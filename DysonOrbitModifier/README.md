@@ -1,7 +1,9 @@
-# DysonOrbitModifier
+# DysonOrbitModifier  
+## Deprecated - Can only work on game version 0.8.x
 
 ![Demo 1 sync v.s. not sync ](https://github.com/starfi5h/DSP_Mod/raw/master/DysonOrbitModifier/img/demo1.gif?raw=true)  
 ![Demo 2 visual effect](https://github.com/starfi5h/DSP_Mod/raw/master/DysonOrbitModifier/img/demo2.gif?raw=true) `chainedRotation` = true  
+
 
 This mod lets you view and change parameters of a created orbit without deleting it.  
 You can also edit settings in configuration to make a bigger dyson sphere.  
@@ -38,6 +40,7 @@ Run the game one time to generate `.cfg` file. Pause and resume the game to make
 
 ----
 # 修改戴森球轨道
+## 不再更新 - 只和0.8.x的遊戲相容
 
 查看/修改现有轨道的参数，例如修改無法被删除的第一轨道。  
 也可以调整设置的倍率来建造比原本限制更大的戴森球，但可能有风险。  
