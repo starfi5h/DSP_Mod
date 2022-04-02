@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DysonOrbitModifier", "DysonOrbitModifier\DysonOrbitModifier.csproj", "{8BC843E7-F406-4170-8D07-55BE46B0FD01}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMod", "TestMod\TestMod.csproj", "{93238C68-5A69-4AE4-BFB2-BE37A3D895CD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingMod", "TestingMod\TestingMod.csproj", "{0A606F92-2D9F-4131-9213-AB49382036E2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "SphereEditorTools\SphereEditorTools.csproj", "{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMilestone", "NoMilestone\NoMilestone.csproj", "{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}"
@@ -27,14 +23,6 @@ Global
 		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{93238C68-5A69-4AE4-BFB2-BE37A3D895CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{93238C68-5A69-4AE4-BFB2-BE37A3D895CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{93238C68-5A69-4AE4-BFB2-BE37A3D895CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{93238C68-5A69-4AE4-BFB2-BE37A3D895CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A606F92-2D9F-4131-9213-AB49382036E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A606F92-2D9F-4131-9213-AB49382036E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A606F92-2D9F-4131-9213-AB49382036E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A606F92-2D9F-4131-9213-AB49382036E2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
