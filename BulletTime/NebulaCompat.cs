@@ -18,7 +18,7 @@ namespace Compatibility
 
         // Pause states
         public static bool IsPlayerJoining { get; set; }
-        public static int PendingFactoryCount { get; set; }
+        public static List<string> LoadingPlayers { get; } = new List<string>();
         public static bool DysonSpherePaused { get; set; }
 
 
@@ -33,6 +33,11 @@ namespace Compatibility
                 NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
                 NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
                 NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
+                NebulaModAPI.OnPlayerLeftGame += (player) =>
+                {
+                    LoadingPlayers.RemoveAll(x => x == player.Username);
+                    DetermineCurrentState();
+                };
 
                 System.Type world = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
                 System.Type type = AccessTools.TypeByName("NebulaWorld.GameStates.GameStatesManager");
@@ -66,28 +71,56 @@ namespace Compatibility
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
             IsPlayerJoining = false;
-            PendingFactoryCount = 0;
+            LoadingPlayers.Clear();
             DysonSpherePaused = false;
         }
 
-        public static void OnFactoryLoadRequest(int planetId)
+        private static void OnFactoryLoadRequest(int planetId)
         {
             if (NebulaModAPI.MultiplayerSession.IsGameLoaded)
                 SendPacket(PauseEvent.FactoryRequest, planetId);
         }
 
-        public static void OnFactoryLoadFinished(int planetId)
+        private static void OnFactoryLoadFinished(int planetId)
         {
             if (NebulaModAPI.MultiplayerSession.IsGameLoaded)
                 SendPacket(PauseEvent.FactoryLoaded, planetId);
         }
 
+        public static void DetermineCurrentState()
+        {
+            if (LoadingPlayers.Count == 0 && !IsPlayerJoining)
+            {
+                // Back to host manual setting
+                if (BulletTimePlugin.State.ManualPause)
+                {
+                    BulletTimePlugin.State.SetPauseMode(true);
+                    SendPacket(PauseEvent.Pause);
+                }
+                else
+                {
+                    BulletTimePlugin.State.SetPauseMode(false);
+                    IngameUI.ShowStatus("");
+                    SendPacket(PauseEvent.Resume);
+                }
+            }
+            else if (LoadingPlayers.Count > 0)
+            {
+                // There are still some player loading factories
+                var player = NebulaModAPI.MultiplayerSession.Network.PlayerManager.GetConnectedPlayerByUsername(LoadingPlayers[0]);
+                var packet = new PauseNotificationPacket(PauseEvent.FactoryRequest, player.Data.Username, player.Data.LocalPlanetId);
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
+            }
+        }
+
+
         public static void SendPacket(PauseEvent pauseEvent, int planetId = 0)
         {
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(pauseEvent, planetId));
+            string username = NebulaModAPI.MultiplayerSession.LocalPlayer.Data.Username;
+            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(pauseEvent, username, planetId));
             if (pauseEvent == PauseEvent.Resume) //UI-slider manual resume
             {
-                PendingFactoryCount = 0;
+                LoadingPlayers.Clear();
                 IsPlayerJoining = false;
             }
         }
@@ -130,10 +163,11 @@ namespace Compatibility
         public static void OnAllPlayersSyncCompleted()
         {
             NebulaCompat.IsPlayerJoining = false;
-            BulletTimePlugin.State.SetPauseMode(false);
-            IngameUI.ShowStatus("");
             if (!NebulaCompat.IsClient)
+            {
+                NebulaCompat.DetermineCurrentState();
                 NebulaCompat.SendPacket(NebulaCompat.DysonSpherePaused ? PauseEvent.DysonSpherePaused : PauseEvent.DysonSphereResume);
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
@@ -146,19 +180,15 @@ namespace Compatibility
         [HarmonyPostfix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
         private static void SaveCurrentGame_Postfix(string saveName)
         {
-            if (NebulaCompat.IsMultiplayerActive)
+            if (NebulaCompat.IsMultiplayerActive && !NebulaCompat.IsClient)
             {
                 if (saveName != GameSave.AutoSaveTmp)
                 {
                     // if it is not autosave (trigger by manual), reset all pause states
-                    NebulaCompat.PendingFactoryCount = 0;
+                    NebulaCompat.LoadingPlayers.Clear();
                     NebulaCompat.IsPlayerJoining = false;
                 }
-
-                if (NebulaCompat.PendingFactoryCount <= 0 && !NebulaCompat.IsPlayerJoining)
-                {
-                    NebulaCompat.SendPacket(PauseEvent.Resume);
-                }
+                NebulaCompat.DetermineCurrentState();
             }
         }
 
@@ -241,10 +271,10 @@ namespace Compatibility
         public int PlanetId { get; set; }
 
         public PauseNotificationPacket() { }
-        public PauseNotificationPacket(PauseEvent pauseEvent, int planetId = 0)
+        public PauseNotificationPacket(PauseEvent pauseEvent, string username, int planetId = 0)
         {
-            Username = NebulaModAPI.MultiplayerSession.LocalPlayer.Data.Username;
             Event = pauseEvent;
+            Username = username;
             PlanetId = planetId;
         }
     }
@@ -266,23 +296,22 @@ namespace Compatibility
     {
         public override void ProcessPacket(PauseNotificationPacket packet, INebulaConnection conn)
         {
+            Log.Dev(packet.Event);
             switch (packet.Event)
             {
                 case PauseEvent.Resume: //Client
                     BulletTimePlugin.State.SetPauseMode(false);
                     IngameUI.ShowStatus("");
-                    Log.Dev("Resume");
                     break;
 
                 case PauseEvent.Pause: //Client
                     BulletTimePlugin.State.SetPauseMode(true);
-                    Log.Dev("Pause");
+                    IngameUI.ShowStatus("");
                     break;
 
                 case PauseEvent.Save: //Client
                     BulletTimePlugin.State.SetPauseMode(true);
                     IngameUI.ShowStatus("Host is saving game...".Translate());
-                    Log.Dev("Save");
                     break;
 
                 case PauseEvent.FactoryRequest: //Host, Client
@@ -290,27 +319,18 @@ namespace Compatibility
                     IngameUI.ShowStatus(string.Format("{0} arriving {1}".Translate(), packet.Username, GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName));
                     if (IsHost)
                     {
-                        NebulaCompat.PendingFactoryCount++;
+                        NebulaCompat.LoadingPlayers.Add(packet.Username);
                         NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
                     }
-                    Log.Dev("FactoryRequest");
                     break;
 
                 case PauseEvent.FactoryLoaded: //Host
                     if (IsHost)
                     {
                         // It is possible that FactoryLoaded is return without FactoryRequest
-                        NebulaCompat.PendingFactoryCount--;
-                        Log.Debug($"Pending factory: {NebulaCompat.PendingFactoryCount}");
-                        if (NebulaCompat.PendingFactoryCount <= 0 && !NebulaCompat.IsPlayerJoining)
-                        {
-                            NebulaCompat.PendingFactoryCount = 0;
-                            BulletTimePlugin.State.SetPauseMode(false);
-                            IngameUI.ShowStatus("");
-                            NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(PauseEvent.Resume));
-                        }
+                        NebulaCompat.LoadingPlayers.RemoveAll(x => x == packet.Username);
+                        NebulaCompat.DetermineCurrentState();
                     }
-                    Log.Dev("FactoryLoaded");
                     break;
 
                 case PauseEvent.DysonSpherePaused:
@@ -323,10 +343,6 @@ namespace Compatibility
                     NebulaPatch.SetDysonSpherePasued(false);
                     if (IsHost)
                         NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
-                    break;
-
-                default:
-                    Log.Warn("PauseNotificationPacket: None");
                     break;
             }
         }
