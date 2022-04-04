@@ -14,7 +14,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.3";
+        public const string VERSION = "1.2.4";
 
         public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
@@ -27,7 +27,7 @@ namespace BulletTime
             Log.Init(Logger);
             State = new GameStateManager();
             harmony = new Harmony("com.starfi5h.plugin.BulletTime");
-            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
+            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", true, "Do auto-save in background thread\n在背景执行自动存档");
             KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
 
