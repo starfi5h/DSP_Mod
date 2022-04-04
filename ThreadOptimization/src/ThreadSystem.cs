@@ -16,49 +16,55 @@ namespace ThreadOptimization
     static class ThreadSystem
     {
         readonly static List<Worker> workers = new List<Worker>();
-        static int workerCount;
-        static int RunningCount;
-        static ManualResetEvent CompleteEvent = new ManualResetEvent(true);
+        static int count;
+        static bool running;
 
-        public static void Schedule(EMission mission, int count)
+        public static void Schedule(EMission mission, int workerCount)
         {
-            if (RunningCount > 0)
+            if (running)
             {
                 Log.Warn($"Schedule({mission}) called before previous jobs finished");
                 Complete();
             }
 
-            workerCount = count;
-            for (int i = workers.Count; i < workerCount; i++)
-                workers.Add(new Worker());
+            count = workerCount;
+            if (workers.Count < count)
+            {
+                workers.Clear();
+                for (int i = 0; i < count; i++)
+                    workers.Add(new Worker());
+            }
 
-            RunningCount = workerCount;
-            CompleteEvent.Reset();
-            for (int i = 0; i < workerCount; i++)
+            for (int i = 0; i < count; i++)
+            {
                 workers[i].Assign(mission, i);
+            }
+            running = true;
         }
 
         public static void Complete()
         {
-            CompleteEvent.WaitOne();
-
             int num = MultithreadSystem.usedThreadCntSetting;
             if (num == 0)
-                num = SystemInfo.processorCount;
-            for (int i = 0; i < workerCount; i++)
             {
+                num = SystemInfo.processorCount;
+            }
+            if (num > 128)
+            {
+                num = 128;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                workers[i].Wait();
+
                 // Calculate time by sum
                 for (int k = 0; k < PerformanceMonitor.timeCostsFrame.Length; k++)
                 {
                     PerformanceMonitor.timeCostsFrame[k] += workers[i].TimeCostsFrame[k] / num;
                 }
             }
-        }
-        public static void OnFinished()
-        {
-            Interlocked.Decrement(ref RunningCount);
-            if (RunningCount <= 0)
-                CompleteEvent.Set();
+            running = false;
         }
     }
 
@@ -68,12 +74,14 @@ namespace ThreadOptimization
         public int Index { get; private set; }
         public double[] TimeCostsFrame { get; }
 
-        readonly WaitCallback callback;
+        WaitCallback callback;
+        AutoResetEvent completeEvent;
         readonly HighStopwatch[] clocks;
 
         public Worker()
         {
             callback = new WaitCallback(ComputerThread);
+            completeEvent = new AutoResetEvent(true);
             clocks = new HighStopwatch[PerformanceMonitor.timeCostsFrame.Length];
             TimeCostsFrame = new double[PerformanceMonitor.timeCostsFrame.Length];
             for (int i = 0; i < clocks.Length; i++)
@@ -85,7 +93,13 @@ namespace ThreadOptimization
             Mission = mission;
             Index = index;
             Array.Clear(TimeCostsFrame, 0, TimeCostsFrame.Length);
+            completeEvent.Reset();
             ThreadPool.QueueUserWorkItem(callback);
+        }
+
+        public void Wait()
+        {
+            completeEvent.WaitOne();
         }
 
         public void ComputerThread(object state = null)
@@ -118,11 +132,9 @@ namespace ThreadOptimization
             }
             finally
             {
-                ThreadSystem.OnFinished();
+                completeEvent.Set();
             }
         }
-
-
 
         private void PlanetFactory_GameTick(PlanetFactory factory, long time)
         {
