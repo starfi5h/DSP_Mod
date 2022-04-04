@@ -1,7 +1,7 @@
 {
     "name": "BulletTime",
-    "description": "Let user slow down game speed to improve FPS.  Run autosave in the background. 使玩家可以调整逻辑帧数来提高渲染帧数。在背景执行自动保存。",
-    "version_number": "1.2.3",
+    "description": "Let user slow down game speed in performance test panel to reduce workload.  Run autosave in the background. 使玩家可以调整逻辑帧数来提高渲染帧数。在背景执行自动保存。",
+    "version_number": "1.2.4",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

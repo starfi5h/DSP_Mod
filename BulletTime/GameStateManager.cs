@@ -7,6 +7,7 @@ namespace BulletTime
     public class GameStateManager
     {
         public bool Pause { get; set; }
+        public bool ManualPause { get; set; } // Manual pause state set by user
         public bool AdvanceTick { get; private set; } = true;
         public long StoredGameTick { get; set; }
         public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
