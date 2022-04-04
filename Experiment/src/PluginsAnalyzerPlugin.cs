@@ -54,10 +54,10 @@ namespace PluginsAnalyzer
 
     public class PatchRecord
     {
-        string fullname;
-        string declareType;
-        List<string> moduleNames;
-        string functions;
+        readonly string fullname;
+        readonly string declareType;
+        readonly List<string> moduleNames;
+        readonly string functions;
 
         public PatchRecord(MethodBase methodBase)
         {

@@ -1,8 +1,9 @@
 # Bullet Time
 
-![Paue Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
+![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
 
-Let user slow down game speed to improve FPS.  Run autosave in the background.  
+Let user slow down game speed to reduce workload, so FPS may improve.  
+Run autosave in the background.  
 调整物理帧數以提高渲染帧數。在背景执行自动保存。
 
 ## Feature
@@ -29,8 +30,8 @@ Run the game one time to generate `com.starfi5h.plugin.BulletTime.cfg` file.
 Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html).   
 
 - `EnableBackgroundAutosave`  
-Run autosave in background. (Default:`false`)  
-在背景执行自动保存。 (预设为关闭)  
+Run autosave in background. (Default:`true`)  
+在背景执行自动保存。 (预设为开启)  
 
 - `KeyAutosave`  
 Hotkey for auto-save. (Default:`F10`)  
@@ -53,27 +54,30 @@ Game speed when the game begin. range:0-100
 - If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
 - Players can stop/resume dyson sphere rotation in the editor at top-left button.  
 
-- 当玩家加入、请求工厂数据、存檔時，进入时停模式。
-- 如果客户端中断连接导致游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
+- 当玩家加入、请求工厂数据、存檔時，进入时停模式。  
+- 如果游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
 - 玩家可以在编辑器左上角的按钮中停止/恢复戴森球旋转。  
 ----
 
 ## Changelog
 
+#### v1.2.4
+\- (Nebula) Resume from pause when a client disconnect during loading a factory.  
+
 #### v1.2.3
-\- Fix Nebula sometimes hangs in pause mode when loading factories. Now manual saving will reset pause states.   
+\- (Nebula) Fix host sometimes hangs in pause mode when loading factories. Now manual saving will reset pause states.   
 \- Make block image in background autosave transparent.  
 
 #### v1.2.2
-\- Enable Nebula dyson sphere rotation start/stop button in editor.   
-\- Handle multiple pause events that happen at the same time.  
+\- (Nebula) Enable dyson sphere rotation start/stop button in editor.   
+\- (Nebula) Handle multiple pause events that happen at the same time.  
 
 #### v1.2.1
 \- Show game speed in FPS indicator (Shift + F12)  
 \- Fix camera & mecha movement speed in low speed.  
 
 #### v1.2.0
-\- Add Nebula extra functions.  
+\- (Nebula) Add support for multiplayer.  
 
 
 #### v1.1.0
