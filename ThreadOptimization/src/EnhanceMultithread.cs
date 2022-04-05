@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace ThreadOptimization
 {
@@ -46,11 +47,15 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.Complete();
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Lab);
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Facility);
+
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Transport);
 			GameMain.multithreadSystem.PrepareTransportData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Transport);
+
+			#region belt
+			/*
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Storage);
 			for (int m = 0; m < data.factoryCount; m++)
 			{
@@ -124,16 +129,35 @@ namespace ThreadOptimization
 				}
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Digital);
+			*/
+			#endregion
+
+			ThreadSystem.Schedule(EMission.FactoryBelt, data.factoryCount);
+			ThreadSystem.Complete();
+
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 			factoryEvent.Set();
 		}
 
 
+
+
+		static bool enable = false;
+
 		[HarmonyPrefix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick)), HarmonyPriority(Priority.Last)]
 		internal static bool GameTick_Prefix()
 		{
-			GameTick();
-			return false;
+			if (Input.GetKeyDown(KeyCode.F9))
+			{
+				enable = !enable;
+				Log.Info("Activate: " + enable);
+			}
+			if (enable)
+			{
+				GameTick();
+				return false;
+			}
+			return true;
 		}
 
 		internal static void GameTick()

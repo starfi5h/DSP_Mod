@@ -10,7 +10,8 @@ namespace ThreadOptimization
         None,
         Factory,
         DysonRocket,
-        FactoryStat
+        FactoryStat,
+        FactoryBelt
     }
 
     static class ThreadSystem
@@ -121,6 +122,10 @@ namespace ThreadOptimization
                         GameMain.data.statistics.production.factoryStatPool[Index].GameTick(GameMain.gameTick);
                         break;
 
+                    case EMission.FactoryBelt:
+                        FactoryBelt_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
+                        break;
+
                     default: break;
                 }
             }
@@ -228,5 +233,51 @@ namespace ThreadOptimization
             if (PerformanceMonitor.CpuProfilerOn)
                 TimeCostsFrame[(int)logic] += clocks[(int)logic].duration;
         }
+
+        private void FactoryBelt_GameTick(PlanetFactory factory, long time)
+        {
+            bool flag = GameMain.localPlanet == factory.planet;
+            BeginSample(ECpuWorkEntry.Storage);
+            if (factory.transport != null)
+            {
+                factory.transport.GameTick_InputFromBelt();
+            }
+            EndSample(ECpuWorkEntry.Storage);
+            BeginSample(ECpuWorkEntry.Inserter);
+            if (factory.factorySystem != null)
+            {
+                factory.factorySystem.GameTickInserters(time, flag);
+            }
+            EndSample(ECpuWorkEntry.Inserter);
+            BeginSample(ECpuWorkEntry.Storage);
+            if (factory.factoryStorage != null)
+            {
+                factory.factoryStorage.GameTick(time, flag);
+            }
+            EndSample(ECpuWorkEntry.Storage);
+            if (factory.cargoTraffic != null)
+            {
+                factory.cargoTraffic.GameTick(time);
+            }
+            BeginSample(ECpuWorkEntry.Storage);
+            if (factory.transport != null)
+            {
+                factory.transport.GameTick_OutputToBelt();
+            }
+            EndSample(ECpuWorkEntry.Storage);
+            if (flag)
+            {
+                BeginSample(ECpuWorkEntry.LocalCargo);
+                if (factory.cargoTraffic != null)
+                {
+                    factory.cargoTraffic.PresentCargoPathsSync();
+                }
+                EndSample(ECpuWorkEntry.LocalCargo);
+            }
+            BeginSample(ECpuWorkEntry.Digital);
+            factory.digitalSystem.GameTick(flag);
+            EndSample(ECpuWorkEntry.Digital);
+        }
+
     }
 }
