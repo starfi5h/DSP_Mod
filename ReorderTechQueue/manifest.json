@@ -1,0 +1,7 @@
+{
+    "name": "ReorderTechQueue",
+    "description": "Reorder research queue by dragging the icon 用拖动图标来重新排序研究伫列",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod",
+		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
+}
