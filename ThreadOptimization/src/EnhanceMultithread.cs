@@ -18,7 +18,9 @@ namespace ThreadOptimization
         {
 			GameData data = GameMain.data;
 			long time = GameMain.gameTick;
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
+
+			#region power system			
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
@@ -28,6 +30,16 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
 			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
+
+			/* New method - power system load balance is still required
+			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
+			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount);
+			ThreadSystem.Complete();
+			*/
+			#endregion
+
+
 
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
 			GameMain.multithreadSystem.PrepareAssemblerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
@@ -139,6 +151,13 @@ namespace ThreadOptimization
 			factoryEvent.Set();
 		}
 
+		//[HarmonyPrefix]
+		//[HarmonyPatch(typeof(MultithreadSystem), "PrepareBeforePowerFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long) })]
+		//[HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long), typeof(Player) })]
+		internal static bool PrepareData_Prefix()
+		{
+			return !enable;
+		}
 
 
 

@@ -11,13 +11,14 @@ namespace ThreadOptimization
         Factory,
         DysonRocket,
         FactoryStat,
-        FactoryBelt
+        FactoryBelt,
+        FactoryPowerSystem,
     }
 
     static class ThreadSystem
     {
         readonly static List<Worker> workers = new List<Worker>();
-        static int count;
+        public static int Count { get; private set; }
         static bool running;
 
         public static void Schedule(EMission mission, int workerCount)
@@ -28,15 +29,15 @@ namespace ThreadOptimization
                 Complete();
             }
 
-            count = workerCount;
-            if (workers.Count < count)
+            Count = workerCount;
+            if (workers.Count < Count)
             {
                 workers.Clear();
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < Count; i++)
                     workers.Add(new Worker());
             }
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 workers[i].Assign(mission, i);
             }
@@ -55,7 +56,7 @@ namespace ThreadOptimization
                 num = 128;
             }
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 workers[i].Wait();
 
@@ -124,6 +125,10 @@ namespace ThreadOptimization
 
                     case EMission.FactoryBelt:
                         FactoryBelt_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
+                        break;
+
+                    case EMission.FactoryPowerSystem:
+                        FactoryPowersystem_GameTick();
                         break;
 
                     default: break;
@@ -277,6 +282,28 @@ namespace ThreadOptimization
             BeginSample(ECpuWorkEntry.Digital);
             factory.digitalSystem.GameTick(flag);
             EndSample(ECpuWorkEntry.Digital);
+        }
+
+        private void FactoryPowersystem_GameTick()
+        {
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
+            long time = GameMain.gameTick;
+            int usedThreadCnt = ThreadSystem.Count;
+            for (int i = 0; i < GameMain.data.factoryCount; i++)
+            {
+                PlanetFactory factory = GameMain.data.factories[i];
+                bool isActive = GameMain.data.localPlanet == factory.planet;
+                //BeforePowerPartExecute
+                factory.factorySystem?.ParallelGameTickBeforePower(time, isActive, usedThreadCnt, Index, 4);
+                factory.cargoTraffic?.ParallelGameTickBeforePower(time, isActive, usedThreadCnt, Index, 4);
+                factory.transport?.ParallelGameTickBeforePower(time, isActive, usedThreadCnt, Index, 2);
+            }
+
+            //PreparePowerSystemFactoryData, PowerSystemPartExecute
+            PlanetFactory factory2 = GameMain.data.factories[Index];
+            bool isActive2 = GameMain.data.localPlanet == factory2.planet;
+            factory2.powerSystem.GameTick(time, isActive2, true);
+            PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
         }
 
     }
