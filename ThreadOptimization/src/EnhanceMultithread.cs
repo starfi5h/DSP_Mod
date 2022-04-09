@@ -19,6 +19,16 @@ namespace ThreadOptimization
 			GameData data = GameMain.data;
 			long time = GameMain.gameTick;
 
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
+			double gameTime = GameMain.gameTime;
+			if (!DSPGame.IsMenuDemo)
+			{
+				//data.statistics.PrepareTick(); // Do statistics.production.PrepareTick() in EMission.FactoryPowerSystem
+				data.statistics.techHashedThisFrame = 0;
+				data.history.PrepareTick();
+			}
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
+
 			#region PowerSystem
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 
@@ -169,6 +179,16 @@ namespace ThreadOptimization
 			factoryEvent.Set();
 		}
 
+		static bool productionStatistics_enable = true;
+
+		[HarmonyPrefix, HarmonyPatch(typeof(ProductionStatistics), "GameTick")]
+		internal static bool ProductionStatisticsGameTick_Block()
+        {
+			return productionStatistics_enable;
+		}
+
+		static bool enable = false;
+
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareBeforePowerFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long) })]
 		[HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long), typeof(Player) })]
@@ -177,9 +197,7 @@ namespace ThreadOptimization
 		internal static bool PrepareData_Prefix()
 		{			
 			return !enable;
-		}
-
-		static bool enable = false;
+		}	
 
 		[HarmonyPrefix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick)), HarmonyPriority(Priority.Last)]
 		internal static bool GameTick_Prefix()
@@ -206,14 +224,7 @@ namespace ThreadOptimization
         {
 			GameData data = GameMain.data;
 			long time = GameMain.gameTick;
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
-			double gameTime = GameMain.gameTime;
-			if (!DSPGame.IsMenuDemo)
-			{
-				data.statistics.PrepareTick();
-				data.history.PrepareTick();
-			}
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
+			// Move data.statistics.PrepareTick() and data.history.PrepareTick() to background thread
 			if (data.localPlanet != null && data.localPlanet.factoryLoaded)
 			{
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
@@ -295,9 +306,9 @@ namespace ThreadOptimization
 				}
 				PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
 
-
 				// Wait for factory
 				factoryEvent.WaitOne();
+
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonRocket);
 				GameMain.multithreadSystem.PrepareRocketFactoryData(data.dysonSpheres, data.dysonSpheres.Length);
@@ -323,7 +334,9 @@ namespace ThreadOptimization
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
 			if (!DSPGame.IsMenuDemo)
 			{
+				productionStatistics_enable = false;
 				data.statistics.GameTick(time);
+				productionStatistics_enable = true;
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Digital);
@@ -333,6 +346,7 @@ namespace ThreadOptimization
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Digital);
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
+			Lab_Patch.ProcessUnlockTech(); //new add
 			data.milestoneSystem.GameTick(time);
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Scenario);
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);

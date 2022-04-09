@@ -307,12 +307,22 @@ namespace ThreadOptimization
             BeginSample(ECpuWorkEntry.Digital);
             factory.digitalSystem.GameTick(flag);
             EndSample(ECpuWorkEntry.Digital);
+
+            //PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
+            if (!DSPGame.IsMenuDemo)
+            {
+                GameMain.data.statistics.production.factoryStatPool[factory.index].GameTick(time);
+            }
+            //PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
         }
 
         private void FactoryPowersystem_GameTick()
         {
             long time = GameMain.gameTick;
             int usedThreadCnt = ThreadSystem.Count;
+
+            GameMain.data.statistics.production.factoryStatPool[Index].PrepareTick();
+
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
                 PlanetFactory factory = GameMain.data.factories[i];
