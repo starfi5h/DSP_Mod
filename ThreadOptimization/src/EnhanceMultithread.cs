@@ -20,8 +20,9 @@ namespace ThreadOptimization
 			long time = GameMain.gameTick;
 
 			#region PowerSystem
-			/*
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
+
+			/*            
 			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
@@ -29,22 +30,21 @@ namespace ThreadOptimization
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
 			GameMain.multithreadSystem.Schedule();
-			GameMain.multithreadSystem.Complete();
-			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
+			GameMain.multithreadSystem.Complete();			
 			*/
-
-			// New method - is power system load balance required?
 			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
-			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount);
+			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount); // New method - is power system load balance required?
 			ThreadSystem.Complete();
-			
+
+			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 			#endregion
 
 
-			#region Facility			
-			/*
+			#region Facility
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
+
+			/*			
 			GameMain.multithreadSystem.PrepareAssemblerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
@@ -60,24 +60,31 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.PrepareLabOutput2NextData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Lab);
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Facility);	
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Lab);			
 			*/
-			
 			GameMain.multithreadSystem.PrepareAssemblerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.PrepareLabOutput2NextData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			ThreadSystem.Schedule(EMission.Facility, ThreadSystem.UsedThreadCnt);
 			ThreadSystem.Complete();
-			
+
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Facility);
 			#endregion
 
+			#region Transport
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Transport);
+						
 			GameMain.multithreadSystem.PrepareTransportData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
-			GameMain.multithreadSystem.Complete();
+			GameMain.multithreadSystem.Complete();			
+			/*
+			GameMain.multithreadSystem.PrepareTransportData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+			ThreadSystem.Schedule(EMission.Facility, data.factoryCount);
+			ThreadSystem.Complete();
+			*/
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Transport);
+			#endregion
 
-			#region belt
+			#region Belt, Storage, Inserter
 			/*
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Storage);
 			for (int m = 0; m < data.factoryCount; m++)

@@ -14,7 +14,8 @@ namespace ThreadOptimization
         FactoryStat,
         FactoryBelt,
         FactoryPowerSystem,
-        Facility
+        Facility,
+        Transport
     }
 
 
@@ -149,6 +150,10 @@ namespace ThreadOptimization
 
                     case EMission.Facility:
                         Facility_GameTick();
+                        break;
+
+                    case EMission.Transport:
+                        Transport_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
                         break;
 
                     default: break;
@@ -306,7 +311,6 @@ namespace ThreadOptimization
 
         private void FactoryPowersystem_GameTick()
         {
-            BeginSample(ECpuWorkEntry.PowerSystem);
             long time = GameMain.gameTick;
             int usedThreadCnt = ThreadSystem.Count;
             for (int i = 0; i < GameMain.data.factoryCount; i++)
@@ -323,12 +327,10 @@ namespace ThreadOptimization
             PlanetFactory factory2 = GameMain.data.factories[Index];
             bool isActive2 = GameMain.data.localPlanet == factory2.planet;
             factory2.powerSystem.GameTick(time, isActive2, true);
-            EndSample(ECpuWorkEntry.PowerSystem);
         }
 
         private void Facility_GameTick()
         {
-            BeginSample(ECpuWorkEntry.Facility);
             long time = GameMain.gameTick;
             int usedThreadCnt = ThreadSystem.Count;
             for (int l = 0; l < GameMain.data.factoryCount; l++)
@@ -339,7 +341,6 @@ namespace ThreadOptimization
                 {
                     factory.factorySystem.GameTick(time, isActive, usedThreadCnt, Index, 4);
                     BeginSample(ECpuWorkEntry.Lab);
-
 
                     GameHistoryData history = GameMain.history;
                     GameStatData statistics = GameMain.statistics;
@@ -455,7 +456,13 @@ namespace ThreadOptimization
                     EndSample(ECpuWorkEntry.Lab);
                 }
             }
-            EndSample(ECpuWorkEntry.Facility);
+        }
+    
+        private void Transport_GameTick(PlanetFactory factory, long time)
+        {
+            bool isActive = GameMain.localPlanet == factory.planet;
+            if (factory.transport != null)
+                factory.transport.GameTick(time, isActive);
         }
     }
 }
