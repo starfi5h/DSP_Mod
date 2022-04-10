@@ -30,9 +30,9 @@ namespace ThreadOptimization
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
 
 			#region PowerSystem
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 
-			/*            
+			/*
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
@@ -40,16 +40,15 @@ namespace ThreadOptimization
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.PowerSystem);
 			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
 			GameMain.multithreadSystem.Schedule();
-			GameMain.multithreadSystem.Complete();			
+			GameMain.multithreadSystem.Complete();
+			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 			*/
 			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
 			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount); // New method - is power system load balance required?
 			ThreadSystem.Complete();
-
-			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
+			
 			#endregion
-
 
 			#region Facility
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
@@ -170,10 +169,13 @@ namespace ThreadOptimization
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Digital);
 			*/
-			#endregion
 
 			ThreadSystem.Schedule(EMission.FactoryBelt, data.factoryCount);
 			ThreadSystem.Complete();
+
+			#endregion
+
+
 
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 			factoryEvent.Set();
@@ -193,6 +195,7 @@ namespace ThreadOptimization
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareBeforePowerFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long) })]
 		[HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long), typeof(Player) })]
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareAssemblerFactoryData")]
+		[HarmonyPatch(typeof(FactorySystem), "GameTickLabResearchMode")]
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareLabOutput2NextData")]
 		internal static bool PrepareData_Prefix()
 		{			
