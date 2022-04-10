@@ -26,6 +26,8 @@ namespace ThreadOptimization
         public static int Count { get; private set; }
         public static int UsedThreadCnt { get; private set; }
         static bool running;
+        static readonly HighStopwatch stopwatch = new HighStopwatch();
+        static readonly double[] timeCostsFrame = new double[Enum.GetNames(typeof(ECpuWorkEntry)).Length];
 
         public static void Schedule(EMission mission, int workerCount)
         {
@@ -34,7 +36,7 @@ namespace ThreadOptimization
                 Log.Warn($"Schedule({mission}) called before previous jobs finished");
                 Complete();
             }
-
+            stopwatch.Begin();
             Count = workerCount;
             if (workers.Count < Count)
             {
@@ -48,31 +50,32 @@ namespace ThreadOptimization
                 workers[i].Assign(mission, i);
             }
             running = true;
+            //Log.Info($"{mission}");
         }
 
         public static void Complete()
         {
-            int num = MultithreadSystem.usedThreadCntSetting;
-            if (num == 0)
-            {
-                num = SystemInfo.processorCount;
-            }
-            if (num > 128)
-            {
-                num = 128;
-            }
-
+            Array.Clear(timeCostsFrame, 0, timeCostsFrame.Length);
             for (int i = 0; i < Count; i++)
             {
                 workers[i].Wait();
-
-                // Calculate time by sum
-                for (int k = 0; k < PerformanceMonitor.timeCostsFrame.Length; k++)
+                for (int k = 2; k < PerformanceMonitor.timeCostsFrame.Length; k++)
                 {
-                    PerformanceMonitor.timeCostsFrame[k] += workers[i].TimeCostsFrame[k] / num;
+                    timeCostsFrame[k] += workers[i].TimeCostsFrame[k];
+                    timeCostsFrame[1] += workers[i].TimeCostsFrame[k]; //ECpuWorkEntry.Total = 1
+                }
+            }
+            // Calcualte time by (totalTime * ratio)
+            double totalTime = stopwatch.duration;
+            if (timeCostsFrame[1] > 0)
+            { 
+                for (int k = 2; k < PerformanceMonitor.timeCostsFrame.Length; k++)
+                {
+                    PerformanceMonitor.timeCostsFrame[k] += totalTime * timeCostsFrame[k] / timeCostsFrame[1];
                 }
             }
             running = false;
+            //Log.Info($"{totalTime}");
         }
 
         [HarmonyPostfix]
