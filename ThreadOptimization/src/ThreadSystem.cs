@@ -26,7 +26,7 @@ namespace ThreadOptimization
     {
         readonly static List<Worker> workers = new List<Worker>();
         public static int Count { get; private set; }
-        public static int UsedThreadCnt { get; private set; }
+        public static int UsedThreadCnt { get; private set; } = MultithreadSystem.usedThreadCntSetting > 0 ? MultithreadSystem.usedThreadCntSetting : SystemInfo.processorCount;
         static bool running;
         static readonly HighStopwatch stopwatch = new HighStopwatch();
         static readonly double[] timeCostsFrame = new double[Enum.GetNames(typeof(ECpuWorkEntry)).Length];
@@ -358,6 +358,7 @@ namespace ThreadOptimization
 
         private void Facility_GameTick()
         {
+            BeginSample(ECpuWorkEntry.Facility);
             long time = GameMain.gameTick;
             int usedThreadCnt = ThreadSystem.Count;
             for (int l = 0; l < GameMain.data.factoryCount; l++)
@@ -378,6 +379,7 @@ namespace ThreadOptimization
                     EndSample(ECpuWorkEntry.Lab);
                 }
             }
+            EndSample(ECpuWorkEntry.Facility);
         }
     
         private void GameTickLabResearchMode(PlanetFactory factory, int usedThreadCnt)

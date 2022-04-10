@@ -47,13 +47,12 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
 			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount); // New method - is power system load balance required?
 			ThreadSystem.Complete();
-			
+
 			#endregion
 
 			#region Facility
+			/*
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
-
-			/*			
 			GameMain.multithreadSystem.PrepareAssemblerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
@@ -69,14 +68,13 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.PrepareLabOutput2NextData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.Schedule();
 			GameMain.multithreadSystem.Complete();
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Lab);			
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Lab);	
 			*/
 			GameMain.multithreadSystem.PrepareAssemblerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			GameMain.multithreadSystem.PrepareLabOutput2NextData(GameMain.localPlanet, data.factories, data.factoryCount, time);
 			ThreadSystem.Schedule(EMission.Facility, ThreadSystem.UsedThreadCnt);
 			ThreadSystem.Complete();
-
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Facility);
+			
 			#endregion
 
 			#region Transport
@@ -193,7 +191,7 @@ namespace ThreadOptimization
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Belt);
 
 			// do splitter, moniter, piler, sprayer; transport.GameTick_OutputToBelt(); digitalSystem.GameTick(); factoryStatPool.GameTick();
-			ThreadSystem.Schedule(EMission.StorageInput, data.factoryCount);
+			ThreadSystem.Schedule(EMission.StorageOutput, data.factoryCount);
 			ThreadSystem.Complete();
 
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalCargo);
