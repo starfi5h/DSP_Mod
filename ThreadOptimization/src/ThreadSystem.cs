@@ -9,13 +9,15 @@ namespace ThreadOptimization
     public enum EMission
     {
         None,
-        Factory,
-        DysonRocket,
-        FactoryStat,
-        FactoryBelt,
+        Factory, //Not in use
+        DysonRocket, //Not in use
+        FactoryStat, //Not in use
+        FactoryBelt, //Not in use
         FactoryPowerSystem,
         Facility,
-        Transport
+        Transport,
+        StorageInput,
+        StorageOutput
     }
 
 
@@ -83,10 +85,10 @@ namespace ThreadOptimization
         [HarmonyPatch(typeof(MultithreadSystem), "ResetUsedThreadCnt")]
         internal static void Record_UsedThreadCnt(MultithreadSystem __instance)
         {
-            ThreadSystem.UsedThreadCnt = __instance.usedThreadCnt;
-            if (ThreadSystem.UsedThreadCnt <= 0)
-                ThreadSystem.UsedThreadCnt = 1;
-            Log.Debug($"usedThreadCnt {__instance.usedThreadCnt}");
+            UsedThreadCnt = __instance.usedThreadCnt;
+            if (UsedThreadCnt <= 0)
+                UsedThreadCnt = 1;
+            Log.Debug($"usedThreadCnt {UsedThreadCnt}");
         }
     }
 
@@ -157,6 +159,14 @@ namespace ThreadOptimization
 
                     case EMission.Transport:
                         Transport_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
+                        break;
+
+                    case EMission.StorageInput:
+                        StorageInput(GameMain.data.factories[Index], GameMain.gameTick);
+                        break;
+
+                    case EMission.StorageOutput:
+                        StorageOutput(GameMain.data.factories[Index], GameMain.gameTick);
                         break;
 
                     default: break;
@@ -441,8 +451,6 @@ namespace ThreadOptimization
                     }
                 }
             }
-            //if (num == 0) return; //end here?
-
             if (WorkerThreadExecutor.CalculateMissionIndex(1, factory.factorySystem.labCursor - 1, usedThreadCnt, Index, 30, out int start, out int end))
             {
                 for (int k = start; k < end; k++)
@@ -473,6 +481,7 @@ namespace ThreadOptimization
                     }
                 }
             }
+            if (num <= 0 || !history.techStates.ContainsKey(num)) return;
             lock (history)
             {
                 techState = history.techStates[num];
@@ -489,6 +498,50 @@ namespace ThreadOptimization
             bool isActive = GameMain.localPlanet == factory.planet;
             if (factory.transport != null)
                 factory.transport.GameTick(time, isActive);
+        }
+
+        private void StorageInput(PlanetFactory factory, long time)
+        {
+            BeginSample(ECpuWorkEntry.Storage);
+            if (factory.transport != null)
+                factory.transport.GameTick_InputFromBelt();
+            if (factory.factoryStorage != null)
+                factory.factoryStorage.GameTick(time, GameMain.localPlanet == factory.planet);
+            EndSample(ECpuWorkEntry.Storage);
+        }
+
+        private void StorageOutput(PlanetFactory factory, long time)
+        {
+            BeginSample(ECpuWorkEntry.Splitter);
+            if (factory.cargoTraffic != null)
+                factory.cargoTraffic.SplitterGameTick();
+            EndSample(ECpuWorkEntry.Splitter);
+
+            BeginSample(ECpuWorkEntry.Belt);
+            if (factory.cargoTraffic != null)
+            {
+                factory.cargoTraffic.MonitorGameTick();
+                factory.cargoTraffic.SpraycoaterGameTick();
+                factory.cargoTraffic.PilerGameTick();
+            }
+            EndSample(ECpuWorkEntry.Belt);
+
+            BeginSample(ECpuWorkEntry.Storage);
+            if (factory.transport != null)
+                factory.transport.GameTick_OutputToBelt();
+            EndSample(ECpuWorkEntry.Storage);
+
+            BeginSample(ECpuWorkEntry.Digital);
+            if (factory.digitalSystem != null)
+                factory.digitalSystem.GameTick(GameMain.localPlanet == factory.planet);
+            EndSample(ECpuWorkEntry.Digital);
+
+            BeginSample(ECpuWorkEntry.Statistics);
+            if (!DSPGame.IsMenuDemo)
+            {
+                GameMain.data.statistics.production.factoryStatPool[factory.index].GameTick(time);
+            }
+            EndSample(ECpuWorkEntry.Statistics);
         }
     }
 }

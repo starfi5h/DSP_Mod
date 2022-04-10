@@ -94,6 +94,8 @@ namespace ThreadOptimization
 			#endregion
 
 			#region Belt, Storage, Inserter
+
+			#region origin
 			/*
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Storage);
 			for (int m = 0; m < data.factoryCount; m++)
@@ -169,13 +171,43 @@ namespace ThreadOptimization
 			}
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Digital);
 			*/
-
-			ThreadSystem.Schedule(EMission.FactoryBelt, data.factoryCount);
-			ThreadSystem.Complete();
-
 			#endregion
 
+			// method 2
 
+			// move transport.GameTick_InputFromBelt() behind
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.Inserter);
+			GameMain.multithreadSystem.PrepareInserterData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+			GameMain.multithreadSystem.Schedule();
+			GameMain.multithreadSystem.Complete();
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Inserter);
+
+			// do transport.GameTick_InputFromBelt(); factoryStorage.GameTick();
+			ThreadSystem.Schedule(EMission.StorageInput, data.factoryCount);
+			ThreadSystem.Complete();
+
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.Belt);
+			GameMain.multithreadSystem.PrepareCargoPathsData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+			GameMain.multithreadSystem.Schedule();
+			GameMain.multithreadSystem.Complete();
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Belt);
+
+			// do splitter, moniter, piler, sprayer; transport.GameTick_OutputToBelt(); digitalSystem.GameTick(); factoryStatPool.GameTick();
+			ThreadSystem.Schedule(EMission.StorageInput, data.factoryCount);
+			ThreadSystem.Complete();
+
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalCargo);
+			GameMain.multithreadSystem.PreparePresentCargoPathsData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+			GameMain.multithreadSystem.Schedule();
+			GameMain.multithreadSystem.Complete();
+			PerformanceMonitor.EndSample(ECpuWorkEntry.LocalCargo);
+
+			/* method 1
+			ThreadSystem.Schedule(EMission.FactoryBelt, data.factoryCount);
+			ThreadSystem.Complete();
+			*/
+
+			#endregion
 
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 			factoryEvent.Set();
