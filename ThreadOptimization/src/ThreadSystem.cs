@@ -9,10 +9,6 @@ namespace ThreadOptimization
     public enum EMission
     {
         None,
-        Factory, //Not in use
-        DysonRocket, //Not in use
-        FactoryStat, //Not in use
-        FactoryBelt, //Not in use
         FactoryPowerSystem,
         Facility,
         Transport,
@@ -186,87 +182,6 @@ namespace ThreadOptimization
             }
         }
 
-        private void PlanetFactory_GameTick(PlanetFactory factory, long time)
-        {
-            bool flag = GameMain.localPlanet == factory.planet;
-            BeginSample(ECpuWorkEntry.PowerSystem);
-            if (factory.factorySystem != null)
-            {
-                factory.factorySystem.GameTickBeforePower(time, flag);
-            }
-            if (factory.cargoTraffic != null)
-            {
-                factory.cargoTraffic.GameTickBeforePower(time, flag);
-            }
-            if (factory.transport != null)
-            {
-                factory.transport.GameTickBeforePower(time, flag);
-            }
-            if (factory.powerSystem != null)
-            {
-                factory.powerSystem.GameTick(time, flag, false);
-            }
-            EndSample(ECpuWorkEntry.PowerSystem);
-            if (factory.factorySystem != null)
-            {
-                BeginSample(ECpuWorkEntry.Facility);
-                factory.factorySystem.CheckBeforeGameTick();
-                factory.factorySystem.GameTick(time, flag);
-                BeginSample(ECpuWorkEntry.Lab);
-                factory.factorySystem.GameTickLabProduceMode(time, flag);
-                factory.factorySystem.GameTickLabResearchMode(time, flag);
-                factory.factorySystem.GameTickLabOutputToNext(time, flag);
-                EndSample(ECpuWorkEntry.Lab);
-                EndSample(ECpuWorkEntry.Facility);
-            }
-            BeginSample(ECpuWorkEntry.Transport);
-            if (factory.transport != null)
-            {
-                factory.transport.GameTick(time, flag);
-            }
-            EndSample(ECpuWorkEntry.Transport);
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.transport != null)
-            {
-                factory.transport.GameTick_InputFromBelt();
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            BeginSample(ECpuWorkEntry.Inserter);
-            if (factory.factorySystem != null)
-            {
-                factory.factorySystem.GameTickInserters(time, flag);
-            }
-            EndSample(ECpuWorkEntry.Inserter);
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.factoryStorage != null)
-            {
-                factory.factoryStorage.GameTick(time, flag);
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            if (factory.cargoTraffic != null)
-            {
-                factory.cargoTraffic.GameTick(time);
-            }
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.transport != null)
-            {
-                factory.transport.GameTick_OutputToBelt();
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            if (flag)
-            {
-                BeginSample(ECpuWorkEntry.LocalCargo);
-                if (factory.cargoTraffic != null)
-                {
-                    factory.cargoTraffic.PresentCargoPathsSync();
-                }
-                EndSample(ECpuWorkEntry.LocalCargo);
-            }
-            BeginSample(ECpuWorkEntry.Digital);
-            factory.digitalSystem.GameTick(flag);
-            EndSample(ECpuWorkEntry.Digital);
-        }
-
         private void BeginSample(ECpuWorkEntry logic)
         {
             if (PerformanceMonitor.CpuProfilerOn)
@@ -277,58 +192,6 @@ namespace ThreadOptimization
         {
             if (PerformanceMonitor.CpuProfilerOn)
                 TimeCostsFrame[(int)logic] += clocks[(int)logic].duration;
-        }
-
-        private void FactoryBelt_GameTick(PlanetFactory factory, long time)
-        {
-            bool flag = GameMain.localPlanet == factory.planet;
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.transport != null)
-            {
-                factory.transport.GameTick_InputFromBelt();
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            BeginSample(ECpuWorkEntry.Inserter);
-            if (factory.factorySystem != null)
-            {
-                factory.factorySystem.GameTickInserters(time, flag);
-            }
-            EndSample(ECpuWorkEntry.Inserter);
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.factoryStorage != null)
-            {
-                factory.factoryStorage.GameTick(time, flag);
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            if (factory.cargoTraffic != null)
-            {
-                factory.cargoTraffic.GameTick(time);
-            }
-            BeginSample(ECpuWorkEntry.Storage);
-            if (factory.transport != null)
-            {
-                factory.transport.GameTick_OutputToBelt();
-            }
-            EndSample(ECpuWorkEntry.Storage);
-            if (flag)
-            {
-                BeginSample(ECpuWorkEntry.LocalCargo);
-                if (factory.cargoTraffic != null)
-                {
-                    factory.cargoTraffic.PresentCargoPathsSync();
-                }
-                EndSample(ECpuWorkEntry.LocalCargo);
-            }
-            BeginSample(ECpuWorkEntry.Digital);
-            factory.digitalSystem.GameTick(flag);
-            EndSample(ECpuWorkEntry.Digital);
-
-            BeginSample(ECpuWorkEntry.Statistics);
-            if (!DSPGame.IsMenuDemo)
-            {
-                GameMain.data.statistics.production.factoryStatPool[factory.index].GameTick(time);
-            }
-            EndSample(ECpuWorkEntry.Statistics);
         }
 
         private void FactoryPowersystem_GameTick()

@@ -19,16 +19,6 @@ namespace ThreadOptimization
 			GameData data = GameMain.data;
 			long time = GameMain.gameTick;
 
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
-			double gameTime = GameMain.gameTime;
-			if (!DSPGame.IsMenuDemo)
-			{
-				//data.statistics.PrepareTick(); // Do statistics.production.PrepareTick() in EMission.FactoryPowerSystem
-				data.statistics.techHashedThisFrame = 0;
-				data.history.PrepareTick();
-			}
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
-
 			#region PowerSystem
 
 			/*
@@ -43,11 +33,8 @@ namespace ThreadOptimization
 			GameMain.multithreadSystem.Complete();
 			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 			*/
-			GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
-			GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
-			ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount); // New method - is power system load balance required?
-			ThreadSystem.Complete();
 
+			// Move EMission.FactoryPowerSystem to eariler stage
 			#endregion
 
 			#region Facility
@@ -213,7 +200,9 @@ namespace ThreadOptimization
 
 		static bool productionStatistics_enable = true;
 
-		[HarmonyPrefix, HarmonyPatch(typeof(ProductionStatistics), "GameTick")]
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(ProductionStatistics), "PrepareTick")]
+		[HarmonyPatch(typeof(ProductionStatistics), "GameTick")]
 		internal static bool ProductionStatisticsGameTick_Block()
         {
 			return productionStatistics_enable;
@@ -249,7 +238,17 @@ namespace ThreadOptimization
         {
 			GameData data = GameMain.data;
 			long time = GameMain.gameTick;
-			// Move data.statistics.PrepareTick() and data.history.PrepareTick() to background thread
+
+			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
+			if (!DSPGame.IsMenuDemo)
+			{
+				productionStatistics_enable = false;
+				data.statistics.PrepareTick(); //do PrepareTick() later
+				productionStatistics_enable = true;
+				data.history.PrepareTick();
+			}
+			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
+
 			if (data.localPlanet != null && data.localPlanet.factoryLoaded)
 			{
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
@@ -297,6 +296,12 @@ namespace ThreadOptimization
 			PerformanceMonitor.EndSample(ECpuWorkEntry.PowerSystem);
 			if (GameMain.multithreadSystem.multithreadSystemEnable)
 			{
+				// Clean up data
+				GameMain.multithreadSystem.PrepareBeforePowerFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+				GameMain.multithreadSystem.PreparePowerSystemFactoryData(GameMain.localPlanet, data.factories, data.factoryCount, time, GameMain.mainPlayer);
+				ThreadSystem.Schedule(EMission.FactoryPowerSystem, data.factoryCount); // New method - is power system load balance required?
+				ThreadSystem.Complete();
+
 				// Schedule multithread factory in another thread
 				factoryEvent.Reset();
 				ThreadPool.QueueUserWorkItem(factoryCallBack, data);

@@ -16,6 +16,7 @@ namespace ThreadOptimization
         {
             if (text == null)
             {
+                Log.Debug("UIPerformancePanel Init");
                 InstantiateText();
                 UIPerformancePanel_Alter(__instance);
             }

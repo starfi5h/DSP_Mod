@@ -267,9 +267,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Compatiblity.cs" />
     <Compile Include="src\EnhanceMultithread.cs" />
-    <Compile Include="src\OneThreadForOnePlanet.cs" />
     <Compile Include="src\Lab_Patch.cs" />
     <Compile Include="src\Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
