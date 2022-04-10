@@ -219,7 +219,7 @@ namespace ThreadOptimization
 			return productionStatistics_enable;
 		}
 
-		static bool enable = false;
+		public static bool Enable { get; set; } = false;
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareBeforePowerFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long) })]
@@ -229,13 +229,13 @@ namespace ThreadOptimization
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareLabOutput2NextData")]
 		internal static bool PrepareData_Prefix()
 		{			
-			return !enable;
+			return !Enable;
 		}	
 
 		[HarmonyPrefix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick)), HarmonyPriority(Priority.Last)]
 		internal static bool GameTick_Prefix()
 		{
-			if (enable)
+			if (Enable)
 			{
 				GameTick();
 				return false;
@@ -248,8 +248,8 @@ namespace ThreadOptimization
 		{
 			if (Input.GetKeyDown(KeyCode.F9))
 			{
-				enable = !enable;
-				Log.Info("Activate: " + enable);
+				Enable = !Enable;
+				Log.Info("Activate: " + Enable);
 			}
 		}
 

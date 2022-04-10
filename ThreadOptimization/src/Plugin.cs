@@ -21,10 +21,6 @@ namespace ThreadOptimization
                 harmony.PatchAll(typeof(EnhanceMultithread));
                 harmony.PatchAll(typeof(Lab_Patch));
                 harmony.PatchAll(typeof(PerformanceStat_Patch));
-
-#if DEBUG
-                PerformanceStat_Patch.UIPerformancePanel_Alter(UIRoot.instance.uiGame.statWindow.performancePanelUI);
-#endif
             }
             catch (Exception e)
             {
@@ -35,6 +31,7 @@ namespace ThreadOptimization
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
+            PerformanceStat_Patch.OnDestory();
         }
     }
 
