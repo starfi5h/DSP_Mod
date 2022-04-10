@@ -178,14 +178,7 @@ namespace ThreadOptimization
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Belt);
 
 			// do splitter, moniter, piler, sprayer; transport.GameTick_OutputToBelt(); digitalSystem.GameTick(); factoryStatPool.GameTick();
-			ThreadSystem.Schedule(EMission.StorageOutput, data.factoryCount);
-			ThreadSystem.Complete();
-
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalCargo);
-			GameMain.multithreadSystem.PreparePresentCargoPathsData(GameMain.localPlanet, data.factories, data.factoryCount, time);
-			GameMain.multithreadSystem.Schedule();
-			GameMain.multithreadSystem.Complete();
-			PerformanceMonitor.EndSample(ECpuWorkEntry.LocalCargo);
+			// move to end
 
 			/* method 1
 			ThreadSystem.Schedule(EMission.FactoryBelt, data.factoryCount);
@@ -193,8 +186,6 @@ namespace ThreadOptimization
 			*/
 
 			#endregion
-
-			PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 			factoryEvent.Set();
 		}
 
@@ -324,9 +315,10 @@ namespace ThreadOptimization
 				PerformanceMonitor.EndSample(ECpuWorkEntry.LocalAudio);
 			}
 
-			PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
+			
 			if (GameMain.multithreadSystem.multithreadSystemEnable)
 			{
+				PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
 				for (int num6 = 0; num6 < data.dysonSpheres.Length; num6++)
 				{
 					if (data.dysonSpheres[num6] != null)
@@ -345,9 +337,21 @@ namespace ThreadOptimization
 				GameMain.multithreadSystem.Schedule();
 				GameMain.multithreadSystem.Complete();
 				PerformanceMonitor.EndSample(ECpuWorkEntry.DysonRocket);
+				PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
+
+				// factoryStatPool[factory.index].GameTick(time) need to go behind dyson rocket to record productRegister in DysonSphere.ConstructSp
+				ThreadSystem.Schedule(EMission.StorageOutput, data.factoryCount);
+				ThreadSystem.Complete();
+				PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalCargo);
+				GameMain.multithreadSystem.PreparePresentCargoPathsData(GameMain.localPlanet, data.factories, data.factoryCount, time);
+				GameMain.multithreadSystem.Schedule();
+				GameMain.multithreadSystem.Complete();
+				PerformanceMonitor.EndSample(ECpuWorkEntry.LocalCargo);
+				PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
 			}
 			else
 			{
+				PerformanceMonitor.BeginSample(ECpuWorkEntry.DysonSphere);
 				for (int num7 = 0; num7 < data.dysonSpheres.Length; num7++)
 				{
 					if (data.dysonSpheres[num7] != null)
@@ -358,8 +362,8 @@ namespace ThreadOptimization
 						PerformanceMonitor.EndSample(ECpuWorkEntry.DysonRocket);
 					}
 				}
+				PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
 			}
-			PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
 
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
 			if (!DSPGame.IsMenuDemo)

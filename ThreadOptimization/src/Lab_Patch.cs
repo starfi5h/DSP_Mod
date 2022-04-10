@@ -8,6 +8,14 @@ namespace ThreadOptimization
 {
     class Lab_Patch
     {
+        //[HarmonyPostfix, HarmonyPatch(typeof(DysonSphere), nameof(DysonSphere.ConstructSp))]
+        internal static void Test(DysonSphere __instance)
+        {
+            Log.Info(__instance.productRegister[11902]);
+        }
+
+
+
         [HarmonyTranspiler, HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
         internal static IEnumerable<CodeInstruction> InternalUpdateResearch_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
