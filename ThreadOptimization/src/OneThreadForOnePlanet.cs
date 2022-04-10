@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿/*
+using HarmonyLib;
 
 namespace ThreadOptimization
 {
@@ -146,3 +147,4 @@ namespace ThreadOptimization
         }
     }
 }
+*/

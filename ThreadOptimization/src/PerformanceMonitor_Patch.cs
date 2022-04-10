@@ -9,7 +9,9 @@ namespace ThreadOptimization
         static Text text;
         static int counter;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnOpen))]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnInit))]
+        [HarmonyPatch(typeof(UIPerformancePanel), nameof(UIPerformancePanel._OnOpen))]
         internal static void UIPerformancePanel_OnOpen(UIPerformancePanel __instance)
         {
             if (text == null)
@@ -55,7 +57,7 @@ namespace ThreadOptimization
             PerformanceMonitor.cpuWorkLevels[(int)ECpuWorkEntry.DysonSphere] = 2;
             PerformanceMonitor.cpuWorkParents[(int)ECpuWorkEntry.DysonSphere] = ECpuWorkEntry.Factory;
             PerformanceMonitor.cpuWorkLevels[(int)ECpuWorkEntry.DysonSwarm] = -1;
-            //PerformanceMonitor.cpuWorkParents[(int)ECpuWorkEntry.DysonBullet] = ECpuWorkEntry.DysonSphere; //this should be a part of swarm
+            PerformanceMonitor.cpuWorkParents[(int)ECpuWorkEntry.DysonBullet] = ECpuWorkEntry.DysonSphere; //this should be a part of swarm
             PerformanceMonitor.cpuWorkLevels[(int)ECpuWorkEntry.DysonRocket] = -1;
             PerformanceMonitor.cpuWorkParents[(int)ECpuWorkEntry.Statistics] = ECpuWorkEntry.Factory;
             PerformanceMonitor.cpuWorkLevels[(int)ECpuWorkEntry.Statistics] = 2;
@@ -63,7 +65,7 @@ namespace ThreadOptimization
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonSphere].level = -1;
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonSphere].parent = (int)ECpuWorkEntry.Null; //don't show dyson sphere on graph
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonSwarm].level = -1;
-            //__instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonBullet].parent = (int)ECpuWorkEntry.DysonSphere;
+            __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonBullet].parent = (int)ECpuWorkEntry.DysonSphere;
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.DysonRocket].level = -1;
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.Statistics].parent = (int)ECpuWorkEntry.Factory;
             __instance.cpuGraph.fanDatas[(int)ECpuWorkEntry.Statistics].level = 2;

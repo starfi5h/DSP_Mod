@@ -5,7 +5,7 @@ using System;
 
 namespace ThreadOptimization
 {
-    [BepInPlugin("com.starfi5h.plugin.ThreadOptimization", "ThreadOptimization", "0.0.2")]
+    [BepInPlugin("com.starfi5h.plugin.ThreadOptimization", "ThreadOptimization", "0.0.3")]
     public class Plugin : BaseUnityPlugin
     {
         Harmony harmony;

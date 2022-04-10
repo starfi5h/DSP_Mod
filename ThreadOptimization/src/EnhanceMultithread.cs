@@ -221,6 +221,8 @@ namespace ThreadOptimization
 
 		public static bool Enable { get; set; } = false;
 
+		// For mods compatiblity
+		// https://github.com/kremnev8/CommonAPI/blob/d39bf67004d26dd87c24346dd3c2d741a087d646/CommonAPI/Systems/PlanetExtensionSystem/Patches/PlanetExtensionHooks.cs
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(MultithreadSystem), "PrepareBeforePowerFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long) })]
 		[HarmonyPatch(typeof(MultithreadSystem), "PreparePowerSystemFactoryData", new Type[] { typeof(PlanetData), typeof(PlanetFactory[]), typeof(int), typeof(long), typeof(Player) })]
@@ -241,16 +243,6 @@ namespace ThreadOptimization
 				return false;
 			}
 			return true;
-		}
-
-		[HarmonyPostfix, HarmonyPatch(typeof(GameData), nameof(GameData.Update))]
-		internal static void Update_Postfix()
-		{
-			if (Input.GetKeyDown(KeyCode.F9))
-			{
-				Enable = !Enable;
-				Log.Info("Activate: " + Enable);
-			}
 		}
 
 		internal static void GameTick()

@@ -132,6 +132,7 @@ namespace ThreadOptimization
             {
                 switch (Mission)
                 {
+                    /*
                     case EMission.Factory:
                         //GameMain.data.factories[Index].GameTick(GameMain.gameTick);
                         PlanetFactory_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
@@ -148,6 +149,7 @@ namespace ThreadOptimization
                     case EMission.FactoryBelt:
                         FactoryBelt_GameTick(GameMain.data.factories[Index], GameMain.gameTick);
                         break;
+                    */
 
                     case EMission.FactoryPowerSystem:
                         FactoryPowersystem_GameTick();
