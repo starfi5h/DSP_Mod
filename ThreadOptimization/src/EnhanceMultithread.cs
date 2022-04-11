@@ -340,6 +340,12 @@ namespace ThreadOptimization
 				PerformanceMonitor.EndSample(ECpuWorkEntry.DysonSphere);
 
 				// factoryStatPool[factory.index].GameTick(time) need to go behind dyson rocket to record productRegister in DysonSphere.ConstructSp
+				if (!DSPGame.IsMenuDemo)
+				{
+					productionStatistics_enable = false;
+					data.statistics.GameTick(time);
+					productionStatistics_enable = true;
+				}
 				ThreadSystem.Schedule(EMission.StorageOutput, data.factoryCount);
 				ThreadSystem.Complete();
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalCargo);
@@ -348,6 +354,8 @@ namespace ThreadOptimization
 				GameMain.multithreadSystem.Complete();
 				PerformanceMonitor.EndSample(ECpuWorkEntry.LocalCargo);
 				PerformanceMonitor.EndSample(ECpuWorkEntry.Factory);
+
+
 			}
 			else
 			{
@@ -366,12 +374,7 @@ namespace ThreadOptimization
 			}
 
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
-			if (!DSPGame.IsMenuDemo)
-			{
-				productionStatistics_enable = false;
-				data.statistics.GameTick(time);
-				productionStatistics_enable = true;
-			}
+
 			PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
 			PerformanceMonitor.BeginSample(ECpuWorkEntry.Digital);
 			if (!DSPGame.IsMenuDemo)
