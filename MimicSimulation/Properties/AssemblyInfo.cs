@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // 組件的一般資訊是由下列的屬性集控制。
@@ -19,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 下列 GUID 為專案公開 (Expose) 至 COM 時所要使用的 typelib ID
-[assembly: Guid("e380e4d6-c5b5-4a68-9fad-16d2e1c7916e")]
+[assembly: Guid("81abb0fd-fda6-4540-be7c-fc097cd16b18")]
 
 // 組件的版本資訊由下列四個值所組成: 
 //
@@ -30,4 +32,5 @@ using System.Runtime.InteropServices;
 //
 // 您可以指定所有的值，也可以使用 '*' 將組建和修訂編號
 // 設為預設，如下所示:
- [assembly: AssemblyVersion("0.0.1")]
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("0.0.1")]

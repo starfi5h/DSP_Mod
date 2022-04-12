@@ -20,6 +20,7 @@ namespace MimicSimulation
             try
             {
                 harmony.PatchAll(typeof(GameData_Patch));
+                harmony.PatchAll(typeof(ProductionStatistics_Patch));
             }
             catch (Exception e)
             {

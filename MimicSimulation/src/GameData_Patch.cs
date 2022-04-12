@@ -5,14 +5,15 @@ using System.Reflection.Emit;
 
 namespace MimicSimulation
 {
-    class GameData_Patch
+    public class GameData_Patch
     {
+        public static bool[] IsActive { get; private set; }
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
         static int idleFactoryCount;
         static int workFactoryCount;
         static int factoryCursor = 0;
-        static int Setting = 5;
+        static int Setting = 3;
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         public static void GameMain_Start()
@@ -21,6 +22,7 @@ namespace MimicSimulation
             {
                 workFactories = new PlanetFactory[GameMain.data.factories.Length];
                 idleFactories = new PlanetFactory[GameMain.data.factories.Length];
+                IsActive = new bool[GameMain.data.factories.Length];
                 factoryCursor = 0;
                 SetFactories();
                 Log.Debug($"FactoryCount total:{GameMain.data.factoryCount} work:{workFactoryCount} idle:{idleFactoryCount}");
@@ -29,11 +31,15 @@ namespace MimicSimulation
 
         public static void SetFactories()
         {
+            int newCursor = 0;
             int workIndex = 0;
             int idleIndex = 0;
             int localId = GameMain.localPlanet?.factoryIndex ?? -1;
             if (localId != -1)
+            {
                 workFactories[workIndex++] = GameMain.data.factories[localId];
+                IsActive[localId] = true;
+            }
 
             int i = factoryCursor;
             do
@@ -42,13 +48,20 @@ namespace MimicSimulation
                 if (i == localId)
                     continue;
                 if (workIndex < Setting)
+                {
                     workFactories[workIndex++] = GameMain.data.factories[i];
+                    IsActive[i] = true;
+                    newCursor = i;
+                }
                 else
+                {
                     idleFactories[idleIndex++] = GameMain.data.factories[i];
+                    IsActive[i] = false;
+                }
             } while (i != factoryCursor);
             workFactoryCount = workIndex;
             idleFactoryCount = idleIndex;
-            factoryCursor = (++factoryCursor) % GameMain.data.factoryCount;
+            factoryCursor = newCursor;
         }
 
         
