@@ -345,6 +345,7 @@
     <Compile Include="src\ProductionStatistics_Patch.cs" />
     <Compile Include="src\StationData.cs" />
     <Compile Include="src\Threading.cs" />
+    <Compile Include="src\UIcontrol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

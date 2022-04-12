@@ -21,6 +21,7 @@ namespace MimicSimulation
             {
                 harmony.PatchAll(typeof(GameData_Patch));
                 harmony.PatchAll(typeof(ProductionStatistics_Patch));
+                harmony.PatchAll(typeof(UIcontrol));
             }
             catch (Exception e)
             {
@@ -31,6 +32,7 @@ namespace MimicSimulation
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
+            UIcontrol.OnDestory();
         }
     }
 

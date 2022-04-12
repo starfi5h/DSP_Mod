@@ -8,12 +8,12 @@ namespace MimicSimulation
     public class GameData_Patch
     {
         public static bool[] IsActive { get; private set; }
+        public static int MaxFactoryCount { get; set; } = 3;
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
         static int idleFactoryCount;
         static int workFactoryCount;
         static int factoryCursor = 0;
-        static int Setting = 3;
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         public static void GameMain_Start()
@@ -47,7 +47,7 @@ namespace MimicSimulation
                 i = (++i) % GameMain.data.factoryCount;
                 if (i == localId)
                     continue;
-                if (workIndex < Setting)
+                if (workIndex < MaxFactoryCount)
                 {
                     workFactories[workIndex++] = GameMain.data.factories[i];
                     IsActive[i] = true;
