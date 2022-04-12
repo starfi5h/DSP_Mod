@@ -1,13 +1,10 @@
-﻿using BepInEx;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 
 namespace MimicSimulation
 {
-    class ProductionStatistics_Patch
+    class Functions_Patch
     {
         [HarmonyPrefix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.PrepareTick))]
         public static bool PrepareTick(ProductionStatistics __instance)
@@ -42,7 +39,7 @@ namespace MimicSimulation
                     .SetOpcodeAndAdvance(OpCodes.Nop)
                     .RemoveInstructions(5)
                     .Start()
-                    .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(ProductionStatistics_Patch), "GameTick")));
+                    .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Functions_Patch), "GameTick")));
                 return codeMatcher.InstructionEnumeration();
             }
             catch
@@ -51,6 +48,16 @@ namespace MimicSimulation
                 return instructions;
             }
         }
+
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick))]
+        static void BeforeStationBeltChange(PlanetTransport __instance)
+        {
+            int index = __instance.planet.factoryIndex;
+            if (GameData_Patch.IsActive[index])
+                StationPool.Before(index);
+        }
+
 
         static void GameTick()
         {
@@ -62,10 +69,12 @@ namespace MimicSimulation
             GameMain.data.statistics.production.factoryStatPool[index].GameTick(GameMain.gameTick);
             if (GameData_Patch.IsActive[index])
             {
+                StationPool.After(index);
             }
             else
             {
                 Lab_IdleTick(index);
+                StationPool.IdleTick(index);
             }
         }
 
