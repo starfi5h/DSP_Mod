@@ -68,7 +68,7 @@ namespace MimicSimulation
                 text_Cycle = tmp.GetComponent<Text>();
             }
 
-            maxFactoryCount = GameData_Patch.MaxFactoryCount;
+            maxFactoryCount = FactoryPool.MaxFactoryCount;
             if (factoryCount != GameMain.data.factoryCount)
                 OnFactroyCountChange();
         }
@@ -83,12 +83,12 @@ namespace MimicSimulation
             eventLock = true;
             factoryCount = GameMain.data.factoryCount;
             int workingCount = Math.Min(maxFactoryCount, factoryCount);
-            GameData_Patch.MaxFactoryCount = maxFactoryCount;
+            FactoryPool.MaxFactoryCount = maxFactoryCount;
 
             input.text = maxFactoryCount.ToString();
             slider.maxValue = factoryCount;
             slider.value = workingCount;
-            text_Cycle.text = String.Format("Cycle: {0,7:F2} ticks", (float)factoryCount / workingCount);            
+            text_Cycle.text = string.Format("Cycle: {0,7:F2} ticks", (float)factoryCount / workingCount);            
             eventLock = false;
         }
 
@@ -107,8 +107,7 @@ namespace MimicSimulation
         {
             if (!eventLock)
             {
-                int value = 0;
-                if (int.TryParse(val, out value) && value >= 1)
+                if (int.TryParse(val, out int value) && value >= 1)
                 {
                     maxFactoryCount = value;
                 }

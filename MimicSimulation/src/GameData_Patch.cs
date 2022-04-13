@@ -7,8 +7,6 @@ namespace MimicSimulation
 {
     public class GameData_Patch
     {
-        public static bool[] IsActive { get; private set; }
-        public static int MaxFactoryCount { get; set; } = 3;
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
         static int idleFactoryCount;
@@ -21,9 +19,9 @@ namespace MimicSimulation
             if (GameMain.data != null)
             {
                 workFactories = new PlanetFactory[GameMain.data.factories.Length];
-                idleFactories = new PlanetFactory[GameMain.data.factories.Length];
-                IsActive = new bool[GameMain.data.factories.Length];
+                idleFactories = new PlanetFactory[GameMain.data.factories.Length];                
                 factoryCursor = 0;
+                FactoryPool.Init();
                 SetFactories();
                 Log.Debug($"FactoryCount total:{GameMain.data.factoryCount} work:{workFactoryCount} idle:{idleFactoryCount}");
             }
@@ -31,6 +29,7 @@ namespace MimicSimulation
 
         public static void SetFactories()
         {
+            FactoryPool.SetFactories();
             int newCursor = 0;
             int workIndex = 0;
             int idleIndex = 0;
@@ -38,7 +37,7 @@ namespace MimicSimulation
             if (localId != -1)
             {
                 workFactories[workIndex++] = GameMain.data.factories[localId];
-                IsActive[localId] = true;
+                FactoryPool.Factories[localId].IsActive = true;
             }
 
             int i = factoryCursor;
@@ -47,16 +46,16 @@ namespace MimicSimulation
                 i = (++i) % GameMain.data.factoryCount;
                 if (i == localId)
                     continue;
-                if (workIndex < MaxFactoryCount)
+                if (workIndex < FactoryPool.MaxFactoryCount)
                 {
                     workFactories[workIndex++] = GameMain.data.factories[i];
-                    IsActive[i] = true;
+                    FactoryPool.Factories[i].IsActive = true;
                     newCursor = i;
                 }
                 else
                 {
                     idleFactories[idleIndex++] = GameMain.data.factories[i];
-                    IsActive[i] = false;
+                    FactoryPool.Factories[i].IsActive = false;
                 }
             } while (i != factoryCursor);
             workFactoryCount = workIndex;

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 
@@ -6,25 +7,25 @@ namespace MimicSimulation
 {
     class Functions_Patch
     {
-        [HarmonyPrefix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.PrepareTick))]
-        public static bool PrepareTick(ProductionStatistics __instance)
+        [HarmonyTranspiler, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.PrepareTick))]
+        static IEnumerable<CodeInstruction> PrepareTick_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            for (int i = 0; i < __instance.gameData.factoryCount; i++)
+            try
             {
-                if (GameData_Patch.IsActive[i])
-                {
-                    __instance.factoryStatPool[i].PrepareTick();
-                }
-                else
-                {
-                    __instance.factoryStatPool[i].itemChanged = false;
-                    __instance.factoryStatPool[i].consumeRegister[11901] = 0; // Sail: Swarm.RemoveSolarSail()
-                    __instance.factoryStatPool[i].productRegister[11901] = 0; // Sail: Swarm.AddSolarSail()
-                    __instance.factoryStatPool[i].productRegister[11902] = 0; // SP: ConstructSp()
-                    __instance.factoryStatPool[i].productRegister[11903] = 0; // CP: Swarm.GameTick()
-                }
+                var codeMatcher = new CodeMatcher(instructions)
+                    .Start()
+                    .InsertAndAdvance(
+                        HarmonyLib.Transpilers.EmitDelegate<Action>(() =>
+                        Threading.ForEachParallel(PrepareTick, GameMain.data.factoryCount)),
+                        new CodeInstruction(OpCodes.Ret)
+                    );
+                return codeMatcher.InstructionEnumeration();
             }
-            return false;
+            catch
+            {
+                Log.Error("Transpiler ProductionStatistics.PrepareTick failed.");
+                return instructions;
+            }
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick))]
@@ -39,7 +40,10 @@ namespace MimicSimulation
                     .SetOpcodeAndAdvance(OpCodes.Nop)
                     .RemoveInstructions(5)
                     .Start()
-                    .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Functions_Patch), "GameTick")));
+                    .Insert(
+                        HarmonyLib.Transpilers.EmitDelegate<Action>(() =>
+                        Threading.ForEachParallel(GameTick, GameMain.data.factoryCount)
+                    ));
                 return codeMatcher.InstructionEnumeration();
             }
             catch
@@ -54,27 +58,47 @@ namespace MimicSimulation
         static void BeforeStationBeltChange(PlanetTransport __instance)
         {
             int index = __instance.planet.factoryIndex;
-            if (GameData_Patch.IsActive[index])
-                StationPool.Before(index);
-        }
-
-
-        static void GameTick()
-        {
-            Threading.ForEachParallel(Work, GameMain.data.factoryCount);
-        }
-
-        static void Work(int index)
-        {
-            GameMain.data.statistics.production.factoryStatPool[index].GameTick(GameMain.gameTick);
-            if (GameData_Patch.IsActive[index])
+            if (FactoryPool.TryGet(index, out FactoryData factoryData))
             {
-                StationPool.After(index);
+                if (factoryData.IsActive)
+                    factoryData.StationStorageBegin();
+            }
+        }
+
+
+        static void PrepareTick(int index)
+        {
+            var factoryStat = GameMain.data.statistics.production.factoryStatPool[index];
+            FactoryPool.TryGet(index, out FactoryData factoryData);
+            if (factoryData == null || factoryData.IsActive)
+            {
+                factoryStat.PrepareTick();
+            }
+            else
+            {
+                factoryStat.itemChanged = false;
+                factoryStat.consumeRegister[11901] = 0; // Sail: Swarm.RemoveSolarSail()
+                factoryStat.productRegister[11901] = 0; // Sail: Swarm.AddSolarSail()
+                factoryStat.productRegister[11902] = 0; // SP: ConstructSp()
+                factoryStat.productRegister[11903] = 0; // CP: Swarm.GameTick()
+            }
+        }
+
+        static void GameTick(int index)
+        {
+            //ProductionStatistics.GameTick
+            GameMain.data.statistics.production.factoryStatPool[index].GameTick(GameMain.gameTick);
+            if (FactoryPool.TryGet(index, out FactoryData factoryData) == false)
+                return;
+
+            if (factoryData.IsActive)
+            {
+                factoryData.StationStorageEnd();
             }
             else
             {
                 Lab_IdleTick(index);
-                StationPool.IdleTick(index);
+                factoryData.StationIdleTick();
             }
         }
 

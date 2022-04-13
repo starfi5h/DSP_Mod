@@ -5,45 +5,38 @@ using System.Collections.Generic;
 
 namespace MimicSimulation
 {
-    public static class StationPool
+    public partial class FactoryData
     {
-        static readonly ConcurrentDictionary<int, Dictionary<int, StationData>> factroyDict = new ConcurrentDictionary<int, Dictionary<int, StationData>>();
+        readonly Dictionary<int, StationData> stationDict = new Dictionary<int, StationData>();
 
-        public static void Before(int index)
+        public void StationStorageBegin()
         {
-            if (!factroyDict.ContainsKey(index))
-                factroyDict.TryAdd(index, new Dictionary<int, StationData>());
-            var dict = factroyDict[index];
-            PlanetTransport transport = GameMain.data.factories[index].transport;
+            PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (!dict.ContainsKey(stationId))
-                    dict.Add(stationId, new StationData(transport.stationPool[stationId]));
-                dict[stationId].Before(transport.stationPool[stationId]);
+                if (!stationDict.ContainsKey(stationId))
+                    stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
+                stationDict[stationId].Begin(transport.stationPool[stationId]);
             }
         }
 
-        public static void After(int index)
+        public void StationStorageEnd()
         {
-            if (!factroyDict.TryGetValue(index, out Dictionary<int, StationData> dict))
-                return;
-            PlanetTransport transport = GameMain.data.factories[index].transport;
+            PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (dict.ContainsKey(stationId))
-                    dict[stationId].After(transport.stationPool[stationId]);
+                if (stationDict.ContainsKey(stationId))
+                    stationDict[stationId].End(transport.stationPool[stationId]);
             }
         }
 
-        public static void IdleTick(int index)
+        public void StationIdleTick()
         {
-            if (!factroyDict.TryGetValue(index, out Dictionary<int, StationData> dict))
-                return;
-            PlanetTransport transport = GameMain.data.factories[index].transport;
+            PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (dict.ContainsKey(stationId))
-                    dict[stationId].IdleTick(transport.stationPool[stationId]);
+                if (stationDict.ContainsKey(stationId))
+                    stationDict[stationId].IdleTick(transport.stationPool[stationId]);
             }
         }
     }
@@ -59,7 +52,7 @@ namespace MimicSimulation
             tmpInc = new int[staion.storage.Length];
         }
 
-        public void Before(StationComponent staion)
+        public void Begin(StationComponent staion)
         {
             for (int i = 0; i < staion.storage.Length; i++)
             {
@@ -68,7 +61,7 @@ namespace MimicSimulation
             }
         }
 
-        public void After(StationComponent staion)
+        public void End(StationComponent staion)
         {
             for (int i = 0; i < staion.storage.Length; i++)
             {
