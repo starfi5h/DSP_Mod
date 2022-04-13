@@ -95,6 +95,15 @@ namespace MimicSimulation
                             .Advance(-2)
                             .SetAndAdvance(OpCodes.Nop, null)
                     );
+                // Restore GameMain.multithreadSystem.PrepareTransportData(GameMain.localPlanet, this.factories, this.factoryCount, time);
+                codeMatcher = new CodeMatcher(codeMatcher.InstructionEnumeration())
+                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "PrepareTransportData"))
+                    .Advance(-5)
+                    .SetAndAdvance(OpCodes.Ldarg_0, null)
+                    .SetAndAdvance(OpCodes.Ldfld, AccessTools.Field(typeof(GameData), "factories"))
+                    .SetAndAdvance(OpCodes.Ldarg_0, null)
+                    .SetAndAdvance(OpCodes.Ldfld, AccessTools.Field(typeof(GameData), "factoryCount"));
+
                 return codeMatcher.InstructionEnumeration();
             }
             catch
@@ -103,5 +112,25 @@ namespace MimicSimulation
                 return instructions;
             }
         }
+
+        static void Print(IEnumerable<CodeInstruction> instructions, int start, int end)
+        {
+            int count = -1;
+            foreach (var i in instructions)
+            {
+                if (count++ <= start)
+                    continue;
+                if (count >= end)
+                    break;
+
+                if (i.opcode == OpCodes.Call || i.opcode == OpCodes.Callvirt)
+                    Log.Warn($"{count,2} {i}");
+                else if (i.IsLdarg())
+                    Log.Info($"{count,2} {i}");
+                else
+                    Log.Debug($"{count,2} {i}");
+            }
+        }
+
     }
 }
