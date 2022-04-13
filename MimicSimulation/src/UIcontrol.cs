@@ -88,7 +88,12 @@ namespace MimicSimulation
             input.text = maxFactoryCount.ToString();
             slider.maxValue = factoryCount;
             slider.value = workingCount;
-            text_Cycle.text = string.Format("Cycle: {0,7:F2} ticks", (float)factoryCount / workingCount);            
+            if (factoryCount == workingCount)
+                text_Cycle.text = string.Format("Cycle: {0,7:F2} ticks", 1.0f);
+            else if (workingCount > 1)
+                text_Cycle.text = string.Format("Cycle: {0,7:F2} ticks", (float)factoryCount / (workingCount - 1));
+            else
+                text_Cycle.text = "Only local planet";
             eventLock = false;
         }
 

@@ -9,7 +9,27 @@ namespace MimicSimulation
     {
         readonly Dictionary<int, StationData> stationDict = new Dictionary<int, StationData>();
 
-        public void StationStorageBegin()
+        public void StationBeforeTransport()
+        {
+            if (!IsActive)
+                Traversal(StationData.IdleBegin);
+        }
+
+        public void StationAfterTransport()
+        {
+            if (IsActive)
+                Traversal(StationData.ActiveBegin);
+        }
+
+        public void StationAfterTick()
+        {
+            if (IsActive)
+                Traversal(StationData.ActiveEnd);
+            else
+                Traversal(StationData.IdleEnd);
+        }
+
+        private void Traversal(Action<StationData, StationComponent> action)
         {
             PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
@@ -18,33 +38,7 @@ namespace MimicSimulation
                 {
                     if (!stationDict.ContainsKey(stationId))
                         stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
-                    stationDict[stationId].Begin(transport.stationPool[stationId]);
-                }
-            }
-        }
-
-        public void StationStorageEnd()
-        {
-            PlanetTransport transport = Factory.transport;
-            for (int stationId = 1; stationId < transport.stationCursor; stationId++)
-            {
-                if (transport.stationPool[stationId] != null)
-                {
-                    if (stationDict.ContainsKey(stationId))
-                        stationDict[stationId].End(transport.stationPool[stationId]);
-                }
-            }
-        }
-
-        public void StationIdleTick()
-        {
-            PlanetTransport transport = Factory.transport;
-            for (int stationId = 1; stationId < transport.stationCursor; stationId++)
-            {
-                if (transport.stationPool[stationId] != null)
-                {
-                    if (stationDict.ContainsKey(stationId))
-                        stationDict[stationId].IdleTick(transport.stationPool[stationId]);
+                    action(stationDict[stationId], transport.stationPool[stationId]);
                 }
             }
         }
@@ -54,6 +48,7 @@ namespace MimicSimulation
     {
         readonly int[] tmpCount;
         readonly int[] tmpInc;
+        long energy;
 
         public StationData (StationComponent station)
         {
@@ -62,30 +57,36 @@ namespace MimicSimulation
             tmpInc = new int[length];
         }
 
-        public void Begin(StationComponent staion)
+        public static void ActiveBegin(StationData data, StationComponent staion)
         {
-            for (int i = 0; i < tmpCount.Length; i++)
+            for (int i = 0; i < data.tmpCount.Length; i++)
             {
-                tmpCount[i] = staion.storage[i].count;
-                tmpInc[i] = staion.storage[i].inc;
+                data.tmpCount[i] = staion.storage[i].count;
+                data.tmpInc[i] = staion.storage[i].inc;
             }
         }
 
-        public void End(StationComponent staion)
+        public static void ActiveEnd(StationData data, StationComponent staion)
         {
-            for (int i = 0; i < tmpCount.Length; i++)
+            for (int i = 0; i < data.tmpCount.Length; i++)
             {
-                tmpCount[i] = staion.storage[i].count - tmpCount[i];
-                tmpInc[i] = staion.storage[i].inc - tmpInc[i];
+                data.tmpCount[i] = staion.storage[i].count - data.tmpCount[i];
+                data.tmpInc[i] = staion.storage[i].inc - data.tmpInc[i];
             }
         }
 
-        public void IdleTick(StationComponent staion)
+        public static void IdleBegin(StationData data, StationComponent staion)
         {
-            for (int i = 0; i < tmpCount.Length; i++)
+            data.energy = staion.energy;
+        }
+
+        public static void IdleEnd(StationData data, StationComponent staion)
+        {
+            staion.energy = data.energy;
+            for (int i = 0; i < data.tmpCount.Length; i++)
             {
-                staion.storage[i].count += tmpCount[i];
-                staion.storage[i].inc += tmpInc[i];
+                staion.storage[i].count += data.tmpCount[i];
+                staion.storage[i].inc += data.tmpInc[i];
                 staion.storage[i].count = Math.Max(staion.storage[i].count, 0);
                 staion.storage[i].inc = Math.Max(staion.storage[i].inc, 0);
             }

@@ -54,17 +54,21 @@ namespace MimicSimulation
         }
 
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick))]
-        static void BeforeStationBeltChange(PlanetTransport __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick))]
+        static void PlanetTransport_Prefix(PlanetTransport __instance)
         {
             int index = __instance.planet.factoryIndex;
             if (FactoryPool.TryGet(index, out FactoryData factoryData))
-            {
-                if (factoryData.IsActive)
-                    factoryData.StationStorageBegin();
-            }
+                factoryData.StationBeforeTransport();
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick))]
+        static void PlanetTransport_Postfix(PlanetTransport __instance)
+        {
+            int index = __instance.planet.factoryIndex;
+            if (FactoryPool.TryGet(index, out FactoryData factoryData))
+                factoryData.StationAfterTransport();
+        }
 
         static void PrepareTick(int index)
         {
@@ -91,15 +95,14 @@ namespace MimicSimulation
             if (FactoryPool.TryGet(index, out FactoryData factoryData) == false)
                 return;
 
+            factoryData.StationAfterTick();
             if (factoryData.IsActive)
             {
-                factoryData.StationStorageEnd();
                 factoryData.DysonColletEnd();
             }
             else
             {
                 Lab_IdleTick(index);
-                factoryData.StationIdleTick();
                 factoryData.DysonIdleTick();
             }
         }
