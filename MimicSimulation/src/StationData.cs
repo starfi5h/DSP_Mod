@@ -14,9 +14,12 @@ namespace MimicSimulation
             PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (!stationDict.ContainsKey(stationId))
-                    stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
-                stationDict[stationId].Begin(transport.stationPool[stationId]);
+                if (transport.stationPool[stationId] != null)
+                {
+                    if (!stationDict.ContainsKey(stationId))
+                        stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
+                    stationDict[stationId].Begin(transport.stationPool[stationId]);
+                }
             }
         }
 
@@ -25,8 +28,11 @@ namespace MimicSimulation
             PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (stationDict.ContainsKey(stationId))
-                    stationDict[stationId].End(transport.stationPool[stationId]);
+                if (transport.stationPool[stationId] != null)
+                {
+                    if (stationDict.ContainsKey(stationId))
+                        stationDict[stationId].End(transport.stationPool[stationId]);
+                }
             }
         }
 
@@ -35,8 +41,11 @@ namespace MimicSimulation
             PlanetTransport transport = Factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (stationDict.ContainsKey(stationId))
-                    stationDict[stationId].IdleTick(transport.stationPool[stationId]);
+                if (transport.stationPool[stationId] != null)
+                {
+                    if (stationDict.ContainsKey(stationId))
+                        stationDict[stationId].IdleTick(transport.stationPool[stationId]);
+                }
             }
         }
     }
@@ -46,15 +55,16 @@ namespace MimicSimulation
         readonly int[] tmpCount;
         readonly int[] tmpInc;
 
-        public StationData (StationComponent staion)
+        public StationData (StationComponent station)
         {
-            tmpCount = new int[staion.storage.Length];
-            tmpInc = new int[staion.storage.Length];
+            int length = station.storage?.Length ?? 0;
+            tmpCount = new int[length];
+            tmpInc = new int[length];
         }
 
         public void Begin(StationComponent staion)
         {
-            for (int i = 0; i < staion.storage.Length; i++)
+            for (int i = 0; i < tmpCount.Length; i++)
             {
                 tmpCount[i] = staion.storage[i].count;
                 tmpInc[i] = staion.storage[i].inc;
@@ -63,7 +73,7 @@ namespace MimicSimulation
 
         public void End(StationComponent staion)
         {
-            for (int i = 0; i < staion.storage.Length; i++)
+            for (int i = 0; i < tmpCount.Length; i++)
             {
                 tmpCount[i] = staion.storage[i].count - tmpCount[i];
                 tmpInc[i] = staion.storage[i].inc - tmpInc[i];
@@ -72,7 +82,7 @@ namespace MimicSimulation
 
         public void IdleTick(StationComponent staion)
         {
-            for (int i = 0; i < staion.storage.Length; i++)
+            for (int i = 0; i < tmpCount.Length; i++)
             {
                 staion.storage[i].count += tmpCount[i];
                 staion.storage[i].inc += tmpInc[i];

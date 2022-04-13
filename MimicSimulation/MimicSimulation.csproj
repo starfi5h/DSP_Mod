@@ -340,7 +340,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\DysonBulletData.cs" />
+    <Compile Include="src\Dyson_Patch.cs" />
     <Compile Include="src\FactoryPool.cs" />
     <Compile Include="src\GameData_Patch.cs" />
     <Compile Include="src\Plugin.cs" />

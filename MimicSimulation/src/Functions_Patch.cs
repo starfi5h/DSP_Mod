@@ -94,11 +94,13 @@ namespace MimicSimulation
             if (factoryData.IsActive)
             {
                 factoryData.StationStorageEnd();
+                factoryData.DysonColletEnd();
             }
             else
             {
                 Lab_IdleTick(index);
                 factoryData.StationIdleTick();
+                factoryData.DysonIdleTick();
             }
         }
 

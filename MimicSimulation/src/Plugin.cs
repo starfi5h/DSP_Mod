@@ -22,6 +22,7 @@ namespace MimicSimulation
                 harmony.PatchAll(typeof(GameData_Patch));
                 harmony.PatchAll(typeof(Functions_Patch));
                 harmony.PatchAll(typeof(UIcontrol));
+                harmony.PatchAll(typeof(Dyson_Patch));
             }
             catch (Exception e)
             {

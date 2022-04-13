@@ -7,10 +7,13 @@ namespace MimicSimulation
     {
         public static int MaxFactoryCount { get; set; } = 100;
         public static List<FactoryData> Factories { get; } = new List<FactoryData>();
+        public static Dictionary<int, FactoryData> Planets { get; } = new Dictionary<int, FactoryData>();
+
 
         public static void Init()
         {
             Factories.Clear();
+            Planets.Clear();
         }
 
         public static void SetFactories()
@@ -18,6 +21,7 @@ namespace MimicSimulation
             for (int i = Factories.Count; i < GameMain.data.factoryCount; i++)
             {
                 Factories.Add(new FactoryData(i, GameMain.data.factories[i]));
+                Planets.Add(GameMain.data.factories[i].planetId, Factories[i]);
             }
         }
 
@@ -45,6 +49,4 @@ namespace MimicSimulation
             Factory = factory;
         }
     }
-
-
 }
