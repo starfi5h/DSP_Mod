@@ -33,7 +33,8 @@ namespace MimicSimulation
             int newCursor = 0;
             int workIndex = 0;
             int idleIndex = 0;
-            int localId = GameMain.localPlanet?.factoryIndex ?? -1;
+            int localId = -1;
+            //int localId = GameMain.localPlanet?.factoryIndex ?? -1;
             if (localId != -1)
             {
                 workFactories[workIndex++] = GameMain.data.factories[localId];

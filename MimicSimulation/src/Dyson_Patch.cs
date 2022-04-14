@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using CircularBuffer;
+using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,52 +10,74 @@ namespace MimicSimulation
 {
     partial class FactoryData
     {
-        ConcurrentBag<ProjectileData> dysonBag;
-        ProjectileData[] dysonArray;
-        readonly Queue<Tuple<long, ProjectileData[]>> dysonQueue = new Queue<Tuple<long, ProjectileData[]>>();
+        readonly ConcurrentBag<ProjectileData> dysonBag = new ConcurrentBag<ProjectileData>();
+        readonly List<ProjectileData> dysonList = new List<ProjectileData>();
+        CircularBuffer<ProjectileRecord> dysonBuffer;
         int idleCount;
 
         const int BulletDelay = 180; //Eject Speed: 20/min => 3s => 180tick
-        const int RocketDelay = 720; //Launch Speed: 5/min => 12s => 720tick
+        const int RocketDelay = 360; //Launch Speed: 5/min => 12s => 720tick
+
 
         public void AddDysonData(ProjectileData data)
         {
-            if (dysonBag == null)
-                dysonBag = new ConcurrentBag<ProjectileData>(); // may miss few data?
-            dysonBag.Add(data);
+            // Don't add if disable
+            if (FactoryPool.MaxFactoryCount < GameMain.data.factoryCount)
+                dysonBag.Add(data);
         }
 
         public void DysonColletEnd()
         {
+            // Store projectile in buffer
+            if (dysonList.Count > 0)
+            {
+                if (dysonBuffer == null)
+                    dysonBuffer = new CircularBuffer<ProjectileRecord>(8);
+                int capactiy = dysonBuffer.Capacity;
+                while (capactiy < (dysonBuffer.Size + dysonList.Count))
+                    capactiy *= 2;
+                if (capactiy != dysonBuffer.Capacity)
+                    dysonBuffer = new CircularBuffer<ProjectileRecord>(capactiy, dysonBuffer.ToArray());
+
+                for (int index = 1; index <= idleCount; index++)
+                {
+                    //Log.Debug(FactoryPool.Ratio);
+                    //Log.Info(((long)(RocketDelay * FactoryPool.Ratio * index) / (idleCount + 1)));
+                    long scheduleTime = GameMain.gameTick + (long)(BulletDelay * FactoryPool.Ratio / (idleCount + 1));
+                    //long scheduleTime = GameMain.gameTick + 30L;
+                    for (int i = 0; i < dysonList.Count; i++)
+                    {
+                        dysonBuffer.PushBack(new ProjectileRecord { data = dysonList[i], time = scheduleTime });
+                    }
+                }
+                //Log.Info($"buffersize: {dysonBuffer.Size}");
+            }
+
             // Collect sailbullet and dysonrocket lanuch in this tick
-            dysonArray = null;
-            if (dysonBag != null)
-                dysonArray = dysonBag.ToArray();
-            dysonBag = null;
             idleCount = 0;
+            dysonList.Clear();
+            while (!dysonBag.IsEmpty)
+            {
+                dysonBag.TryTake(out ProjectileData data);
+                dysonList.Add(data);
+            }
         }
 
         public void DysonIdleTick()
         {
-            // If pass the time, lanuch pending Projectile
-            while (dysonQueue.Count > 0 && GameMain.gameTick <= dysonQueue.Peek().Item1)
+            idleCount++;
+            // Lanuch projectile in buffer when time is passed
+            if (dysonBuffer != null)
             {
-                //Log.Warn($"Current{GameMain.gameTick} Queue{dysonQueue.Peek().Item1} Len{dysonQueue.Peek().Item2.Length}");
-                ProjectileData[] array = dysonQueue.Dequeue().Item2;
-                foreach (var data in array)
+                while (dysonBuffer.Size > 0 && GameMain.gameTick <= dysonBuffer[0].time)
                 {
-                    if (data.TargetId < 0)
-                        Dyson_Patch.AddBullet(Factory.dysonSphere.swarm, data);
+                    //Log.Warn($"buffersize: {dysonBuffer.Size} {dysonBuffer[0].time}");
+                    if (dysonBuffer[0].data.TargetId < 0)
+                        Dyson_Patch.AddBullet(Factory.dysonSphere.swarm, dysonBuffer[0].data);
                     else
-                        Dyson_Patch.AddRocket(Factory.dysonSphere, data);
+                        Dyson_Patch.AddRocket(Factory.dysonSphere, dysonBuffer[0].data);
+                    dysonBuffer.PopFront();
                 }
-            }
-            // Store to launch in future
-            if (dysonArray != null)
-            {
-                idleCount++;
-                dysonQueue.Enqueue(Tuple.Create(GameMain.gameTick + BulletDelay * idleCount, dysonArray));
-                //Log.Info($"Current{GameMain.gameTick} Insert{GameMain.gameTick + BulletDelay * idleCount} Len{dysonArray.Length} Count{dysonQueue.Count}");
             }
         }
     }
@@ -156,6 +179,8 @@ namespace MimicSimulation
                 bullet.maxt = (float)((bullet.uEnd - bullet.uBegin).magnitude / 4000.0);
                 bullet.uEndVel = VectorLF3.Cross(bullet.uEnd - starPos, swarm.orbits[orbitId].up).normalized * Math.Sqrt(swarm.dysonSphere.gravity / swarm.orbits[orbitId].radius);
                 swarm.AddBullet(bullet, orbitId);
+                if (swarm.dysonSphere.starData.displayName == "OsPegasi")
+                    Log.Warn($"Add Rocket {swarm.dysonSphere.starData.displayName} time:{GameMain.gameTick}");
             }
         }
 
@@ -176,8 +201,16 @@ namespace MimicSimulation
                 rocket.uSpeed = 0f;
                 rocket.launch = projectile.LocalPos.normalized;
                 sphere.AddDysonRocket(rocket, node);
+                if (sphere.starData.displayName == "OsPegasi")
+                    Log.Warn($"Add Rocket {sphere.starData.displayName} time:{GameMain.gameTick}");
             }
         }
+    }
+
+    public struct ProjectileRecord
+    {
+        public long time;
+        public ProjectileData data;
     }
 
     public struct ProjectileData
