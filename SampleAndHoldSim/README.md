@@ -67,8 +67,7 @@ Display item count change rate in station storages. (Default:`true`)
 - 研究的哈希块上传量  
 - 产物统计和电力统计  
 - 射出的太阳帆和火箭  
-
-![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats1.jpg)  
+  
 如果工厂的产出是稳定的，长期下来模拟的产量和真实的产量会相近。  
 短期上统计的数据可能会变得稀疏，此外工厂内部元件(仓储,运输带)中货物的增加数量也会比原本的少。  
 
@@ -86,6 +85,9 @@ Display item count change rate in station storages. (Default:`true`)
 ----
 
 ## Changelog
+
+#### v0.1.1  
+\- Fix veinGroup value changes.  
 
 #### v0.1.0  
 \- Initial release.  
