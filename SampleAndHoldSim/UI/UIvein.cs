@@ -5,19 +5,21 @@ namespace SampleAndHoldSim
     class UIvein
     {
         public static int ViewFactoryIndex = -1;
-
-        static int[,] periodArray;
+        
+        static int[,] periodArray = null;
         const int PEROID = 600;
         static int cursor;
 
+        // Due to there is random seed in MinerComponent, sliding window can't get accurate results
+        /*
         [HarmonyPrefix, HarmonyPatch(typeof(UIVeinDetailNode), "_OnUpdate")]
-        static void OnUpdate_Prefix(UIVeinDetailNode __instance, out long __state)
+        public static void OnUpdate_Prefix(UIVeinDetailNode __instance, out long __state)
         {
             __state = __instance.showingAmount;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIVeinDetailNode), "_OnUpdate")]
-        static void OnUpdate_Postfix(UIVeinDetailNode __instance, long __state)
+        public static void OnUpdate_Postfix(UIVeinDetailNode __instance, long __state)
         {
             if (__instance.showingAmount != __state)
             {
@@ -30,6 +32,7 @@ namespace SampleAndHoldSim
                 __instance.infoText.text += $"\nMiningRate: {GetVeinGroupChangeRate(__instance.veinGroupIndex):+0.00;-0.00} /s";
             }
         }
+        */
 
         public static void AdvanceCursor()
         {            
