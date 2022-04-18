@@ -11,7 +11,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.1.0";
+        public const string VERSION = "0.1.1";
         public static Plugin instance;
         Harmony harmony;
 
@@ -44,7 +44,7 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(UIcontrol));
             harmony.PatchAll(typeof(Dyson_Patch));
 
-            harmony.PatchAll(typeof(UIvein));
+            //harmony.PatchAll(typeof(UIvein));
             if (EnableStationStorageUI.Value)
                 harmony.PatchAll(typeof(UIStation));
 

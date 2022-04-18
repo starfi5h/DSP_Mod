@@ -42,13 +42,12 @@ namespace SampleAndHoldSim
                 {
                     if (tmpVeinAmount[i] != 0)
                     {
-                        factory.veinPool[i].amount -= tmpVeinAmount[i];
-                        factory.planet.veinGroups[factory.veinPool[i].groupIndex].amount += tmpVeinAmount[i];
+                        int consumeAmount = tmpVeinAmount[i] <= factory.veinPool[i].amount ? tmpVeinAmount[i] : factory.veinPool[i].amount;
+                        factory.veinPool[i].amount -= consumeAmount;
+                        factory.planet.veinGroups[factory.veinPool[i].groupIndex].amount -= consumeAmount;
                     }
                 }
             }
         }
-
-
     }
 }
