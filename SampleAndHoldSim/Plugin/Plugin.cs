@@ -17,13 +17,14 @@ namespace SampleAndHoldSim
 
         ConfigEntry<int> MaxFactoryCount;
         ConfigEntry<bool> EnableStationStorageUI;
+        ConfigEntry<bool> EnableVeinConsumptionUI;
 
         public void LoadConfig()
         {
             MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑祯所能运行的最大工厂数量");
             EnableStationStorageUI = Config.Bind<bool>("UI", "EnableStationStorageUI", true, "Display item count change rate in station storages.\n显示物流塔货物变化速率");
+            EnableVeinConsumptionUI = Config.Bind<bool>("UI", "EnableVeinConsumptionUI", true, "Display mineral consumption rate of veins.\n显示矿脉的矿物消耗速率");
             MainManager.MaxFactoryCount = MaxFactoryCount.Value;
-            Log.Debug($"MaxFactoryCount:{MainManager.MaxFactoryCount} EnableStationStorageUI:{EnableStationStorageUI.Value}");
         }
 
         public void SaveConfig(int maxFactoryCount)
@@ -44,7 +45,8 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(UIcontrol));
             harmony.PatchAll(typeof(Dyson_Patch));
 
-            //harmony.PatchAll(typeof(UIvein));
+            if (EnableVeinConsumptionUI.Value)
+                harmony.PatchAll(typeof(UIvein));
             if (EnableStationStorageUI.Value)
                 harmony.PatchAll(typeof(UIStation));
 
