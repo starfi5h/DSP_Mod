@@ -13,7 +13,7 @@ namespace SphereEditorTools
 
         public static bool Toggle(bool enable)
         {
-            DysonSphereLayer currentLayer = UIRoot.instance.uiGame.dysonEditor.selection.singleSelectedLayer;
+            //DysonSphereLayer currentLayer = UIRoot.instance.uiGame.dysonEditor.selection.singleSelectedLayer;
             if (enable && selectedLayer != null)
             {
                 selectedLayer.orbitAngularSpeed = 0f; //Stop selected layer rotation
@@ -64,7 +64,6 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphereLayer), "InitOrbitRotation")]
         public static bool InitOrbitRotation_Prefix(DysonSphereLayer __instance, Quaternion __1)
         {
-            Log.LogDebug(EnableAnchorMode);
             if (EnableAnchorMode)
             {
                 ChangeLayer(__instance, __1);
@@ -131,7 +130,6 @@ namespace SphereEditorTools
                 DysonNode node = layer.nodePool[i];
                 if (node != null && node.id == i)
                 {
-                    Vector3 pos = node.pos;
                     if (EnableAnchorMode)
                         node.pos = Quaternion.Inverse(layer.currentRotation) * previousRotation * node.pos;
                 }
@@ -153,7 +151,7 @@ namespace SphereEditorTools
                     frame.nodeA.RecalcSpReq();
                     frame.nodeB.RecalcSpReq();
 
-                    Log.LogDebug("Frame[{i}]: spMax {spMax}->{frame.spMax}; " + $"ReqSP nodeA[{frame.nodeA.id}]:{spReqOrderA}->{frame.nodeA.spReqOrder}, nodeB[{frame.nodeB.id}]:{spReqOrderB}->{frame.nodeB.spReqOrder}");
+                    Log.LogDebug($"Frame[{i}]: spMax {spMax}->{frame.spMax}; " + $"ReqSP nodeA[{frame.nodeA.id}]:{spReqOrderA}->{frame.nodeA.spReqOrder}, nodeB[{frame.nodeB.id}]:{spReqOrderB}->{frame.nodeB.spReqOrder}");
 
                     frame.segPoints = null; //Reset private field segPoints to recalculate position
                 }

@@ -25,7 +25,7 @@ namespace SphereEditorTools
             dysonEditor = __instance;
             Stringpool.Set();
             if (SphereEditorTools.EnableGUI.Value)
-                UIWindow.OnOpen(dysonEditor);
+                UIWindow.OnOpen();
 
             HideLayer.SetDisplayMode(DisplayMode);
             HideLayer.SetMask(HideLayer.EnableMask);
@@ -62,7 +62,7 @@ namespace SphereEditorTools
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnClose")]
-        public static void Free(UIDysonEditor __instance)
+        public static void Free()
         {
             dysonEditor = null;
             if (SphereEditorTools.EnableGUI.Value)

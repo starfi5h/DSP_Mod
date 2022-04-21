@@ -5,7 +5,6 @@ namespace SphereEditorTools
 {
     class UIWindow
     {
-        static UIDysonEditor dysnoEditor;
         public static bool isShow;
         static bool isMin;
 
@@ -43,17 +42,15 @@ namespace SphereEditorTools
         }
 
 
-        public static void OnOpen(UIDysonEditor __instance)
+        public static void OnOpen()
         {
             isShow = true;
-            dysnoEditor = __instance;
             SpeedInput = "";
         }
  
         public static void OnClose()
         {
             isShow = false;
-            dysnoEditor = null;
         }
 
         public static void OnGUI()
@@ -87,7 +84,6 @@ namespace SphereEditorTools
         {
             bool tmpBool;
             int tmpInt;
-            float tmpFloat;
             string tmpString;
 
             GUILayout.BeginArea(new Rect(windowRect.width - 27f, 1f, 25f, 16f));
@@ -208,7 +204,7 @@ namespace SphereEditorTools
                     SpeedInput = GUILayout.TextField(SpeedInput, 7, GUILayout.MinWidth(35));
                     if (GUILayout.Button(Stringpool.Set1))
                     {
-                        if (float.TryParse(SpeedInput, out tmpFloat) && tmpFloat >= 0f)
+                        if (float.TryParse(SpeedInput, out float tmpFloat) && tmpFloat >= 0f)
                         {
                             EditOrbit.TrySetAngularSpeed(tmpFloat);
                         }
