@@ -279,9 +279,12 @@ namespace SphereEditorTools
 
             try
             {
-                var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap");
+                var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap", new Type[] { typeof(Ray), typeof(Vector3).MakeByRefType()});
+                var methodRaySnap2 = typeof(UIDysonDrawingGrid).GetMethod("RaySnap", new Type[] { typeof(Ray), typeof(Vector3).MakeByRefType(), typeof(int).MakeByRefType() });
                 var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
                 var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
+
+                Log.LogInfo(methodRaySnap);
 
                 for (int i = 0; i < code.Count; i++)
                 {
@@ -296,6 +299,12 @@ namespace SphereEditorTools
                         {
                             code[i].opcode = OpCodes.Call;
                             code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RaySnap");
+                            Log.LogDebug("RaySnap");
+                        }
+                        else if (code[i].opcode == OpCodes.Callvirt && mi == methodRaySnap2)
+                        {
+                            code[i].opcode = OpCodes.Call;
+                            code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RaySnap2");
                         }
                         else if (code[i].opcode == OpCodes.Callvirt && mi == methodRayCast)
                         {
@@ -309,7 +318,7 @@ namespace SphereEditorTools
             {
                 Log.LogError(e);
                 code = backup;
-                Log.LogWarning("Transpiler failed. Restore backup IL");
+                Log.LogWarning("Brush transpiler failed. Restore backup IL");
                 SphereEditorTools.ErrorMessage += "SymmetryTool ";
             }            
             return code.AsEnumerable();
@@ -339,6 +348,7 @@ namespace SphereEditorTools
             }
             return result;
         }
+
         public static bool Overwrite_RayCast(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, Quaternion rotation, float radius, out Vector3 cast, bool front = true)
         {
             if (overwrite)
@@ -368,6 +378,19 @@ namespace SphereEditorTools
                 return resultSnap;
             }
             resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap);
+            dataPoint = snap;
+            return resultSnap;
+        }
+
+        public static bool Overwrite_RaySnap2(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, out Vector3 snap, out int triIdx)
+        {
+            if (overwrite)
+            {
+                snap = dataPoint;
+                triIdx = 0; // What does tis variable do?
+                return resultSnap;
+            }
+            resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap, out triIdx);
             dataPoint = snap;
             return resultSnap;
         }

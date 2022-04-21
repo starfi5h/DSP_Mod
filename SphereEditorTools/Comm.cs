@@ -163,7 +163,7 @@ namespace SphereEditorTools
                         }
                         else if (Input.GetKeyDown(SphereEditorTools.KeyGrid.Value))
                         {
-                            singleSelectedLayer.gridMode = (singleSelectedLayer.gridMode + 1) % 5; //0: No Grid, 1: Graticule, 2~4: Geometric
+                            singleSelectedLayer.drawingGridMode = (singleSelectedLayer.drawingGridMode + 1) % 5; //0: No Grid, 1: Graticule, 2~4: Geometric
                         }
                     }         
                 }
