@@ -169,6 +169,10 @@ namespace SphereEditorTools
                             {
                                 switch (brushId)
                                 {
+                                    case (int)BrushMode.Select:
+                                        var uiDysonBrush_Select = brush as UIDysonBrush_Select;
+                                        uiDysonBrush_Select.selectedLayerId = dysnoEditor.selection.singleSelectedLayer?.id ?? 0;
+                                        break;
                                     case (int)BrushMode.FrameGeo:
                                     case (int)BrushMode.FrameEuler:
                                         var uiDysonBrush_Frame = brush as UIDysonBrush_Frame;
@@ -180,6 +184,8 @@ namespace SphereEditorTools
                                         break;
                                     case (int)BrushMode.Paint:
                                         var uiDysonBrush_Paint = brush as UIDysonBrush_Paint;
+                                        if (dysnoEditor.brush_paint.pickColorMode)
+                                            return; // 使用選色器時跳過多重筆刷
                                         uiDysonBrush_Paint.paint = dysnoEditor.brush_paint.paint;
                                         uiDysonBrush_Paint.eraseMode = dysnoEditor.brush_paint.eraseMode;
                                         uiDysonBrush_Paint.size = dysnoEditor.brush_paint.size;
@@ -296,8 +302,6 @@ namespace SphereEditorTools
                 var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
                 var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
 
-                Log.LogInfo(methodRaySnap);
-
                 for (int i = 0; i < code.Count; i++)
                 {
                     if (code[i].operand is MethodInfo mi)
@@ -311,7 +315,6 @@ namespace SphereEditorTools
                         {
                             code[i].opcode = OpCodes.Call;
                             code[i].operand = typeof(SymmetryTool).GetMethod("Overwrite_RaySnap");
-                            Log.LogDebug("RaySnap");
                         }
                         else if (code[i].opcode == OpCodes.Callvirt && mi == methodRaySnap2)
                         {
@@ -421,13 +424,16 @@ namespace SphereEditorTools
 
             // Multiple select as if LeftControl is hold
             if (!__instance.selectedNodes.Contains(node))
+            {
+                Log.LogDebug($"Add {node.id}");
                 __instance.AddNodeSelection(node);
+            }
             return false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnFrameClick")]
         public static bool Overwrite_OnFrameClick(DESelection __instance, DysonFrame frame)
-        {
+        {            
             if (!overwrite || __instance.selectedFrames == null || frame == null)
                 return true;
 
