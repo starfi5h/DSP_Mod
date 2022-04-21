@@ -89,16 +89,23 @@ namespace SphereEditorTools
         static void AddBrushes()
         {
             int id;
-            
+
+            id = (int)BrushMode.Select;
+            var brushSelect = (UIDysonBrush_Select)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
+            brushes[id].Add(brushSelect);
+            foreach (Transform child in brushSelect.gameObject.transform)
+                Destroy(child.gameObject);
+            brushSelect._OnInit();
+
             id = (int)BrushMode.Node;
-            UIDysonBrush_Node brushNode = (UIDysonBrush_Node)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);            
+            var brushNode = (UIDysonBrush_Node)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);            
             brushes[id].Add(brushNode);
             foreach (Transform child in brushNode.gameObject.transform)
                 Destroy(child.gameObject);
             brushNode._OnInit();
 
             id = (int)BrushMode.FrameGeo;
-            UIDysonBrush_Frame brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
+            var brushFrame = (UIDysonBrush_Frame)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushFrame);
             foreach (Transform child in brushFrame.gameObject.transform)
                 Destroy(child.gameObject);
@@ -114,27 +121,25 @@ namespace SphereEditorTools
             brushFrame.isEuler = true;
 
             id = (int)BrushMode.Shell;
-            UIDysonBrush_Shell brushShell = (UIDysonBrush_Shell)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
+            var brushShell = (UIDysonBrush_Shell)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushShell);
             foreach (Transform child in brushShell.gameObject.transform)
                 Destroy(child.gameObject);
             brushShell._OnInit();
 
+            id = (int)BrushMode.Paint;
+            var brushPaint = (UIDysonBrush_Paint)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
+            brushes[id].Add(brushPaint);
+            foreach (Transform child in brushPaint.gameObject.transform)
+                Destroy(child.gameObject);
+            brushPaint._OnInit();
+
             id = (int)BrushMode.Remove;
-            UIDysonBrush_Remove brushRemove = (UIDysonBrush_Remove)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
+            var brushRemove = (UIDysonBrush_Remove)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
             brushes[id].Add(brushRemove);
             foreach (Transform child in brushRemove.gameObject.transform)
                 Destroy(child.gameObject);
             brushRemove._OnInit();
-
-
-            id = (int)BrushMode.Select;
-            UIDysonBrush_Select brushSelect = (UIDysonBrush_Select)Instantiate(dysnoEditor.brushes[id], dysnoEditor.brushes[id].transform.parent);
-            brushes[id].Add(brushSelect);
-            foreach (Transform child in brushSelect.gameObject.transform)
-                Destroy(child.gameObject);
-            brushSelect._OnInit();
-
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "UpdateBrushes")]
@@ -166,12 +171,18 @@ namespace SphereEditorTools
                                 {
                                     case (int)BrushMode.FrameGeo:
                                     case (int)BrushMode.FrameEuler:
-                                        UIDysonBrush_Frame uiysonBrush_Frame = brush as UIDysonBrush_Frame;
-                                        uiysonBrush_Frame.frameProtoId = dysnoEditor.frameProtoId;
+                                        var uiDysonBrush_Frame = brush as UIDysonBrush_Frame;
+                                        uiDysonBrush_Frame.frameProtoId = dysnoEditor.frameProtoId;
                                         break;
                                     case (int)BrushMode.Shell:
-                                        UIDysonBrush_Shell uiysonBrush_Shell = brush as UIDysonBrush_Shell;
-                                        uiysonBrush_Shell.shellProtoId = dysnoEditor.shellProtoId;
+                                        var uiDysonBrush_Shell = brush as UIDysonBrush_Shell;
+                                        uiDysonBrush_Shell.shellProtoId = dysnoEditor.shellProtoId;
+                                        break;
+                                    case (int)BrushMode.Paint:
+                                        var uiDysonBrush_Paint = brush as UIDysonBrush_Paint;
+                                        uiDysonBrush_Paint.paint = dysnoEditor.brush_paint.paint;
+                                        uiDysonBrush_Paint.eraseMode = dysnoEditor.brush_paint.eraseMode;
+                                        uiDysonBrush_Paint.size = dysnoEditor.brush_paint.size;
                                         break;
                                 }
                             }
@@ -271,6 +282,7 @@ namespace SphereEditorTools
         [HarmonyPatch(typeof(UIDysonBrush_Shell), "_OnUpdate")]
         [HarmonyPatch(typeof(UIDysonBrush_Select), "_OnUpdate")]
         [HarmonyPatch(typeof(UIDysonBrush_Remove), "_OnUpdate")]
+        [HarmonyPatch(typeof(UIDysonBrush_Paint), "_OnUpdate")]
         public static IEnumerable<CodeInstruction> Transpiler_OnUpdate(IEnumerable<CodeInstruction> instructions)
         {
             
