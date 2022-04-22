@@ -29,6 +29,22 @@ namespace SphereEditorTools
 
         static int tick;
 
+
+        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereLayer), "SetPaintingData")]
+        public static void Test(DysonSphereLayer __instance, Color32[] colors)
+        {
+            dysnoEditor = __instance;
+            brushes = new List<UIDysonBrush>[dysnoEditor.brushes.Length];
+            for (int i = 0; i < brushes.Length; i++)
+            {
+                brushes[i] = new List<UIDysonBrush>
+                {
+                    null //placeholder for original brush
+                };
+            }
+        }
+
+
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnOpen")]
         public static void Init(UIDysonEditor __instance)
         {
