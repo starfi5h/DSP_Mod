@@ -188,7 +188,10 @@ namespace Compatibility
                     NebulaCompat.LoadingPlayers.Clear();
                     NebulaCompat.IsPlayerJoining = false;
                 }
-                NebulaCompat.DetermineCurrentState();
+                if (saveName != GameSave.saveExt)
+                {
+                    NebulaCompat.DetermineCurrentState();
+                }
             }
         }
 
@@ -305,13 +308,19 @@ namespace Compatibility
                     break;
 
                 case PauseEvent.Pause: //Client
-                    BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("");
+                    if (IsClient)
+                    {
+                        BulletTimePlugin.State.SetPauseMode(true);
+                        IngameUI.ShowStatus("");
+                    }
                     break;
 
                 case PauseEvent.Save: //Client
-                    BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("Host is saving game...".Translate());
+                    if (IsClient)
+                    {
+                        BulletTimePlugin.State.SetPauseMode(true);
+                        IngameUI.ShowStatus("Host is saving game...".Translate());
+                    }
                     break;
 
                 case PauseEvent.FactoryRequest: //Host, Client

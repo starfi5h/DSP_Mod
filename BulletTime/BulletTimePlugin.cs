@@ -14,7 +14,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.4";
+        public const string VERSION = "1.2.5";
 
         public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
@@ -41,6 +41,7 @@ namespace BulletTime
                     harmony.PatchAll(typeof(GameSave_Patch));
                 if (NebulaCompat.Enable)
                     NebulaCompat.Init(harmony);
+                harmony.PatchAll(typeof(GameLoader_Patch));
             }
             catch (Exception e)
             {
