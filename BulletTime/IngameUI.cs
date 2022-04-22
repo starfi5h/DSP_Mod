@@ -50,11 +50,11 @@ namespace BulletTime
             }
             // Only host can have control slider
             slider.gameObject.SetActive(!NebulaCompat.IsClient);
-            BulletTimePlugin.State.ManualPause = false;
+            GameStateManager.ManualPause = false;
         }
 
         public static void OnPauseModeChange(bool pause)
-        {
+        {            
             if (timeText == null)
             {
                 timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
@@ -66,29 +66,35 @@ namespace BulletTime
                 infoText.GetComponent<Text>().text = "Pause";
                 infoText.GetComponent<Text>().enabled = true;
             }
-            timeText?.SetActive(!pause);
-            infoText?.SetActive(pause);
-            text.text = pause ? "pause".Translate() : $"{(int)slider.value}%";
+            if (timeText != null && infoText != null)
+            {
+                timeText.SetActive(!pause);
+                infoText.SetActive(pause);
+            }            
+            if (text != null)
+                text.text = pause ? "pause".Translate() : $"{(int)slider.value}%";
         }
 
         private static void OnSliderChange(float value)
         {
             if (value == 0)
-            {
-                BulletTimePlugin.State.ManualPause = true;
-                if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+            {                
+                GameStateManager.ManualPause = true;
+                text.text = "pause".Translate();
+                if (!GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
-                BulletTimePlugin.State.ManualPause = false;
-                if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                GameStateManager.ManualPause = false;
+                text.text = $"{(int)value}%";
+                if (GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                 {
                     NebulaCompat.SendPacket(PauseEvent.Resume);
                     ShowStatus("");
                 }
             }
-            BulletTimePlugin.State.SetSpeedRatio(value/100f);
+            GameStateManager.SetSpeedRatio(value/100f);
         }
         
         public static void ShowStatus(string message)
@@ -136,7 +142,7 @@ namespace BulletTime
                 if (__instance.fpsTextChanged)
                 {
                     // assume normal ups is 60/s, realSpeed = realUps / 60f
-                    float realSpeed = ((float)FPSController.currentUPS * (1f - BulletTimePlugin.State.SkipRatio)) / 60f;
+                    float realSpeed = ((float)FPSController.currentUPS * (1f - GameStateManager.SkipRatio)) / 60f;
                     StringBuilderUtility.WritePositiveFloat(__instance.fpsText, 10, 3, realSpeed * 100, 0, '-');
                 }
             }

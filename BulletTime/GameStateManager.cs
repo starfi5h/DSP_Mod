@@ -1,23 +1,21 @@
 ﻿using Compatibility;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace BulletTime
 {
-    public class GameStateManager
+    public static class GameStateManager
     {
-        public bool Pause { get; set; }
-        public bool ManualPause { get; set; } // Manual pause state set by user
-        public bool AdvanceTick { get; private set; } = true;
-        public long StoredGameTick { get; set; }
-        public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
-        public bool LockFactory { get; set; } = false; // Lock all interaction on local planet
-        public float SkipRatio { get; set; }
+        public static bool Pause { get; set; }
+        public static bool ManualPause { get; set; } // Manual pause state set by user
+        public static bool AdvanceTick { get; private set; } = true;
+        public static long StoredGameTick { get; set; }
+        public static bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
+        public static bool LockFactory { get; set; } = false; // Lock all interaction on local planet
+        public static float SkipRatio { get; set; }
 
-        private float timer;
+        private static float timer;
  
 
-        public void SetSpeedRatio(float value)
+        public static void SetSpeedRatio(float value)
         {
             if (value == 0)
             {
@@ -33,7 +31,7 @@ namespace BulletTime
             }
         }
 
-        public void SetPauseMode(bool value)
+        public static void SetPauseMode(bool value)
         {
             if (value)
             {
@@ -62,7 +60,7 @@ namespace BulletTime
         }
 
         //Before gameTick, determine whether to pause and whether to advance tick
-        public bool PauseInThisFrame()
+        public static bool PauseInThisFrame()
         {
             bool pauseThisFrame = Pause;
             AdvanceTick = GameMain.data.guideComplete && Interactable;
@@ -79,7 +77,7 @@ namespace BulletTime
             return pauseThisFrame;
         }
 
-        public void SetInteractable(bool value)
+        public static void SetInteractable(bool value)
         {
             Log.Debug($"Interactable = {value}");
             Interactable = value;
@@ -90,7 +88,7 @@ namespace BulletTime
             }
         }
 
-        public void SetLockFactory(bool value)
+        public static void SetLockFactory(bool value)
         {
             Log.Debug($"LockFactory = {value}");
             LockFactory = value;

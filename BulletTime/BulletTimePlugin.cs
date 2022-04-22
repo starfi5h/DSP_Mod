@@ -9,19 +9,18 @@ using System.Diagnostics;
 namespace BulletTime
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("dsp.nebula-multiplayer-api", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(NebulaCompat.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class BulletTimePlugin : BaseUnityPlugin
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
         public const string VERSION = "1.2.5";
 
-        public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<string> KeyAutosave;
         public static ConfigEntry<float> StartingSpeed;
-        public static Harmony harmony;
+        static Harmony harmony;
 
         private void LoadConfig()
         {
@@ -34,7 +33,6 @@ namespace BulletTime
         public void Start()
         {
             Log.Init(Logger);
-            State = new GameStateManager();
             harmony = new Harmony(GUID);
             LoadConfig();
 
@@ -46,7 +44,7 @@ namespace BulletTime
                     harmony.PatchAll(typeof(GameSave_Patch));
                 if (EnableFastLoading.Value)
                     harmony.PatchAll(typeof(GameLoader_Patch));
-                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api"))
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
                     NebulaCompat.Init(harmony);
             }
             catch (Exception e)
@@ -54,7 +52,9 @@ namespace BulletTime
                 Logger.LogError(e);
                 throw e;
             }
-            //IngameUI.Init(); //Only enable in develop mode
+#if DEBUG
+            IngameUI.Init(); //Only enable in develop mode
+#endif
         }
 
         public void OnDestroy()
