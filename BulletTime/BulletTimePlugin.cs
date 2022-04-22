@@ -61,7 +61,6 @@ namespace BulletTime
         {
             harmony.UnpatchSelf();
             harmony = null;
-            State.Dispose();
             IngameUI.Dispose();
             NebulaCompat.Dispose();
         }

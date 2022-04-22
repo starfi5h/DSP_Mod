@@ -11,6 +11,8 @@ namespace BulletTime
         private static Slider slider;
         private static Text text;
         private static Text stateMessage;
+        private static GameObject timeText;
+        private static GameObject infoText;
 
         public static void Dispose()
         {
@@ -26,6 +28,9 @@ namespace BulletTime
                 GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
                 stateMessage = null;
             }
+            timeText = null;
+            GameObject.Destroy(infoText);
+            infoText = null;
         }
 
         public static void Init()
@@ -48,19 +53,35 @@ namespace BulletTime
             BulletTimePlugin.State.ManualPause = false;
         }
 
+        public static void OnPauseModeChange(bool pause)
+        {
+            if (timeText == null)
+            {
+                timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
+            }            
+            if (infoText == null && timeText != null)
+            {
+                infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
+                infoText.name = "pause info-text";
+                infoText.GetComponent<Text>().text = "Pause";
+                infoText.GetComponent<Text>().enabled = true;
+            }
+            timeText?.SetActive(!pause);
+            infoText?.SetActive(pause);
+            text.text = pause ? "pause".Translate() : $"{(int)slider.value}%";
+        }
+
         private static void OnSliderChange(float value)
         {
             if (value == 0)
             {
                 BulletTimePlugin.State.ManualPause = true;
-                text.text = "pause".Translate();
                 if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
                 BulletTimePlugin.State.ManualPause = false;
-                text.text = $"{(int)value}%";
                 if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
                 {
                     NebulaCompat.SendPacket(PauseEvent.Resume);
