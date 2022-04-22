@@ -31,6 +31,8 @@ namespace Compatibility
                     return;
 
                 NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
+                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
                 NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
                 NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
                 NebulaModAPI.OnPlayerLeftGame += (player) =>
@@ -61,15 +63,26 @@ namespace Compatibility
         {
             if (NebulaIsInstalled)
             {
+                NebulaModAPI.OnMultiplayerGameStarted -= OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded -= OnMultiplayerGameEnded;
                 NebulaModAPI.OnPlanetLoadRequest -= OnFactoryLoadRequest;
                 NebulaModAPI.OnPlanetLoadFinished -= OnFactoryLoadFinished;
             }
         }
 
-        public static void OnGameMainBegin()
+        public static void OnMultiplayerGameStarted()
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
+            IsPlayerJoining = false;
+            LoadingPlayers.Clear();
+            DysonSpherePaused = false;
+        }
+
+        public static void OnMultiplayerGameEnded()
+        {
+            IsMultiplayerActive = false;
+            IsClient = false;
             IsPlayerJoining = false;
             LoadingPlayers.Clear();
             DysonSpherePaused = false;

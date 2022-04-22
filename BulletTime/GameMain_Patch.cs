@@ -95,10 +95,6 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         private static void Begin_Postfix()
         {
-            if (NebulaCompat.Enable)
-            {
-                NebulaCompat.OnGameMainBegin();
-            }
             if (!GameMain.instance.isMenuDemo)
             {
                 IngameUI.Init();

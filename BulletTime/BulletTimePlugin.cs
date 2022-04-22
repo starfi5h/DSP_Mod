@@ -18,20 +18,25 @@ namespace BulletTime
 
         public static GameStateManager State { get; set; }
         public static ConfigEntry<bool> EnableBackgroundAutosave;
+        public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<string> KeyAutosave;
         public static ConfigEntry<float> StartingSpeed;
         public static Harmony harmony;
+
+        private void LoadConfig()
+        {
+            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", true, "Do auto-save in background thread\n在背景执行自动存档");
+            EnableFastLoading = Config.Bind<bool>("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
+            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
+            StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
+        }
 
         public void Start()
         {
             Log.Init(Logger);
             State = new GameStateManager();
-            harmony = new Harmony("com.starfi5h.plugin.BulletTime");
-            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", true, "Do auto-save in background thread\n在背景执行自动存档");
-            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
-            StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
-
-            NebulaCompat.Enable = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api");
+            harmony = new Harmony(GUID);
+            LoadConfig();
 
             try
             {
@@ -39,9 +44,10 @@ namespace BulletTime
                 harmony.PatchAll(typeof(IngameUI));
                 if (EnableBackgroundAutosave.Value)
                     harmony.PatchAll(typeof(GameSave_Patch));
-                if (NebulaCompat.Enable)
+                if (EnableFastLoading.Value)
+                    harmony.PatchAll(typeof(GameLoader_Patch));
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer-api"))
                     NebulaCompat.Init(harmony);
-                harmony.PatchAll(typeof(GameLoader_Patch));
             }
             catch (Exception e)
             {
@@ -57,10 +63,7 @@ namespace BulletTime
             harmony = null;
             State.Dispose();
             IngameUI.Dispose();
-            if (NebulaCompat.Enable)
-            {
-                NebulaCompat.Dispose();
-            }
+            NebulaCompat.Dispose();
         }
     }
 

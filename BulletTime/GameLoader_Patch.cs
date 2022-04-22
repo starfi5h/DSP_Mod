@@ -29,5 +29,33 @@ namespace BulletTime
                 return instructions;
             }
         }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameLoader), nameof(GameLoader.FixedUpdate))]
+        static void FixedUpdate_Postfix(GameLoader __instance)
+        {
+            if (__instance.frame >= 5 && DSPGame.Game.isMenuDemo)
+            {
+                Log.Debug("MenuDemo - Fast forward");
+                GameMain.data.SetReady();
+                //GameCamera.instance.SetReady();
+                GameMain.Begin();
+                __instance.SelfDestroy();
+            }
+        }
+
+        static bool restart;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.RestartThread))]
+        static void RestartThread_Postfix()
+        {
+            restart = true;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.IsMusicReached))]
+        static void IsMusicReached_Postfix(ref bool __result)
+        {
+            // Only sync BGM when game start, skip syncing when restart
+            __result |= restart;
+        }
     }
 }
