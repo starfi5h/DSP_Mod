@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 namespace ReorderTechQueue
 {
-    [BepInPlugin("com.starfi5h.plugin.ReorderTechQueue", "ReorderTechQueue", "1.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.ReorderTechQueue", "ReorderTechQueue", "1.1.1")]
     public class ReorderTechQueuePlugin : BaseUnityPlugin
     {
         Harmony harmony;
@@ -23,11 +23,13 @@ namespace ReorderTechQueue
 #endif
         }
 
+#if DEBUG
         public void OnDestroy()
         {
             ReorderTechQueue.Free();
             harmony.UnpatchSelf();
         }
+#endif
     }
 
     class ReorderTechQueue
@@ -49,7 +51,7 @@ namespace ReorderTechQueue
             AddUIReorderNode(__instance.nodes);
         }
 
-
+#if DEBUG
         internal static void Init()
         {
             AddUIReorderNode(UIRoot.instance.uiGame.researchQueue.nodes);
@@ -61,6 +63,7 @@ namespace ReorderTechQueue
             RemoveUIReorderNode(UIRoot.instance.uiGame.researchQueue.nodes);
             RemoveUIReorderNode(UIRoot.instance.uiGame.techTree.resQueueUI.nodes);
         }
+#endif
 
         private static void AddUIReorderNode(UIResearchQueueNode[] nodes)
         {
@@ -84,8 +87,8 @@ namespace ReorderTechQueue
 
     public class UIReorderNode : ManualBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler
     {
-        static int currIndex = -1;
         public int Index { get; set; }
+        static int currIndex = -1;
 
         public void OnPointerDown(PointerEventData pointerEventData)
         {
@@ -107,26 +110,25 @@ namespace ReorderTechQueue
 
         private static int ReorderQueue(int oldIndex, int newIndex)
         {
-            int[] techQueue = GameMain.data.history.techQueue;
-            int techId = techQueue[oldIndex];
+            int minIndex = oldIndex < newIndex ? oldIndex : newIndex;
+            int[] newQueue = new int[GameMain.data.history.techQueueLength - minIndex];
+            Array.Copy(GameMain.data.history.techQueue, minIndex, newQueue, 0, newQueue.Length);
 
-            int[] newQueue = new int[GameMain.data.history.techQueueLength - newIndex];
-            Array.Copy(techQueue, newIndex, newQueue, 0, newQueue.Length);
-            if (oldIndex > newIndex)
-                newQueue[oldIndex - newIndex] = 0;
-            GameMain.data.history.RemoveTechInQueue(oldIndex);
-            for (int i = GameMain.data.history.techQueueLength; i >= newIndex; i--)
+            int techId = newQueue[oldIndex - minIndex];
+            newQueue[oldIndex - minIndex] = newQueue[newIndex - minIndex];
+            newQueue[newIndex - minIndex] = techId;
+
+            for (int i = GameMain.data.history.techQueueLength - 1; i >= minIndex; i--)
             {
                 GameMain.data.history.RemoveTechInQueue(i);
             }
-            GameMain.data.history.EnqueueTech(techId);
             for (int i = 0; i < newQueue.Length; i++)
             {
                 GameMain.data.history.EnqueueTech(newQueue[i]);
             }
 
             // if techId is removed due to dependenies conflict, reset currIndex
-            return techQueue[newIndex] == techId ? newIndex : -1;
+            return GameMain.data.history.techQueue[newIndex] == techId ? newIndex : -1;
         }
     }
 }

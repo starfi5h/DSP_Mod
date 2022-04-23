@@ -20,6 +20,10 @@ Length of reserach queue. (Default:`8`)
 
 ## Changelog
 
+
+#### v1.1.1
+\- Fix a bug that moving an infinite tech will enqueue duplicate tech.  
+
 #### v1.1.0
 \- Add a config option to change research queue length.  
 \- Fix a bug that changing a tech will remove all dependent techs behind it.  
