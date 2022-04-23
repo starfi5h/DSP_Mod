@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.0.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.2.0")]
     public class SphereEditorTools : BaseUnityPlugin
     {
         Harmony harmony;

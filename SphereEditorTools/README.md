@@ -145,6 +145,9 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 ## Changelog
 
+### v2.2.0
+\- Add support to paint brush. (Game version 0.9.25.11996)  
+\- Reduce GUI height.  
 
 ### v2.1.0
 \- Add EnableNonemptyList option.  
