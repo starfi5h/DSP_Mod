@@ -9,12 +9,11 @@ namespace SphereEditorTools
         public static string Star;
         public static string Mask;
 
-        public static string Mirror_symmetry;
+        public static string SymmetryTool;
         public static string None;
         public static string Equatorial;
         public static string Antipodal;
         public static string[] MirrorModes;
-        public static string Rotation_symmetry;
 
         public static string LAYER;
         public static string[] DisplayMode;
@@ -42,11 +41,10 @@ namespace SphereEditorTools
                 Star = "恒星";
                 Mask = "遮罩";
 
-                Mirror_symmetry = "镜像对称";
+                SymmetryTool = "对称工具";
                 None = "无";
                 Equatorial = "赤道对称";
                 Antipodal = "对跖点";
-                Rotation_symmetry = "旋转对称";
 
                 OrbitTool = "轨道工具";
                 AnchorMode = "锚定模式";
@@ -66,11 +64,10 @@ namespace SphereEditorTools
                 Star = "Star".Translate();
                 Mask = "Mask".Translate();
 
-                Mirror_symmetry = "Mirror symmetry".Translate();
+                SymmetryTool = "Symmetry Tool".Translate();
                 None = "None".Translate();
                 Equatorial = "Equatorial".Translate();
                 Antipodal = "Antipodal".Translate();
-                Rotation_symmetry = "Rotation symmetry".Translate();
 
                 OrbitTool = "Orbit Tool".Translate();
                 AnchorMode = "Anchor Mode".Translate();
