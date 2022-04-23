@@ -27,7 +27,7 @@ namespace SphereEditorTools
         static float castDist;
         static Vector3 rayOrigin;
         static Ray castRay = default;
-        static bool gridMode;
+        static bool paint_gridMode;
 
         static int tick;
 
@@ -145,6 +145,23 @@ namespace SphereEditorTools
             brushRemove._OnInit();
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonEditor), "UpdateBrushes")]
+        public static void Brushes_Prepare()
+        {
+            if ((rdialCount * (mirrorMode > 0 ? 2 : 1)) > 1)
+            {
+                if (brushId != (int)dysnoEditor.brushMode)
+                {
+                    foreach (var brush in brushes[brushId])
+                    {
+                        brush?._OnClose(); //Clean previous brushes
+                        brush?.gameObject.SetActive(false);
+                    }
+                    brushId = (int)dysnoEditor.brushMode;
+                }
+            }
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "UpdateBrushes")]
         public static void Brushes_OnUpdate()
         {
@@ -153,19 +170,10 @@ namespace SphereEditorTools
                 int activeBrushCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
                 if (activeBrushCount > 1) //symmetric mode on
                 {
-                    if (brushId != (int)dysnoEditor.brushMode)
-                    {
-                        foreach (var brush in brushes[brushId])
-                        {
-                            brush?._OnClose(); //Clean previous brushes
-                            brush?.gameObject.SetActive(false);
-                        }
-                        brushId = (int)dysnoEditor.brushMode;
-                    }
-
                     //on left-click, update clone brushes texture (protoId) to match with original one
                     if (Input.GetMouseButton(0))
                     {
+                        //Log.LogWarning($"{dysnoEditor.brushMode} {dysnoEditor.selection.singleSelectedLayer?.id ?? -1}");
                         foreach (var brush in brushes[brushId])
                         {
                             if (brush != null)
@@ -174,7 +182,8 @@ namespace SphereEditorTools
                                 {
                                     case (int)BrushMode.Select:
                                         var uiDysonBrush_Select = brush as UIDysonBrush_Select;
-                                        uiDysonBrush_Select.selectedLayerId = dysnoEditor.selection.singleSelectedLayer?.id ?? 0;
+                                        var original_select = dysnoEditor.brushes[brushId] as UIDysonBrush_Select;
+                                        uiDysonBrush_Select.selectedLayerId = original_select.selectedLayerId;
                                         break;
                                     case (int)BrushMode.FrameGeo:
                                     case (int)BrushMode.FrameEuler:
@@ -207,7 +216,7 @@ namespace SphereEditorTools
                     Vector3 pos = dataPoint;
                     Quaternion currentRotation = Quaternion.identity;
                     Ray ray = dysnoEditor.screenCamera.ScreenPointToRay(Input.mousePosition);
-                    gridMode = dysnoEditor.brushMode == BrushMode.Paint && dysnoEditor.brush_paint.isGridMode;
+                    paint_gridMode = dysnoEditor.brushMode == BrushMode.Paint && dysnoEditor.brush_paint.isGridMode;
                     if (clickPoint != Vector3.zero)
                     {
                         castRadius = (ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
@@ -356,7 +365,7 @@ namespace SphereEditorTools
             {
                 rch.point = Vector3.zero;
                 rch.normal = Vector3.zero;
-                if (origin == rayOrigin && (center - clickPoint).sqrMagnitude < 1E-8)
+                if (origin == rayOrigin && (center - clickPoint).sqrMagnitude < 1E-6)
                 {
                     rch.dist = castDist; //only use dist 
                     return true;
@@ -411,15 +420,17 @@ namespace SphereEditorTools
         public static bool Overwrite_RaySnap2(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, out Vector3 snap, out int triIdx)
         {
             if (overwrite)
-            {
-                var res = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
-                if (gridMode)
+            {                
+                if (paint_gridMode)
                 {
+                    bool res = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
+                    //snap = dataPoint;
                     return res;
                 }
                 else
                 {
                     snap = dataPoint;
+                    triIdx = 0;
                     return resultSnap;
                 }
             }
@@ -456,7 +467,7 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnNodeClick")]
         public static bool Overwrite_OnNodeClick(DESelection __instance, DysonNode node)
         {
-            if (!overwrite || __instance.selectedNodes == null || node == null)
+            if (!overwrite || node == null)
                 return true;
 
             // Multiple select as if LeftControl is hold
@@ -470,7 +481,7 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnFrameClick")]
         public static bool Overwrite_OnFrameClick(DESelection __instance, DysonFrame frame)
         {            
-            if (!overwrite || __instance.selectedFrames == null || frame == null)
+            if (!overwrite || frame == null)
                 return true;
 
             if (!__instance.selectedFrames.Contains(frame))
@@ -481,7 +492,7 @@ namespace SphereEditorTools
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnShellClick")]
         public static bool Overwrite_OnFrameClick(DESelection __instance, DysonShell shell)
         {
-            if (!overwrite || __instance.selectedShells == null || shell == null)
+            if (!overwrite || shell == null)
                 return true;
 
             if (!__instance.selectedShells.Contains(shell))
