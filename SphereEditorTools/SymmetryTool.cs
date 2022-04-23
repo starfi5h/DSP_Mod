@@ -26,23 +26,9 @@ namespace SphereEditorTools
         static Vector3 clickPoint; //currentRoation * dataPoint
         static float castDist;
         static Vector3 rayOrigin;
+        static Ray castRay = default;
 
         static int tick;
-
-
-        [HarmonyPostfix, HarmonyPatch(typeof(DysonSphereLayer), "SetPaintingData")]
-        public static void Test(DysonSphereLayer __instance, Color32[] colors)
-        {
-            dysnoEditor = __instance;
-            brushes = new List<UIDysonBrush>[dysnoEditor.brushes.Length];
-            for (int i = 0; i < brushes.Length; i++)
-            {
-                brushes[i] = new List<UIDysonBrush>
-                {
-                    null //placeholder for original brush
-                };
-            }
-        }
 
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnOpen")]
@@ -219,9 +205,9 @@ namespace SphereEditorTools
                     overwrite = true;
                     Vector3 pos = dataPoint;
                     Quaternion currentRotation = Quaternion.identity;
+                    Ray ray = dysnoEditor.screenCamera.ScreenPointToRay(Input.mousePosition);
                     if (clickPoint != Vector3.zero)
                     {
-                        Ray ray = dysnoEditor.screenCamera.ScreenPointToRay(Input.mousePosition);
                         castRadius = (ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
                         bool front = Vector3.Dot(ray.direction, clickPoint) < 0f; //true : clickPoint is toward camera
                         for (int i = sphere.layersSorted.Length - 1; i >= 0; i--)
@@ -241,27 +227,34 @@ namespace SphereEditorTools
                     {
                         for (int t = 1; t < rdialCount; t++)
                         {
-                            dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
+                            Quaternion quaternion = Quaternion.Euler(0f, 360f * t / rdialCount, 0f);
+                            dataPoint = quaternion * pos;
                             clickPoint = currentRotation * dataPoint;
+                            castRay = new Ray(quaternion * ray.origin, quaternion * ray.direction);
                             brushes[brushId][t].SetDysonSphere(sphere);
                             brushes[brushId][t].layer = layer;                                
                             brushes[brushId][t]._Open();
                             brushes[brushId][t].gameObject.SetActive(true);
-                            brushes[brushId][t]._OnUpdate();
-                                
+                            brushes[brushId][t]._OnUpdate();                                
                         }
                         if (mirrorMode > 0)
                         {
                             pos.y = -pos.y;
+                            ray.origin = new Vector3(ray.origin.x, -ray.origin.y, ray.origin.z);
+                            ray.direction = new Vector3(ray.direction.x, -ray.direction.y, ray.direction.z);
                             if (mirrorMode == 2) //Antipodal point
                             {
                                 pos.x = -pos.x;
                                 pos.z = -pos.z;
+                                ray.origin = new Vector3(-ray.origin.x, ray.origin.y, -ray.origin.z);
+                                ray.direction = new Vector3(-ray.direction.x, ray.direction.y, -ray.direction.z);
                             }
                             for (int t = rdialCount; t < 2 * rdialCount; t++)
                             {
-                                dataPoint = Quaternion.Euler(0f, 360f * t / rdialCount, 0f) * pos;
+                                Quaternion quaternion = Quaternion.Euler(0f, 360f * t / rdialCount, 0f);
+                                dataPoint = quaternion * pos;
                                 clickPoint = currentRotation * dataPoint;
+                                castRay = new Ray(quaternion * ray.origin, quaternion * ray.direction);
                                 brushes[brushId][t].SetDysonSphere(sphere);
                                 brushes[brushId][t].layer = layer;
                                 brushes[brushId][t].active = true;
@@ -415,10 +408,18 @@ namespace SphereEditorTools
 
         public static bool Overwrite_RaySnap2(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, out Vector3 snap, out int triIdx)
         {
+            /*
             if (overwrite)
             {
                 snap = dataPoint;
                 triIdx = 0; // What does tis variable do?
+                return resultSnap;
+            }
+            */
+            if (overwrite)
+            {
+                _ = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
+                snap = dataPoint;
                 return resultSnap;
             }
             resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap, out triIdx);
@@ -426,10 +427,21 @@ namespace SphereEditorTools
             return resultSnap;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Shell), "AddNodeGizmo")]
-        public static bool Overwrite_AddNodeGizmo()
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonPaintingGrid), "RayCastAndHightlight")]
+        public static void Overwrite_RayCastAndHightlight(ref Ray lookRay)
         {
-            return !overwrite; //if overwrite is on, skip AddNodeGizmo()
+            if (overwrite)
+            {
+                lookRay = castRay;
+                return;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIDysonBrush_Shell), "AddNodeGizmo")]
+        public static bool Overwrite_Disable()
+        {
+            return !overwrite; //if overwrite is on, skip those functions
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnNodeClick")]
@@ -441,7 +453,6 @@ namespace SphereEditorTools
             // Multiple select as if LeftControl is hold
             if (!__instance.selectedNodes.Contains(node))
             {
-                Log.LogDebug($"Add {node.id}");
                 __instance.AddNodeSelection(node);
             }
             return false;
