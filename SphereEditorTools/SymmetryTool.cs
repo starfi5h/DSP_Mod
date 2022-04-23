@@ -27,6 +27,7 @@ namespace SphereEditorTools
         static float castDist;
         static Vector3 rayOrigin;
         static Ray castRay = default;
+        static bool gridMode;
 
         static int tick;
 
@@ -163,7 +164,7 @@ namespace SphereEditorTools
                     }
 
                     //on left-click, update clone brushes texture (protoId) to match with original one
-                    if (Input.GetMouseButtonDown(0))
+                    if (Input.GetMouseButton(0))
                     {
                         foreach (var brush in brushes[brushId])
                         {
@@ -206,6 +207,7 @@ namespace SphereEditorTools
                     Vector3 pos = dataPoint;
                     Quaternion currentRotation = Quaternion.identity;
                     Ray ray = dysnoEditor.screenCamera.ScreenPointToRay(Input.mousePosition);
+                    gridMode = dysnoEditor.brushMode == BrushMode.Paint && dysnoEditor.brush_paint.isGridMode;
                     if (clickPoint != Vector3.zero)
                     {
                         castRadius = (ray.origin.magnitude * 4000 / (rayOrigin.magnitude));
@@ -411,8 +413,15 @@ namespace SphereEditorTools
             if (overwrite)
             {
                 var res = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
-                snap = dataPoint;
-                return res;
+                if (gridMode)
+                {
+                    return res;
+                }
+                else
+                {
+                    snap = dataPoint;
+                    return resultSnap;
+                }
             }
             resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap, out triIdx);
             dataPoint = snap;
@@ -453,7 +462,6 @@ namespace SphereEditorTools
             // Multiple select as if LeftControl is hold
             if (!__instance.selectedNodes.Contains(node))
             {
-                Log.LogDebug($"Add {node.id}");
                 __instance.AddNodeSelection(node);
             }
             return false;

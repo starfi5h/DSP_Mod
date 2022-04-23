@@ -88,7 +88,6 @@ namespace SphereEditorTools
                 UIWindow.SaveWindowPos();
             }
             SphereEditorTools.Config.Save();
-            Log.LogDebug("Save config");
         }
 
 
