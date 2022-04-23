@@ -408,19 +408,11 @@ namespace SphereEditorTools
 
         public static bool Overwrite_RaySnap2(UIDysonDrawingGrid uidysonDrawingGrid, Ray lookRay, out Vector3 snap, out int triIdx)
         {
-            /*
             if (overwrite)
             {
+                var res = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
                 snap = dataPoint;
-                triIdx = 0; // What does tis variable do?
-                return resultSnap;
-            }
-            */
-            if (overwrite)
-            {
-                _ = uidysonDrawingGrid.RaySnap(castRay, out snap, out triIdx);
-                snap = dataPoint;
-                return resultSnap;
+                return res;
             }
             resultSnap = uidysonDrawingGrid.RaySnap(lookRay, out snap, out triIdx);
             dataPoint = snap;
@@ -433,15 +425,23 @@ namespace SphereEditorTools
             if (overwrite)
             {
                 lookRay = castRay;
-                return;
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIDysonBrush_Shell), "AddNodeGizmo")]
-        public static bool Overwrite_Disable()
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Shell), "AddNodeGizmo")]
+        public static bool Overwrite_AddNodeGizmo()
         {
-            return !overwrite; //if overwrite is on, skip those functions
+            return !overwrite; //if overwrite is on, skip AddNodeGizmo()
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIDysonPaintingGrid), "SetCursorCellsGraticule")]
+        [HarmonyPatch(typeof(UIDysonPaintingGrid), "SetCursorCells")]
+        public static bool Overwrite_Paint()
+        {
+            // Don't update cursor cells, except when mouse button hit
+            return !overwrite || Input.GetMouseButton(0);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(DESelection), "OnNodeClick")]
@@ -453,6 +453,7 @@ namespace SphereEditorTools
             // Multiple select as if LeftControl is hold
             if (!__instance.selectedNodes.Contains(node))
             {
+                Log.LogDebug($"Add {node.id}");
                 __instance.AddNodeSelection(node);
             }
             return false;
