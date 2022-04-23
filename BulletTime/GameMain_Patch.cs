@@ -23,13 +23,13 @@ namespace BulletTime
                 }
             }
 
-            pasueThisFrame = BulletTimePlugin.State.PauseInThisFrame();
+            pasueThisFrame = GameStateManager.PauseInThisFrame();
             if (!pasueThisFrame)
             {
                 return true;
             }
 
-            if (BulletTimePlugin.State.AdvanceTick)
+            if (GameStateManager.AdvanceTick)
             {
                 __instance.timei += 1L;
                 __instance.timei_once += 1L;
@@ -95,10 +95,6 @@ namespace BulletTime
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         private static void Begin_Postfix()
         {
-            if (NebulaCompat.Enable)
-            {
-                NebulaCompat.OnGameMainBegin();
-            }
             if (!GameMain.instance.isMenuDemo)
             {
                 IngameUI.Init();
@@ -110,7 +106,7 @@ namespace BulletTime
         private static void End_Postfix()
         {
             IngameUI.Dispose();
-            BulletTimePlugin.State.SetSpeedRatio(1f);
+            GameStateManager.SetSpeedRatio(1f);
         }
 
         [HarmonyPrefix]
@@ -118,9 +114,9 @@ namespace BulletTime
         private static void SaveCurrentGame_Prefix()
         {
             // Save real gameTick
-            if (BulletTimePlugin.State.StoredGameTick != 0)
+            if (GameStateManager.StoredGameTick != 0)
             {
-                GameMain.gameTick = BulletTimePlugin.State.StoredGameTick;
+                GameMain.gameTick = GameStateManager.StoredGameTick;
             }
         }
 
@@ -128,7 +124,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
         private static bool GamePauseLogic_Prefix(ref bool __result)
         {
-            if (BulletTimePlugin.State.Pause)
+            if (GameStateManager.Pause)
             {
                 __result = false;
                 return false;
@@ -182,7 +178,7 @@ namespace BulletTime
             if (player == null)
                 return;
 
-            if (BulletTimePlugin.State.Interactable)
+            if (GameStateManager.Interactable)
             {
                 player.GameTick(time);
                 return;

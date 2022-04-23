@@ -11,7 +11,7 @@ namespace Compatibility
 {
     public static class NebulaCompat
     {
-        public static bool Enable { get; set; }
+        public const string GUID = "dsp.nebula-multiplayer-api";
         public static bool NebulaIsInstalled { get; private set; }
         public static bool IsMultiplayerActive { get; private set; }
         public static bool IsClient { get; private set; }
@@ -31,6 +31,8 @@ namespace Compatibility
                     return;
 
                 NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
+                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
                 NebulaModAPI.OnPlanetLoadRequest += OnFactoryLoadRequest;
                 NebulaModAPI.OnPlanetLoadFinished += OnFactoryLoadFinished;
                 NebulaModAPI.OnPlayerLeftGame += (player) =>
@@ -48,7 +50,7 @@ namespace Compatibility
                 harmony.Patch(type.GetMethod("NotifyTickDifference"), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("NotifyTickDifference")));
                 harmony.PatchAll(typeof(NebulaPatch));
 
-                Log.Info("Nebula Compatibility is ready.");
+                Log.Info("Nebula Compatibility OK");
             }
             catch (Exception e)
             {
@@ -61,15 +63,26 @@ namespace Compatibility
         {
             if (NebulaIsInstalled)
             {
+                NebulaModAPI.OnMultiplayerGameStarted -= OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded -= OnMultiplayerGameEnded;
                 NebulaModAPI.OnPlanetLoadRequest -= OnFactoryLoadRequest;
                 NebulaModAPI.OnPlanetLoadFinished -= OnFactoryLoadFinished;
             }
         }
 
-        public static void OnGameMainBegin()
+        public static void OnMultiplayerGameStarted()
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
+            IsPlayerJoining = false;
+            LoadingPlayers.Clear();
+            DysonSpherePaused = false;
+        }
+
+        public static void OnMultiplayerGameEnded()
+        {
+            IsMultiplayerActive = false;
+            IsClient = false;
             IsPlayerJoining = false;
             LoadingPlayers.Clear();
             DysonSpherePaused = false;
@@ -92,14 +105,14 @@ namespace Compatibility
             if (LoadingPlayers.Count == 0 && !IsPlayerJoining)
             {
                 // Back to host manual setting
-                if (BulletTimePlugin.State.ManualPause)
+                if (GameStateManager.ManualPause)
                 {
-                    BulletTimePlugin.State.SetPauseMode(true);
+                    GameStateManager.SetPauseMode(true);
                     SendPacket(PauseEvent.Pause);
                 }
                 else
                 {
-                    BulletTimePlugin.State.SetPauseMode(false);
+                    GameStateManager.SetPauseMode(false);
                     IngameUI.ShowStatus("");
                     SendPacket(PauseEvent.Resume);
                 }
@@ -131,23 +144,23 @@ namespace Compatibility
     {
         public static void RealGameTick(ref long __result)
         {
-            if (BulletTimePlugin.State.StoredGameTick != 0)
-                __result = BulletTimePlugin.State.StoredGameTick;
+            if (GameStateManager.StoredGameTick != 0)
+                __result = GameStateManager.StoredGameTick;
         }
 
         public static void RealUPS(ref float __result)
         {
-            if (!BulletTimePlugin.State.Pause)
-                __result *= (1f - BulletTimePlugin.State.SkipRatio) / 100f;
-            Log.Dev($"{1f - BulletTimePlugin.State.SkipRatio:F3} UPS:{__result}");
+            if (!GameStateManager.Pause)
+                __result *= (1f - GameStateManager.SkipRatio) / 100f;
+            Log.Dev($"{1f - GameStateManager.SkipRatio:F3} UPS:{__result}");
         }
 
         public static void NotifyTickDifference(float delta)
         {            
-            if (!BulletTimePlugin.State.Pause)
+            if (!GameStateManager.Pause)
             {
                 float ratio = Mathf.Clamp(1 + delta / (float)FPSController.currentUPS, 0.01f, 1f);
-                BulletTimePlugin.State.SetSpeedRatio(ratio);
+                GameStateManager.SetSpeedRatio(ratio);
                 //Log.Dev($"{delta:F4} RATIO:{ratio}");
             }
         }
@@ -156,7 +169,7 @@ namespace Compatibility
         {
             NebulaCompat.IsPlayerJoining = true;
             IngameUI.ShowStatus(string.Format("{0} joining the game".Translate(), Username));
-            BulletTimePlugin.State.SetPauseMode(true);
+            GameStateManager.SetPauseMode(true);
             return false;
         }
 
@@ -188,7 +201,10 @@ namespace Compatibility
                     NebulaCompat.LoadingPlayers.Clear();
                     NebulaCompat.IsPlayerJoining = false;
                 }
-                NebulaCompat.DetermineCurrentState();
+                if (saveName != GameSave.saveExt)
+                {
+                    NebulaCompat.DetermineCurrentState();
+                }
             }
         }
 
@@ -300,22 +316,28 @@ namespace Compatibility
             switch (packet.Event)
             {
                 case PauseEvent.Resume: //Client
-                    BulletTimePlugin.State.SetPauseMode(false);
+                    GameStateManager.SetPauseMode(false);
                     IngameUI.ShowStatus("");
                     break;
 
                 case PauseEvent.Pause: //Client
-                    BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("");
+                    if (IsClient)
+                    {
+                        GameStateManager.SetPauseMode(true);
+                        IngameUI.ShowStatus("");
+                    }
                     break;
 
                 case PauseEvent.Save: //Client
-                    BulletTimePlugin.State.SetPauseMode(true);
-                    IngameUI.ShowStatus("Host is saving game...".Translate());
+                    if (IsClient)
+                    {
+                        GameStateManager.SetPauseMode(true);
+                        IngameUI.ShowStatus("Host is saving game...".Translate());
+                    }
                     break;
 
                 case PauseEvent.FactoryRequest: //Host, Client
-                    BulletTimePlugin.State.SetPauseMode(true);
+                    GameStateManager.SetPauseMode(true);
                     IngameUI.ShowStatus(string.Format("{0} arriving {1}".Translate(), packet.Username, GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName));
                     if (IsHost)
                     {

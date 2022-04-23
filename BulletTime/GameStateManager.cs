@@ -1,31 +1,21 @@
 ﻿using Compatibility;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace BulletTime
 {
-    public class GameStateManager
+    public static class GameStateManager
     {
-        public bool Pause { get; set; }
-        public bool ManualPause { get; set; } // Manual pause state set by user
-        public bool AdvanceTick { get; private set; } = true;
-        public long StoredGameTick { get; set; }
-        public bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
-        public bool LockFactory { get; set; } = false; // Lock all interaction on local planet
-        public float SkipRatio { get; set; }
+        public static bool Pause { get; set; }
+        public static bool ManualPause { get; set; } // Manual pause state set by user
+        public static bool AdvanceTick { get; private set; } = true;
+        public static long StoredGameTick { get; set; }
+        public static bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
+        public static bool LockFactory { get; set; } = false; // Lock all interaction on local planet
+        public static float SkipRatio { get; set; }
 
-        private GameObject timeText;
-        private GameObject infoText;
-        private float timer;
+        private static float timer;
+ 
 
-        public void Dispose()
-        {
-            timeText = null;
-            GameObject.Destroy(infoText);
-            infoText = null;
-        }        
-
-        public void SetSpeedRatio(float value)
+        public static void SetSpeedRatio(float value)
         {
             if (value == 0)
             {
@@ -41,19 +31,8 @@ namespace BulletTime
             }
         }
 
-        public void SetPauseMode(bool value)
+        public static void SetPauseMode(bool value)
         {
-            if (timeText == null)
-            {
-                timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
-            }
-            if (infoText == null && timeText != null)
-            {
-                infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
-                infoText.name = "pause info-text";
-                infoText.GetComponent<Text>().text = "Pause";
-                infoText.GetComponent<Text>().enabled = true;
-            }
             if (value)
             {
                 Pause = true;
@@ -64,8 +43,6 @@ namespace BulletTime
                     if (NebulaCompat.IsClient)
                         FPSController.SetFixUPS(0);
                 }
-                timeText?.SetActive(false);
-                infoText?.SetActive(true);
                 GameMain.isFullscreenPaused = true;
             }
             else
@@ -77,14 +54,13 @@ namespace BulletTime
                     GameMain.gameTick = StoredGameTick;
                     StoredGameTick = 0;
                 }
-                timeText?.SetActive(true);
-                infoText?.SetActive(false);
                 GameMain.isFullscreenPaused = false;
             }
+            IngameUI.OnPauseModeChange(value);
         }
 
         //Before gameTick, determine whether to pause and whether to advance tick
-        public bool PauseInThisFrame()
+        public static bool PauseInThisFrame()
         {
             bool pauseThisFrame = Pause;
             AdvanceTick = GameMain.data.guideComplete && Interactable;
@@ -101,31 +77,22 @@ namespace BulletTime
             return pauseThisFrame;
         }
 
-        public void SetInteractable(bool value)
+        public static void SetInteractable(bool value)
         {
             Log.Debug($"Interactable = {value}");
             Interactable = value;
-            if (!Interactable)
-            {
-                //infoText.GetComponent<Text>().text = "Read-Only";
-            }
-            else
-            {
+            if (Interactable)
+            { 
                 GameSave_Patch.isBlocked = false;
                 UIMessageBox.CloseTopMessage();
-                //infoText.GetComponent<Text>().text = "Pause";
             }
         }
 
-        public void SetLockFactory(bool value)
+        public static void SetLockFactory(bool value)
         {
             Log.Debug($"LockFactory = {value}");
             LockFactory = value;
-            if (LockFactory)
-            {
-                infoText.GetComponent<Text>().text = "Read-Only";
-            }
-            else
+            if (!LockFactory)
             {                
                 // Close blocking message if it is not dysonEditor
                 if (!UIRoot.instance.uiGame.dysonEditor.active)
@@ -133,7 +100,6 @@ namespace BulletTime
                     GameSave_Patch.isBlocked = false;
                     UIMessageBox.CloseTopMessage();
                 }
-                infoText.GetComponent<Text>().text = "Pause";
             }
         }
     }

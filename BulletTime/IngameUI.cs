@@ -11,6 +11,8 @@ namespace BulletTime
         private static Slider slider;
         private static Text text;
         private static Text stateMessage;
+        private static GameObject timeText;
+        private static GameObject infoText;
 
         public static void Dispose()
         {
@@ -26,6 +28,9 @@ namespace BulletTime
                 GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
                 stateMessage = null;
             }
+            timeText = null;
+            GameObject.Destroy(infoText);
+            infoText = null;
         }
 
         public static void Init()
@@ -45,29 +50,51 @@ namespace BulletTime
             }
             // Only host can have control slider
             slider.gameObject.SetActive(!NebulaCompat.IsClient);
-            BulletTimePlugin.State.ManualPause = false;
+            GameStateManager.ManualPause = false;
+        }
+
+        public static void OnPauseModeChange(bool pause)
+        {            
+            if (timeText == null)
+            {
+                timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
+            }            
+            if (infoText == null && timeText != null)
+            {
+                infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
+                infoText.name = "pause info-text";
+                infoText.GetComponent<Text>().text = "Pause";
+                infoText.GetComponent<Text>().enabled = true;
+            }
+            if (timeText != null && infoText != null)
+            {
+                timeText.SetActive(!pause);
+                infoText.SetActive(pause);
+            }            
+            if (text != null)
+                text.text = pause ? "pause".Translate() : $"{(int)slider.value}%";
         }
 
         private static void OnSliderChange(float value)
         {
             if (value == 0)
-            {
-                BulletTimePlugin.State.ManualPause = true;
+            {                
+                GameStateManager.ManualPause = true;
                 text.text = "pause".Translate();
-                if (!BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                if (!GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
-                BulletTimePlugin.State.ManualPause = false;
+                GameStateManager.ManualPause = false;
                 text.text = $"{(int)value}%";
-                if (BulletTimePlugin.State.Pause && NebulaCompat.IsMultiplayerActive)
+                if (GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                 {
                     NebulaCompat.SendPacket(PauseEvent.Resume);
                     ShowStatus("");
                 }
             }
-            BulletTimePlugin.State.SetSpeedRatio(value/100f);
+            GameStateManager.SetSpeedRatio(value/100f);
         }
         
         public static void ShowStatus(string message)
@@ -115,7 +142,7 @@ namespace BulletTime
                 if (__instance.fpsTextChanged)
                 {
                     // assume normal ups is 60/s, realSpeed = realUps / 60f
-                    float realSpeed = ((float)FPSController.currentUPS * (1f - BulletTimePlugin.State.SkipRatio)) / 60f;
+                    float realSpeed = ((float)FPSController.currentUPS * (1f - GameStateManager.SkipRatio)) / 60f;
                     StringBuilderUtility.WritePositiveFloat(__instance.fpsText, 10, 3, realSpeed * 100, 0, '-');
                 }
             }
