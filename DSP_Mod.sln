@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiment", "Experiment\Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAndHoldSim", "SampleAndHoldSim\SampleAndHoldSim.csproj", "{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{806B18C4-E083-4295-8D66-D12B7B6F9EA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

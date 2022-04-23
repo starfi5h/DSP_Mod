@@ -5,13 +5,12 @@ namespace SphereEditorTools
 {
     class UIWindow
     {
-        static UIDysonEditor dysnoEditor;
         public static bool isShow;
         static bool isMin;
 
-        static Rect normalSize = new Rect(0, 0, 240f, 220f);
+        static Rect normalSize = new Rect(0, 0, 240f, 200f);
         static Rect miniSize = new Rect(0, 0, 75f, 20f);
-        private static Rect windowRect = new Rect(300f, 250f, 240f, 220f);
+        private static Rect windowRect = new Rect(300f, 250f, 240f, 200f);
         static GUIStyle textStyle;
 
         public static string SpeedInput;
@@ -32,8 +31,9 @@ namespace SphereEditorTools
                 Log.LogWarning(ex);
             }
 
-            int height = 20 + (SphereEditorTools.EnableDisplayOptions.Value ? 30 : 0) + (SphereEditorTools.EnableSymmetryTool.Value ? 110 : 0) + (SphereEditorTools.EnableOrbitTool.Value ? 60 : 0);
+            int height = 20 + (SphereEditorTools.EnableDisplayOptions.Value ? 30 : 0) + (SphereEditorTools.EnableSymmetryTool.Value ? 90 : 0) + (SphereEditorTools.EnableOrbitTool.Value ? 60 : 0);
             normalSize.height = height;
+            windowRect.height = normalSize.height;
         }
 
         public static void SaveWindowPos()
@@ -43,17 +43,15 @@ namespace SphereEditorTools
         }
 
 
-        public static void OnOpen(UIDysonEditor __instance)
+        public static void OnOpen()
         {
             isShow = true;
-            dysnoEditor = __instance;
             SpeedInput = "";
         }
  
         public static void OnClose()
         {
             isShow = false;
-            dysnoEditor = null;
         }
 
         public static void OnGUI()
@@ -87,7 +85,6 @@ namespace SphereEditorTools
         {
             bool tmpBool;
             int tmpInt;
-            float tmpFloat;
             string tmpString;
 
             GUILayout.BeginArea(new Rect(windowRect.width - 27f, 1f, 25f, 16f));
@@ -127,7 +124,7 @@ namespace SphereEditorTools
                 GUILayout.BeginVertical(UnityEngine.GUI.skin.box); //Symmetry Tool
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label(Stringpool.Mirror_symmetry, GUILayout.MinWidth(180));
+                    GUILayout.Label(Stringpool.SymmetryTool, GUILayout.MinWidth(180));
                     if (GUILayout.Toggle(Comm.SymmetricMode, "", GUILayout.Width(20)) != Comm.SymmetricMode)
                         Comm.SetSymmetricMode(!Comm.SymmetricMode);
                     GUILayout.EndHorizontal();
@@ -138,11 +135,6 @@ namespace SphereEditorTools
                         SymmetryTool.ChangeParameters(Comm.MirrorMode, Comm.RadialCount);
                         Comm.SymmetricMode = true;
                     }
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label(Stringpool.Rotation_symmetry, GUILayout.MinWidth(180));
-                    if (GUILayout.Toggle(Comm.SymmetricMode, "", GUILayout.Width(20)) != Comm.SymmetricMode)
-                        Comm.SetSymmetricMode(!Comm.SymmetricMode);
-                    GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("<<"))
                     {
@@ -208,7 +200,7 @@ namespace SphereEditorTools
                     SpeedInput = GUILayout.TextField(SpeedInput, 7, GUILayout.MinWidth(35));
                     if (GUILayout.Button(Stringpool.Set1))
                     {
-                        if (float.TryParse(SpeedInput, out tmpFloat) && tmpFloat >= 0f)
+                        if (float.TryParse(SpeedInput, out float tmpFloat) && tmpFloat >= 0f)
                         {
                             EditOrbit.TrySetAngularSpeed(tmpFloat);
                         }

@@ -25,7 +25,7 @@ namespace SphereEditorTools
             dysonEditor = __instance;
             Stringpool.Set();
             if (SphereEditorTools.EnableGUI.Value)
-                UIWindow.OnOpen(dysonEditor);
+                UIWindow.OnOpen();
 
             HideLayer.SetDisplayMode(DisplayMode);
             HideLayer.SetMask(HideLayer.EnableMask);
@@ -62,7 +62,7 @@ namespace SphereEditorTools
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIDysonEditor), "_OnClose")]
-        public static void Free(UIDysonEditor __instance)
+        public static void Free()
         {
             dysonEditor = null;
             if (SphereEditorTools.EnableGUI.Value)
@@ -88,7 +88,6 @@ namespace SphereEditorTools
                 UIWindow.SaveWindowPos();
             }
             SphereEditorTools.Config.Save();
-            Log.LogDebug("Save config");
         }
 
 
@@ -163,7 +162,7 @@ namespace SphereEditorTools
                         }
                         else if (Input.GetKeyDown(SphereEditorTools.KeyGrid.Value))
                         {
-                            singleSelectedLayer.gridMode = (singleSelectedLayer.gridMode + 1) % 5; //0: No Grid, 1: Graticule, 2~4: Geometric
+                            singleSelectedLayer.drawingGridMode = (singleSelectedLayer.drawingGridMode + 1) % 5; //0: No Grid, 1: Graticule, 2~4: Geometric
                         }
                     }         
                 }
