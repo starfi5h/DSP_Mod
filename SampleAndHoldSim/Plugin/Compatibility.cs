@@ -25,7 +25,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.4.9");
+                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.5.0");
                     Log.Warn(e);
                 }
             }

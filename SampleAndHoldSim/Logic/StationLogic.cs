@@ -26,7 +26,7 @@ namespace SampleAndHoldSim
             PlanetTransport transport = factory.transport;
             for (int stationId = 1; stationId < transport.stationCursor; stationId++)
             {
-                if (transport.stationPool[stationId] != null)
+                if (transport.stationPool[stationId] != null && transport.stationPool[stationId].id == stationId)
                 {
                     if (!stationDict.ContainsKey(stationId))
                         stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
@@ -40,47 +40,61 @@ namespace SampleAndHoldSim
 
     public class StationData
     {
-        public readonly int[] tmpCount;
-        readonly int[] tmpInc;
+        public int[] tmpCount;
+        int[] tmpInc;
         int tmpWarperCount;
 
         public StationData (StationComponent station)
         {
             int length = station.storage?.Length ?? 0;
+            SetArray(length);
+        }
+
+        private void SetArray(int length)
+        {
             tmpCount = new int[length];
             tmpInc = new int[length];
         }
 
-        public static void ActiveBegin(StationData data, StationComponent staion)
+        public static void ActiveBegin(StationData data, StationComponent station)
         {
-            for (int i = 0; i < data.tmpCount.Length; i++)
+            int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length)
+                data.SetArray(length);
+            for (int i = 0; i < length; i++)
             {
-                data.tmpCount[i] = staion.storage[i].count;
-                data.tmpInc[i] = staion.storage[i].inc;
+                data.tmpCount[i] = station.storage[i].count;
+                data.tmpInc[i] = station.storage[i].inc;
             }
-            data.tmpWarperCount = staion.warperCount;
+            data.tmpWarperCount = station.warperCount;
         }
 
-        public static void ActiveEnd(StationData data, StationComponent staion)
+        public static void ActiveEnd(StationData data, StationComponent station)
         {
-            for (int i = 0; i < data.tmpCount.Length; i++)
+            int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length)
+                data.SetArray(length);
+            for (int i = 0; i < length; i++)
             {
-                data.tmpCount[i] = staion.storage[i].count - data.tmpCount[i];
-                data.tmpInc[i] = staion.storage[i].inc - data.tmpInc[i];
+                data.tmpCount[i] = station.storage[i].count - data.tmpCount[i];
+                data.tmpInc[i] = station.storage[i].inc - data.tmpInc[i];
             }
-            data.tmpWarperCount = staion.warperCount - data.tmpWarperCount;
+            data.tmpWarperCount = station.warperCount - data.tmpWarperCount;
         }
 
-        public static void IdleEnd(StationData data, StationComponent staion)
+        public static void IdleEnd(StationData data, StationComponent station)
         {
-            for (int i = 0; i < data.tmpCount.Length; i++)
+            int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length)
+                data.SetArray(length);
+            for (int i = 0; i < length; i++)
             {
-                staion.storage[i].count += data.tmpCount[i];
-                staion.storage[i].inc += data.tmpInc[i];
-                staion.storage[i].count = Math.Max(staion.storage[i].count, 0);
-                staion.storage[i].inc = Math.Max(staion.storage[i].inc, 0);
+                station.storage[i].count += data.tmpCount[i];
+                station.storage[i].inc += data.tmpInc[i];
+                station.storage[i].count = Math.Max(station.storage[i].count, 0);
+                station.storage[i].inc = Math.Max(station.storage[i].inc, 0);
             }
-            staion.warperCount += data.tmpWarperCount;
+            station.warperCount += data.tmpWarperCount;
         }
     }
 }
