@@ -1,4 +1,4 @@
-# Sample and Hold Simulation (work in progress)
+# Sample and Hold Simulation  
 
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo1.gif)  
 Change how many planet factories run per tick, simulating idle factories input and output using values from last tick.  
@@ -11,10 +11,12 @@ Warning: Because this mod manipulate stats data, if it does not work as intend, 
 User can set how many planet factories can work during a game tick, the rest will be put into the idle state. For working factories, the factories will run as normal. For idle factories, simulate the input/output by value changes of the last active tick.  
 In the example chart, the upper one is the original game which runs 3 factories per tick, and their factory cycles are 4/3/2. The lower one set cycle time = 3 ticks so there is only 1 factory run per tick, and it now takes 3 times to complete a full factory cycle.  
 
+![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo1.mp4)  
+Simulation in action. Above: cycle = 1. Below: cycle = 2.  
+
 ### Factory Input:  
 - Vein amount decrease  
 - Logistic stations storage decrease by belt output ports  
-
 
 ### Factory Output:  
 - Logistic stations storage increase by belt input ports  
@@ -23,7 +25,7 @@ In the example chart, the upper one is the original game which runs 3 factories 
 - Ejector bullets & silo rockets  
   
 ![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats1.jpg)  
-The production throughput will catch up with original one in long term if it is stable. In short term there are some differences, like statistic data will be more sparse. Also local conponents inside the factory will be slower, so storage boxes or tanks will have fewer items than vanilla.  
+The production throughput will catch up with original one in long term if it is stable. In short term there are some differences, for example statistic data will be more sparse. Also local conponents inside the factory will be slower, so storage boxes or tanks will have fewer items than vanilla.  
 
 ## Configuration
 
@@ -35,12 +37,15 @@ Maximum number of factories allow to active and run per tick. (Default:`100`)
 - `EnableStationStorageUI`  
 Display item count change rate in station storages. (Default:`true`)  
 
+- `EnableVeinConsumptionUI`
+Display mineral consumption rate of mineral. (Default:`true`)  
+
 ## Compatibility  
 
 (v) CommonAPI  
 (v) DSPOptimizations  
-( ) Blackbox - The production stats will be multiplied.  
-( ) NebulaMultiplayer - Client will see less item in storage box when he is in different planet from host.  
+( ) Blackbox - The production stats of blackbox will be multiplied.  
+( ) NebulaMultiplayer - Only host can use this. Client will see less item in storage box when he is in different planet from host.  
 
 ----
 # 取样保持模拟
@@ -57,6 +62,7 @@ Display item count change rate in station storages. (Default:`true`)
 上方为原本游戏运行方式，每一祯有3个工厂运作，完整周期分别是4/3/2。  
 下方为Mod改变之后的运作方式，每一祯有1个工厂运作，在闲置的期间(浅色格)会让数值套用上一次工作的变化，完整周期变为3倍-12/9/6。  
 套用变化的只有工厂的输入和输出，工厂的内部元件会以低速运行。而戴森球系统和运输机则继续每祯都运行。  
+
 
 ### 工厂输入  
 - 矿脉的矿物消耗  
@@ -82,9 +88,16 @@ Display item count change rate in station storages. (Default:`true`)
 - `EnableStationStorageUI`  
 显示物流塔货物变化速率 (Default:`true`)  
 
+- `EnableVeinConsumptionUI`  
+显示矿脉的矿物消耗速率 (Default:`true`)  
+
 ----
 
 ## Changelog
+
+#### v0.2.0  
+\- Add EnableVeinConsumptionUI option.  
+\- Fix error when removing stations.  
 
 #### v0.1.1  
 \- Fix veinGroup value changes.  

@@ -11,7 +11,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.1.1";
+        public const string VERSION = "0.2.0";
         public static Plugin instance;
         Harmony harmony;
 
@@ -23,7 +23,7 @@ namespace SampleAndHoldSim
         {
             MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑祯所能运行的最大工厂数量");
             EnableStationStorageUI = Config.Bind<bool>("UI", "EnableStationStorageUI", true, "Display item count change rate in station storages.\n显示物流塔货物变化速率");
-            EnableVeinConsumptionUI = Config.Bind<bool>("UI", "EnableVeinConsumptionUI", true, "Display mineral consumption rate of veins.\n显示矿脉的矿物消耗速率");
+            EnableVeinConsumptionUI = Config.Bind<bool>("UI", "EnableVeinConsumptionUI", true, "Display mineral consumption rate of mineral.\n显示矿脉的矿物消耗速率");
             MainManager.MaxFactoryCount = MaxFactoryCount.Value;
         }
 
