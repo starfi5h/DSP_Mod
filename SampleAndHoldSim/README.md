@@ -1,15 +1,19 @@
-# Sample and Hold Simulation (work in progress)
+# Sample and Hold Simulation  
 
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo1.gif)  
 Change how many planet factories run per tick, simulating idle factories input and output using values from last tick.  
-Lower MaxFactoryCount can reduce calculation and increase UPS.  
+The factories tick less but still make the same amount of items in ILS with larger gap in time.  
 Recommend to set focus local factory to true and not set cycle time too high to have a better experience.  
+
 Warning: Because this mod manipulate stats data, if it does not work as intend, it may diable Milkyway upload.  
 
 ## How does it work
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/time_chart.png)  
 User can set how many planet factories can work during a game tick, the rest will be put into the idle state. For working factories, the factories will run as normal. For idle factories, simulate the input/output by value changes of the last active tick.  
 In the example chart, the upper one is the original game which runs 3 factories per tick, and their factory cycles are 4/3/2. The lower one set cycle time = 3 ticks so there is only 1 factory run per tick, and it now takes 3 times to complete a full factory cycle.  
+
+![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo2.gif)  
+Simulation in action, observe how station storage and vein amount change.  Above: cycle = 1. Below: cycle = 2.  
 
 ### Factory Input:  
 - Vein amount decrease  
@@ -23,7 +27,7 @@ In the example chart, the upper one is the original game which runs 3 factories 
 - Ejector bullets & silo rockets  
   
 ![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats1.jpg)  
-The production throughput will catch up with original one in long term if it is stable. In short term there are some differences, like statistic data will be more sparse. Also local conponents inside the factory will be slower, so storage boxes or tanks will have fewer items than vanilla.  
+The production throughput will catch up with original one in long term if it is stable. In short term there are some differences, for example statistic data will be more sparse. Also local conponents inside the factory will be slower, so storage boxes or tanks will have fewer items than vanilla.  
 
 ## Configuration
 
@@ -35,12 +39,15 @@ Maximum number of factories allow to active and run per tick. (Default:`100`)
 - `EnableStationStorageUI`  
 Display item count change rate in station storages. (Default:`true`)  
 
+- `EnableVeinConsumptionUI`
+Display mineral consumption rate of mineral. (Default:`true`)  
+
 ## Compatibility  
 
 (v) CommonAPI  
 (v) DSPOptimizations  
-( ) Blackbox - The production stats will be multiplied.  
-( ) NebulaMultiplayer - Client will see less item in storage box when he is in different planet from host.  
+( ) Blackbox - The production stats of blackbox will be multiplied.  
+( ) NebulaMultiplayer - Only host can use this. Client will see less item in storage box when he is in different planet from host.  
 
 ----
 # 取样保持模拟
@@ -67,8 +74,9 @@ Display item count change rate in station storages. (Default:`true`)
 - 研究的哈希块上传量  
 - 产物统计和电力统计  
 - 射出的太阳帆和火箭  
-  
-如果工厂的产出是稳定的，长期下来模拟的产量和真实的产量会相近。  
+
+![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo2.gif)  
+实际演示，上图为正常游戏，下图为设置cycle=2。可以观察到两者的矿物消耗以及物流塔内货物增加速率是一样的。如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近。  
 短期上统计的数据可能会变得稀疏，此外工厂内部元件(仓储,运输带)中货物的增加数量也会比原本的少。  
 
 ## 設置
@@ -82,9 +90,16 @@ Display item count change rate in station storages. (Default:`true`)
 - `EnableStationStorageUI`  
 显示物流塔货物变化速率 (Default:`true`)  
 
+- `EnableVeinConsumptionUI`  
+显示矿脉的矿物消耗速率 (Default:`true`)  
+
 ----
 
 ## Changelog
+
+#### v0.2.0  
+\- Add EnableVeinConsumptionUI option.  
+\- Fix error when removing stations.  
 
 #### v0.1.1  
 \- Fix veinGroup value changes.  
