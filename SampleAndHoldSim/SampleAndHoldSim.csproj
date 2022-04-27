@@ -348,7 +348,7 @@
     <Compile Include="Logic\GameData_Patch.cs" />
     <Compile Include="Plugin\Plugin.cs" />
     <Compile Include="Logic\ManagerLogic.cs" />
-    <Compile Include="UI\UIStation.cs" />
+    <Compile Include="UI\UIstation.cs" />
     <Compile Include="UI\UIvein.cs" />
     <Compile Include="UI\UItooltip.cs" />
     <Compile Include="Logic\VeinLogic.cs" />

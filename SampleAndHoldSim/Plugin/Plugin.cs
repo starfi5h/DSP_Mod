@@ -11,7 +11,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.2.0";
+        public const string VERSION = "0.2.1";
         public static Plugin instance;
         Harmony harmony;
 
@@ -49,7 +49,7 @@ namespace SampleAndHoldSim
             if (EnableVeinConsumptionUI.Value)
                 harmony.PatchAll(typeof(UIvein));
             if (EnableStationStorageUI.Value)
-                harmony.PatchAll(typeof(UIStation));
+                harmony.PatchAll(typeof(UIstation));
 
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.CommonAPI.GUID))
                 Compatibility.CommonAPI.Init(harmony);
@@ -61,7 +61,7 @@ namespace SampleAndHoldSim
         {
             harmony.UnpatchSelf();
             UIcontrol.OnDestory();
-            UIStation.OnDestory();
+            UIstation.OnDestory();
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace SampleAndHoldSim
 {
-    class UIStation
+    class UIstation
     {
         public static int ViewFactoryIndex = -1;
         public static int VeiwStationId = -1;
@@ -36,7 +36,7 @@ namespace SampleAndHoldSim
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIStationWindow), "_OnClose")]
-        public static void UIStationWindow_OnClose(UIStationWindow __instance)
+        public static void UIStationWindow_OnClose()
         {
             SetVeiwStation(-1, -1, 0);
         }

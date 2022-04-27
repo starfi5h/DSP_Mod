@@ -1,7 +1,7 @@
 {
     "name": "SampleAndHoldSim",
     "description": "Change how many planet factories run per tick, simulating idle factories input and output to reduce calculation.  周期性的仿造星球工厂的输入/输出以跳过运算。",
-    "version_number": "0.2.0",
+    "version_number": "0.2.1",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

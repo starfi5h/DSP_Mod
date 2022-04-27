@@ -23,6 +23,8 @@ namespace SampleAndHoldSim
                 workFactoryCount = MainManager.SetFactories(workFactories, idleFactories);
                 idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
                 Log.Debug($"factoryCount total:{GameMain.data.factoryCount} work:{workFactoryCount} idle:{idleFactoryCount}");
+                UIvein.ViewFactoryIndex = -1;
+                UIstation.SetVeiwStation(-1, -1, 0);
             }
         }
 

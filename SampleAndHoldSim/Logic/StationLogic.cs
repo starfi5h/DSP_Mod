@@ -16,7 +16,7 @@ namespace SampleAndHoldSim
         public void StationAfterTick()
         {
             if (IsActive)
-                Traversal(StationData.ActiveEnd, Index == UIStation.ViewFactoryIndex);
+                Traversal(StationData.ActiveEnd, Index == UIstation.ViewFactoryIndex);
             else
                 Traversal(StationData.IdleEnd, false);
         }
@@ -31,8 +31,8 @@ namespace SampleAndHoldSim
                     if (!stationDict.ContainsKey(stationId))
                         stationDict.Add(stationId, new StationData(transport.stationPool[stationId]));
                     action(stationDict[stationId], transport.stationPool[stationId]);
-                    if (record && stationId == UIStation.VeiwStationId)
-                        UIStation.Record(stationDict[stationId]);
+                    if (record && stationId == UIstation.VeiwStationId)
+                        UIstation.Record(stationDict[stationId]);
                 }
             }
         }

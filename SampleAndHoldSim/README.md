@@ -13,7 +13,9 @@ User can set how many planet factories can work during a game tick, the rest wil
 In the example chart, the upper one is the original game which runs 3 factories per tick, and their factory cycles are 4/3/2. The lower one set cycle time = 3 ticks so there is only 1 factory run per tick, and it now takes 3 times to complete a full factory cycle.  
 
 ![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo2.gif)  
-Simulation in action, observe how station storage and vein amount change.  Above: cycle = 1. Below: cycle = 2.  
+Simulation in action. Above: normal game, cycle = 1. Below: mod enable, cycle = 2.  
+In the gif, both vein amount go from 100 to 90, and station storage go from 55 to 65.  
+
 
 ### Factory Input:  
 - Vein amount decrease  
@@ -52,7 +54,6 @@ Display mineral consumption rate of mineral. (Default:`true`)
 ----
 # 取样保持模拟
 
-![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo1.gif)  
 尝试用取样工厂输入/输出的方法来减少计算量。  
 使用者可以在性能测试面板设定每个逻辑祯可以使多少星球运行，闲置的星球将会用上一个tick的值来模拟工厂的输入和输出。  
 建议勾选Focus Local让本地工厂保持运行来维持游戏体验，运行工厂数调低到能让UPS>60就好。  
@@ -76,8 +77,8 @@ Display mineral consumption rate of mineral. (Default:`true`)
 - 射出的太阳帆和火箭  
 
 ![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo2.gif)  
-实际演示，上图为正常游戏，下图为设置cycle=2。可以观察到两者的矿物消耗以及物流塔内货物增加速率是一样的。如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近。  
-短期上统计的数据可能会变得稀疏，此外工厂内部元件(仓储,运输带)中货物的增加数量也会比原本的少。  
+实际演示，上图为正常游戏，下图为设置cycle=2。可以观察到两者的矿物消耗以及物流塔内货物增加速率是一样的。
+如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近，短期上统计的数据可能会变得稀疏，此外工厂内部元件(仓储,运输带)中货物的增加数量也会比原本的少。  
 
 ## 設置
 .cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
@@ -96,6 +97,8 @@ Display mineral consumption rate of mineral. (Default:`true`)
 ----
 
 ## Changelog
+#### v0.2.1
+\- Fix a bug that sometimes switching game with veinUI enable will get errors.  
 
 #### v0.2.0  
 \- Add EnableVeinConsumptionUI option.  
