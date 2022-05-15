@@ -1,7 +1,7 @@
 {
     "name": "AutoMute",
-    "description": "Automatically mute audio when game loses focus. Mute user-specified building audio.",
-    "version_number": "0.1.0",
+    "description": "Auto-mute sound when in background. Mute user-specified building. 后台时静音；消音指定建筑",
+    "version_number": "1.0.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

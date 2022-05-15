@@ -11,19 +11,17 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "0.1.0";
+        public const string VERSION = "1.0.0";
         public static Plugin Instance;
         Harmony harmony;
 
         public static ConfigEntry<bool> MuteInBackground;
-        public static ConfigEntry<bool> WindTurbine;
-        public static ConfigEntry<bool> RayReceiver;
+        public static ConfigEntry<string> MuteBuildingIds;
 
         public void LoadConfig()
         {
             MuteInBackground = Config.Bind("- General -", "Mute In Background", true, "Whether to mute the game when in the background, i.e. alt-tabbed.");
-            WindTurbine = Config.Bind("Building Audio - Power", "Wind Turbine", true);
-            RayReceiver = Config.Bind("Building Audio - Power", "Ray Receiver", true);
+            MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by comma");
         }
 
         public void Awake()
@@ -40,11 +38,8 @@ namespace AutoMute
             harmony.UnpatchSelf();
         }
 
-        [Conditional("DEBUG")]
-        public static void Log(object data)
-        {
-            Instance.Logger.LogDebug(data);
-        }
+        public static void LogWarn(object data) => Instance.Logger.LogWarning(data);
+        public static void LogInfo(object data) => Instance.Logger.LogInfo(data);
     }
 
     class Patch
@@ -60,21 +55,27 @@ namespace AutoMute
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(AudioData), "BindToObject")]
-        public static void BindToObject(ref AudioData __instance, EObjectType _objType, PrefabDesc _pdesc)
+        [HarmonyPatch(typeof(VFPreload), "InvokeOnLoadWorkEnded")]
+        [HarmonyAfter("me.xiaoye97.plugin.Dyson.LDBTool")]
+        public static void InvokeOnLoadWorkEnded()
         {
-            if (_objType == EObjectType.Entity)
+            MuteBuildings();
+        }
+
+        public static void MuteBuildings()
+        {
+            foreach (var str in Plugin.MuteBuildingIds.Value.Split(','))
             {
-                if (_pdesc.isPowerGen)
+                if (int.TryParse(str, out int itemId))
                 {
-                    if (_pdesc.windForcedPower && !Plugin.WindTurbine.Value)
-                    {
-                        __instance.volume = 0;
-                    }
-                    else if (_pdesc.gammaRayReceiver && !Plugin.RayReceiver.Value)
-                    {
-                        __instance.volume = 0;
-                    }
+                    var item = LDB.items.Select(itemId);
+                    Plugin.LogInfo($"Mute {itemId} {item.Name.Translate()}");
+                    int modelIndex = item.ModelIndex;
+                    LDB.models.Select(modelIndex).prefabDesc.audioVolume = 0;
+                }
+                else
+                {
+                    Plugin.LogWarn($"Can't parse {str} to int");
                 }
             }
         }
