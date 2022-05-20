@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using NebulaCompatibilityAssist.Packets;
 using System.Diagnostics;
 
 namespace NebulaCompatibilityAssist
@@ -10,19 +11,22 @@ namespace NebulaCompatibilityAssist
     [BepInDependency("dsp.nebula-multiplayer-api")]
     public class Plugin : BaseUnityPlugin
     {
-        Harmony harmony;
+        public static Harmony Harmony { get; private set; }
 
         public void Awake()
         {
             Log.LogSource = Logger;
-            harmony = new Harmony(PluginInfo.PLUGIN_GUID);
-            Patches.NC_Patch.Init(harmony);
+            Harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            Patches.NC_Patch.OnAwake();
         }
 
         [Conditional("DEBUG")]
         public void OnDestroy()
         {
-            harmony.UnpatchSelf();
+            Harmony.UnpatchSelf();
+            Harmony = null;
+            NC_ModSaveRequest.OnReceive = null;
+            NC_ModSaveData.OnReceive = null;
         }
     }
 
