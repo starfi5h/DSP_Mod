@@ -16,6 +16,7 @@ namespace NebulaCompatibilityAssist
         {
             Log.LogSource = Logger;
             harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            Patches.NC_Patch.Init(harmony);
         }
 
         [Conditional("DEBUG")]
