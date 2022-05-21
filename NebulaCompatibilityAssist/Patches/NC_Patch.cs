@@ -22,9 +22,11 @@ namespace NebulaCompatibilityAssist.Patches
         [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
         public static void Init()
         {
-            LSTM.Init(Plugin.Harmony);
-            DSPMarker.Init(Plugin.Harmony);
-            DSPStarMapMemo.Init(Plugin.Harmony);
+            Harmony harmony = Plugin.Harmony;
+            LSTM.Init(harmony);
+            DSPMarker.Init(harmony);
+            DSPStarMapMemo.Init(harmony);
+            DSPBeltReverseDirection.Init(harmony);
         }
 
         [HarmonyPostfix]
