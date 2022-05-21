@@ -42,6 +42,7 @@ namespace NebulaCompatibilityAssist.Patches
             catch (Exception e)
             {
                 Log.Warn($"{NAME} - Fail! Last target version: {VERSION}");
+                NC_Patch.ErrorMessage += $"\n{NAME} (last target version: {VERSION})";
                 Log.Debug(e);
             }
         }

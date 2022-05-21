@@ -8,6 +8,8 @@ namespace NebulaCompatibilityAssist.Patches
     public static class NC_Patch
     {
         public static Action OnLogin;
+        public static string ErrorMessage = "";
+        public static bool initialized = false;
 
         public static void OnAwake()
         {
@@ -22,11 +24,20 @@ namespace NebulaCompatibilityAssist.Patches
         [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
         public static void Init()
         {
+            if (initialized) return;
+
             Harmony harmony = Plugin.Harmony;
             LSTM.Init(harmony);
             DSPMarker.Init(harmony);
             DSPStarMapMemo.Init(harmony);
             DSPBeltReverseDirection.Init(harmony);
+
+            if (ErrorMessage != "")
+            {
+                ErrorMessage = "Error occurred when patching following mods:" + ErrorMessage;
+                UIMessageBox.Show("Nebula Compatibility Assist Error", ErrorMessage, "确定".Translate(), 3);
+            }
+            initialized = true;
         }
 
         [HarmonyPostfix]

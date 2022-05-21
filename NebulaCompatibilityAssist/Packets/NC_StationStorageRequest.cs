@@ -7,7 +7,7 @@ namespace NebulaCompatibilityAssist.Packets
     }
 
     [RegisterPacketProcessor]
-    internal class StationStorageRequestProcessor : BasePacketProcessor<NC_StationStorageRequest>
+    internal class NC_StationStorageRequestProcessor : BasePacketProcessor<NC_StationStorageRequest>
     {
         public override void ProcessPacket(NC_StationStorageRequest packet, INebulaConnection conn)
         {

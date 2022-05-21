@@ -20,6 +20,7 @@ namespace NebulaCompatibilityAssist.Patches
         public const string VERSION = "1.1.6";
 
         private static Action ReverseBelt_Modified;
+        private static bool normal = true;
 
         public static void Init(Harmony harmony)
         {
@@ -37,11 +38,14 @@ namespace NebulaCompatibilityAssist.Patches
                 harmony.Patch(methodInfo, prefix, postfix, transplier);
                 ReverseBelt_Modified = AccessTools.MethodDelegate<Action>(methodInfo);
 
+                if (!normal) 
+                    throw new Exception("ReverseBelt_Transpiler error");
                 Log.Info($"{NAME} - OK");
             }
             catch (Exception e)
             {
                 Log.Warn($"{NAME} - Fail! Last target version: {VERSION}");
+                NC_Patch.ErrorMessage += $"\n{NAME} (last target version: {VERSION})";
                 Log.Debug(e);
             }
         }
@@ -69,7 +73,10 @@ namespace NebulaCompatibilityAssist.Patches
 
         public static void ReverseBeltLocal_Postfix()
         {
-            NebulaModAPI.MultiplayerSession.Factories.PacketAuthor = NebulaModAPI.AUTHOR_NONE;
+            if (NebulaModAPI.IsMultiplayerActive)
+            {
+                NebulaModAPI.MultiplayerSession.Factories.PacketAuthor = NebulaModAPI.AUTHOR_NONE;
+            }
         }
 
         public static void ReverseBeltRemote(int planetId, int beltId)
@@ -135,7 +142,8 @@ namespace NebulaCompatibilityAssist.Patches
             catch (Exception e)
             {
                 Log.Warn("ReverseBelt_Transpiler fail!");
-                Log.Debug(e);
+                Log.Dev(e);
+                normal = false;
                 return instructions;
             }
         }

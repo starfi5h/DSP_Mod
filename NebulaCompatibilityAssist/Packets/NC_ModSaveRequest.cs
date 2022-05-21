@@ -16,7 +16,7 @@ namespace NebulaCompatibilityAssist.Packets
     }
 
     [RegisterPacketProcessor]
-    internal class ModSaveRequestProcessor : BasePacketProcessor<NC_ModSaveRequest>
+    internal class NC_ModSaveRequestProcessor : BasePacketProcessor<NC_ModSaveRequest>
     {
         public override void ProcessPacket(NC_ModSaveRequest packet, INebulaConnection conn)
         {

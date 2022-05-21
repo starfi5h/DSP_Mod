@@ -7,6 +7,7 @@ namespace NebulaCompatibilityAssist.Patches
 {
     public static class LSTM
     {
+        public const string NAME = "LSTM";
         public const string GUID = "com.hetima.dsp.LSTM";
         public const string VERSION = "6.5.0";
 
@@ -23,11 +24,12 @@ namespace NebulaCompatibilityAssist.Patches
                 harmony.Patch(targetType.GetMethod("SwitchToStarSystem"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
                 harmony.Patch(targetType.GetMethod("SwitchToGlobal"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
 
-                Log.Info("LSTM - OK");
+                Log.Info($"{NAME} - OK");
             }
             catch (Exception e)
             {
-                Log.Warn($"LSTM - Fail! Last target version: {VERSION}");
+                Log.Warn($"{NAME} - Fail! Last target version: {VERSION}");
+                NC_Patch.ErrorMessage += $"\n{NAME} (last target version: {VERSION})";
                 Log.Debug(e);
             }
         }
