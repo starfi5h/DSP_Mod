@@ -31,6 +31,7 @@ namespace NebulaCompatibilityAssist.Patches
             DSPMarker.Init(harmony);
             DSPStarMapMemo.Init(harmony);
             DSPBeltReverseDirection.Init(harmony);
+            DSPTransportStat_Patch.Init(harmony);
 
             if (ErrorMessage != "")
             {
