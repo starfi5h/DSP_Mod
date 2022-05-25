@@ -12,7 +12,9 @@ namespace SampleAndHoldSim
         static Text[] changeRateText;
 
         static int[,] periodArray;
-        const int PEROID = 600;
+        static int[] sumArray;
+        const int PEROID = 60;
+        const int SETP = 10;
         static int time;
         static int cursor;
         
@@ -79,12 +81,22 @@ namespace SampleAndHoldSim
 
         public static void Record(StationData data)
         {
-            cursor = (cursor + 1) % PEROID;
-            time = time < PEROID ? time + 1 : PEROID;
             for (int i = 0; i < data.tmpCount.Length; i++)
             {
-                periodArray[PEROID, i] += data.tmpCount[i] - periodArray[cursor, i];
-                periodArray[cursor, i] = data.tmpCount[i];
+                // collect item count change in SETP ticks
+                periodArray[PEROID, i] += data.tmpCount[i];
+            }
+            if (GameMain.gameTick % SETP == 0)
+            {
+                for (int i = 0; i < data.tmpCount.Length; i++)
+                {
+                    // sliding window: replace old value with new value
+                    sumArray[i] += -periodArray[cursor, i] + periodArray[PEROID, i];
+                    periodArray[cursor, i] = periodArray[PEROID, i];
+                    periodArray[PEROID, i] = 0;
+                }
+                cursor = (cursor + 1) % PEROID;
+                time = time < PEROID ? time + 1 : PEROID;
             }
         }
 
@@ -95,18 +107,24 @@ namespace SampleAndHoldSim
                 ViewFactoryIndex = factoryId;
                 VeiwStationId = stationId;
                 if (length > 0)
+                {
                     periodArray = new int[PEROID + 1, length];
+                    sumArray = new int[length];
+                }
                 else
+                {
                     periodArray = null;
+                    sumArray = null;
+                }
                 time = 0;
             }
         }
 
         public static float GetStorageChangeRate(int storageIndex)
         {
-            if (periodArray == null || time < 10)
+            if (periodArray == null || time < 1)
                 return 0;
-            return periodArray[PEROID, storageIndex] * 60f / (time / 10 * 10);
+            return sumArray[storageIndex] * 60f / time / SETP;
         }
     }
 }

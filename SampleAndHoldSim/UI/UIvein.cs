@@ -8,7 +8,9 @@ namespace SampleAndHoldSim
         public static int ViewFactoryIndex = -1;
         
         static int[,] periodArray = null;
-        const int PEROID = 600;
+        static int[] sumArray;
+        const int PEROID = 30;
+        const int SETP = 60;
         static int cursor;
 
         // Due to there is random seed in MinerComponent, sliding window can't get accurate results
@@ -26,6 +28,7 @@ namespace SampleAndHoldSim
                 if (ViewFactoryIndex != (GameMain.localPlanet?.factory.index ?? -1))
                 {
                     periodArray = new int[PEROID + 1, GameMain.localPlanet.factory.planet.veinGroups.Length];
+                    sumArray = new int[GameMain.localPlanet.factory.planet.veinGroups.Length];
                     ViewFactoryIndex = GameMain.localPlanet.factory.index;
                     cursor = 0;
                 }
@@ -37,7 +40,7 @@ namespace SampleAndHoldSim
                 else
                 {
                     string str = __instance.infoText.text;
-                    int index = str.LastIndexOf("\n ");
+                    int index = str.LastIndexOf("\n-");
                     if (index > 0)
                         str = str.Remove(index);
                     if (rate > 0)
@@ -50,33 +53,36 @@ namespace SampleAndHoldSim
         static string GetRateString(float rate)
         {
             if (UnitPerMinute)
-                return string.Format("\n {0:0.0} /min", rate * 60);
+                return string.Format("\n- {0:0} /min", rate * 60);
             else
-                return string.Format("\n {0:0.0} /s", rate);
+                return string.Format("\n- {0:0.0} /s", rate);
         }
 
         public static void AdvanceCursor()
-        {            
-            cursor = (cursor + 1) % PEROID;
-            for (int i = 0; i < periodArray.GetLength(1); i++)
+        {
+            if (GameMain.gameTick % SETP == 0)
             {
-                periodArray[PEROID, i] -= periodArray[cursor, i];
-                periodArray[cursor, i] = 0;
+                for (int i = 0; i < sumArray.Length; i++)
+                {
+                    // sliding window: replace old value with new value
+                    sumArray[i] += -periodArray[cursor, i] + periodArray[PEROID, i];
+                    periodArray[cursor, i] = periodArray[PEROID, i];
+                    periodArray[PEROID, i] = 0;
+                }
+                cursor = (cursor + 1) % PEROID;
             }            
-            
         }
 
         public static void Record(int groupIndex, int amount)
         {
             periodArray[PEROID, groupIndex] += amount;
-            periodArray[cursor, groupIndex] += amount;
         }
 
         public static float GetVeinGroupChangeRate(int groupIndex)
         {
-            if (periodArray == null)
+            if (sumArray == null)
                 return 0;
-            return periodArray[PEROID, groupIndex] * (60f / PEROID);
+            return sumArray[groupIndex] * 60f / PEROID / SETP;
         }
     }
 }
