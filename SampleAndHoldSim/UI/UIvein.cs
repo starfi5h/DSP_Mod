@@ -4,6 +4,7 @@ namespace SampleAndHoldSim
 {
     class UIvein
     {
+        public static bool UnitPerMinute = false;
         public static int ViewFactoryIndex = -1;
         
         static int[,] periodArray = null;
@@ -31,7 +32,7 @@ namespace SampleAndHoldSim
                 float rate = GetVeinGroupChangeRate(__instance.veinGroupIndex);
                 if (__instance.showingAmount != __state)
                 {
-                    __instance.infoText.text += $"\nConsumption: {rate:0.0} /s";
+                    __instance.infoText.text += GetRateString(rate);
                 }
                 else
                 {
@@ -40,10 +41,18 @@ namespace SampleAndHoldSim
                     if (index > 0)
                         str = str.Remove(index);
                     if (rate > 0)
-                        str += $"\nConsumption: {rate:0.0} /s";
+                        str += GetRateString(rate);
                     __instance.infoText.text = str;
                 }
             }
+        }
+
+        static string GetRateString(float rate)
+        {
+            if (UnitPerMinute)
+                return string.Format("\nConsumption: {0:0.0} /min", rate * 60);
+            else
+                return string.Format("\nConsumption: {0:0.0} /s", rate);
         }
 
         public static void AdvanceCursor()

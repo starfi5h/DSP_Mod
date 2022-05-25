@@ -6,12 +6,13 @@ namespace SampleAndHoldSim
 {
     class UIstation
     {
+        public static bool UnitPerMinute = false;
         public static int ViewFactoryIndex = -1;
         public static int VeiwStationId = -1;
         static Text[] changeRateText;
 
         static int[,] periodArray;
-        const int PEROID = 240;
+        const int PEROID = 480;
         static int time;
         static int cursor;
         
@@ -56,10 +57,19 @@ namespace SampleAndHoldSim
             {
                 if (__instance.storageUIs[i].station != null)
                 {
-                    changeRateText[i].text = $"{GetStorageChangeRate(i):+0.00;-0.00} /s";
+                    changeRateText[i].text = GetRateString(GetStorageChangeRate(i));
                 }
             }
         }
+
+        static string GetRateString(float rate)
+        {
+            if (UnitPerMinute)
+                return string.Format("{0:+0.0;-0.0} /min", rate * 60);
+            else
+                return string.Format("{0:+0.00;-0.00} /s", rate);
+        }
+
         public static void OnDestory()
         {
             if (changeRateText == null) return;
