@@ -12,7 +12,7 @@ namespace SampleAndHoldSim
         static Text[] changeRateText;
 
         static int[,] periodArray;
-        const int PEROID = 480;
+        const int PEROID = 600;
         static int time;
         static int cursor;
         

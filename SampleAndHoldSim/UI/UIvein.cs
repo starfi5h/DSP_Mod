@@ -37,7 +37,7 @@ namespace SampleAndHoldSim
                 else
                 {
                     string str = __instance.infoText.text;
-                    int index = str.LastIndexOf("\nCon");
+                    int index = str.LastIndexOf("\n ");
                     if (index > 0)
                         str = str.Remove(index);
                     if (rate > 0)
@@ -50,9 +50,9 @@ namespace SampleAndHoldSim
         static string GetRateString(float rate)
         {
             if (UnitPerMinute)
-                return string.Format("\nConsumption: {0:0.0} /min", rate * 60);
+                return string.Format("\n {0:0.0} /min", rate * 60);
             else
-                return string.Format("\nConsumption: {0:0.0} /s", rate);
+                return string.Format("\n {0:0.0} /s", rate);
         }
 
         public static void AdvanceCursor()
