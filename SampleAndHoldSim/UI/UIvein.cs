@@ -4,11 +4,15 @@ namespace SampleAndHoldSim
 {
     class UIvein
     {
+        public static bool UnitPerMinute = false;
         public static int ViewFactoryIndex = -1;
         
         static int[,] periodArray = null;
-        const int PEROID = 600;
+        static int[] sumArray;
+        const int PEROID = 30;
+        const int STEP = 60;
         static int cursor;
+        static int counter;
 
         // Due to there is random seed in MinerComponent, sliding window can't get accurate results
         [HarmonyPrefix, HarmonyPatch(typeof(UIVeinDetailNode), "_OnUpdate")]
@@ -25,49 +29,63 @@ namespace SampleAndHoldSim
                 if (ViewFactoryIndex != (GameMain.localPlanet?.factory.index ?? -1))
                 {
                     periodArray = new int[PEROID + 1, GameMain.localPlanet.factory.planet.veinGroups.Length];
+                    sumArray = new int[GameMain.localPlanet.factory.planet.veinGroups.Length];
                     ViewFactoryIndex = GameMain.localPlanet.factory.index;
                     cursor = 0;
+                    counter = 0;
                 }
                 float rate = GetVeinGroupChangeRate(__instance.veinGroupIndex);
                 if (__instance.showingAmount != __state)
                 {
-                    __instance.infoText.text += $"\nConsumption: {rate:0.0} /s";
+                    __instance.infoText.text += GetRateString(rate);
                 }
                 else
                 {
                     string str = __instance.infoText.text;
-                    int index = str.LastIndexOf("\nCon");
+                    int index = str.LastIndexOf("\n-");
                     if (index > 0)
                         str = str.Remove(index);
                     if (rate > 0)
-                        str += $"\nConsumption: {rate:0.0} /s";
+                        str += GetRateString(rate);
                     __instance.infoText.text = str;
                 }
             }
         }
 
+        static string GetRateString(float rate)
+        {
+            if (UnitPerMinute)
+                return string.Format("\n- {0:0} /min", rate * 60);
+            else
+                return string.Format("\n- {0:0.0} /s", rate);
+        }
+
         public static void AdvanceCursor()
-        {            
-            cursor = (cursor + 1) % PEROID;
-            for (int i = 0; i < periodArray.GetLength(1); i++)
+        {
+            if (++counter >= STEP)
             {
-                periodArray[PEROID, i] -= periodArray[cursor, i];
-                periodArray[cursor, i] = 0;
-            }            
-            
+                for (int i = 0; i < sumArray.Length; i++)
+                {
+                    // sliding window: replace old value with new value
+                    sumArray[i] += -periodArray[cursor, i] + periodArray[PEROID, i];
+                    periodArray[cursor, i] = periodArray[PEROID, i];
+                    periodArray[PEROID, i] = 0;
+                }
+                cursor = (cursor + 1) % PEROID;
+                counter = 0;
+            }
         }
 
         public static void Record(int groupIndex, int amount)
         {
             periodArray[PEROID, groupIndex] += amount;
-            periodArray[cursor, groupIndex] += amount;
         }
 
         public static float GetVeinGroupChangeRate(int groupIndex)
         {
-            if (periodArray == null)
+            if (sumArray == null)
                 return 0;
-            return periodArray[PEROID, groupIndex] * (60f / PEROID);
+            return sumArray[groupIndex] * 60f / PEROID / STEP;
         }
     }
 }

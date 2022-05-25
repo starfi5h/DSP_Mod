@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Threading;
 using UnityEngine;
 
 namespace SampleAndHoldSim
@@ -9,6 +10,7 @@ namespace SampleAndHoldSim
     class ManagerLogic
     {
         static int threadCount = SystemInfo.processorCount;
+        static long totalHash = 0;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MultithreadSystem), "Init")]
@@ -55,8 +57,13 @@ namespace SampleAndHoldSim
                     .RemoveInstructions(5)
                     .Start()
                     .Insert(
-                        HarmonyLib.Transpilers.EmitDelegate<Action>(() =>
-                        Threading.ForEachParallel(GameTick, GameMain.data.factoryCount, threadCount)
+                        HarmonyLib.Transpilers.EmitDelegate<Action>(() => 
+                        {
+                            totalHash = 0;
+                            Threading.ForEachParallel(GameTick, GameMain.data.factoryCount, threadCount);
+                            // NotifyTechUnlock() use unity api so needs to be in main thread
+                            GameMain.data.history.AddTechHash(totalHash);
+                        }
                     ));
                 return codeMatcher.InstructionEnumeration();
             }
@@ -122,10 +129,7 @@ namespace SampleAndHoldSim
             long hash = GameMain.data.statistics.production.factoryStatPool[index].hashRegister;
             if (hash > 0 && GameMain.data.history.currentTech > 0)
             {
-                lock (GameMain.data.history)
-                {
-                    GameMain.data.history.AddTechHash(hash);
-                }
+                Interlocked.Add(ref totalHash, hash);
             }
         }
     }
