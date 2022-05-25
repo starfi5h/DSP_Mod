@@ -40,10 +40,10 @@ Run the game one time to generate `com.starfi5h.plugin.SampleAndHoldSim.cfg` fil
 Maximum number of factories allow to active and run per tick.  
 
 - `EnableStationStorageUI` (Default:`true`)  
-Display item count change rate in station storages.  
+Display item count change rate in station storages in last 10 seconds.  
 
 - `EnableVeinConsumptionUI` (Default:`true`)  
-Display mineral consumption rate of mineral.  
+Display mineral consumption rate of vein group in last 30 seconds.  
 
 - `UnitPerMinute` (Default:`false`)  
 If true, show rate in unit per minute. otherwise show rate in unit per second.  
@@ -95,10 +95,10 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 每个逻辑祯所能运行的最大工厂数量  
 
 - `EnableStationStorageUI` (Default:`true`)  
-显示物流塔货物的流入或流出速率  
+显示过去10秒内物流塔货物的流入或流出速率  
 
 - `EnableVeinConsumptionUI` (Default:`true`)  
-显示矿脉的矿物消耗速率  
+显示过去30秒内矿脉的矿物消耗速率  
 
 - `UnitPerMinute` (Default:`false`)  
 true: 显示单位设为每分钟速率 false: 显示每秒速率  

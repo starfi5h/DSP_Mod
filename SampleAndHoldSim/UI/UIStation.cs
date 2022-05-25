@@ -14,10 +14,10 @@ namespace SampleAndHoldSim
         static int[,] periodArray;
         static int[] sumArray;
         const int PEROID = 60;
-        const int SETP = 10;
+        const int STEP = 10;
         static int time;
         static int cursor;
-        
+        static int counter;        
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIStationWindow), "_OnOpen")]
         public static void UIStationWindow_OnOpen(UIStationWindow __instance)
@@ -86,7 +86,7 @@ namespace SampleAndHoldSim
                 // collect item count change in SETP ticks
                 periodArray[PEROID, i] += data.tmpCount[i];
             }
-            if (GameMain.gameTick % SETP == 0)
+            if (++counter >= STEP)
             {
                 for (int i = 0; i < data.tmpCount.Length; i++)
                 {
@@ -97,6 +97,7 @@ namespace SampleAndHoldSim
                 }
                 cursor = (cursor + 1) % PEROID;
                 time = time < PEROID ? time + 1 : PEROID;
+                counter = 0;
             }
         }
 
@@ -117,6 +118,8 @@ namespace SampleAndHoldSim
                     sumArray = null;
                 }
                 time = 0;
+                cursor = 0;
+                counter = 0;
             }
         }
 
@@ -124,7 +127,7 @@ namespace SampleAndHoldSim
         {
             if (periodArray == null || time < 1)
                 return 0;
-            return sumArray[storageIndex] * 60f / time / SETP;
+            return sumArray[storageIndex] * 60f / time / STEP;
         }
     }
 }

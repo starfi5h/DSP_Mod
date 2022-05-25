@@ -10,8 +10,9 @@ namespace SampleAndHoldSim
         static int[,] periodArray = null;
         static int[] sumArray;
         const int PEROID = 30;
-        const int SETP = 60;
+        const int STEP = 60;
         static int cursor;
+        static int counter;
 
         // Due to there is random seed in MinerComponent, sliding window can't get accurate results
         [HarmonyPrefix, HarmonyPatch(typeof(UIVeinDetailNode), "_OnUpdate")]
@@ -31,6 +32,7 @@ namespace SampleAndHoldSim
                     sumArray = new int[GameMain.localPlanet.factory.planet.veinGroups.Length];
                     ViewFactoryIndex = GameMain.localPlanet.factory.index;
                     cursor = 0;
+                    counter = 0;
                 }
                 float rate = GetVeinGroupChangeRate(__instance.veinGroupIndex);
                 if (__instance.showingAmount != __state)
@@ -60,7 +62,7 @@ namespace SampleAndHoldSim
 
         public static void AdvanceCursor()
         {
-            if (GameMain.gameTick % SETP == 0)
+            if (++counter >= STEP)
             {
                 for (int i = 0; i < sumArray.Length; i++)
                 {
@@ -70,7 +72,8 @@ namespace SampleAndHoldSim
                     periodArray[PEROID, i] = 0;
                 }
                 cursor = (cursor + 1) % PEROID;
-            }            
+                counter = 0;
+            }
         }
 
         public static void Record(int groupIndex, int amount)
@@ -82,7 +85,7 @@ namespace SampleAndHoldSim
         {
             if (sumArray == null)
                 return 0;
-            return sumArray[groupIndex] * 60f / PEROID / SETP;
+            return sumArray[groupIndex] * 60f / PEROID / STEP;
         }
     }
 }
