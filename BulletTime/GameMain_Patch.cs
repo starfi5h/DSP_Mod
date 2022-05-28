@@ -84,7 +84,7 @@ namespace BulletTime
             {
                 pasueThisFrame = false;
             }            
-            if (Input.GetKeyDown(BulletTimePlugin.KeyAutosave.Value) && UIRoot.instance.uiGame.autoSave.showTime == 0)
+            if (BulletTimePlugin.KeyAutosave.Value.IsDown() && UIRoot.instance.uiGame.autoSave.showTime == 0)
             {
                 // Initial auto save when there is no autosave in process
                 UIAutoSave.lastSaveTick = 0L;
