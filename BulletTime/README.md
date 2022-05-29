@@ -28,7 +28,7 @@ Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/
 Run autosave in background. (Default:`true`)  
 
 - `KeyAutosave`  
-Hotkey for auto-save. (Default:`F10`)  
+Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
   
 - `StartingSpeed`  
 Game speed when the game begin. range:0-100  (Default:`100`)  
@@ -39,9 +39,8 @@ Increase main menu loading speed. (Default:`true`)
 
 ## Compatibility
 
-- [v] CompressSave  
-- [v] GalacticScale  
-- [v] NebulaMultiplayer  
+- [✅] GalacticScale  
+- [✅] NebulaMultiplayer  
 
 ### Extra Functions in Nebula Multiplayer  
 
@@ -69,13 +68,13 @@ Increase main menu loading speed. (Default:`true`)
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.BulletTime.cfg`文件  
 
 - `EnableBackgroundAutosave`  
-在背景执行自动保存。 (预设为开启)  
+在背景执行自动保存。 (预设为开启`true`)  
 
 - `KeyAutosave`  
-自动存档的热键 (预设为F10)  
+自动存档的热键组合 (预设为`F10 + LeftShift`)  
   
 - `StartingSpeed`   
-开始时的游戏速度，范围: 0-100 (预设为100)  
+开始时的游戏速度，范围: 0-100 (预设为`100`)  
 
 - `EnableFastLoading`  
 加快载入主选单 (预设为开启)  
@@ -89,6 +88,10 @@ Increase main menu loading speed. (Default:`true`)
 ----
 
 ## Changelog
+
+#### v1.2.6
+\- Change `KeyAutosave` from KeyCode to KeyboardShortcut  
+\- Small tweak to backgroud autosave. (Game version 0.9.26.12201)  
 
 #### v1.2.5
 \- Add EnableFastLoading config option. (Game version 0.9.25.11996)  
@@ -124,3 +127,4 @@ Increase main menu loading speed. (Default:`true`)
 
 #### Acknowledgements
 All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  
+<a href="https://www.flaticon.com/free-icons/pause-button" title="pause-button icons">Pause-button icons created by Uniconlabs - Flaticon</a>

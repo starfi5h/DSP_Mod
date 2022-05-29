@@ -101,22 +101,24 @@ namespace BulletTime
             {                
                 // Let's capture screenshot on main thread first
                 GameCamera.CaptureSaveScreenShot();
+
+                // Set pause state here so the game will go to pause in the next fixupdate()
+                bool tmp = GameStateManager.Pause;
+                GameStateManager.SetPauseMode(true);
+                GameStateManager.SetInteractable(false);
                 ThreadingHelper.Instance.StartAsyncInvoke(() =>
                 {
                     HighStopwatch highStopwatch = new HighStopwatch();
                     highStopwatch.Begin();
-                    bool tmp = GameStateManager.Pause;
-                    GameStateManager.SetPauseMode(true);
-                    GameStateManager.SetInteractable(false);
-                    // Wait a tick to let game full stop
+                    // Wait a tick to let game full stop?
                     Thread.Sleep((int)(1000/FPSController.currentUPS));
                     Log.Info($"Background Autosave start. Sleep: {(int)(1000/FPSController.currentUPS)}ms");
                     bool result = GameSave.AutoSave();
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
-                    GameStateManager.SetInteractable(true);
-                    GameStateManager.SetPauseMode(tmp);
                     return () =>
                     {
+                        GameStateManager.SetInteractable(true);
+                        GameStateManager.SetPauseMode(tmp);
                         UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
                         UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
                     };
