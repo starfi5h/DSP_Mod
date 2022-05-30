@@ -33,7 +33,7 @@ namespace NebulaCompatibilityAssist.Patches
                 harmony.Patch(targetType.GetMethod("OpenStationWindowOfAnyStation"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("OpenStationWindowOfAnyStation_Postfix")));
                 harmony.PatchAll(typeof(DSPTransportStat_Patch));
 
-                NC_StationStorageReponse.OnReceive += OnReceive;
+                NC_StationStorageData.OnReceive += OnReceive;
 
                 Log.Info($"{NAME} - OK");
             }
