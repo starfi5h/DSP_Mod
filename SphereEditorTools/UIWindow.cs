@@ -30,9 +30,27 @@ namespace SphereEditorTools
                 Log.LogWarning("WindowPos parse error, use defualt position (300, 250)");
                 Log.LogWarning(ex);
             }
+        }
 
-            int height = 20 + (SphereEditorTools.EnableDisplayOptions.Value ? 30 : 0) + (SphereEditorTools.EnableSymmetryTool.Value ? 90 : 0) + (SphereEditorTools.EnableOrbitTool.Value ? 60 : 0);
-            normalSize.height = height;
+        public static void LoadWindowSize()
+        {
+            try
+            {
+                var token = SphereEditorTools.WindowSize.Value.Split(',');
+                int width = int.Parse(token[0].Trim());
+                int height = int.Parse(token[token.Length - 1].Trim());
+                normalSize.width = width;
+                normalSize.height = height;
+                Log.LogDebug($"window size: {width},{height}");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning("WindowPos parse error, use defualt size (240, 200)");
+                Log.LogWarning(ex);
+                normalSize.width = 240f;
+                normalSize.height = 200f;
+            }
+            windowRect.width = normalSize.width;
             windowRect.height = normalSize.height;
         }
 

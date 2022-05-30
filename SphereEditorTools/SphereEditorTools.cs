@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.2.0")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.2.1")]
     public class SphereEditorTools : BaseUnityPlugin
     {
         Harmony harmony;
@@ -21,6 +21,7 @@ namespace SphereEditorTools
         public static ConfigEntry<bool> EnableVisualEffect;
         public static ConfigEntry<bool> EnableGUI;
         public static ConfigEntry<string> WindowPosition;
+        public static ConfigEntry<string> WindowSize;
         public static ConfigEntry<string> KeySelect;
         public static ConfigEntry<string> KeyNode;
         public static ConfigEntry<string> KeyFrameGeo;
@@ -43,8 +44,9 @@ namespace SphereEditorTools
             EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用壳层轨道工具");
             EnableNonemptyList      = Config.Bind<bool>("- General -", "EnableNonemptyList", true, "Dropdown list only shows dysonspheres that are not empty.\n下拉列表中仅显示非空的戴森球");
 
-            EnableGUI = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作窗口");
+            EnableGUI               = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作界面窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
+            WindowSize              = Config.Bind<string>("GUI", "WindowSize", "240, 200", "Size of the window. Format: width,height\n窗口的大小 格式: 宽度,高度");
 
             KeySelect               = Config.Bind<string>("Hotkeys - Toolbox", "KeySelect", "space", "Inspect / 查看");
             KeyNode                 = Config.Bind<string>("Hotkeys - Toolbox", "KeyNode", "q", "Build Node / 修建节点");
@@ -79,6 +81,7 @@ namespace SphereEditorTools
             if (EnableGUI.Value)
             {
                 UIWindow.LoadWindowPos();
+                UIWindow.LoadWindowSize();
             }
         }
 
