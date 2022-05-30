@@ -1,10 +1,11 @@
 ﻿using BepInEx;
+using DSPTransportStat;
+using HarmonyLib;
 using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
-using HarmonyLib;
-using UnityEngine;
 using System;
-using DSPTransportStat;
+using System.Reflection;
+using UnityEngine;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -19,20 +20,21 @@ namespace NebulaCompatibilityAssist.Patches
 
         public static void Init(Harmony harmony)
         {
-            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID))
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                 return;
+            Assembly assembly = pluginInfo.Instance.GetType().Assembly;
 
             try
             {
-                instance = BepInEx.Bootstrap.Chainloader.PluginInfos[GUID].Instance;
-
+                instance = pluginInfo.Instance;
+                
                 // Send request when client open window or click global/systme buttons
-                Type targetType = typeof(DSPTransportStat.UITransportStationsWindow);
-                harmony.Patch(targetType.GetMethod("ComputeTransportStationsWindow_LoadStations"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("LoadStations")));
-                targetType = typeof(DSPTransportStat.Plugin.Patch_UIStationWindow);
-                harmony.Patch(targetType.GetMethod("OpenStationWindowOfAnyStation"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("OpenStationWindowOfAnyStation_Postfix")));
+                Type classType = assembly.GetType("DSPTransportStat.UITransportStationsWindow");
+                harmony.Patch(classType.GetMethod("ComputeTransportStationsWindow_LoadStations"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("LoadStations")));
+                classType = assembly.GetType("DSPTransportStat.Plugin.Patch_UIStationWindow");
+                harmony.Patch(classType.GetMethod("OpenStationWindowOfAnyStation"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("OpenStationWindowOfAnyStation_Postfix")));
                 harmony.PatchAll(typeof(DSPTransportStat_Patch));
-
+                
                 NC_StationStorageData.OnReceive += OnReceive;
 
                 Log.Info($"{NAME} - OK");
@@ -44,7 +46,7 @@ namespace NebulaCompatibilityAssist.Patches
                 Log.Debug(e);
             }
         }
-
+        
         public static void OnReceive()
         {
             var plugin = instance as DSPTransportStat.Plugin;
@@ -55,7 +57,7 @@ namespace NebulaCompatibilityAssist.Patches
                 supression = false;
             }
         }
-
+        
         public static void LoadStations(UITransportStationsWindow __instance)
         {
             if (!NebulaModAPI.IsMultiplayerActive || NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost)
@@ -84,12 +86,7 @@ namespace NebulaCompatibilityAssist.Patches
                     continue;
                 }
 
-                /* 行星内物流站不會在此
-                if (!toggleInPlanet && !station.isCollector && !station.isStellar)
-                {
-                    continue;
-                }
-                */
+                // 行星内物流站不會在此
 
                 // 是否显示星际物流运输站
                 if (!toggleInterstellar && !station.isCollector && station.isStellar)
@@ -146,7 +143,7 @@ namespace NebulaCompatibilityAssist.Patches
 
             if (!supression)
                 NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_StationStorageRequest());
-        }
+        }       
 
         public static void OpenStationWindowOfAnyStation_Postfix(PlanetFactory factory)
         {
@@ -166,6 +163,5 @@ namespace NebulaCompatibilityAssist.Patches
         {
             return !supression;
         }
-
     }
 }

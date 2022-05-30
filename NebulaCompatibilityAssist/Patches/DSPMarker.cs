@@ -1,8 +1,9 @@
-﻿using NebulaAPI;
+﻿using crecheng.DSPModSave;
 using HarmonyLib;
-using System;
+using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
-using crecheng.DSPModSave;
+using System;
+using System.Reflection;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -13,16 +14,18 @@ namespace NebulaCompatibilityAssist.Patches
         private const string VERSION = "0.0.8";
 
         private static IModCanSave Save;
+        private static Action MarkerPool_Refresh;
 
         public static void Init(Harmony harmony)
         {
-            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID))
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                 return;
+            Assembly assembly = pluginInfo.Instance.GetType().Assembly;
 
             try
             {
                 // Sync Client's mod save with Host when joined
-                Save = BepInEx.Bootstrap.Chainloader.PluginInfos[GUID].Instance as IModCanSave;
+                Save = pluginInfo.Instance as IModCanSave;
                 NC_Patch.OnLogin += SendRequest;
                 NC_ModSaveRequest.OnReceive += (guid, conn) =>
                 {
@@ -36,15 +39,20 @@ namespace NebulaCompatibilityAssist.Patches
                 };
 
                 // Send mod save when changing marker
-                Type targetType = AccessTools.TypeByName("DSPMarker.MarkerEditor");
-                harmony.Patch(AccessTools.Method(targetType, "onClickApplyButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
-                harmony.Patch(AccessTools.Method(targetType, "onClickDeleteButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
+                Type classType = assembly.GetType("DSPMarker.MarkerEditor");
+                harmony.Patch(AccessTools.Method(classType, "onClickApplyButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
+                harmony.Patch(AccessTools.Method(classType, "onClickDeleteButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
 
-                // This is for debug
-                targetType = AccessTools.TypeByName("DSPMarker.MarkerPool");
-                harmony.Patch(AccessTools.Method(targetType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
-                targetType = AccessTools.TypeByName("DSPMarker.MarkerList");
-                harmony.Patch(AccessTools.Method(targetType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
+                // Below are for bugfix
+                classType = assembly.GetType("DSPMarker.MarkerPool");
+                harmony.Patch(AccessTools.Method(classType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
+                MarkerPool_Refresh = AccessTools.MethodDelegate<Action>(AccessTools.Method(classType, "Refresh"));
+
+                classType = assembly.GetType("DSPMarker.MarkerList");
+                harmony.Patch(AccessTools.Method(classType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
+
+                classType = assembly.GetType("DSPMarker.Patch");
+                harmony.Patch(AccessTools.Method(classType, "UIStarDetail_ArrivePlanet_Postfix"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("ArrivePlanet_Postfix")));
 
                 Log.Info($"{NAME} - OK");
             }
@@ -59,6 +67,11 @@ namespace NebulaCompatibilityAssist.Patches
         public static bool StopRefreshIfNoLocalPlanet()
         {
             return GameMain.localPlanet != null;
+        }
+
+        public static void ArrivePlanet_Postfix()
+        {
+            MarkerPool_Refresh.Invoke();
         }
 
         public static void SendRequest()
