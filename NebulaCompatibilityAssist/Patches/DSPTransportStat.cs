@@ -12,9 +12,10 @@ namespace NebulaCompatibilityAssist.Patches
     {
         public const string NAME = "DSPTransportStat";
         public const string GUID = "IndexOutOfRange.DSPTransportStat";
-        public const string VERSION = "0.0.10";
+        public const string VERSION = "0.0.12";
 
         private static BaseUnityPlugin instance;
+        private static bool supression;
 
         public static void Init(Harmony harmony)
         {
@@ -26,9 +27,13 @@ namespace NebulaCompatibilityAssist.Patches
                 instance = BepInEx.Bootstrap.Chainloader.PluginInfos[GUID].Instance;
 
                 // Send request when client open window or click global/systme buttons
-                //System.Type targetType = AccessTools.TypeByName("DSPTransportStat.UITransportStationsWindow");
-                //harmony.Patch(targetType.GetMethod("ComputeTransportStationsWindow_LoadStations"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("LoadStations")));
-                //NC_StationStorageReponse.OnReceive += OnReceive;
+                Type targetType = typeof(DSPTransportStat.UITransportStationsWindow);
+                harmony.Patch(targetType.GetMethod("ComputeTransportStationsWindow_LoadStations"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("LoadStations")));
+                targetType = typeof(DSPTransportStat.Plugin.Patch_UIStationWindow);
+                harmony.Patch(targetType.GetMethod("OpenStationWindowOfAnyStation"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("OpenStationWindowOfAnyStation_Postfix")));
+                harmony.PatchAll(typeof(DSPTransportStat_Patch));
+
+                NC_StationStorageReponse.OnReceive += OnReceive;
 
                 Log.Info($"{NAME} - OK");
             }
@@ -40,22 +45,15 @@ namespace NebulaCompatibilityAssist.Patches
             }
         }
 
-        public static void SendRequest()
-        {
-            if (NebulaModAPI.IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient)
-            {
-                NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_StationStorageRequest());
-            }
-        }
-
         public static void OnReceive()
         {
             var plugin = instance as DSPTransportStat.Plugin;
             if (plugin.uiTransportStationsWindow.active)
             {
-                //plugin.uiTransportStationsWindow.ComputeTransportStationsWindow_LoadStations();
+                supression = true;
+                plugin.uiTransportStationsWindow.ComputeTransportStationsWindow_LoadStations();
+                supression = false;
             }
-            Log.Dev("OnReceive");
         }
 
         public static void LoadStations(UITransportStationsWindow __instance)
@@ -65,32 +63,33 @@ namespace NebulaCompatibilityAssist.Patches
                 return;
             }
 
-            bool toggleInPlanet = __instance.uiTSWParameterPanel.ToggleInPlanet;
             bool toggleInterstellar = __instance.uiTSWParameterPanel.ToggleInterstellar;
             bool toggleCollector = __instance.uiTSWParameterPanel.ToggleCollector;
             int relatedItemFilter = __instance.uiTSWParameterPanel.RelatedItemFilter;
+            int count = 0;
 
             for (int k = 1; k < GameMain.data.galacticTransport.stationCursor; ++k)
             {
                 StationComponent station = GameMain.data.galacticTransport.stationPool[k];
 
-                
-                if (station == null || station.entityId == 0)
+                // 已刪除, 還沒載入的物流塔跳過
+                if (station == null || station.storage == null)
                 {
                     continue;
                 }
 
                 // 当地星球的物流塔已经载入过了
-                if (station.planetId == GameMain.localPlanet?.id || station.storage == null)
+                if (station.planetId == GameMain.localPlanet?.id)
                 {
                     continue;
                 }
 
-                // 是否显示行星内物流站
+                /* 行星内物流站不會在此
                 if (!toggleInPlanet && !station.isCollector && !station.isStellar)
                 {
                     continue;
                 }
+                */
 
                 // 是否显示星际物流运输站
                 if (!toggleInterstellar && !station.isCollector && station.isStellar)
@@ -104,10 +103,12 @@ namespace NebulaCompatibilityAssist.Patches
                     continue;
                 }
 
+
                 // 通过搜索字符串对站点进行过滤
                 string name = DSPTransportStat.Extensions.StationComponentExtensions.GetStationName(station);
                 PlanetData planet = GameMain.galaxy.PlanetById(station.planetId);
                 StarData star = planet.star;
+                
                 if (!string.IsNullOrWhiteSpace(__instance.searchString) 
                     && !name.Contains(__instance.searchString) 
                     && !star.name.Contains(__instance.searchString) 
@@ -132,17 +133,38 @@ namespace NebulaCompatibilityAssist.Patches
                     {
                         continue;
                     }
-                }
+                }                
 
-                Log.Debug(planet.id);
                 __instance.stations.Add(new StationInfoBundle(star, planet, station));
+                count++;
             }
+            Log.Dev($"Add {count} ILS stations");
             __instance.OnSort();
             __instance.contentRectTransform.offsetMin = new Vector2(0, -DSPTransportStat.Global.Constants.TRANSPORT_STATIONS_ENTRY_HEIGHT * __instance.stations.Count);
             __instance.contentRectTransform.offsetMax = new Vector2(0, 0);
             __instance.uiStationCountInListTranslation.SetNumber(__instance.stations.Count);
 
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_StationStorageRequest());
+            if (!supression)
+                NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_StationStorageRequest());
+        }
+
+        public static void OpenStationWindowOfAnyStation_Postfix(PlanetFactory factory)
+        {
+            //add open() and supress its content to call nebula patch OnOpen
+            supression = true;
+            UIRoot.instance.uiGame.stationWindow._OnOpen();
+            supression = false;
+
+            if (factory == null)
+            {
+                UIMessageBox.Show("ACCESS DENY", "Can't open remote ILS on planet not loaded yet", "确定".Translate(), 3);
+            }
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIStationWindow), nameof(UIStationWindow._OnOpen))]
+        public static bool _OnOpen_Prefix()
+        {
+            return !supression;
         }
 
     }
