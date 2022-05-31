@@ -2,7 +2,6 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using NebulaAPI;
-using NebulaCompatibilityAssist.Packets;
 using System.Diagnostics;
 
 namespace NebulaCompatibilityAssist
