@@ -25,7 +25,7 @@ namespace NebulaCompatibilityAssist.Packets
             if (IsHost)
             {
                 // Broadcast changes to other users
-                NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
+                NebulaModAPI.MultiplayerSession.Network.SendPacketExclude(packet, conn);
             }
             Log.Debug($"Receive ModSave Data Packet - {packet.Guid}");
             NC_ModSaveData.OnReceive?.Invoke(packet.Guid, packet.Bytes);

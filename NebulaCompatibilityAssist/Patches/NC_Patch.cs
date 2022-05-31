@@ -34,6 +34,7 @@ namespace NebulaCompatibilityAssist.Patches
             DSPBeltReverseDirection.Init(harmony);
             DSPTransportStat_Patch.Init(harmony);
             PlanetFinder.Init(harmony);
+            MoreMegaStructure.Init(harmony);
 
             if (ErrorMessage != "")
             {
