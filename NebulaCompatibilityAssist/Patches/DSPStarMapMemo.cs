@@ -1,8 +1,9 @@
-﻿using NebulaAPI;
+﻿using crecheng.DSPModSave;
 using HarmonyLib;
-using System;
+using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
-using crecheng.DSPModSave;
+using System;
+using System.Reflection;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -16,12 +17,13 @@ namespace NebulaCompatibilityAssist.Patches
 
         public static void Init(Harmony harmony)
         {
-            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID))
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                 return;
+            Assembly assembly = pluginInfo.Instance.GetType().Assembly;
 
             try
             {                
-                Save = BepInEx.Bootstrap.Chainloader.PluginInfos[GUID].Instance as IModCanSave;
+                Save = pluginInfo.Instance as IModCanSave;
                 NC_Patch.OnLogin += SendRequest;
                 NC_ModSaveRequest.OnReceive += (guid, conn) =>
                 {
@@ -34,8 +36,8 @@ namespace NebulaCompatibilityAssist.Patches
                     Import(bytes);
                 };
                 
-                System.Type targetType = AccessTools.TypeByName("DSPStarMapMemo.MemoPool");
-                harmony.Patch(AccessTools.Method(targetType, "AddOrUpdate"), null, new HarmonyMethod(typeof(DSPStarMapMemo).GetMethod("SendData")));
+                Type classType = assembly.GetType("DSPStarMapMemo.MemoPool");
+                harmony.Patch(AccessTools.Method(classType, "AddOrUpdate"), null, new HarmonyMethod(typeof(DSPStarMapMemo).GetMethod("SendData")));
 
                 Log.Info($"{NAME} - OK");
             }
