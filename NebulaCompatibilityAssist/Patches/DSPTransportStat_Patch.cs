@@ -13,7 +13,7 @@ namespace NebulaCompatibilityAssist.Patches
     {
         public const string NAME = "DSPTransportStat";
         public const string GUID = "IndexOutOfRange.DSPTransportStat";
-        public const string VERSION = "0.0.12";
+        public const string VERSION = "0.0.13";
 
         private static BaseUnityPlugin instance;
         private static bool supression;
@@ -31,7 +31,9 @@ namespace NebulaCompatibilityAssist.Patches
                 // Send request when client open window or click global/systme buttons
                 Type classType = assembly.GetType("DSPTransportStat.UITransportStationsWindow");
                 harmony.Patch(classType.GetMethod("ComputeTransportStationsWindow_LoadStations"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("LoadStations")));
-                classType = assembly.GetType("DSPTransportStat.Plugin.Patch_UIStationWindow");
+                
+                // Fix remote station window
+                classType = assembly.GetType("DSPTransportStat.Plugin+Patch_UIStationWindow");
                 harmony.Patch(classType.GetMethod("OpenStationWindowOfAnyStation"), null, new HarmonyMethod(typeof(DSPTransportStat_Patch).GetMethod("OpenStationWindowOfAnyStation_Postfix")));
                 harmony.PatchAll(typeof(DSPTransportStat_Patch));
                 
