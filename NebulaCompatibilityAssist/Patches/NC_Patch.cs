@@ -33,6 +33,7 @@ namespace NebulaCompatibilityAssist.Patches
             DSPStarMapMemo.Init(harmony);
             DSPBeltReverseDirection.Init(harmony);
             DSPTransportStat_Patch.Init(harmony);
+            PlanetFinder.Init(harmony);
 
             if (ErrorMessage != "")
             {
