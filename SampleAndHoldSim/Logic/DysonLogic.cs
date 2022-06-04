@@ -204,7 +204,17 @@ namespace SampleAndHoldSim
                 rocket.uSpeed = 0f;
                 rocket.launch = projectile.LocalPos.normalized;
                 rocket.uPos -= new VectorLF3(rocket.uVel) * 15 * idleCount; // move starting position toward plaent to delay
-                sphere.AddDysonRocket(rocket, node);
+                if ((node._spReq - node.spOrdered) > 0)
+                {
+                    // if node is not full, add to original node
+                    sphere.AddDysonRocket(rocket, node);
+                }
+                else if (sphere.GetAutoNodeCount() > 0)
+                {
+                    // if node is full, find another node waiting to build
+                    if ((node = sphere.GetAutoDysonNode(nodeId)) != null) 
+                        sphere.AddDysonRocket(rocket, node);
+                }
             }
         }
     }
