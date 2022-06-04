@@ -62,12 +62,9 @@ namespace SampleAndHoldSim
             if (EnableStationStorageUI.Value)
                 harmony.PatchAll(typeof(UIstation));
 
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.CommonAPI.GUID))
-                Compatibility.CommonAPI.Init(harmony);
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.DSPOptimizations.GUID))
-                Compatibility.DSPOptimizations.Init(harmony);
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.Auxilaryfunction.GUID))
-                Compatibility.Auxilaryfunction.Init(harmony);
+            Compatibility.CommonAPI.Init(harmony);
+            Compatibility.DSPOptimizations.Init(harmony);
+            Compatibility.Auxilaryfunction.Init(harmony);
         }
 
         public void OnDestroy()

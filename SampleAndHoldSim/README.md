@@ -54,12 +54,13 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 (✅) DSPOptimizations  
 (⚠️) NebulaMultiplayer - Only host can use this.  
 (⚠️) Blackbox - The production stats of blackbox will be multiplied.  
+(⚠️) Auxilaryfunction - Conflicts with stop factories and stop dyson spheres functions. Will tempoary disable them.    
 
 ----
-# 取样保持模拟
-
-尝试用取样工厂输入/输出的方法来减少计算量。  
-使用者可以在性能测试面板设定每个逻辑祯可以使多少星球运行，闲置的星球将会用上一个tick的值来模拟工厂的输入和输出。  
+## [戴森球mod - 修改游戏运算方式，提升逻辑帧率](https://b23.tv/BV1oB4y1X78J)
+  
+尝试减缓运算速度并增加每次运算的产物来提升逻辑帧率。  
+使用者可以在性能测试面板设定每个逻辑祯可以使多少星球运行，闲置的星球将会用上一个帧的值来模拟工厂的输入和输出。  
 建议勾选Focus Local让本地工厂保持运行来维持游戏体验，运行工厂数调低到能让UPS>60就好。  
 警告: 此mod会改动统计资料。虽然目的是为了近似原本游戏的数据，但是出错时可能会让存档无法上传银河系。  
 
@@ -68,23 +69,23 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 此图中有三个星球工厂，星球A的工厂的物品数量变化是+2/+1/+0/-1，经过一个完整生产周期后最终会有2个物品。其余工厂同理。  
 上方为原本游戏运行方式，每一祯有3个工厂运作，完整周期分别是4/3/2。  
 下方为Mod改变之后的运作方式，每一祯有1个工厂运作，在闲置的期间(浅色格)会让数值套用上一次工作的变化，完整周期变为3倍-12/9/6。  
-套用变化的只有工厂的输入和输出，工厂的内部元件会以低速运行。而戴森球系统和运输机则继续每祯都运行。  
+套用变化的只有工厂的输入和输出，工厂的内部元件会以低速运行。而戴森球系统和物流塔系统则继续每祯都运行。  
 
-### 工厂输入  
+### 工厂输入互动  
 - 矿脉的矿物消耗  
 - 物流塔流出减少的货物量  
 
-### 工厂输出  
+### 工厂输出互动  
 - 物流塔流入增加的货物量      
 - 研究的哈希块上传量  
 - 产物统计和电力统计  
 - 射出的太阳帆和火箭  
 
 ![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo3.gif)  
-实际演示，上图为正常游戏，下图为设置cycle=2。
+实际演示，上图为正常游戏cycle=1，下图为设置cycle=2。
 下图的内部元件速率只有上图的一半，但是一次消耗石矿数目和进塔数目皆为上图的2倍，因此最终两输入和输出的速率一样:两者的石矿储量皆从100降到90，而物流塔内的石材数量皆从55增加到65。
   
-如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近，短期上统计的数据可能会变得稀疏，此外工厂内部元件(仓储,运输带)中货物的增加速率也会比原本的少。  
+如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近。短期上统计的数据可能会变得稀疏，工厂内部元件(仓储,运输带)中货物的增减速率也会比原本的少。  
 
 ## 設置
 .cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
@@ -103,9 +104,22 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 - `UnitPerMinute` (Default:`false`)  
 true: 显示单位设为每分钟速率 false: 显示每秒速率  
 
+
+## MOD相容性:
+- DSPOptimizations(优化mod) - 相容
+- Blackbox(黑盒化mod) - 低速下产物统计会倍增
+- NebulaMultiplayer(联机mod) - 只有主机可使用
+- 深空来敌(战斗mod) - 低速下炮塔和发射井的射速会降低
+- 多功能辅助mod - 和停止工厂/戴森球冲突, 在同时安装时会暂时关闭这两项功能
+
 ----
 
 ## Changelog
+
+#### v0.3.1
+\- Fix warper consume stat.  
+\- Fix vein amount decrease in InfiniteResource.  
+\- Copied rockets now find new target when the node is full.  
 
 #### v0.3.0
 \- Add a config option to switch display unit (/s or /min)

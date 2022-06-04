@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Reflection;
 
 namespace SampleAndHoldSim
 {
@@ -15,7 +16,9 @@ namespace SampleAndHoldSim
                 {
                     // Patch fall-back calls in PlanetExtensionSystem
                     // Change their GameData.factories => GameData_Patch.workfactories
-                    System.Type targetType = AccessTools.TypeByName("CommonAPI.Systems.PlanetExtensionSystem");
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type targetType = assembly.GetType("CommonAPI.Systems.PlanetExtensionSystem");
                     harmony.Patch(targetType.GetMethod("PowerUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
                     harmony.Patch(targetType.GetMethod("PreUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
                     harmony.Patch(targetType.GetMethod("UpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
@@ -25,7 +28,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.5.0");
+                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.5.1");
                     Log.Warn(e);
                 }
             }
@@ -39,12 +42,13 @@ namespace SampleAndHoldSim
             {
                 try
                 {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(DSPOptimizations));
                     Log.Info("DSPOptimizations compatibility OK.");
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.6");
+                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.9");
                     Log.Warn(e);
                 }
             }
@@ -73,13 +77,13 @@ namespace SampleAndHoldSim
             {
                 try
                 {
-                    // Patch fall-back calls in PlanetExtensionSystem
-                    // Change their GameData.factories => GameData_Patch.workfactories
-                    Type classType = AccessTools.TypeByName("Auxilaryfunction.AuxilaryfunctionPatch+GameTick1Patch");
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+GameTick1Patch");
 
                     // Vein got deleted for slowed planets, don't know why :(
                     //harmony.Patch(classType.GetMethod("Prefix"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
-                    
+
                     // Suppress stop factory and stop dyson sphere function
                     harmony.Patch(classType.GetMethod("Prefix"), new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("SuppressModPatch")));
 
