@@ -64,5 +64,39 @@ namespace SampleAndHoldSim
                 return true;
             }
         }
+
+        public static class Auxilaryfunction
+        {
+            public const string GUID = "cn.blacksnipe.dsp.Auxilaryfunction";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    // Patch fall-back calls in PlanetExtensionSystem
+                    // Change their GameData.factories => GameData_Patch.workfactories
+                    Type classType = AccessTools.TypeByName("Auxilaryfunction.AuxilaryfunctionPatch+GameTick1Patch");
+
+                    // Vein got deleted for slowed planets, don't know why :(
+                    //harmony.Patch(classType.GetMethod("Prefix"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
+                    
+                    // Suppress stop factory and stop dyson sphere function
+                    harmony.Patch(classType.GetMethod("Prefix"), new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("SuppressModPatch")));
+
+                    Log.Info("Auxilaryfunction compatibility OK.");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("Auxilaryfunction compatibility failed! Last working version: 1.6.6");
+                    Log.Warn(e);
+                }
+            }
+
+            public static bool SuppressModPatch(ref bool __result)
+            {
+                __result = true;
+                return false;
+            }
+        }
     }
 }
