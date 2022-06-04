@@ -7,14 +7,13 @@ using System.Reflection;
 
 namespace NebulaCompatibilityAssist.Patches
 {
-    public static class DSPMarker
+    public static class MoreMegaStructure
     {
-        private const string NAME = "DSPMarker";
-        private const string GUID = "Appun.DSP.plugin.Marker";
-        private const string VERSION = "0.0.8";
+        private const string NAME = "MoreMegaStructure";
+        private const string GUID = "Gnimaerd.DSP.plugin.MoreMegaStructure";
+        private const string VERSION = "1.0.2";
 
         private static IModCanSave Save;
-        private static Action MarkerPool_Refresh;
 
         public static void Init(Harmony harmony)
         {
@@ -23,8 +22,7 @@ namespace NebulaCompatibilityAssist.Patches
             Assembly assembly = pluginInfo.Instance.GetType().Assembly;
 
             try
-            {
-                // Sync Client's mod save with Host when joined
+            {                
                 Save = pluginInfo.Instance as IModCanSave;
                 NC_Patch.OnLogin += SendRequest;
                 NC_ModSaveRequest.OnReceive += (guid, conn) =>
@@ -37,24 +35,13 @@ namespace NebulaCompatibilityAssist.Patches
                     if (guid != GUID) return;
                     Import(bytes);
                 };
-
-                // Send mod save when changing marker
-                Type classType = assembly.GetType("DSPMarker.MarkerEditor");
-                harmony.Patch(AccessTools.Method(classType, "onClickApplyButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
-                harmony.Patch(AccessTools.Method(classType, "onClickDeleteButton"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("SendData")));
-
-                // Below are for bugfix
-                classType = assembly.GetType("DSPMarker.MarkerPool");
-                harmony.Patch(AccessTools.Method(classType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
-                MarkerPool_Refresh = AccessTools.MethodDelegate<Action>(AccessTools.Method(classType, "Refresh"));
-
-                classType = assembly.GetType("DSPMarker.MarkerList");
-                harmony.Patch(AccessTools.Method(classType, "Refresh"), new HarmonyMethod(typeof(DSPMarker).GetMethod("StopRefreshIfNoLocalPlanet")));
-
-                classType = assembly.GetType("DSPMarker.Patch");
-                harmony.Patch(AccessTools.Method(classType, "UIStarDetail_ArrivePlanet_Postfix"), null, new HarmonyMethod(typeof(DSPMarker).GetMethod("ArrivePlanet_Postfix")));
+                
+                Type classType = assembly.GetType("MoreMegaStructure.MoreMegaStructure");
+                harmony.Patch(AccessTools.Method(classType, "SetMegaStructure"), null, new HarmonyMethod(typeof(MoreMegaStructure).GetMethod("SendData")));
+                harmony.Patch(AccessTools.Method(classType, "BeforeGameTickPostPatch"), new HarmonyMethod(typeof(MoreMegaStructure).GetMethod("SuppressOnClient")));
 
                 Log.Info($"{NAME} - OK");
+                NC_Patch.RequriedPlugins += " +" + NAME;
             }
             catch (Exception e)
             {
@@ -62,16 +49,6 @@ namespace NebulaCompatibilityAssist.Patches
                 NC_Patch.ErrorMessage += $"\n{NAME} (last target version: {VERSION})";
                 Log.Debug(e);
             }
-        }
-
-        public static bool StopRefreshIfNoLocalPlanet()
-        {
-            return GameMain.localPlanet != null;
-        }
-
-        public static void ArrivePlanet_Postfix()
-        {
-            MarkerPool_Refresh.Invoke();
         }
 
         public static void SendRequest()
@@ -108,10 +85,14 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (Save != null)
             {
-                Log.Dev($"{NAME} import data");
                 using var p = NebulaModAPI.GetBinaryReader(bytes);
                 Save.Import(p.BinaryReader);
             }
+        }
+
+        public static bool SuppressOnClient()
+        {
+            return !NebulaModAPI.IsMultiplayerActive || NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost;
         }
     }
 }

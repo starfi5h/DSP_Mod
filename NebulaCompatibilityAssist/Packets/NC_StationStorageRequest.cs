@@ -12,7 +12,7 @@ namespace NebulaCompatibilityAssist.Packets
         public override void ProcessPacket(NC_StationStorageRequest packet, INebulaConnection conn)
         {
             if (IsHost)
-                conn.SendPacket(new NC_StationStorageReponse());
+                conn.SendPacket(new NC_StationStorageData());
         }
     }
 }

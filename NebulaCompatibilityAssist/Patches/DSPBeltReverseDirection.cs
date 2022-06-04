@@ -1,11 +1,11 @@
-﻿using NebulaAPI;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
+using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using System.Reflection;
 
 // DSP Belt Reverse Direction is made by GreyHak
 // https://github.com/GreyHak/dsp-belt-reverse/blob/main/DSPBeltReverseDirection.cs
@@ -24,14 +24,15 @@ namespace NebulaCompatibilityAssist.Patches
 
         public static void Init(Harmony harmony)
         {
-            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID))
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                 return;
+            Assembly assembly = pluginInfo.Instance.GetType().Assembly;
 
             try
             {
                 // Send packet when players click the button
-                System.Type targetType = AccessTools.TypeByName("DSPBeltReverseDirection.DSPBeltReverseDirection");
-                var methodInfo = AccessTools.Method(targetType, "ReverseBelt");
+                Type classType = assembly.GetType("DSPBeltReverseDirection.DSPBeltReverseDirection");
+                var methodInfo = AccessTools.Method(classType, "ReverseBelt");
                 var prefix = new HarmonyMethod(typeof(DSPBeltReverseDirection).GetMethod("ReverseBeltLocal_Prefix"));
                 var postfix = new HarmonyMethod(typeof(DSPBeltReverseDirection).GetMethod("ReverseBeltLocal_Postfix"));
                 var transplier = new HarmonyMethod(typeof(DSPBeltReverseDirection).GetMethod("ReverseBelt_Transpiler"));
@@ -41,6 +42,7 @@ namespace NebulaCompatibilityAssist.Patches
                 if (!normal) 
                     throw new Exception("ReverseBelt_Transpiler error");
                 Log.Info($"{NAME} - OK");
+                NC_Patch.RequriedPlugins += " +" + NAME;
             }
             catch (Exception e)
             {

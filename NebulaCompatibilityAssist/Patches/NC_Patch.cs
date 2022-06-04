@@ -1,20 +1,21 @@
-﻿using NebulaAPI;
-using HarmonyLib;
-using System.Reflection;
+﻿using HarmonyLib;
+using NebulaAPI;
 using System;
+using System.Reflection;
 
 namespace NebulaCompatibilityAssist.Patches
 {
     public static class NC_Patch
     {
         public static Action OnLogin;
+        public static string RequriedPlugins = ""; // plugins required to install on both end
         public static string ErrorMessage = "";
         public static bool initialized = false;
 
         public static void OnAwake()
         {
             NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
-            Plugin.Harmony.PatchAll(typeof(NC_Patch));
+            Plugin.Instance.Harmony.PatchAll(typeof(NC_Patch));
 #if DEBUG
             Init();
 #endif
@@ -26,11 +27,15 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (initialized) return;
 
-            Harmony harmony = Plugin.Harmony;
+            Harmony harmony = Plugin.Instance.Harmony;
             LSTM.Init(harmony);
             DSPMarker.Init(harmony);
             DSPStarMapMemo.Init(harmony);
             DSPBeltReverseDirection.Init(harmony);
+            DSPTransportStat_Patch.Init(harmony);
+            PlanetFinder.Init(harmony);
+            MoreMegaStructure.Init(harmony);
+            DSPFreeMechaCustom.Init(harmony);
 
             if (ErrorMessage != "")
             {
@@ -38,6 +43,8 @@ namespace NebulaCompatibilityAssist.Patches
                 UIMessageBox.Show("Nebula Compatibility Assist Error", ErrorMessage, "确定".Translate(), 3);
             }
             initialized = true;
+            Plugin.Instance.Version = PluginInfo.PLUGIN_VERSION + RequriedPlugins;
+            Log.Debug($"Version: {Plugin.Instance.Version}");
         }
 
         [HarmonyPostfix]

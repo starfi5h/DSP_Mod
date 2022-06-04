@@ -5,6 +5,7 @@ using Compatibility;
 using HarmonyLib;
 using System;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace BulletTime
 {
@@ -14,11 +15,11 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.5";
+        public const string VERSION = "1.2.6";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
-        public static ConfigEntry<string> KeyAutosave;
+        public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<float> StartingSpeed;
         static Harmony harmony;
 
@@ -26,7 +27,7 @@ namespace BulletTime
         {
             EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", true, "Do auto-save in background thread\n在背景执行自动存档");
             EnableFastLoading = Config.Bind<bool>("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
-            KeyAutosave = Config.Bind<string>("Save", "KeyAutosave", "f10", "Hotkey for auto-save\n自动存档的热键");
+            KeyAutosave = Config.Bind("Save", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
         }
 

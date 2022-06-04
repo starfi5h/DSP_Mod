@@ -4,12 +4,13 @@ using System.Collections.Generic;
 
 namespace NebulaCompatibilityAssist.Packets
 {
-    public class NC_StationStorageReponse
+    public class NC_StationStorageData
     {
         public static Action OnReceive;
 
         public int[] StationGId { get; set; }
         public int[] StorageLength { get; set; }
+        public bool[] IsCollector { get; set; }
 
         public int[] ItemId { get; set; }
         public int[] Max { get; set; }
@@ -18,11 +19,12 @@ namespace NebulaCompatibilityAssist.Packets
         public int[] RemoteOrder { get; set; }
         public byte[] Logic { get; set; }
 
-        public NC_StationStorageReponse()
+        public NC_StationStorageData()
         {
             StationComponent[] gStationPool = GameMain.data.galacticTransport.stationPool;
             List<int> stationGId = new ();
             List<int> storageLength = new ();
+            List<bool> isCollector = new ();
             int arraySize = 0;
             int offset = 0;
 
@@ -32,12 +34,14 @@ namespace NebulaCompatibilityAssist.Packets
                 {
                     stationGId.Add(stationComponent.gid);
                     storageLength.Add(stationComponent.storage.Length);
+                    isCollector.Add(stationComponent.isCollector);
                     arraySize += stationComponent.storage.Length;
                 }
             }
 
             StationGId = stationGId.ToArray();
             StorageLength = storageLength.ToArray();
+            IsCollector = isCollector.ToArray();
             ItemId = new int[arraySize];
             Max = new int[arraySize];
             Count = new int[arraySize];
@@ -64,9 +68,9 @@ namespace NebulaCompatibilityAssist.Packets
     }
 
     [RegisterPacketProcessor]
-    internal class NC_StationStorageReponseProcessor : BasePacketProcessor<NC_StationStorageReponse>
+    internal class NC_StationStorageReponseProcessor : BasePacketProcessor<NC_StationStorageData>
     {
-        public override void ProcessPacket(NC_StationStorageReponse packet, INebulaConnection conn)
+        public override void ProcessPacket(NC_StationStorageData packet, INebulaConnection conn)
         {
             if (IsHost)
                 return;
@@ -83,6 +87,7 @@ namespace NebulaCompatibilityAssist.Packets
                 }
                 if (station.storage == null)
                     station.storage = new StationStore[packet.StorageLength[i]];
+                station.isCollector = packet.IsCollector[i];
 
                 for (int j = 0; j < packet.StorageLength[i]; j++)
                 {
@@ -104,7 +109,7 @@ namespace NebulaCompatibilityAssist.Packets
                 }
             }
 
-            NC_StationStorageReponse.OnReceive?.Invoke();
+            NC_StationStorageData.OnReceive?.Invoke();
         }
     }
 

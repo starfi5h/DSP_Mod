@@ -1,7 +1,7 @@
-﻿using NebulaAPI;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
+using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
+using System;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -19,10 +19,10 @@ namespace NebulaCompatibilityAssist.Patches
             try
             {
                 // Send request when client open window or click global/systme buttons
-                System.Type targetType = AccessTools.TypeByName("LSTMMod.UIBalanceWindow");
-                harmony.Patch(AccessTools.Method(targetType, "_OnOpen"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
-                harmony.Patch(targetType.GetMethod("SwitchToStarSystem"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
-                harmony.Patch(targetType.GetMethod("SwitchToGlobal"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
+                Type classType = AccessTools.TypeByName("LSTMMod.UIBalanceWindow");
+                harmony.Patch(AccessTools.Method(classType, "_OnOpen"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
+                harmony.Patch(classType.GetMethod("SwitchToStarSystem"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
+                harmony.Patch(classType.GetMethod("SwitchToGlobal"), new HarmonyMethod(typeof(LSTM).GetMethod("SendRequest")));
 
                 Log.Info($"{NAME} - OK");
             }
