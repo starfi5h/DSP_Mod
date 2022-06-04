@@ -8,6 +8,8 @@ namespace SampleAndHoldSim
 
         public void VeinWorkBegin()
         {
+            if (GameMain.data.gameDesc.isInfiniteResource) return;
+
             if (IsNextIdle || Index == UIvein.ViewFactoryIndex)
             {
                 if (tmpVeinAmount == null || tmpVeinAmount.Length != factory.veinPool.Length)
@@ -19,6 +21,8 @@ namespace SampleAndHoldSim
 
         public void VeinWorkEnd()
         {
+            if (GameMain.data.gameDesc.isInfiniteResource) return;
+
             if (IsNextIdle || Index == UIvein.ViewFactoryIndex)
             {
                 for (int i = 0; i < factory.veinCursor; i++)
@@ -35,6 +39,8 @@ namespace SampleAndHoldSim
 
         public void VeinIdleEnd()
         {
+            if (GameMain.data.gameDesc.isInfiniteResource) return;
+
             if (tmpVeinAmount != null)
             {
                 int length = Math.Min(tmpVeinAmount.Length, factory.veinCursor);
@@ -48,7 +54,7 @@ namespace SampleAndHoldSim
                         factory.planet.veinGroups[groupIndex].amount -= consumeAmount;
                         if (factory.veinPool[i].amount <= 0)
                         {
-                            Log.Debug($"Factory[{Index}]: Remove vein {i}");
+                            Log.Debug($"Factory[{Index}] ({factory.planet.displayName}): Remove vein {i}");
                             factory.planet.veinGroups[groupIndex].count -= 1;
                             factory.RemoveVeinWithComponents(i);
                             factory.NotifyVeinExhausted();
