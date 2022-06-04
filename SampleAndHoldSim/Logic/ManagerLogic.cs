@@ -96,6 +96,7 @@ namespace SampleAndHoldSim
             else
             {
                 factoryStat.itemChanged = false;
+                factoryStat.consumeRegister[1210]  = 0; // Warper: StationComponent.InternalTickRemote()
                 factoryStat.consumeRegister[11901] = 0; // Sail: Swarm.RemoveSolarSail()
                 factoryStat.productRegister[11901] = 0; // Sail: Swarm.AddSolarSail()
                 factoryStat.productRegister[11902] = 0; // SP: ConstructSp()
