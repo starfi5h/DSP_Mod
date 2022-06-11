@@ -339,6 +339,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\NoWarpBobbingPlugin.cs" />
     <Compile Include="src\PluginsAnalyzerPlugin.cs" />
     <Compile Include="src\ExperimentPlugin.cs" />
     <Compile Include="src\NoUploadPlugin.cs" />
