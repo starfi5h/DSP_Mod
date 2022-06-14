@@ -48,7 +48,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.9");
+                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.10");
                     Log.Warn(e);
                 }
             }
@@ -91,7 +91,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Auxilaryfunction compatibility failed! Last working version: 1.6.6");
+                    Log.Warn("Auxilaryfunction compatibility failed! Last working version: 1.6.9");
                     Log.Warn(e);
                 }
             }

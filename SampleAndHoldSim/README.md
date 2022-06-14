@@ -116,6 +116,9 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 
 ## Changelog
 
+#### v0.3.2
+\- Fix compatibility for game version 0.9.26.12900
+
 #### v0.3.1
 \- Fix warper consume stat.  
 \- Fix vein amount decrease in InfiniteResource.  
