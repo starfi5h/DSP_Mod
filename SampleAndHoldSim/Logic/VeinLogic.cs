@@ -48,15 +48,15 @@ namespace SampleAndHoldSim
                 {
                     if (tmpVeinAmount[i] != 0 && factory.veinPool[i].amount > 0)
                     {
-                        int consumeAmount = tmpVeinAmount[i] <= factory.veinPool[i].amount ? tmpVeinAmount[i] : factory.veinPool[i].amount;
+                        int consumeAmount = Math.Min(tmpVeinAmount[i], factory.veinPool[i].amount);
                         short groupIndex = factory.veinPool[i].groupIndex;
                         factory.veinPool[i].amount -= consumeAmount;
-                        factory.planet.veinGroups[groupIndex].amount -= consumeAmount;
+                        factory.veinGroups[groupIndex].amount -= consumeAmount;
                         if (factory.veinPool[i].amount <= 0)
                         {
                             Log.Debug($"Factory[{Index}] ({factory.planet.displayName}): Remove vein {i}");
-                            factory.planet.veinGroups[groupIndex].count -= 1;
                             factory.RemoveVeinWithComponents(i);
+                            factory.RecalculateVeinGroup(groupIndex);
                             factory.NotifyVeinExhausted();
                         }
                     }

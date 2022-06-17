@@ -116,6 +116,10 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 
 ## Changelog
 
+#### v0.3.3
+\- Fix compatibility for game version 0.9.26.13026  
+\- Fix Advance Miner mining amount.  
+
 #### v0.3.2
 \- Fix compatibility for game version 0.9.26.12900
 
