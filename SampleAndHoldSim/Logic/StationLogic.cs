@@ -7,6 +7,16 @@ namespace SampleAndHoldSim
     {
         readonly Dictionary<int, StationData> stationDict = new Dictionary<int, StationData>();
 
+        public void SetMinearl(int stationId, int mineralCount)
+        {
+            if (IsActive)
+            {
+                if (!stationDict.ContainsKey(stationId))
+                    stationDict.Add(stationId, new StationData(factory.transport.stationPool[stationId]));
+                StationData.SetMinearl(stationDict[stationId], mineralCount);
+            }
+        }
+
         public void StationAfterTransport()
         {
             if (IsActive)
@@ -43,6 +53,7 @@ namespace SampleAndHoldSim
         public int[] tmpCount;
         int[] tmpInc;
         int tmpWarperCount;
+        int tmpMineralCount;
 
         public StationData (StationComponent station)
         {
@@ -54,6 +65,11 @@ namespace SampleAndHoldSim
         {
             tmpCount = new int[length];
             tmpInc = new int[length];
+        }
+
+        public static void SetMinearl(StationData data, int mineralCount)
+        {
+            data.tmpMineralCount = mineralCount;
         }
 
         public static void ActiveBegin(StationData data, StationComponent station)
@@ -94,7 +110,10 @@ namespace SampleAndHoldSim
                 station.storage[i].count = Math.Max(station.storage[i].count, 0);
                 station.storage[i].inc = Math.Max(station.storage[i].inc, 0);
             }
-            station.warperCount += data.tmpWarperCount;
+            if (station.isVeinCollector)
+                station.storage[0].count += data.tmpMineralCount;
+            else
+                station.warperCount += data.tmpWarperCount;
         }
     }
 }
