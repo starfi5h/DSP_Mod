@@ -12,7 +12,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.3.2";
+        public const string VERSION = "0.3.3";
         public static Plugin instance;
         Harmony harmony;
 
