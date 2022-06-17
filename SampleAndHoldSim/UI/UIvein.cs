@@ -28,8 +28,8 @@ namespace SampleAndHoldSim
             {
                 if (ViewFactoryIndex != (GameMain.localPlanet?.factory.index ?? -1))
                 {
-                    periodArray = new int[PEROID + 1, GameMain.localPlanet.factory.planet.veinGroups.Length];
-                    sumArray = new int[GameMain.localPlanet.factory.planet.veinGroups.Length];
+                    periodArray = new int[PEROID + 1, GameMain.localPlanet.factory.veinGroups.Length];
+                    sumArray = new int[GameMain.localPlanet.factory.veinGroups.Length];
                     ViewFactoryIndex = GameMain.localPlanet.factory.index;
                     cursor = 0;
                     counter = 0;
