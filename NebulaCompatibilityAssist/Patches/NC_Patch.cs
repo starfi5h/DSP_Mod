@@ -36,6 +36,7 @@ namespace NebulaCompatibilityAssist.Patches
             PlanetFinder.Init(harmony);
             MoreMegaStructure.Init(harmony);
             DSPFreeMechaCustom.Init(harmony);
+            AutoStationConfig.Init(harmony);
 
             if (ErrorMessage != "")
             {
