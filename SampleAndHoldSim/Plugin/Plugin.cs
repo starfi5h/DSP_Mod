@@ -7,11 +7,12 @@ namespace SampleAndHoldSim
     [BepInPlugin(GUID, NAME, VERSION)]
     [BepInDependency(Compatibility.CommonAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.Auxilaryfunction.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.3.0";
+        public const string VERSION = "0.3.3";
         public static Plugin instance;
         Harmony harmony;
 
@@ -61,10 +62,9 @@ namespace SampleAndHoldSim
             if (EnableStationStorageUI.Value)
                 harmony.PatchAll(typeof(UIstation));
 
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.CommonAPI.GUID))
-                Compatibility.CommonAPI.Init(harmony);
-            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Compatibility.DSPOptimizations.GUID))
-                Compatibility.DSPOptimizations.Init(harmony);
+            Compatibility.CommonAPI.Init(harmony);
+            Compatibility.DSPOptimizations.Init(harmony);
+            Compatibility.Auxilaryfunction.Init(harmony);
         }
 
         public void OnDestroy()

@@ -48,6 +48,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | :----- | :------ | :---------- |
 | `EnableGUI`      | true  | Display a toolbox window. |
 | `WindowPosition` | 300, 250 | Position of the window. Format: x,y |
+| `WindowSize`     | 240, 200 | Size of the window. Format: width,height |
 
 ### Hotkeys  
 || Default | Description |
@@ -60,17 +61,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `KeyShell`      | r       | Build Shell |
 | `KeyGrid`       | g       | Toggle Grid |
 | Visibility |
-| `KeyShowAllLayers` | `    | Toggle show all layers mode |
 | `KeyHideMode`      | h    | Toggle mask & star hide mode |
 | Symmetry Tool |
 | `KeySymmetryTool`  | tab  | Toggle symmetry tool |
 | `KeyMirroring`     | m    | Toggle mirroring mode |
 | `KeyRotationInc`   | [+]  | Increase the degree of rotational symmetry |
 | `KeyRotationDec`   | [-]  | Decrease the degree of rotational symmetry |
-| Copy & paste |
-| `KeyLayerCopy`   | page up  | Copy the selected layer |
-| `KeyLayerPaste`   | page down  | Paste to the selected layer |  
-  
   
 ----
 # 画球辅助工具
@@ -122,6 +118,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | :----- | :------ | :---------- |
 | `EnableGUI`      | true  | 启用图形操作窗口 |
 | `WindowPosition` | 300, 250 | 窗口的位置 格式: x,y |
+| `WindowSize`     | 240, 200 | 窗口的大小 格式: 宽度,高度 |
 	
 ### 热键  
 || 默认 | 描述 |
@@ -144,6 +141,9 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 ----
 
 ## Changelog
+
+### v2.2.1
+\- Add WindowSize option. (Game version 0.9.25.12201)  
 
 ### v2.2.0
 \- Add support to paint brush. (Game version 0.9.25.11996)  

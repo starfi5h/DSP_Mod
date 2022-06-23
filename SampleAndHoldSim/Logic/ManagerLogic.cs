@@ -74,7 +74,23 @@ namespace SampleAndHoldSim
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick)), HarmonyPriority(Priority.Last)]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StationComponent), nameof(StationComponent.UpdateVeinCollection))]
+        static void UpdateVeinCollection_Prefix(StationComponent __instance, ref int __state)
+        {
+            __state = __instance.storage[0].count;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StationComponent), nameof(StationComponent.UpdateVeinCollection))]
+        static void UpdateVeinCollection_Postfix(StationComponent __instance, int __state, PlanetFactory factory)
+        {
+            if (MainManager.TryGet(factory.index, out FactoryManager manager))
+                manager.SetMinearl(__instance.id, __instance.storage[0].count - __state);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick)), HarmonyPriority(Priority.VeryLow)]
         static void PlanetTransport_Postfix(PlanetTransport __instance)
         {
             int index = __instance.planet.factoryIndex;
@@ -96,6 +112,7 @@ namespace SampleAndHoldSim
             else
             {
                 factoryStat.itemChanged = false;
+                factoryStat.consumeRegister[1210]  = 0; // Warper: StationComponent.InternalTickRemote()
                 factoryStat.consumeRegister[11901] = 0; // Sail: Swarm.RemoveSolarSail()
                 factoryStat.productRegister[11901] = 0; // Sail: Swarm.AddSolarSail()
                 factoryStat.productRegister[11902] = 0; // SP: ConstructSp()

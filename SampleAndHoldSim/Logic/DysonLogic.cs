@@ -172,14 +172,14 @@ namespace SampleAndHoldSim
 
         public static void AddBullet(DysonSwarm swarm, ProjectileData projectile, int idleCount)
         {
-            ref AstroPose[] astroPoses = ref GameMain.data.galaxy.astroPoses;
+            ref AstroData[] astroDatas = ref GameMain.data.galaxy.astrosData;
             int orbitId = -projectile.TargetId;
             if (swarm.OrbitExist(orbitId))
             {
-                VectorLF3 starPos = astroPoses[projectile.PlanetId / 100 * 100].uPos;
+                VectorLF3 starPos = astroDatas[projectile.PlanetId / 100 * 100].uPos;
                 SailBullet bullet = default;
                 bullet.lBegin = projectile.LocalPos;
-                bullet.uBegin = astroPoses[projectile.PlanetId].uPos + Maths.QRotateLF(astroPoses[projectile.PlanetId].uRot, projectile.LocalPos);
+                bullet.uBegin = astroDatas[projectile.PlanetId].uPos + Maths.QRotateLF(astroDatas[projectile.PlanetId].uRot, projectile.LocalPos);
                 bullet.uEnd = starPos + VectorLF3.Cross(swarm.orbits[orbitId].up, starPos - bullet.uBegin).normalized * swarm.orbits[orbitId].radius;
                 bullet.maxt = (float)((bullet.uEnd - bullet.uBegin).magnitude / 4000.0);
                 bullet.uEndVel = VectorLF3.Cross(bullet.uEnd - starPos, swarm.orbits[orbitId].up).normalized * Math.Sqrt(swarm.dysonSphere.gravity / swarm.orbits[orbitId].radius);
@@ -189,7 +189,7 @@ namespace SampleAndHoldSim
 
         public static void AddRocket(DysonSphere sphere, ProjectileData projectile, int idleCount)
         {
-            ref AstroPose[] astroPoses = ref GameMain.data.galaxy.astroPoses;
+            ref AstroData[] astroDatas = ref GameMain.data.galaxy.astrosData;
             // Assume layerId < 16, nodeId < 4096
             int layerId = projectile.TargetId >> 12;
             int nodeId = projectile.TargetId & 0x0FFF;
@@ -198,13 +198,23 @@ namespace SampleAndHoldSim
             {
                 DysonRocket rocket = default;
                 rocket.planetId = projectile.PlanetId;
-                rocket.uPos = astroPoses[projectile.PlanetId].uPos + Maths.QRotateLF(astroPoses[projectile.PlanetId].uRot, projectile.LocalPos + projectile.LocalPos.normalized * 6.1f);
-                rocket.uRot = astroPoses[projectile.PlanetId].uRot * Maths.SphericalRotation(projectile.LocalPos, 0f) * Quaternion.Euler(-90f, 0f, 0f);
+                rocket.uPos = astroDatas[projectile.PlanetId].uPos + Maths.QRotateLF(astroDatas[projectile.PlanetId].uRot, projectile.LocalPos + projectile.LocalPos.normalized * 6.1f);
+                rocket.uRot = astroDatas[projectile.PlanetId].uRot * Maths.SphericalRotation(projectile.LocalPos, 0f) * Quaternion.Euler(-90f, 0f, 0f);
                 rocket.uVel = rocket.uRot * Vector3.forward;
                 rocket.uSpeed = 0f;
                 rocket.launch = projectile.LocalPos.normalized;
                 rocket.uPos -= new VectorLF3(rocket.uVel) * 15 * idleCount; // move starting position toward plaent to delay
-                sphere.AddDysonRocket(rocket, node);
+                if ((node._spReq - node.spOrdered) > 0)
+                {
+                    // if node is not full, add to original node
+                    sphere.AddDysonRocket(rocket, node);
+                }
+                else if (sphere.GetAutoNodeCount() > 0)
+                {
+                    // if node is full, find another node waiting to build
+                    if ((node = sphere.GetAutoDysonNode(nodeId)) != null) 
+                        sphere.AddDysonRocket(rocket, node);
+                }
             }
         }
     }

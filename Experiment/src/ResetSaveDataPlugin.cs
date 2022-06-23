@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.IO;
 using BepInEx;
 using BepInEx.Logging;
@@ -318,3 +319,4 @@ namespace ResetSaveData
 
 	}
 }
+*/
