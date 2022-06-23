@@ -13,7 +13,7 @@ namespace NebulaCompatibilityAssist.Patches
     {
         public const string NAME = "PlanetFinder";
         public const string GUID = "com.hetima.dsp.PlanetFinder";
-        public const string VERSION = "0.4.0";
+        public const string VERSION = "0.4.1";
 
         public struct PlanetInfo
         {
@@ -68,7 +68,7 @@ namespace NebulaCompatibilityAssist.Patches
 
         public static void OnReceive(NC_PlanetInfoData packet)
         {
-            Log.Info(packet.PlanetId);
+            Log.Debug("NC_PlanetInfoData: " + packet.PlanetId);
             planetInfos[packet.PlanetId] = new PlanetInfo
             {
                 energyCapacity = packet.EnergyCapacity,

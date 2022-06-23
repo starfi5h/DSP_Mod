@@ -6,7 +6,6 @@ namespace NebulaCompatibilityAssist.Packets
     public class NC_PlanetInfoData
     {
         public int PlanetId { get; set; }
-        public long[] VeinAmounts { get; set; }
         public long EnergyCapacity { get; set; }
         public long EnergyRequired { get; set; }
         public int NetworkCount { get; set; }
@@ -15,7 +14,6 @@ namespace NebulaCompatibilityAssist.Packets
         public NC_PlanetInfoData(in PlanetData planet)
         {
             PlanetId = planet.id;
-            VeinAmounts = planet.veinAmounts;
             if (planet.factory?.powerSystem != null)
             {
                 for (int i = 1; i < planet.factory.powerSystem.netCursor; i++)
@@ -39,8 +37,6 @@ namespace NebulaCompatibilityAssist.Packets
         {
             if (IsHost) return;
 
-            PlanetData planet = GameMain.galaxy.PlanetById(packet.PlanetId);
-            planet.veinAmounts = packet.VeinAmounts;
             PlanetFinder.OnReceive(packet);
         }
     }
