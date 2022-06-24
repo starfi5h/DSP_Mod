@@ -52,12 +52,11 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (NebulaModAPI.IsMultiplayerActive && __runOriginal)
             {
-                PlanetFactory factory = __0.factory;                
-                factory.CopyBuildingSetting(__1.entityId);
+                PlanetFactory factory = __0.factory;
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
-                    new PasteBuildingSettingUpdate(__1.entityId, BuildingParameters.clipboard, factory.planetId));
+                    new NC_StationConfig(__1, factory));
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
-                    new NC_StationItemCount(in __1, factory.planetId));
+                    new NC_StationShipCount(__1, factory.planetId));
             }
         }
     }

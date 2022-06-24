@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx.Configuration;
+using HarmonyLib;
 using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
 using NebulaModel.Packets.Factory;
@@ -13,6 +14,9 @@ namespace NebulaCompatibilityAssist.Patches
         public const string GUID = "cn.blacksnipe.dsp.Auxilaryfunction";
         public const string VERSION = "1.6.9";
 
+        private static ConfigEntry<bool> stationcopyItem_bool; // 物流站复制物品配方
+        private static ConfigEntry<bool> auto_supply_station; // 自动配置新运输站
+
         public static void Init(Harmony harmony)
         {
             if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
@@ -21,22 +25,33 @@ namespace NebulaCompatibilityAssist.Patches
 
             try
             {
+                Type classType = assembly.GetType("Auxilaryfunction.Auxilaryfunction");
+                stationcopyItem_bool = (ConfigEntry<bool>)AccessTools.Field(classType, "stationcopyItem_bool").GetValue(pluginInfo.Instance);
+                auto_supply_station = (ConfigEntry<bool>)AccessTools.Field(classType, "auto_supply_station").GetValue(pluginInfo.Instance);
 
+                // 填充當前星球飛機,飛船,翹曲器
+                harmony.Patch(AccessTools.Method(classType, "addDroneShiptooldstation"), null,
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("AddDroneShiptooldstation_Postfix")));
+
+                // 批量配置當前星球物流站
+                harmony.Patch(AccessTools.Method(classType, "changeallstationconfig"), null,
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("Changeallstationconfig_Postfix")));
+
+                // 批量配置當前星球大礦機速率
+                harmony.Patch(AccessTools.Method(classType, "changeallveincollectorspeedconfig"), null,
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("Changeallstationconfig_Postfix")));
 
                 // 自動配置新運輸站
-                Type classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+NewStationComponentPatch");
+                classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+NewStationComponentPatch");
                 harmony.Patch(AccessTools.Method(classType, "Postfix"),
                     new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Prefix")),
                     new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Postfix")));
 
-                // 填充當前星球飛船,翹曲器
-
-                // 批量配置當前星球物流站
-
-                // 批量配置當前星球大礦機速率
-
                 // 物流塔物品複製黏貼
-
+                classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+PasteToFactoryObjectPatch");
+                harmony.Patch(AccessTools.Method(classType, "Prefix"),
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Prefix")),
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Postfix")));
 
                 Log.Info($"{NAME} - OK");
             }
@@ -48,8 +63,28 @@ namespace NebulaCompatibilityAssist.Patches
             }
         }
 
+        public static void AddDroneShiptooldstation_Postfix()
+        {
+            if (NebulaModAPI.IsMultiplayerActive && GameMain.localPlanet?.factory != null)
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
+                    new NC_StationShipCount(GameMain.localPlanet.factory.transport.stationPool, GameMain.localPlanet.id));
+            }
+        }
+
+        public static void Changeallstationconfig_Postfix()
+        {
+            if (NebulaModAPI.IsMultiplayerActive && GameMain.localPlanet?.factory != null)
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
+                    new NC_StationConfig(GameMain.localPlanet.factory.transport.stationPool, GameMain.localPlanet.factory));
+            }
+        }
+
         public static bool NewStationComponent_Prefix()
         {
+            if (!auto_supply_station.Value)
+                return false;
             if (!NebulaModAPI.IsMultiplayerActive)
                 return true;
 
@@ -63,12 +98,32 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (NebulaModAPI.IsMultiplayerActive && __runOriginal)
             {
-                PlanetFactory factory = __1.factory;                
-                factory.CopyBuildingSetting(__0.entityId);
+                PlanetFactory factory = __1.factory;
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
-                    new PasteBuildingSettingUpdate(__0.entityId, BuildingParameters.clipboard, factory.planetId));
+                    new NC_StationConfig(__0, factory));
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
-                    new NC_StationItemCount(in __0, factory.planetId));
+                    new NC_StationShipCount(__0, factory.planetId));
+            }
+        }
+
+        public static bool PasteToFactoryObject_Prefix()
+        {
+            if (!stationcopyItem_bool.Value)
+                return false;
+            if (!NebulaModAPI.IsMultiplayerActive)
+                return true;
+
+            // Apply AutoStationConfig if author (the drone owner) is local player
+            IFactoryManager factoryManager = NebulaModAPI.MultiplayerSession.Factories;
+            return !factoryManager.IsIncomingRequest.Value;
+        }
+
+        public static void PasteToFactoryObject_Postfix(int __0, PlanetFactory __1, bool __runOriginal)
+        {
+            if (NebulaModAPI.IsMultiplayerActive && __runOriginal)
+            {
+                PlanetFactory factory = __1;
+
             }
         }
     }
