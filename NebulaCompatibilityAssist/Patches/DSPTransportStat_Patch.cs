@@ -1,9 +1,12 @@
 ﻿using BepInEx;
 using DSPTransportStat;
+using DSPTransportStat.Enum;
+using DSPTransportStat.Global;
 using HarmonyLib;
 using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,7 +16,7 @@ namespace NebulaCompatibilityAssist.Patches
     {
         public const string NAME = "DSPTransportStat";
         public const string GUID = "IndexOutOfRange.DSPTransportStat";
-        public const string VERSION = "0.0.13";
+        public const string VERSION = "0.0.17";
 
         private static BaseUnityPlugin instance;
         private static bool supression;
@@ -66,24 +69,32 @@ namespace NebulaCompatibilityAssist.Patches
             {
                 return;
             }
+            // 客户端已经载入的星球工厂
+            HashSet<int> loadedPlanets = new();
+            for (int i = 0; i < GameMain.data.factoryCount; i++)
+            {
+                loadedPlanets.Add(GameMain.data.factories[i].planetId);
+            }
+            int count = 0;
 
             bool toggleInterstellar = __instance.uiTSWParameterPanel.ToggleInterstellar;
             bool toggleCollector = __instance.uiTSWParameterPanel.ToggleCollector;
             int relatedItemFilter = __instance.uiTSWParameterPanel.RelatedItemFilter;
-            int count = 0;
+            StorageUsageTypeFilter storageUsageType = __instance.uiTSWParameterPanel.StorageUsageTypeFilter;
+            StorageUsageDirectionFilter storageUsageDirection = __instance.uiTSWParameterPanel.StorageUsageDirectionFilter;
 
             for (int k = 1; k < GameMain.data.galacticTransport.stationCursor; ++k)
             {
                 StationComponent station = GameMain.data.galacticTransport.stationPool[k];
 
-                // 已刪除, 還沒載入的物流塔跳過
+                // 跳过已删除或尚未载入的物流塔
                 if (station == null || station.storage == null)
                 {
                     continue;
                 }
 
                 // 当地星球的物流塔已经载入过了
-                if (station.planetId == GameMain.localPlanet?.id)
+                if (loadedPlanets.Contains(station.planetId))
                 {
                     continue;
                 }
@@ -107,17 +118,18 @@ namespace NebulaCompatibilityAssist.Patches
                 string name = DSPTransportStat.Extensions.StationComponentExtensions.GetStationName(station);
                 PlanetData planet = GameMain.galaxy.PlanetById(station.planetId);
                 StarData star = planet.star;
-                
-                if (!string.IsNullOrWhiteSpace(__instance.searchString) 
-                    && !name.Contains(__instance.searchString) 
-                    && !star.name.Contains(__instance.searchString) 
-                    && !planet.name.Contains(__instance.searchString))
+
+                if (!string.IsNullOrWhiteSpace(__instance.searchString) &&
+                    star.name.IndexOf(__instance.searchString, StringComparison.CurrentCultureIgnoreCase) == -1 &&
+                    planet.name.IndexOf(__instance.searchString, StringComparison.CurrentCultureIgnoreCase) == -1 &&
+                    name.IndexOf(__instance.searchString, StringComparison.CurrentCultureIgnoreCase) == -1
+                )
                 {
                     continue;
                 }
 
                 // 过滤相关物品
-                if (relatedItemFilter != DSPTransportStat.Global.Constants.NONE_ITEM_ID)
+                if (relatedItemFilter != Constants.NONE_ITEM_ID)
                 {
                     // 该站点至少有一个槽位包含用户选择的物品
                     int ii = 0;
@@ -125,6 +137,59 @@ namespace NebulaCompatibilityAssist.Patches
                     {
                         if (station.storage[ii].itemId == relatedItemFilter)
                         {
+                            StationStore ss = station.storage[ii];
+                            // 对 usage type 和 usage direction 进行过滤
+                            if (storageUsageDirection == StorageUsageDirectionFilter.Supply)
+                            {
+                                // usage direction 为 supply
+                                if (storageUsageType == StorageUsageTypeFilter.All && ss.localLogic != ELogisticStorage.Supply && ss.remoteLogic != ELogisticStorage.Supply)
+                                {
+                                    // usage type 为 all 但是 local logic 和 remote logic 都不为 supply
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Local && ss.localLogic != ELogisticStorage.Supply)
+                                {
+                                    // usage type 为 local 但是 local logic 不为 supply
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Remote && ss.remoteLogic != ELogisticStorage.Supply)
+                                {
+                                    // usage type 为 remote 但是 remote logic 不为 supply
+                                    continue;
+                                }
+                            }
+                            else if (storageUsageDirection == StorageUsageDirectionFilter.Demand)
+                            {
+                                // usage direction 为 demand
+                                if (storageUsageType == StorageUsageTypeFilter.All && ss.localLogic != ELogisticStorage.Demand && ss.remoteLogic != ELogisticStorage.Demand)
+                                {
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Local && ss.localLogic != ELogisticStorage.Demand)
+                                {
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Remote && ss.remoteLogic != ELogisticStorage.Demand)
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (storageUsageDirection == StorageUsageDirectionFilter.Storage)
+                            {
+                                // usage direction 为 storage
+                                if (storageUsageType == StorageUsageTypeFilter.All && ss.localLogic != ELogisticStorage.None && ss.remoteLogic != ELogisticStorage.None)
+                                {
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Local && ss.localLogic != ELogisticStorage.None)
+                                {
+                                    continue;
+                                }
+                                if (storageUsageType == StorageUsageTypeFilter.Remote && ss.remoteLogic != ELogisticStorage.None)
+                                {
+                                    continue;
+                                }
+                            }
                             break;
                         }
                     }
@@ -161,7 +226,7 @@ namespace NebulaCompatibilityAssist.Patches
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIStationWindow), nameof(UIStationWindow._OnOpen))]
-        public static bool _OnOpen_Prefix()
+        public static bool OnOpen_Prefix()
         {
             return !supression;
         }

@@ -13,12 +13,13 @@ namespace NebulaCompatibilityAssist.Patches
     {
         public const string NAME = "PlanetFinder";
         public const string GUID = "com.hetima.dsp.PlanetFinder";
-        public const string VERSION = "0.4.0";
+        public const string VERSION = "0.4.2";
 
         public struct PlanetInfo
         {
             public long energyCapacity;
             public long energyRequired;
+            public long energyExchanged;
             public int networkCount;
         }
         private static Dictionary<int, PlanetInfo> planetInfos = null;
@@ -61,18 +62,18 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (NebulaModAPI.IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient)
             {
-                Log.Warn("sendrequest");
                 NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_PlanetInfoRequest());
             }
         }
 
         public static void OnReceive(NC_PlanetInfoData packet)
         {
-            Log.Info(packet.PlanetId);
+            Log.Dev("NC_PlanetInfoData: " + packet.PlanetId);
             planetInfos[packet.PlanetId] = new PlanetInfo
             {
                 energyCapacity = packet.EnergyCapacity,
                 energyRequired = packet.EnergyRequired,
+                energyExchanged = packet.EnergyExchanged,
                 networkCount = packet.NetworkCount
             };
         }
@@ -89,13 +90,23 @@ namespace NebulaCompatibilityAssist.Patches
             {
                 long energyRequired = planetInfos[___planetData.id].energyRequired;
                 long energyCapacity = planetInfos[___planetData.id].energyCapacity;
+                long energyX = -planetInfos[___planetData.id].energyExchanged;
                 int networkCount = planetInfos[___planetData.id].networkCount;
                 
                 StringBuilderUtility.WriteKMG(sbWatt, 8, energyRequired * 60L, false);
                 sbText.Append(sbWatt);
                 StringBuilderUtility.WriteKMG(sbWatt, 8, energyCapacity * 60L, false);
                 sbText.Append(" / ").Append(sbWatt.ToString().Trim());
-                float ratio = (float)energyRequired / energyCapacity;
+                if (energyX > 0L)
+                {
+                    StringBuilderUtility.WriteKMG(sbWatt, 8, energyX * 60L, false);
+                    sbText.Append(" + ").Append(sbWatt.ToString().Trim());
+                }
+                else
+                {
+                    energyX = 0;
+                }
+                float ratio = (float)energyRequired / (energyCapacity + energyX);
                 if (ratio > 0.9f)
                 {
                     sbText.Append(" (").Append(ratio.ToString("P1")).Append(")");
