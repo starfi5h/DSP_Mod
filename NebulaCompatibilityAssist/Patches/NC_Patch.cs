@@ -37,6 +37,7 @@ namespace NebulaCompatibilityAssist.Patches
             MoreMegaStructure.Init(harmony);
             DSPFreeMechaCustom.Init(harmony);
             AutoStationConfig.Init(harmony);
+            Auxilaryfunction.Init(harmony);
 
             if (ErrorMessage != "")
             {

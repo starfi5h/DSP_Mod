@@ -32,6 +32,9 @@
     <Reference Include="DSPTransportStat">
       <HintPath>reference\DSPTransportStat_publicized.dll</HintPath>
     </Reference>
+    <Reference Include="NebulaModel">
+      <HintPath>reference\NebulaModel.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
