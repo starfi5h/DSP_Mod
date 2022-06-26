@@ -8,6 +8,7 @@ namespace NebulaCompatibilityAssist.Packets
         public int PlanetId { get; set; }
         public long EnergyCapacity { get; set; }
         public long EnergyRequired { get; set; }
+        public long EnergyExchanged { get; set; }
         public int NetworkCount { get; set; }
 
         public NC_PlanetInfoData() { }
@@ -24,6 +25,7 @@ namespace NebulaCompatibilityAssist.Packets
                         NetworkCount++;
                         EnergyCapacity += powerNetwork.energyCapacity;
                         EnergyRequired += powerNetwork.energyRequired;
+                        EnergyExchanged += powerNetwork.energyExchanged;
                     }
                 }
             }
