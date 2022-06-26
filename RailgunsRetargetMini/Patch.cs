@@ -3,7 +3,53 @@ using UnityEngine;
 
 namespace RailgunsRetargetMini
 {
-    public class Patch
+    public class Patch1
+    {
+        static int checkIndex;
+
+        [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
+        public static void GameData_GameTick()
+        {
+            checkIndex = (++checkIndex >= Configs.RotatePeriod) ? 0 : checkIndex;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(EjectorComponent), "InternalUpdate")]
+        public static void EjectorComponent_InternalUpdate_Postfix(ref EjectorComponent __instance, DysonSwarm swarm)
+        {
+            // check every Configs.CheckPeriod ticks
+            if (checkIndex != 0 || __instance.bulletCount == 0) return;
+
+            switch (__instance.targetState)
+            {
+                case EjectorComponent.ETargetState.None:
+                    if (Configs.ForceRetargeting)
+                        goto case EjectorComponent.ETargetState.Blocked;
+                    return;
+
+                case EjectorComponent.ETargetState.OK:
+                    return;
+
+                case EjectorComponent.ETargetState.AngleLimit:
+                case EjectorComponent.ETargetState.Blocked:
+                    // Find the next enabled orbit
+                    int nextOrbitId = __instance.orbitId + 1;
+                    while (nextOrbitId < swarm.orbitCursor && !swarm.orbits[nextOrbitId].enabled)
+                    {
+                        nextOrbitId++;
+                    }
+                    if (nextOrbitId >= swarm.orbitCursor)
+                        nextOrbitId = 1;
+                    //__instance.orbitId = nextOrbitId;
+                    __instance.SetOrbit(nextOrbitId);
+                    return;
+
+                default:
+                    return;
+            }
+        }
+    }
+
+    public class Patch2
     {
         static int checkIndex;
 
@@ -18,34 +64,50 @@ namespace RailgunsRetargetMini
         {
             // check every Configs.CheckPeriod ticks
             if (__instance.id % Configs.CheckPeriod != checkIndex || __instance.bulletCount == 0) return;
-            if (__instance.targetState == EjectorComponent.ETargetState.OK || __instance.targetState == EjectorComponent.ETargetState.None) return;
 
-            // Find a reachable orbit from all other enabled orbits
-            int originalId = __instance.orbitId;
+            switch(__instance.targetState)
+            {                
+                case EjectorComponent.ETargetState.None:
+                    if (Configs.ForceRetargeting)
+                        goto case EjectorComponent.ETargetState.Blocked;
+                    return;
 
-            // Precalculate common parts
-            int starId = __instance.planetId / 100 * 100;
-            float num5 = __instance.localAlt + __instance.pivotY + (__instance.muzzleY - __instance.pivotY) / Mathf.Max(0.1f, Mathf.Sqrt(1f - __instance.localDir.y * __instance.localDir.y));
-            Vector3 vector = new(__instance.localPosN.x * num5, __instance.localPosN.y * num5, __instance.localPosN.z * num5);
-            VectorLF3 vectorLF = astroPoses[__instance.planetId].uPos + Maths.QRotateLF(astroPoses[__instance.planetId].uRot, vector);
-            Quaternion q = astroPoses[__instance.planetId].uRot * __instance.localRot;
-            VectorLF3 b = astroPoses[starId].uPos - vectorLF;
-            for (int i = 1; i < swarm.orbitCursor; i++)
-            {
-                if (swarm.orbits[i].id == i && swarm.orbits[i].enabled && i != originalId)
-                {
-                    // Calculate the parts related to swarm obrit
-                    __instance.orbitId = i;
-                    if (IsReachable(in __instance, swarm, starId, astroPoses, in vectorLF, in q, in b))
+                case EjectorComponent.ETargetState.OK:
+                    return;
+
+                case EjectorComponent.ETargetState.AngleLimit:
+                case EjectorComponent.ETargetState.Blocked:
+                    // Find a reachable orbit from all other enabled orbits
+                    int originalId = __instance.orbitId;
+
+                    // Precalculate common parts
+                    int starId = __instance.planetId / 100 * 100;
+                    float num5 = __instance.localAlt + __instance.pivotY + (__instance.muzzleY - __instance.pivotY) / Mathf.Max(0.1f, Mathf.Sqrt(1f - __instance.localDir.y * __instance.localDir.y));
+                    Vector3 vector = new(__instance.localPosN.x * num5, __instance.localPosN.y * num5, __instance.localPosN.z * num5);
+                    VectorLF3 vectorLF = astroPoses[__instance.planetId].uPos + Maths.QRotateLF(astroPoses[__instance.planetId].uRot, vector);
+                    Quaternion q = astroPoses[__instance.planetId].uRot * __instance.localRot;
+                    VectorLF3 b = astroPoses[starId].uPos - vectorLF;
+                    for (int i = 1; i < swarm.orbitCursor; i++)
                     {
-                        __instance.SetOrbit(i);
-                        return;
+                        if (swarm.orbits[i].id == i && swarm.orbits[i].enabled && i != originalId)
+                        {
+                            // Calculate the parts related to swarm obrit
+                            __instance.orbitId = i;
+                            if (IsReachable(in __instance, swarm, starId, astroPoses, in vectorLF, in q, in b))
+                            {
+                                __instance.SetOrbit(i);
+                                return;
+                            }
+                        }
                     }
-                }
-            }
 
-            // Can't find retarget orbit, reset to original orbitId;
-            __instance.orbitId = originalId;
+                    // Can't find retarget orbit, reset to original orbitId;
+                    __instance.orbitId = originalId;
+                    break;
+
+                default:
+                    return;
+            }
         }
 
         public static bool IsReachable(in EjectorComponent ejector, DysonSwarm swarm, int starId, AstroData[] astroPoses, in VectorLF3 vectorLF, in Quaternion q, in VectorLF3 b)
