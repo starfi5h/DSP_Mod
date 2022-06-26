@@ -62,7 +62,6 @@ namespace NebulaCompatibilityAssist.Patches
         {
             if (NebulaModAPI.IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient)
             {
-                Log.Warn("sendrequest");
                 NebulaModAPI.MultiplayerSession.Network.SendPacket(new NC_PlanetInfoRequest());
             }
         }
