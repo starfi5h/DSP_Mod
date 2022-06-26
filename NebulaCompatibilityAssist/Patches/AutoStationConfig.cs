@@ -21,11 +21,16 @@ namespace NebulaCompatibilityAssist.Patches
 
             try
             {
+                // Sync new station config
                 Type classType = assembly.GetType("Pasukaru.DSP.AutoStationConfig.PlanetTransportPatch");
-                // Send request when client open window
                 harmony.Patch(AccessTools.Method(classType, "NewStationComponent"), 
                     new HarmonyMethod(typeof(AutoStationConfig).GetMethod("NewStationComponent_Prefix")),
                     new HarmonyMethod(typeof(AutoStationConfig).GetMethod("NewStationComponent_Postfix")));
+
+                // Fix advance miner power usage abnormal
+                classType = assembly.GetType("Pasukaru.DSP.AutoStationConfig.Extensions");
+                harmony.Patch(AccessTools.Method(classType, "SetChargingPower"),
+                    new HarmonyMethod(typeof(AutoStationConfig).GetMethod("SetChargingPower_Prefix")));
 
                 Log.Info($"{NAME} - OK");
             }
@@ -58,6 +63,13 @@ namespace NebulaCompatibilityAssist.Patches
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
                     new NC_StationShipCount(__1, factory.planetId));
             }
+        }
+
+        public static bool SetChargingPower_Prefix(StationComponent __0)
+        {
+            // Disable set charging power if it is advance miner
+            Log.Debug(__0.isVeinCollector);
+            return !__0.isVeinCollector;              
         }
     }
 }

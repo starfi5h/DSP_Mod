@@ -2,7 +2,7 @@
 using HarmonyLib;
 using NebulaAPI;
 using NebulaCompatibilityAssist.Packets;
-using NebulaModel.Packets.Factory;
+using NebulaModel.Packets.Factory.PowerGenerator;
 using System;
 using System.Reflection;
 
@@ -41,6 +41,10 @@ namespace NebulaCompatibilityAssist.Patches
                 harmony.Patch(AccessTools.Method(classType, "changeallveincollectorspeedconfig"), null,
                     new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("Changeallstationconfig_Postfix")));
 
+                // 填充當前星球人造恆星
+                harmony.Patch(AccessTools.Method(classType, "addfueltoallStar"), null,
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("AddfueltoallStar_Postfix")));
+
                 // 自動配置新運輸站
                 classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+NewStationComponentPatch");
                 harmony.Patch(AccessTools.Method(classType, "Postfix"),
@@ -50,8 +54,7 @@ namespace NebulaCompatibilityAssist.Patches
                 // 物流塔物品複製黏貼
                 classType = assembly.GetType("Auxilaryfunction.AuxilaryfunctionPatch+PasteToFactoryObjectPatch");
                 harmony.Patch(AccessTools.Method(classType, "Prefix"),
-                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Prefix")),
-                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("NewStationComponent_Postfix")));
+                    new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("PasteToFactoryObject_Prefix")));
 
                 Log.Info($"{NAME} - OK");
             }
@@ -78,6 +81,21 @@ namespace NebulaCompatibilityAssist.Patches
             {
                 NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
                     new NC_StationConfig(GameMain.localPlanet.factory.transport.stationPool, GameMain.localPlanet.factory));
+            }
+        }
+
+        public static void AddfueltoallStar_Postfix()
+        {
+            if (NebulaModAPI.IsMultiplayerActive && GameMain.localPlanet?.factory != null)
+            {
+                foreach (PowerGeneratorComponent pgc in GameMain.localPlanet.factory.powerSystem.genPool)
+                {
+                    if (pgc.fuelMask == 4)
+                    {
+                        NebulaModAPI.MultiplayerSession.Network.SendPacketToLocalStar(
+                            new PowerGeneratorFuelUpdatePacket(pgc.id, pgc.fuelId, pgc.fuelCount, pgc.fuelInc, GameMain.localPlanet.id));
+                    }
+                }
             }
         }
 
@@ -116,15 +134,6 @@ namespace NebulaCompatibilityAssist.Patches
             // Apply AutoStationConfig if author (the drone owner) is local player
             IFactoryManager factoryManager = NebulaModAPI.MultiplayerSession.Factories;
             return !factoryManager.IsIncomingRequest.Value;
-        }
-
-        public static void PasteToFactoryObject_Postfix(int __0, PlanetFactory __1, bool __runOriginal)
-        {
-            if (NebulaModAPI.IsMultiplayerActive && __runOriginal)
-            {
-                PlanetFactory factory = __1;
-
-            }
         }
     }
 }
