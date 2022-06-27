@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using UnityEngine;
@@ -89,13 +90,65 @@ namespace SampleAndHoldSim
                 manager.SetMinearl(__instance.id, __instance.storage[0].count - __state);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.GameTick)), HarmonyPriority(Priority.VeryLow)]
-        static void PlanetTransport_Postfix(PlanetTransport __instance)
+        [HarmonyTranspiler, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.GameTick))]
+        static IEnumerable<CodeInstruction> PlanetTransport_Transpiler1(IEnumerable<CodeInstruction> instructions)
         {
-            int index = __instance.planet.factoryIndex;
-            if (MainManager.TryGet(index, out FactoryManager manager))
-                manager.StationAfterTransport();
+            try
+            {
+                // Patch for singlethread
+                // Goal: Prevent other stations's ship delivery interfare item count diff record
+                var codeMatcher = new CodeMatcher(instructions)
+                    .MatchForward(true, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(PlanetTransport), "GameTick")))
+                    .Advance(1)
+                    .Insert(
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        HarmonyLib.Transpilers.EmitDelegate<Action<PlanetFactory>>((factory) =>
+                        {
+                            if (MainManager.TryGet(factory.index, out FactoryManager manager))
+                                manager.StationAfterTransport();
+                        }
+                    ));
+                return codeMatcher.InstructionEnumeration();
+            }
+            catch
+            {
+                Log.Error("Transpiler PlanetTransport_Transpiler1 failed.");
+                return instructions;
+            }
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick))]
+        static IEnumerable<CodeInstruction> PlanetTransport_Transpiler2(IEnumerable<CodeInstruction> instructions)
+        {
+            try
+            {
+                // Patch for multithread
+                // Goal: Execute FactoryManager.StationAfterTransport() after all PlanetTransport.GameTick() is done
+                var codeMatcher = new CodeMatcher(instructions)
+                    .MatchForward(true, 
+                        new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "PrepareTransportData"),
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "get_multithreadSystem"),
+                        new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "Schedule"),
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "get_multithreadSystem"),
+                        new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "Complete"))
+                    .Advance(1)
+                    .Insert(
+                        HarmonyLib.Transpilers.EmitDelegate<Action>(() =>
+                        {
+                            for (int index = 0; index < GameMain.data.factoryCount; index++)
+                            {
+                                if (MainManager.TryGet(index, out FactoryManager manager))
+                                    manager.StationAfterTransport();
+                            }
+                        }
+                    ));
+                return codeMatcher.InstructionEnumeration();
+            }
+            catch
+            {
+                Log.Error("PlanetTransport_Transpiler2 failed.");
+                return instructions;
+            }
         }
 
         static void PrepareTick(int index)
