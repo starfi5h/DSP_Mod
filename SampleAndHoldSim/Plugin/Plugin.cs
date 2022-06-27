@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using System;
 
 namespace SampleAndHoldSim
 {
@@ -17,24 +18,26 @@ namespace SampleAndHoldSim
         Harmony harmony;
 
         ConfigEntry<int> MaxFactoryCount;
-        ConfigEntry<bool> EnableStationStorageUI;
-        ConfigEntry<bool> EnableVeinConsumptionUI;
+        ConfigEntry<int> UIStationStoragePeriod;
+        ConfigEntry<int> UIVeinConsumptionPeriod;
         ConfigEntry<bool> UnitPerMinute;
 
         public void LoadConfig()
         {
             MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑祯所能运行的最大工厂数量");
-            EnableStationStorageUI = Config.Bind<bool>("UI", "EnableStationStorageUI", true, "Display item count change rate in station storages.\n显示物流塔货物变化速率");
-            EnableVeinConsumptionUI = Config.Bind<bool>("UI", "EnableVeinConsumptionUI", true, "Display mineral consumption rate of mineral.\n显示矿脉的矿物消耗速率");
+            UIStationStoragePeriod = Config.Bind<int>("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\nUI物流塔货物变化速率的监视周期。0 = 不显示");
+            UIVeinConsumptionPeriod = Config.Bind<int>("UI", "UIVeinConsumptionPeriod", 1800, "Display mineral consumption rate of mineral in x ticks. 0 = no display\nUI矿脉的矿物消耗速率的监视周期。0 = 不显示");
             UnitPerMinute = Config.Bind<bool>("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
             MainManager.MaxFactoryCount = MaxFactoryCount.Value;
+            UIstation.Period = (int)Math.Ceiling(UIStationStoragePeriod.Value / (float)UIstation.STEP);
             UIstation.UnitPerMinute = UnitPerMinute.Value;
+            UIvein.Period = (int)Math.Ceiling(UIVeinConsumptionPeriod.Value / (float)UIvein.STEP);
             UIvein.UnitPerMinute = UnitPerMinute.Value;
 
-            Log.Debug(string.Format("MaxFactoryCount:{0} {1} {2} {3}",
+            Log.Debug(string.Format("MaxFactoryCount:{0} StationUI:{1} VeinUI:{2} {3}",
                 MainManager.MaxFactoryCount,
-                EnableStationStorageUI.Value ? "StationUI" : "",
-                EnableVeinConsumptionUI.Value ? "VeinUI" : "",
+                UIstation.Period * UIstation.STEP,
+                UIvein.Period * UIvein.STEP,
                 UnitPerMinute.Value ? "/min" : "/s"
                 ));
         }
@@ -57,9 +60,9 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(UIcontrol));
             harmony.PatchAll(typeof(Dyson_Patch));
 
-            if (EnableVeinConsumptionUI.Value)
+            if (UIstation.Period > 0)
                 harmony.PatchAll(typeof(UIvein));
-            if (EnableStationStorageUI.Value)
+            if (UIvein.Period > 0)
                 harmony.PatchAll(typeof(UIstation));
 
             Compatibility.CommonAPI.Init(harmony);
