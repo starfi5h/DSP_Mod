@@ -13,7 +13,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.3.3";
+        public const string VERSION = "0.4.0";
         public static Plugin instance;
         Harmony harmony;
 
@@ -24,9 +24,9 @@ namespace SampleAndHoldSim
 
         public void LoadConfig()
         {
-            MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑祯所能运行的最大工厂数量");
-            UIStationStoragePeriod = Config.Bind<int>("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\nUI物流塔货物变化速率的监视周期。0 = 不显示");
-            UIVeinConsumptionPeriod = Config.Bind<int>("UI", "UIVeinConsumptionPeriod", 1800, "Display mineral consumption rate of mineral in x ticks. 0 = no display\nUI矿脉的矿物消耗速率的监视周期。0 = 不显示");
+            MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑帧所能运行的最大工厂数量");
+            UIStationStoragePeriod = Config.Bind<int>("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");
+            UIVeinConsumptionPeriod = Config.Bind<int>("UI", "UIVeinConsumptionPeriod", 1800, "Display mineral consumption rate of mineral in x ticks. 0 = no display\n显示过去x帧内矿脉的矿物消耗速率, 0 = 不显示");
             UnitPerMinute = Config.Bind<bool>("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
             MainManager.MaxFactoryCount = MaxFactoryCount.Value;
             UIstation.Period = (int)Math.Ceiling(UIStationStoragePeriod.Value / (float)UIstation.STEP);
