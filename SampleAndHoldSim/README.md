@@ -3,7 +3,7 @@
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo1.gif)  
 Change how many planet factories run per tick, simulating idle factories input and output using values from last tick.  
 The factories tick less but still make the same amount of items in ILS with larger gap in time.  
-Recommend to set focus local factory to true and not set cycle time too high to have a better experience.  
+Recommend to set focus local factory = true and not set cycle time too high (<20) to have a better experience.  
 
 Warning: Because this mod manipulate stats data, if it does not work as intend, it may diable Milkyway upload.  
 
@@ -26,7 +26,7 @@ In the example chart, the upper one is the original game which runs 3 factories 
 - Ejector bullets & silo rockets  
 
 ![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo3.gif)  
-Simulation in action. Above: normal game, cycle = 1. Below: mod enable, cycle = 2.  
+Simulation in action. Above: vanilla game, cycle = 1. Below: mod enable, cycle = 2.  
 In the gif, both vein amount go from 100 to 90, and station storage go from 55 to 65.  
   
 ![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats1.jpg)  
@@ -39,11 +39,11 @@ Run the game one time to generate `com.starfi5h.plugin.SampleAndHoldSim.cfg` fil
 - `MaxFactoryCount` (Default:`100`)  
 Maximum number of factories allow to active and run per tick.  
 
-- `EnableStationStorageUI` (Default:`true`)  
-Display item count change rate in station storages in last 10 seconds.  
+- `EnableStationStorageUI` (Default:`600`)  
+Display item count change rate in station storages in x ticks. 0 = no display  
 
-- `EnableVeinConsumptionUI` (Default:`true`)  
-Display mineral consumption rate of vein group in last 30 seconds.  
+- `EnableVeinConsumptionUI` (Default:`1800`)  
+Display mineral consumption rate of mineral in x ticks. 0 = no display  
 
 - `UnitPerMinute` (Default:`false`)  
 If true, show rate in unit per minute. otherwise show rate in unit per second.  
@@ -53,7 +53,7 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 (✅) CommonAPI  
 (✅) DSPOptimizations  
 (⚠️) NebulaMultiplayer - Only host can use this.  
-(⚠️) Blackbox - The production stats of blackbox will be multiplied.  
+(⚠️) Blackbox - Conflicts: The production stats of blackbox will be multiplied. Analysis won't start.  
 (⚠️) Auxilaryfunction - Conflicts with stop factories and stop dyson spheres functions. Will tempoary disable them.    
 
 ----
@@ -81,9 +81,9 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 - 产物统计和电力统计  
 - 射出的太阳帆和火箭  
 
-![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo3.gif)  
+![normal vs sim](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/demo4.gif)  
 实际演示，上图为正常游戏cycle=1，下图为设置cycle=2。
-下图的内部元件速率只有上图的一半，但是一次消耗石矿数目和进塔数目皆为上图的2倍，因此最终两输入和输出的速率一样:两者的石矿储量皆从100降到90，而物流塔内的石材数量皆从55增加到65。
+下图的内部元件速率只有上图的1/2，但是一次发射火箭的数量和一次出塔数量皆为上图的2倍，因此最终两者有一致的输入输出速率：同样12秒间，两者皆发射了2枚火箭，物流塔火箭储量皆从12减少至10。  
   
 如果工厂是稳定的，长期下来模拟的产量和真实的产量会相近。短期上统计的数据可能会变得稀疏，工厂内部元件(仓储,运输带)中货物的增减速率也会比原本的少。  
 
@@ -93,13 +93,13 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.SampleAndHoldSim.cfg`文件  
   
 - `MaxFactoryCount` (Default:`100`)  
-每个逻辑祯所能运行的最大工厂数量  
+每个逻辑帧所能运行的最大工厂数量  
 
-- `EnableStationStorageUI` (Default:`true`)  
-显示过去10秒内物流塔货物的流入或流出速率  
+- `EnableStationStorageUI` (Default:`600`)  
+显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示  
 
-- `EnableVeinConsumptionUI` (Default:`true`)  
-显示过去30秒内矿脉的矿物消耗速率  
+- `EnableVeinConsumptionUI` (Default:`1800`)  
+显示过去x帧内矿脉的矿物消耗速率, 0 = 不显示  
 
 - `UnitPerMinute` (Default:`false`)  
 true: 显示单位设为每分钟速率 false: 显示每秒速率  
@@ -115,6 +115,11 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 ----
 
 ## Changelog
+
+#### v0.4.0
+\- Fix ship delivery from other stations sometimes gets multiplied.  
+\- Change UI settings to let users customize monitor time.  
+
 
 #### v0.3.3
 \- Fix compatibility for game version 0.9.26.13026  

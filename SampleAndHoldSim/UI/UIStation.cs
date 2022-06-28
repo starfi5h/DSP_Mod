@@ -13,8 +13,8 @@ namespace SampleAndHoldSim
 
         static int[,] periodArray;
         static int[] sumArray;
-        const int PEROID = 60;
-        const int STEP = 10;
+        public static int Period = 60;
+        public const int STEP = 10;
         static int time;
         static int cursor;
         static int counter;        
@@ -84,19 +84,19 @@ namespace SampleAndHoldSim
             for (int i = 0; i < data.tmpCount.Length; i++)
             {
                 // collect item count change in SETP ticks
-                periodArray[PEROID, i] += data.tmpCount[i];
+                periodArray[Period, i] += data.tmpCount[i];
             }
             if (++counter >= STEP)
             {
                 for (int i = 0; i < data.tmpCount.Length; i++)
                 {
                     // sliding window: replace old value with new value
-                    sumArray[i] += -periodArray[cursor, i] + periodArray[PEROID, i];
-                    periodArray[cursor, i] = periodArray[PEROID, i];
-                    periodArray[PEROID, i] = 0;
+                    sumArray[i] += -periodArray[cursor, i] + periodArray[Period, i];
+                    periodArray[cursor, i] = periodArray[Period, i];
+                    periodArray[Period, i] = 0;
                 }
-                cursor = (cursor + 1) % PEROID;
-                time = time < PEROID ? time + 1 : PEROID;
+                cursor = (cursor + 1) % Period;
+                time = time < Period ? time + 1 : Period;
                 counter = 0;
             }
         }
@@ -109,7 +109,7 @@ namespace SampleAndHoldSim
                 VeiwStationId = stationId;
                 if (length > 0)
                 {
-                    periodArray = new int[PEROID + 1, length];
+                    periodArray = new int[Period + 1, length];
                     sumArray = new int[length];
                 }
                 else

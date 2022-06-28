@@ -9,8 +9,8 @@ namespace SampleAndHoldSim
         
         static int[,] periodArray = null;
         static int[] sumArray;
-        const int PEROID = 30;
-        const int STEP = 60;
+        public static int Period = 30;
+        public const int STEP = 60;
         static int cursor;
         static int counter;
 
@@ -28,7 +28,7 @@ namespace SampleAndHoldSim
             {
                 if (ViewFactoryIndex != (GameMain.localPlanet?.factory.index ?? -1))
                 {
-                    periodArray = new int[PEROID + 1, GameMain.localPlanet.factory.veinGroups.Length];
+                    periodArray = new int[Period + 1, GameMain.localPlanet.factory.veinGroups.Length];
                     sumArray = new int[GameMain.localPlanet.factory.veinGroups.Length];
                     ViewFactoryIndex = GameMain.localPlanet.factory.index;
                     cursor = 0;
@@ -67,25 +67,25 @@ namespace SampleAndHoldSim
                 for (int i = 0; i < sumArray.Length; i++)
                 {
                     // sliding window: replace old value with new value
-                    sumArray[i] += -periodArray[cursor, i] + periodArray[PEROID, i];
-                    periodArray[cursor, i] = periodArray[PEROID, i];
-                    periodArray[PEROID, i] = 0;
+                    sumArray[i] += -periodArray[cursor, i] + periodArray[Period, i];
+                    periodArray[cursor, i] = periodArray[Period, i];
+                    periodArray[Period, i] = 0;
                 }
-                cursor = (cursor + 1) % PEROID;
+                cursor = (cursor + 1) % Period;
                 counter = 0;
             }
         }
 
         public static void Record(int groupIndex, int amount)
         {
-            periodArray[PEROID, groupIndex] += amount;
+            periodArray[Period, groupIndex] += amount;
         }
 
         public static float GetVeinGroupChangeRate(int groupIndex)
         {
             if (sumArray == null)
                 return 0;
-            return sumArray[groupIndex] * 60f / PEROID / STEP;
+            return sumArray[groupIndex] * 60f / Period / STEP;
         }
     }
 }

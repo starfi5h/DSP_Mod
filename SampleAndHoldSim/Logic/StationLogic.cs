@@ -94,6 +94,11 @@ namespace SampleAndHoldSim
             {
                 data.tmpCount[i] = station.storage[i].count - data.tmpCount[i];
                 data.tmpInc[i] = station.storage[i].inc - data.tmpInc[i];
+
+                // DEBUG for abnormal change
+                // if (data.tmpCount[i] >= 1000)
+                //    Log.Debug($"station: {station.planetId} - {station.id} [{i}] itemId:{station.storage[i].itemId} diff:{data.tmpCount[i]}");
+                
             }
             data.tmpWarperCount = station.warperCount - data.tmpWarperCount;
         }
