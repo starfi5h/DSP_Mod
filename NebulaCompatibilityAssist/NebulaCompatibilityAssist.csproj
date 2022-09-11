@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>NebulaCompatibilityAssist</AssemblyName>
-    <Description>Plugin to improve compatibility of nebula and other mods</Description>
-    <Version>0.1.1</Version>
+    <Description>Plugin to improve compatibility of Nebula with other mods</Description>
+    <Version>0.1.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
