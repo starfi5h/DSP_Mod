@@ -49,6 +49,7 @@ namespace Compatibility
                 harmony.Patch(type.GetProperty("RealUPS").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealUPS")));
                 harmony.Patch(type.GetMethod("NotifyTickDifference"), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("NotifyTickDifference")));
                 harmony.PatchAll(typeof(NebulaPatch));
+                AccessTools.Field(type, "MinUPS").SetValue(null, BulletTimePlugin.MinimumUPS.Value);
 
                 Log.Info("Nebula Compatibility OK");
             }

@@ -112,11 +112,12 @@ namespace BulletTime
                     highStopwatch.Begin();
                     // Wait a tick to let game full stop?
                     Thread.Sleep((int)(1000/FPSController.currentUPS));
-                    Log.Info($"Background Autosave start. Sleep: {(int)(1000/FPSController.currentUPS)}ms");
+                    Log.Info($"Background Autosave start. UPS: {FPSController.currentUPS:F2}");
                     bool result = GameSave.AutoSave();
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
                     return () =>
                     {
+                        System.GC.Collect();
                         GameStateManager.SetInteractable(true);
                         GameStateManager.SetPauseMode(tmp);
                         UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
@@ -154,7 +155,7 @@ namespace BulletTime
                     __instance.Export(w);
                     autoEvent.Set();
                 });
-                Log.Debug($"Exporting DysonSwarm {__instance.starData.displayName}...");
+                //Log.Debug($"Exporting DysonSwarm {__instance.starData.displayName}...");
                 autoEvent.WaitOne(-1);
                 return false;
             }
