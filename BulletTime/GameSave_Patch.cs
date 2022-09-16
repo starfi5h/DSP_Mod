@@ -117,6 +117,7 @@ namespace BulletTime
                     Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
                     return () =>
                     {
+                        System.GC.Collect();
                         GameStateManager.SetInteractable(true);
                         GameStateManager.SetPauseMode(tmp);
                         UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
