@@ -36,6 +36,9 @@ Game speed when the game begin. range:0-100  (Default:`100`)
 - `EnableFastLoading`  
 Increase main menu loading speed. (Default:`true`)  
 
+- `EnableFastLoading`  
+Minimum UPS in client of multiplayer game. (Default:`50.0`)  
+
 
 ## Compatibility
 
@@ -79,6 +82,9 @@ Increase main menu loading speed. (Default:`true`)
 - `EnableFastLoading`  
 加快载入主选单 (预设为开启)  
 
+- `MinimumUPS`  
+联机-客户端的最小逻辑帧 (预设为`50.0`)  
+
 
 ## 联机功能  
 
@@ -88,6 +94,10 @@ Increase main menu loading speed. (Default:`true`)
 ----
 
 ## Changelog
+
+#### v1.2.7
+\- (Nebula) Add `MinimumUPS` config option.  
+\- Disable force GC in vanilla game when placing buildings.  
 
 #### v1.2.6
 \- Change `KeyAutosave` from KeyCode to KeyboardShortcut  
