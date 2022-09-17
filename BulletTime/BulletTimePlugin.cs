@@ -21,6 +21,7 @@ namespace BulletTime
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<float> StartingSpeed;
+        public static ConfigEntry<float> MinimumUPS;
         static Harmony harmony;
 
         private void LoadConfig()
@@ -29,6 +30,7 @@ namespace BulletTime
             EnableFastLoading = Config.Bind<bool>("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             KeyAutosave = Config.Bind("Save", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
+            MinimumUPS = Config.Bind<float>("Multiplayer", "MinimumUPS", 50f, new ConfigDescription("Minimum UPS in client of multiplayer game\n联机-客户端的最小逻辑帧"));
         }
 
         public void Start()
