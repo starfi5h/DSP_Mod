@@ -6,6 +6,7 @@ using System;
 namespace SampleAndHoldSim
 {
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(Compatibility.NebulaAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.CommonAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.Auxilaryfunction.GUID, BepInDependency.DependencyFlags.SoftDependency)]
@@ -13,7 +14,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.4.0";
+        public const string VERSION = "0.4.1";
         public static Plugin instance;
         Harmony harmony;
 
@@ -65,6 +66,7 @@ namespace SampleAndHoldSim
             if (UIvein.Period > 0)
                 harmony.PatchAll(typeof(UIstation));
 
+            Compatibility.NebulaAPI.Init(harmony);
             Compatibility.CommonAPI.Init(harmony);
             Compatibility.DSPOptimizations.Init(harmony);
             Compatibility.Auxilaryfunction.Init(harmony);
