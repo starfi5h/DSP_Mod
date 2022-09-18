@@ -52,7 +52,7 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 
 (✅) CommonAPI  
 (✅) DSPOptimizations  
-(⚠️) NebulaMultiplayer - Only host can use this.  
+(✅) NebulaMultiplayer - This mod will diable itself in client mode. Only host can use it.    
 (⚠️) Blackbox - Conflicts: The production stats of blackbox will be multiplied. Analysis won't start.  
 (⚠️) Auxilaryfunction - Conflicts with stop factories and stop dyson spheres functions. Will tempoary disable them.    
 
@@ -108,13 +108,17 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 ## MOD相容性:
 - DSPOptimizations(优化mod) - 相容
 - Blackbox(黑盒化mod) - 低速下产物统计会倍增
-- NebulaMultiplayer(联机mod) - 只有主机可使用
+- NebulaMultiplayer(联机mod) - 只有主机可使用, 客户端会自动停用并关闭介面
 - 深空来敌(战斗mod) - 低速下炮塔和发射井的射速会降低
 - 多功能辅助mod - 和停止工厂/戴森球冲突, 在同时安装时会暂时关闭这两项功能
 
 ----
 
 ## Changelog
+
+#### v0.4.1
+\- Fix vein UI errors cause by vein manipulation.  
+\- Improve compatible with Nebula.  
 
 #### v0.4.0
 \- Fix ship delivery from other stations sometimes gets multiplied.  
