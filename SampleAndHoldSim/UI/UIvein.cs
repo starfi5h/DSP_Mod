@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 
 namespace SampleAndHoldSim
 {
@@ -52,6 +53,13 @@ namespace SampleAndHoldSim
             }
         }
 
+        static float GetVeinGroupChangeRate(int groupIndex)
+        {
+            if (sumArray == null || groupIndex >= sumArray.Length)
+                return 0;
+            return sumArray[groupIndex] * 60f / Period / STEP;
+        }
+
         static string GetRateString(float rate)
         {
             if (UnitPerMinute)
@@ -60,8 +68,18 @@ namespace SampleAndHoldSim
                 return string.Format("\n- {0:0.0} /s", rate);
         }
 
-        public static void AdvanceCursor()
+        public static void Record(PlanetFactory factory, int[] tmpVeinAmount)
         {
+            // Reset record array if veinGroups length change
+            if (sumArray.Length != factory.veinGroups.Length)
+            {
+                Log.Warn($"UIvein.Record: length: {sumArray.Length} -> {factory.veinGroups.Length}");
+                periodArray = new int[Period + 1, factory.veinGroups.Length];
+                sumArray = new int[factory.veinGroups.Length];
+                cursor = 0;
+                counter = 0;
+            }
+
             if (++counter >= STEP)
             {
                 for (int i = 0; i < sumArray.Length; i++)
@@ -74,18 +92,12 @@ namespace SampleAndHoldSim
                 cursor = (cursor + 1) % Period;
                 counter = 0;
             }
-        }
 
-        public static void Record(int groupIndex, int amount)
-        {
-            periodArray[Period, groupIndex] += amount;
-        }
-
-        public static float GetVeinGroupChangeRate(int groupIndex)
-        {
-            if (sumArray == null)
-                return 0;
-            return sumArray[groupIndex] * 60f / Period / STEP;
+            int length = Math.Min(factory.veinCursor, tmpVeinAmount.Length);
+            for (int i = 0; i < length; i++)
+            {
+                periodArray[Period, factory.veinPool[i].groupIndex] += tmpVeinAmount[i];
+            }
         }
     }
 }

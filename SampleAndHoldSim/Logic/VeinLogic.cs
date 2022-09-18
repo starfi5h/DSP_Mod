@@ -13,7 +13,10 @@ namespace SampleAndHoldSim
             if (IsNextIdle || Index == UIvein.ViewFactoryIndex)
             {
                 if (tmpVeinAmount == null || tmpVeinAmount.Length != factory.veinPool.Length)
+                {
+                    Log.Debug($"VeinWorkBegin {tmpVeinAmount?.Length} -> {factory.veinPool.Length}");
                     tmpVeinAmount = new int[factory.veinPool.Length];
+                }
                 for (int i = 0; i < factory.veinCursor; i++)
                     tmpVeinAmount[i] = factory.veinPool[i].amount;
             }
@@ -25,14 +28,20 @@ namespace SampleAndHoldSim
 
             if (IsNextIdle || Index == UIvein.ViewFactoryIndex)
             {
-                for (int i = 0; i < factory.veinCursor; i++)
-                    tmpVeinAmount[i] -= factory.veinPool[i].amount; // consume amount (+)
-
-                if (Index == UIvein.ViewFactoryIndex)
+                if (tmpVeinAmount == null || tmpVeinAmount.Length != factory.veinPool.Length)
                 {
-                    UIvein.AdvanceCursor();
-                    for (int i = 0; i < factory.veinCursor; i++)
-                        UIvein.Record(factory.veinPool[i].groupIndex, tmpVeinAmount[i]);
+                    Log.Debug($"VeinWorkEnd {tmpVeinAmount?.Length} -> {factory.veinPool.Length}");
+                    tmpVeinAmount = new int[factory.veinPool.Length];
+                }
+                else
+                {
+                    for (int i = 0; i < tmpVeinAmount.Length; i++)
+                        tmpVeinAmount[i] -= factory.veinPool[i].amount; // consume amount (+)
+
+                    if (Index == UIvein.ViewFactoryIndex)
+                    {
+                        UIvein.Record(factory, tmpVeinAmount);
+                    }
                 }
             }
         }
