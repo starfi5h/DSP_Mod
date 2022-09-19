@@ -19,13 +19,8 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) 
                         return;
-                    if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
-                        return;
 
-                    NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
-                    NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
-                    IsPatched = true;
-
+                    Patch();
                     Log.Info("Nebula compatibility - OK");
                 }
                 catch (Exception e)
@@ -33,6 +28,16 @@ namespace SampleAndHoldSim
                     Log.Warn("Nebula compatibility failed!");
                     Log.Warn(e);
                 }
+            }
+
+            private static void Patch()
+            {
+                // Separate for using NebulaModAPI
+                if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
+                    return;
+                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
+                IsPatched = true;
             }
 
             public static void OnMultiplayerGameStarted()

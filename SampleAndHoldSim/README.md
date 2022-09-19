@@ -116,6 +116,9 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 
 ## Changelog
 
+#### v0.4.2
+\- Fix error when NebulaAPI is not enabled.  
+
 #### v0.4.1
 \- Fix vein UI errors cause by vein manipulation.  
 \- Improve compatible with Nebula.  

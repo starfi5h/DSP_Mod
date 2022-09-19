@@ -1,7 +1,7 @@
 {
     "name": "SampleAndHoldSim",
     "description": "Alter how game simulation works to reduce calculation (see README).  模拟星球工厂的输入输出以减少运算。",
-    "version_number": "0.4.1",
+    "version_number": "0.4.2",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
