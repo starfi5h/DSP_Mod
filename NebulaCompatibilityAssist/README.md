@@ -40,6 +40,9 @@ DSP Belt Reverse Direction, MoreMegaStructure are required to install on both cl
 - Sync auto station config functions.  
 - Sync planetary item fill (ships, fuel) functions.  
 
+### DSPOptimizations(https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)
+- Fix client crash when leaving a system.  
+
 ----
 
 # 联机兼容支援
@@ -82,12 +85,18 @@ DSP Belt Reverse Direction, MoreMegaStructure are required to install on both cl
 - 同步物流站自动配置相关功能  
 - 同步一键填充星球上的飞机飞船翘曲器、燃料  
 
+### DSPOptimizations(https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)
+- 修复客户端离开星系会使游戏崩溃的错误  
+
 主要是让主机和客户端显示的内容可以一致，或著修復建築不同步的問題。  
 DSP Belt Reverse Direction、MoreMegaStructure必须要两端都得安装。  
 
 ----
 
 ## Changelog
+
+#### v0.1.2 (NebulaMultiplayerMod 0.8.10)
+\- Support DSPOptimizations  
 
 #### v0.1.1 (NebulaMultiplayerMod 0.8.10)
 \- Support AutoStationConfig, Auxilaryfunction.  

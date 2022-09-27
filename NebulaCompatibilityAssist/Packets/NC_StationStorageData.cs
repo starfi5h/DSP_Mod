@@ -85,7 +85,7 @@ namespace NebulaCompatibilityAssist.Packets
                     Log.Warn($"Gid {packet.StationGId[i]} does not in client");
                     continue;
                 }
-                if (station.storage == null)
+                if (station.storage == null || station.storage.Length < packet.StorageLength[i])
                     station.storage = new StationStore[packet.StorageLength[i]];
                 station.isCollector = packet.IsCollector[i];
 
