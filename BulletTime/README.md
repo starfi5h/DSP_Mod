@@ -2,7 +2,7 @@
 
 ![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
 
-Let user slow down game speed to reduce workload, so FPS may improve.  
+Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
 Run autosave in the background.  
 
 ## Feature
@@ -83,7 +83,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 加快载入主选单 (预设为开启)  
 
 - `MinimumUPS`  
-联机-客户端的最小逻辑帧 (预设为`50.0`)  
+联机mod-客户端的最小逻辑帧 (预设为`50.0`)  
 
 
 ## 联机功能  
@@ -94,6 +94,9 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 ----
 
 ## Changelog
+
+#### v1.2.8
+\- Adapt to game version 0.9.27.14546.  
 
 #### v1.2.7
 \- (Nebula) Add `MinimumUPS` config option.  

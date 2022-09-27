@@ -54,7 +54,7 @@ namespace BulletTime
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.CreatePrebuilds))]
         [HarmonyPatch(typeof(BuildTool_Path), nameof(BuildTool_Path.CreatePrebuilds))]
-        [HarmonyPatch(typeof(BuildTool_PathAddon), nameof(BuildTool_PathAddon.CreatePrebuilds))]
+        [HarmonyPatch(typeof(BuildTool_Addon), nameof(BuildTool_Addon.CreatePrebuilds))]
         [HarmonyPatch(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.CreatePrebuilds))]
         [HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds))]
         static IEnumerable<CodeInstruction> Real_Transpiler3(IEnumerable<CodeInstruction> instructions)
