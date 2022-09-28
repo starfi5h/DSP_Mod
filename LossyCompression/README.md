@@ -65,8 +65,11 @@ The new save can load without this mod or the file, it will appear like there is
 
 ## Changelog
 
+#### v0.1.1
+\- Change to released version. (0.9.27.14553)  
+
 #### v0.1.0  
-\- Initial release. (0.9.27.14553)  
+\- (DEBUG VERSION)  
 
 ----
 
