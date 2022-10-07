@@ -39,6 +39,7 @@ namespace NebulaCompatibilityAssist.Patches
             AutoStationConfig.Init(harmony);
             Auxilaryfunction.Init(harmony);
             DSPOptimizations.Init(harmony);
+            NebulaHotfix.Init(harmony);
 
             if (ErrorMessage != "")
             {

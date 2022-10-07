@@ -89,14 +89,16 @@ namespace NebulaCompatibilityAssist.Patches
 
             using (NebulaModAPI.MultiplayerSession.Factories.IsIncomingRequest.On())
             {
+                NebulaModAPI.MultiplayerSession.Factories.EventFactory = Factory;
+                NebulaModAPI.MultiplayerSession.Factories.TargetPlanet = planetId;
                 if (NebulaModAPI.MultiplayerSession.LocalPlayer.IsHost)
                 {
                     // Load planet model
-                    NebulaModAPI.MultiplayerSession.Factories.TargetPlanet = planetId;
                     NebulaModAPI.MultiplayerSession.Factories.AddPlanetTimer(planetId);
                 }
                 ReverseBelt_Modified.Invoke();
             }
+            NebulaModAPI.MultiplayerSession.Factories.EventFactory = null;
             NebulaModAPI.MultiplayerSession.Factories.TargetPlanet = NebulaModAPI.PLANET_NONE;
         }
 
