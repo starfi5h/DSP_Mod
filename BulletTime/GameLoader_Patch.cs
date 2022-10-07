@@ -43,19 +43,11 @@ namespace BulletTime
             }
         }
 
-        static bool restart;
-
-        [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.RestartThread))]
-        static void RestartThread_Postfix()
-        {
-            restart = true;
-        }
-
         [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.IsMusicReached))]
         static void IsMusicReached_Postfix(ref bool __result)
         {
-            // Only sync BGM when game start, skip syncing when restart
-            __result |= restart;
+            // Skip syncing of BGM
+            __result |= true;
         }
     }
 }

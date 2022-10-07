@@ -34,21 +34,21 @@ namespace SampleAndHoldSim
                     GameObject checkBox = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
                     GameObject panelObj = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel");
 
-                    group = new GameObject("MimicSimulation_Group");
+                    group = new GameObject("SAHS_Group");
                     group.transform.SetParent(panelObj.transform);
                     group.transform.localPosition = new Vector3(200, 105);
                     group.transform.localScale = Vector3.one;
 
                     GameObject tmp = GameObject.Instantiate(text0.gameObject, group.transform);
                     tmp.name = "text_factory";
-                    tmp.transform.localPosition = new Vector3(-50, 8);
+                    tmp.transform.localPosition = new Vector3(-50, 9);
                     text_factory = tmp.GetComponent<Text>();
                     text_factory.text = "factory";
                     tmp.AddComponent<UItooltip>().Text = "Maximum number of factories allow to active and run per tick.";
 
                     tmp = GameObject.Instantiate(input0.gameObject, group.transform);
                     tmp.name = "input_MaxFactoryCount";
-                    tmp.transform.localPosition = new Vector3(155, 0);
+                    tmp.transform.localPosition = new Vector3(155, 1);
                     input = tmp.GetComponent<InputField>();
                     input.characterValidation = InputField.CharacterValidation.Integer;
                     input.contentType = InputField.ContentType.IntegerNumber;
@@ -59,7 +59,7 @@ namespace SampleAndHoldSim
 
                     tmp = GameObject.Instantiate(slider0.gameObject, group.transform);
                     tmp.name = "slider_factoryCount";
-                    tmp.transform.localPosition = new Vector3(55, -20, 0);
+                    tmp.transform.localPosition = new Vector3(60, -20, -2);
                     slider = tmp.GetComponent<Slider>();
                     slider.minValue = 1;
                     slider.wholeNumbers = true;

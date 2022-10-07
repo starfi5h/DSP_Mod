@@ -64,6 +64,13 @@ namespace SampleAndHoldSim
             }
         }
 
+        static float GetStorageChangeRate(int storageIndex)
+        {
+            if (periodArray == null || storageIndex >= periodArray.Length || time < 1)
+                return 0;
+            return sumArray[storageIndex] * 60f / time / STEP;
+        }
+
         static string GetRateString(float rate)
         {
             if (UnitPerMinute)
@@ -81,6 +88,16 @@ namespace SampleAndHoldSim
 
         public static void Record(StationData data)
         {
+            // Reset record array if veinGroups length change
+            if (sumArray.Length < data.tmpCount.Length)
+            {
+                Log.Warn($"UIstation.Record: length: {sumArray.Length} -> {data.tmpCount.Length}");
+                periodArray = new int[Period + 1, data.tmpCount.Length];
+                sumArray = new int[data.tmpCount.Length];
+                cursor = 0;
+                counter = 0;
+            }
+
             for (int i = 0; i < data.tmpCount.Length; i++)
             {
                 // collect item count change in SETP ticks
@@ -103,6 +120,10 @@ namespace SampleAndHoldSim
 
         public static void SetVeiwStation(int factoryId, int stationId, int length)
         {
+            // If UI station is disabled, return
+            if (Period == 0)
+                return;
+
             if (ViewFactoryIndex != factoryId || VeiwStationId != stationId)
             {
                 ViewFactoryIndex = factoryId;
@@ -121,13 +142,6 @@ namespace SampleAndHoldSim
                 cursor = 0;
                 counter = 0;
             }
-        }
-
-        public static float GetStorageChangeRate(int storageIndex)
-        {
-            if (periodArray == null || time < 1)
-                return 0;
-            return sumArray[storageIndex] * 60f / time / STEP;
         }
     }
 }

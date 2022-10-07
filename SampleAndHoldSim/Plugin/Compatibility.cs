@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using NebulaAPI;
 using System;
 using System.Reflection;
 
@@ -6,6 +7,60 @@ namespace SampleAndHoldSim
 {
     public class Compatibility
     {
+        public static class NebulaAPI
+        {
+            public const string GUID = "dsp.nebula-multiplayer-api";
+            public static bool IsClient { get; private set; }
+            public static bool IsPatched { get; private set; }
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) 
+                        return;
+
+                    Patch();
+                    Log.Info("Nebula compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("Nebula compatibility failed!");
+                    Log.Warn(e);
+                }
+            }
+
+            private static void Patch()
+            {
+                // Separate for using NebulaModAPI
+                if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
+                    return;
+                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
+                IsPatched = true;
+            }
+
+            public static void OnMultiplayerGameStarted()
+            {
+                IsClient = NebulaModAPI.IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
+                if (IsClient)
+                {
+                    Log.Warn("Nebula client: Unload plugin!");
+                    Plugin.instance.OnDestroy();
+                }
+            }
+
+            public static void OnMultiplayerGameEnded()
+            {
+                if (IsClient)
+                {
+                    Log.Warn("Nebula client: Reload plugin!");
+                    Plugin.instance.Awake();
+                }
+                IsClient = false;
+            }
+        }
+
         public static class CommonAPI
         {
             public const string GUID = "dsp.common-api.CommonAPI";
@@ -24,7 +79,7 @@ namespace SampleAndHoldSim
                     harmony.Patch(targetType.GetMethod("UpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
                     harmony.Patch(targetType.GetMethod("PostUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
 
-                    Log.Info("CommonAPI compatibility OK.");
+                    Log.Info("CommonAPI compatibility - OK");
                 }
                 catch (Exception e)
                 {
@@ -44,7 +99,7 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(DSPOptimizations));
-                    Log.Info("DSPOptimizations compatibility OK.");
+                    Log.Info("DSPOptimizations compatibility - OK");
                 }
                 catch (Exception e)
                 {
@@ -87,11 +142,11 @@ namespace SampleAndHoldSim
                     // Suppress stop factory and stop dyson sphere function
                     harmony.Patch(classType.GetMethod("Prefix"), new HarmonyMethod(typeof(Auxilaryfunction).GetMethod("SuppressModPatch")));
 
-                    Log.Info("Auxilaryfunction compatibility OK.");
+                    Log.Info("Auxilaryfunction compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Auxilaryfunction compatibility failed! Last working version: 1.6.9");
+                    Log.Warn("Auxilaryfunction compatibility failed! Last working version: 1.7.6");
                     Log.Warn(e);
                 }
             }

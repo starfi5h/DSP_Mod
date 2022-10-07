@@ -2,8 +2,8 @@
 
 ![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
 
-Let user slow down game speed to reduce workload, so FPS may improve.  
-Run autosave in the background.  
+Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
+Run autosave in the background to make the game stay responsive.  
 
 ## Feature
 
@@ -35,6 +35,12 @@ Game speed when the game begin. range:0-100  (Default:`100`)
 
 - `EnableFastLoading`  
 Increase main menu loading speed. (Default:`true`)  
+
+- `RemoveGC`  
+Remove force garbage collection of build tools. (Default:`true`)  
+
+- `EnableFastLoading`  
+Minimum UPS in client of multiplayer game. (Default:`50.0`)  
 
 
 ## Compatibility
@@ -77,7 +83,13 @@ Increase main menu loading speed. (Default:`true`)
 开始时的游戏速度，范围: 0-100 (预设为`100`)  
 
 - `EnableFastLoading`  
-加快载入主选单 (预设为开启)  
+加快载入主选单 (预设为开启`true`)  
+
+- `RemoveGC`  
+移除建筑工具的强制内存回收 (预设为开启`true`) 
+
+- `MinimumUPS`  
+联机mod-客户端的最小逻辑帧 (预设为`50.0`)  
 
 
 ## 联机功能  
@@ -88,6 +100,17 @@ Increase main menu loading speed. (Default:`true`)
 ----
 
 ## Changelog
+
+#### v1.2.9
+\- Add `RemoveGC`config option.  
+\- Backward compatible with 0.9.26.13034.  
+
+#### v1.2.8
+\- Adapt to game version 0.9.27.14546.  
+
+#### v1.2.7
+\- (Nebula) Add `MinimumUPS` config option.  
+\- Disable force GC in vanilla game when placing buildings.  
 
 #### v1.2.6
 \- Change `KeyAutosave` from KeyCode to KeyboardShortcut  
