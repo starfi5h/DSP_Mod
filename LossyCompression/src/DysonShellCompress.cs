@@ -16,7 +16,7 @@ namespace LossyCompression
 
         public static bool Enable { get; set; }
         public static bool IsMultithread { get; set; }
-        public static readonly int EncodedVersion = 1; //PeekChar() max is 127?
+        public static readonly int EncodedVersion = 2; //PeekChar() max is 127?
 
         public static void Export(BinaryWriter w)
         {
@@ -86,6 +86,11 @@ namespace LossyCompression
                             //nodecps.Count = this.nodes.Count + 1, the last one is sum			
                             for (int j = 0; j < dysonShell.nodes.Count + 1; j++)
                                 w.Write(dysonShell.nodecps[j]);
+                            //vertexCount, vertsqOffset , cpPerVertex are needed in constructCp
+                            for (int j = 0; j < dysonShell.nodes.Count + 1; j++)
+                                w.Write(dysonShell.vertsqOffset[j]);
+                            w.Write(dysonShell.vertexCount);
+                            w.Write(dysonShell.cpPerVertex);
 
                             #endregion
                             shellCount++;
@@ -103,7 +108,7 @@ namespace LossyCompression
         public static void Import(BinaryReader r)
         {
             int version = r.ReadInt32();
-            if (version == EncodedVersion)
+            if (version <= EncodedVersion)
             {
                 long datalen = -r.BaseStream.Length;
                 var stopWatch = new HighStopwatch();
@@ -116,7 +121,7 @@ namespace LossyCompression
                     int starIndex = r.ReadInt32();
                     if (starIndex != -1)
                     {
-                        Decode(GameMain.data.dysonSpheres[starIndex], r);
+                        Decode(GameMain.data.dysonSpheres[starIndex], r, version);
                     }
                 }
 
@@ -128,12 +133,8 @@ namespace LossyCompression
             }
         }
 
-        public static void Decode(DysonSphere dysonSphere, BinaryReader r)
+        public static void Decode(DysonSphere dysonSphere, BinaryReader r, int version)
         {
-            double t0, t1, t2;
-            var stopwatch = new HighStopwatch();
-            stopwatch.Begin();
-
             List<DysonShell> dysonShells = new List<DysonShell>();
             List<int> list = new List<int>(12);
             int layerLength = r.ReadInt32();
@@ -175,6 +176,15 @@ namespace LossyCompression
                         dysonShell.nodecps = new int[nodesCount + 1];
                         for (int i = 0; i < nodesCount + 1; i++)
                             dysonShell.nodecps[i] = r.ReadInt32();
+
+                        if (version >= 2)
+                        {
+                            dysonShell.vertsqOffset = new int[nodesCount + 1];
+                            for (int i = 0; i < nodesCount + 1; i++)
+                                dysonShell.vertsqOffset[i] = r.ReadInt32();
+                            dysonShell.vertexCount = r.ReadInt32();
+                            dysonShell.cpPerVertex = r.ReadInt32();
+                        }
                         #endregion
 
                         #region Add collections and gnerate polygon
@@ -234,7 +244,61 @@ namespace LossyCompression
                     }
                 }
             }
-            t0 = stopwatch.duration;
+
+            if (dysonShells.Count > 0)
+            {
+                if (version >= 2)
+                {
+                    LazyLoading.Add(dysonSphere);
+                }
+                else
+                {
+                    // Old version doesn't support lazy loading. Check for all layers.
+                    GenerateModel(dysonSphere, -1); // -1 => all bits in mask on
+                }
+                // Recalculate CP request for all nodes
+                for (int layerId = 1; layerId < dysonSphere.layersIdBased.Length; layerId++)
+                {
+                    if (dysonSphere.layersIdBased[layerId] != null && dysonSphere.layersIdBased[layerId].id == layerId)
+                    {
+                        DysonSphereLayer dysonSphereLayer = dysonSphere.layersIdBased[layerId];
+                        for (int nodeId = 1; nodeId < dysonSphereLayer.nodeCursor; nodeId++)
+                        {
+                            if (dysonSphereLayer.nodePool[nodeId] != null && dysonSphereLayer.nodePool[nodeId].id == nodeId)
+                                dysonSphereLayer.nodePool[nodeId].RecalcCpReq();
+                        }
+                    }
+                }
+            }
+        }
+
+        public static int GenerateModel(DysonSphere dysonSphere, int bitMask)
+        {
+            double t1, t2;
+            var stopwatch = new HighStopwatch();
+            stopwatch.Begin();
+            List<DysonShell> dysonShells = new List<DysonShell>();
+
+            for (int layerId = 1; layerId < dysonSphere.layersIdBased.Length; layerId++)
+            {
+                if ((bitMask & (1 << layerId)) > 0)
+                {
+                    if (dysonSphere.layersIdBased[layerId] != null && dysonSphere.layersIdBased[layerId].id == layerId)
+                    {
+                        DysonSphereLayer dysonSphereLayer = dysonSphere.layersIdBased[layerId];
+                        for (int shellId = 1; shellId < dysonSphereLayer.shellCursor; shellId++)
+                        {
+                            if (dysonSphereLayer.shellPool[shellId] != null && dysonSphereLayer.shellPool[shellId].id == shellId)
+                            {
+                                if (dysonSphereLayer.shellPool[shellId].verts == null)
+                                {
+                                    dysonShells.Add(dysonSphereLayer.shellPool[shellId]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             if (dysonShells.Count > 0)
             {
@@ -253,26 +317,13 @@ namespace LossyCompression
                 stopwatch.Begin();
                 foreach (var dysonShell in dysonShells)
                     dysonShell.GenerateModelObjects();
-
-                // Recalculate CP request for all nodes
-                for (int layerId = 1; layerId < dysonSphere.layersIdBased.Length; layerId++)
-                {
-                    if (dysonSphere.layersIdBased[layerId] != null && dysonSphere.layersIdBased[layerId].id == layerId)
-                    {
-                        DysonSphereLayer dysonSphereLayer = dysonSphere.layersIdBased[layerId];
-                        for (int nodeId = 1; nodeId < dysonSphereLayer.nodeCursor; nodeId++)
-                        {
-                            if (dysonSphereLayer.nodePool[nodeId] != null && dysonSphereLayer.nodePool[nodeId].id == nodeId)
-                                dysonSphereLayer.nodePool[nodeId].RecalcCpReq();
-                        }
-                    }
-                }
-
                 t2 = stopwatch.duration;
 
-                Log.Debug($"[{dysonSphere.starData.index,2}] shell count:{dysonShells.Count,4}  Time: {t0:F4} | {t1:F4} | {t2:F4}");
+                Log.Debug($"[{dysonSphere.starData.index,2}] shell count:{dysonShells.Count,4}  Time: {t1:F4} | {t2:F4}");
             }
+            return dysonShells.Count;
         }
+
 
 #pragma warning disable CS8321
 
@@ -338,7 +389,7 @@ namespace LossyCompression
             Task.WaitAll(tasks);
         }
 
-        static void FreeRAM()
+        public static void FreeRAM()
         {
             for (int i = 0; i < 3; i++)
             {

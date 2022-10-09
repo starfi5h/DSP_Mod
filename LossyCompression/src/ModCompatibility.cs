@@ -38,7 +38,6 @@ namespace LossyCompression
         public static class NebulaAPI
         {
             public const string GUID = "dsp.nebula-multiplayer-api";
-            private static bool EnableSwarm;
 
             public static void Init(Harmony harmony)
             {
@@ -73,14 +72,11 @@ namespace LossyCompression
 
             public static void OnMultiplayerGameStarted()
             {
-                // Disable swarm compression in MP due to the first loaded sphere doesn't load correctly
-                EnableSwarm = DysonSwarmCompress.Enable;
-                DysonSwarmCompress.Enable = false;
+                LazyLoading.Reset();
             }
 
             public static void OnMultiplayerGameEnded()
             {
-                DysonSwarmCompress.Enable = EnableSwarm;
             }
 
             public static void DysonDataPostfix(INebulaConnection conn, int starIndex)
@@ -95,6 +91,7 @@ namespace LossyCompression
             public int StarIndex { get; set; }
             public int EnableFlags { get; set; }
             public byte[] Bytes { get; set; }
+            public long GameTick { get; set; }
 
             public LC_DysonData() { }
             public LC_DysonData(int starIndex)
@@ -110,6 +107,7 @@ namespace LossyCompression
                         DysonSwarmCompress.Encode(dysonSphere, w.BinaryWriter);
                     Bytes = w.CloseAndGetBytes();
                 }
+                GameTick = GameMain.gameTick;
                 Log.Debug($"Send compressed data {Bytes.Length:N0}");
             }
         }
@@ -127,10 +125,11 @@ namespace LossyCompression
                     using (var r = NebulaModAPI.GetBinaryReader(packet.Bytes))
                     {
                         if ((packet.EnableFlags & 2) != 0)
-                            DysonShellCompress.Decode(dysonSphere, r.BinaryReader);
+                            DysonShellCompress.Decode(dysonSphere, r.BinaryReader, DysonShellCompress.EncodedVersion);
                         if ((packet.EnableFlags & 4) != 0)
-                            DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader);
+                            DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader, packet.GameTick);
                     }
+
                     if (AfeterImport != null)
                     {
                         AfeterImport.Invoke();
