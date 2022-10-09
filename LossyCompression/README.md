@@ -63,7 +63,7 @@ Can reduce RAM usage by disabling layer display in Dyson editor panel.
 - `LazyLoad` (默认停用 `false`)  
 延迟载入戴森壳的模型。存档需要先压缩过戴森壳才能生效。  
 只有在需要时(看到模型, 写入原生存档)才会产生模型。
-因此只要在戴森球面板隐藏壳层显示就不会立即载入，可以减少内存的使用量。  
+因此只要在戴森球面板隐藏壳层显示就不会载入，可以减少内存的使用量。  
 
 
 ## MOD相容性  
@@ -75,6 +75,10 @@ Can reduce RAM usage by disabling layer display in Dyson editor panel.
 ----
 
 ## Changelog
+
+#### v0.2.1
+\- Fix error when using LazyLoad with DSPOptimizations.  
+\- Fix crash when using BulletTime background save.  
 
 #### v0.2.0  
 \- Add `LazyLoad` function to reduce RAM usage.  

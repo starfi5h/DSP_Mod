@@ -25,6 +25,9 @@ namespace LossyCompression
                     var methodInfo = AccessTools.Method(classType, "InitSPAndCPCounts");
                     AfeterImport = AccessTools.MethodDelegate<Action>(methodInfo);
 
+                    // ShellShaderVarOpt will call SetMaterialDynamicVars so guard is needed
+                    harmony.PatchAll(typeof(DSPOptimizations));
+
                     Log.Info("DSPOptimizations compatibility - OK");
                 }
                 catch (Exception e)
@@ -32,6 +35,35 @@ namespace LossyCompression
                     Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.11");
                     Log.Warn(e);
                 }
+            }
+
+            [HarmonyPrefix, HarmonyPatch(typeof(DysonShell), nameof(DysonShell.SetMaterialDynamicVars))]
+            public static bool SetMaterialDynamicVars(DysonShell __instance)
+            {
+                // nodeProgressArr is intialized in DysonShell.GenerateModelObjects, which is null before lazy loading
+                if (__instance.nodeProgressArr != null)
+                {
+                    int num = __instance.nodecps.Length - 1;
+                    int num2 = 0;
+                    while (num2 < num && num2 < 768)
+                    {
+                        __instance.nodeProgressArr[num2] = (float)((double)__instance.nodecps[num2] / ((__instance.vertsqOffset[num2 + 1] - __instance.vertsqOffset[num2]) * __instance.cpPerVertex));
+                        num2++;
+                    }
+                    if (__instance.nodecps.Length <= 768)
+                    {
+                        __instance.nodeProgressArr[num] = (float)((double)__instance.nodecps[num] / __instance.vertsqOffset[num]);
+                    }
+                }
+                // material is intialized in GenerateModelObjects too
+                if (__instance.material != null)
+                {
+                    __instance.material.SetFloat("_State", __instance.state);
+                    int value = __instance.color.a << 24 | __instance.color.b << 16 | __instance.color.g << 8 | __instance.color.r;
+                    __instance.material.SetInt("_Color32Int", value);
+                    __instance.material.SetFloatArray("_NodeProgressArr", __instance.nodeProgressArr);
+                }
+                return false;
             }
         }
 

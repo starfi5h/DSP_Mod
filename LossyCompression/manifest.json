@@ -1,7 +1,7 @@
 {
     "name": "LossyCompression",
     "description": "Compress dyson shells, solar sails, and belt data to reduce save size. 压缩戴森壳,太阳帆,传送带的存档数据",
-    "version_number": "0.2.0",
+    "version_number": "0.2.1",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
     "dependencies": ["xiaoye97-BepInEx-5.4.17", "CommonAPI-DSPModSave-1.1.4"]
 }

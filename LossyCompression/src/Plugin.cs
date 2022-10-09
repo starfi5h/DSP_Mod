@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using crecheng.DSPModSave;
 using HarmonyLib;
@@ -16,7 +15,7 @@ namespace LossyCompression
     {
         public const string GUID = "starfi5h.plugin.LossyCompression";
         public const string NAME = "LossyCompression";
-        public const string VERSION = "0.2.0";
+        public const string VERSION = "0.2.1";
         public const int FORMAT_VERSION = 1;
 
         public static Plugin Instance { get; private set; }
@@ -120,7 +119,6 @@ namespace LossyCompression
                 w.Write(FORMAT_VERSION);
                 DysonShellCompress.Export(w);
                 DysonSwarmCompress.Export(w);
-                UIRoot.instance.uiGame.statWindow.performancePanelUI.RefreshDataStatTexts();
             }
             else
             {

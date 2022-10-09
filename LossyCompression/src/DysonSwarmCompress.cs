@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -228,6 +229,7 @@ namespace LossyCompression
         public static bool DysonSwarm_Export_Prefix(DysonSwarm __instance, BinaryWriter w)
         {
             if (!Enable) return true;
+            if (ThreadingHelper.Instance.InvokeRequired) return false; // BulletTime.GameSave_Patch.Export_Prefix: Don't run if it is in background thread
 
             int sailCapacity, sailCursor, sailRecycleCursor;
             int expiryCursor, expiryEnding, absorbCursor, absorbEnding;
