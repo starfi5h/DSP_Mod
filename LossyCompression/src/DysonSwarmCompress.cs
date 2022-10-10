@@ -1,9 +1,11 @@
-﻿using HarmonyLib;
+﻿using BepInEx;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading.Tasks;
 
 namespace LossyCompression
 {
@@ -13,6 +15,8 @@ namespace LossyCompression
         // 4*(DIVISION) bytes for whole sails
 
         public static bool Enable { get; set; }
+        public static bool IsMultithread { get; set; }
+
         public static readonly int EncodedVersion = 1; //PeekChar() max is 127
 
         private const int DIVISION = 350; // default = 70
@@ -65,7 +69,7 @@ namespace LossyCompression
                     int starIndex = r.ReadInt32();
                     if (starIndex != -1)
                     {
-                        Decode(GameMain.data.dysonSpheres[starIndex], r);
+                        Decode(GameMain.data.dysonSpheres[starIndex], r, GameMain.gameTick);
                     }
                 }
 
@@ -107,11 +111,12 @@ namespace LossyCompression
             w.Write(absorbingSailCount);
         }
 
-        public static void Decode(DysonSphere dysonSphere, BinaryReader r)
+        public static void Decode(DysonSphere dysonSphere, BinaryReader r, long time)
         {
-            DysonSwarm dysonSwarm = dysonSphere.swarm;
+            HighStopwatch stopwatch = new HighStopwatch();
 
             // Import binary data
+            DysonSwarm dysonSwarm = dysonSphere.swarm;
             long totalSailCount = 0;
             int[] array = new int[r.ReadInt32() + 1];
             for (int i = 0; i < array.Length; i++)
@@ -119,17 +124,71 @@ namespace LossyCompression
                 array[i] = r.ReadInt32();
                 totalSailCount += array[i];
             }
-            Log.Debug($"[{dysonSphere.starData.index ,2}] sail count: {totalSailCount}");
             if (totalSailCount == 0)
                 return;
 
-            RemoveSailsByOrbit_NoSync(dysonSwarm , - 1); // Clean all sails
+            // Clean all sails
+            RemoveSailsByOrbit_NoSync(dysonSwarm , - 1); 
             int newCap = 512;
             while (newCap <= totalSailCount)
                 newCap *= 2;
             dysonSwarm.SetSailCapacity(newCap);
+            dysonSwarm.sailPoolForSave = new DysonSail[newCap];
 
-            // Modify from DysonSwarm.AutoConstruct
+            // Setting sails life
+            dysonSwarm.sailCursor = 0;
+            dysonSwarm.sailRecycleCursor = 0;
+            dysonSwarm.expiryEnding = 0;
+            dysonSwarm.expiryCursor = 0;
+            long maxSailLife = (long)(GameMain.history.solarSailLife * 60);
+            long step = (long)(GameMain.history.solarSailLife * 60 / DIVISION);
+            for (int col = 0; col < array.Length; col++)
+            {
+                long life = step * (col + 1);
+                if (life > maxSailLife)
+                    life = maxSailLife;
+                long expiryTime = time + life;
+
+                for (int k = 0; k < array[col]; k++)
+                {
+                    dysonSwarm.expiryOrder[dysonSwarm.expiryEnding].time = expiryTime;
+                    dysonSwarm.expiryOrder[dysonSwarm.expiryEnding].index = dysonSwarm.sailCursor;
+                    dysonSwarm.sailInfos[dysonSwarm.sailCursor].kill = (uint)((ulong)expiryTime & uint.MaxValue);
+
+                    dysonSwarm.expiryEnding++;
+                    dysonSwarm.sailCursor++;
+                }
+            }
+
+            stopwatch.Begin();
+            // Setting sails position and velocity
+            if (!IsMultithread || dysonSwarm.sailCursor < 1000)
+            {
+                GenerateSails(dysonSwarm, 0, dysonSwarm.sailCursor);
+            }
+            else
+            {
+                int numThread = Environment.ProcessorCount;
+                int batchSize = dysonSwarm.sailCursor / numThread;
+                var tasks = new Task[numThread - 1];
+                for (int i = 0; i < (numThread - 1); i++)
+                {
+                    int startIndex = batchSize * i;
+                    int endIndex = batchSize * (i + 1);
+                    tasks[i] = Task.Run(() => GenerateSails(dysonSwarm, startIndex, endIndex));
+                }
+                GenerateSails(dysonSwarm, batchSize * (numThread - 1), dysonSwarm.sailCursor);
+                Task.WaitAll(tasks);
+            }
+
+            // Sync GPU buffer in main thread
+            dysonSwarm.swarmBuffer.SetData(dysonSwarm.sailPoolForSave, 0, 0, dysonSwarm.sailCursor);
+            dysonSwarm.swarmInfoBuffer.SetData(dysonSwarm.sailInfos, 0, 0, dysonSwarm.sailCursor);
+            Log.Info($"[{dysonSphere.starData.index,2}] Generate {dysonSwarm.sailCursor:N0} sails. Time:{stopwatch.duration} s");
+        }
+
+        public static void GenerateSails(DysonSwarm dysonSwarm, int startIndex, int endIndex)
+        {
             List<int> activeOrbitIds = new List<int>();
             for (int i = 1; i < dysonSwarm.orbitCursor; i++)
             {
@@ -138,46 +197,29 @@ namespace LossyCompression
             }
             if (activeOrbitIds.Count == 0)
             {
-                // Orbit 1 cannot be deleted
-                activeOrbitIds.Add(1);
+                activeOrbitIds.Add(1); // Orbit 1 cannot be deleted
             }
 
-            // Split sails evenly across all active orbits
-            int sailCount = 0;
-            long maxSailLife = (long)(GameMain.history.solarSailLife * 60);
-            long step = (long)(GameMain.history.solarSailLife * 60 / DIVISION);
+            // Formula modify from AutoConstruct
             float gravity = dysonSwarm.dysonSphere.gravity;
-            long time = GameMain.gameTick;
-            for (int col = 0; col < array.Length; col++)
+            for (int id = startIndex; id < endIndex; id++)
             {
-                long life = step * (col + 1);
-                if (life > maxSailLife)
-                {
-                    life = maxSailLife;
-                }
-
-                for (int k = 0; k < array[col]; k++)
-                {
-                    int orbitId = activeOrbitIds[sailCount++ % activeOrbitIds.Count];
-                    ref SailOrbit obrit = ref dysonSwarm.orbits[orbitId];
-
-                    DysonSail ss = default;
-                    VectorLF3 vectorLF = VectorLF3.Cross(obrit.up, RandomTable.SphericNormal(ref dysonSwarm.autoConstructSeed, 1.0)).normalized * obrit.radius;
-                    vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 200.0); // original: 200.0
-                    ss.px = (float)vectorLF.x;
-                    ss.py = (float)vectorLF.y;
-                    ss.pz = (float)vectorLF.z;
-                    vectorLF = VectorLF3.Cross(vectorLF, obrit.up).normalized * Math.Sqrt(gravity / obrit.radius);
-                    vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.6000000238418579);
-                    vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.5);
-                    ss.vx = (float)vectorLF.x;
-                    ss.vy = (float)vectorLF.y;
-                    ss.vz = (float)vectorLF.z;
-                    ss.gs = 1f;
-
-                    // TODO: Use AddSolarSail_NoGPU to speed up creation process
-                    dysonSwarm.AddSolarSail(ss, orbitId, time + life);
-                }
+                int orbitId = activeOrbitIds[id % activeOrbitIds.Count];
+                ref SailOrbit obrit = ref dysonSwarm.orbits[orbitId];
+                ref DysonSail ss = ref dysonSwarm.sailPoolForSave[id];
+                VectorLF3 vectorLF = VectorLF3.Cross(obrit.up, RandomTable.SphericNormal(ref dysonSwarm.autoConstructSeed, 1.0)).normalized * obrit.radius;
+                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 200.0);
+                ss.st = (float)orbitId;
+                ss.px = (float)vectorLF.x;
+                ss.py = (float)vectorLF.y;
+                ss.pz = (float)vectorLF.z;
+                vectorLF = VectorLF3.Cross(vectorLF, obrit.up).normalized * Math.Sqrt(gravity / obrit.radius);
+                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.6000000238418579);
+                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.5);
+                ss.vx = (float)vectorLF.x;
+                ss.vy = (float)vectorLF.y;
+                ss.vz = (float)vectorLF.z;
+                ss.gs = 1f;                
             }
         }
 
@@ -187,6 +229,7 @@ namespace LossyCompression
         public static bool DysonSwarm_Export_Prefix(DysonSwarm __instance, BinaryWriter w)
         {
             if (!Enable) return true;
+            if (ThreadingHelper.Instance.InvokeRequired) return false; // BulletTime.GameSave_Patch.Export_Prefix: Don't run if it is in background thread
 
             int sailCapacity, sailCursor, sailRecycleCursor;
             int expiryCursor, expiryEnding, absorbCursor, absorbEnding;
@@ -297,27 +340,6 @@ namespace LossyCompression
         {
             // Don't sync this in nebula multiplayer
         }
-
-        /*
-        [HarmonyReversePatch]
-        [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.AddSolarSail))]
-        public static int AddSolarSail_NoGPU(DysonSwarm __instance, DysonSail ss, int orbitId, long expiryTime)
-        {
-            IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                // remove swarmBuffer.GetData and swarmInfoBuffer.GetData
-                var codeMatcher = new CodeMatcher(instructions)
-                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetData"))
-                    .Repeat(matcher => matcher
-                            .Advance(-7)
-                            .RemoveInstructions(8)
-                    );
-                return codeMatcher.InstructionEnumeration();
-            }
-
-            return 0;
-        }
-        */
 #pragma warning restore CS8321, IDE0060
     }
 }

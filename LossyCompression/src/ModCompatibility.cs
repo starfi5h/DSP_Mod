@@ -25,6 +25,9 @@ namespace LossyCompression
                     var methodInfo = AccessTools.Method(classType, "InitSPAndCPCounts");
                     AfeterImport = AccessTools.MethodDelegate<Action>(methodInfo);
 
+                    // ShellShaderVarOpt will call SetMaterialDynamicVars so guard is needed
+                    harmony.PatchAll(typeof(DSPOptimizations));
+
                     Log.Info("DSPOptimizations compatibility - OK");
                 }
                 catch (Exception e)
@@ -33,12 +36,40 @@ namespace LossyCompression
                     Log.Warn(e);
                 }
             }
+
+            [HarmonyPrefix, HarmonyPatch(typeof(DysonShell), nameof(DysonShell.SetMaterialDynamicVars))]
+            public static bool SetMaterialDynamicVars(DysonShell __instance)
+            {
+                // nodeProgressArr is intialized in DysonShell.GenerateModelObjects, which is null before lazy loading
+                if (__instance.nodeProgressArr != null)
+                {
+                    int num = __instance.nodecps.Length - 1;
+                    int num2 = 0;
+                    while (num2 < num && num2 < 768)
+                    {
+                        __instance.nodeProgressArr[num2] = (float)((double)__instance.nodecps[num2] / ((__instance.vertsqOffset[num2 + 1] - __instance.vertsqOffset[num2]) * __instance.cpPerVertex));
+                        num2++;
+                    }
+                    if (__instance.nodecps.Length <= 768)
+                    {
+                        __instance.nodeProgressArr[num] = (float)((double)__instance.nodecps[num] / __instance.vertsqOffset[num]);
+                    }
+                }
+                // material is intialized in GenerateModelObjects too
+                if (__instance.material != null)
+                {
+                    __instance.material.SetFloat("_State", __instance.state);
+                    int value = __instance.color.a << 24 | __instance.color.b << 16 | __instance.color.g << 8 | __instance.color.r;
+                    __instance.material.SetInt("_Color32Int", value);
+                    __instance.material.SetFloatArray("_NodeProgressArr", __instance.nodeProgressArr);
+                }
+                return false;
+            }
         }
 
         public static class NebulaAPI
         {
             public const string GUID = "dsp.nebula-multiplayer-api";
-            private static bool EnableSwarm;
 
             public static void Init(Harmony harmony)
             {
@@ -73,14 +104,11 @@ namespace LossyCompression
 
             public static void OnMultiplayerGameStarted()
             {
-                // Disable swarm compression in MP due to the first loaded sphere doesn't load correctly
-                EnableSwarm = DysonSwarmCompress.Enable;
-                DysonSwarmCompress.Enable = false;
+                LazyLoading.Reset();
             }
 
             public static void OnMultiplayerGameEnded()
             {
-                DysonSwarmCompress.Enable = EnableSwarm;
             }
 
             public static void DysonDataPostfix(INebulaConnection conn, int starIndex)
@@ -95,6 +123,7 @@ namespace LossyCompression
             public int StarIndex { get; set; }
             public int EnableFlags { get; set; }
             public byte[] Bytes { get; set; }
+            public long GameTick { get; set; }
 
             public LC_DysonData() { }
             public LC_DysonData(int starIndex)
@@ -110,6 +139,7 @@ namespace LossyCompression
                         DysonSwarmCompress.Encode(dysonSphere, w.BinaryWriter);
                     Bytes = w.CloseAndGetBytes();
                 }
+                GameTick = GameMain.gameTick;
                 Log.Debug($"Send compressed data {Bytes.Length:N0}");
             }
         }
@@ -127,10 +157,11 @@ namespace LossyCompression
                     using (var r = NebulaModAPI.GetBinaryReader(packet.Bytes))
                     {
                         if ((packet.EnableFlags & 2) != 0)
-                            DysonShellCompress.Decode(dysonSphere, r.BinaryReader);
+                            DysonShellCompress.Decode(dysonSphere, r.BinaryReader, DysonShellCompress.EncodedVersion);
                         if ((packet.EnableFlags & 4) != 0)
-                            DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader);
+                            DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader, packet.GameTick);
                     }
+
                     if (AfeterImport != null)
                     {
                         AfeterImport.Invoke();

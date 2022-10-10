@@ -9,7 +9,7 @@ Suggest to backup your saves before using this mod.
 
 Run the game one time to generate `starfi5h.plugin.LossyCompression.cfg` file.  
 
-- `CargoPath` (Default: `fasle`)  
+- `CargoPath` (Default: `false`)  
 Lossy compress for belts & cargo data. Position and orientation will be slightly distorted.  
 The compressed data is stored in game save so the new save can only be opened with this mod.   
 
@@ -23,11 +23,17 @@ Lossy compress for solar sails. Sail life and position will be distorted, absorb
 The compressed data is stored in separated file `.moddsv`.  
 The new save can load without this mod or the file, it will appear like there is no sails.  
 
+- `LazyLoad` (Default:`false`)  
+Delay generation of shell model until needed (veiwing, exporting).  
+Only takes effect when loading a save with compressed dyson shell.  
+Can reduce RAM usage by disabling layer display in Dyson editor panel.  
+
 ## Compatibility  
 
-- (✅) CompressSave  
-- (✅) DSPOptimizations    
-- (✅) NebulaMultiplayer - Note: Sails compression is disabled in MP.  
+- (✅) [CompressSave](https://dsp.thunderstore.io/package/soarqin/CompressSave/)  
+- (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
+- (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)  
+
 ----
 # 有损/无损压缩
 
@@ -40,7 +46,7 @@ The new save can load without this mod or the file, it will appear like there is
 管理器安装: 左边选项Config editor -> 找到`starfi5h.plugin.LossyCompression` -> Edit Config  
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.LossyCompression.cfg`文件  
   
-- `CargoPath` (默认停用 `fasle`)  
+- `CargoPath` (默认停用 `false`)  
 有损式压缩传送带数据。位置和方向会些微失真。   
 启用后新的存档必须有mod才能开启。   
 
@@ -54,19 +60,33 @@ The new save can load without this mod or the file, it will appear like there is
 压缩的数据会另外存在`.moddsv`档案中。  
 在没有mod或档案时存档依然可以开启, 只是会丢失所有的太阳帆。  
 
+- `LazyLoad` (默认停用 `false`)  
+延迟载入戴森壳的模型。存档需要先压缩过戴森壳才能生效。  
+只有在需要时(看到模型, 写入原生存档)才会产生模型。
+因此只要在戴森球面板隐藏壳层显示就不会载入，可以减少内存的使用量。  
+
 
 ## MOD相容性  
 
-- (✅) CompressSave(LZ4压缩)  
-- (✅) DSPOptimizations(优化mod)  
-- (✅) NebulaMultiplayer(联机mod) - 在多人模式时将停用太阳帆压缩  
+- (✅) [CompressSave](https://dsp.thunderstore.io/package/soarqin/CompressSave/)(LZ4压缩)  
+- (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)(优化mod)  
+- (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod)
 
 ----
 
 ## Changelog
 
+#### v0.2.1
+\- Fix error when using LazyLoad with DSPOptimizations.  
+\- Fix crash when using BulletTime background save.  
+
+#### v0.2.0  
+\- Add `LazyLoad` function to reduce RAM usage.  
+\- Add multithreading for swarm generation.  
+\- Fix dyson swarm compression for multiplayer.  
+
 #### v0.1.1
-\- Change to released version. (0.9.27.14553)  
+\- Change to released version. (DSP 0.9.27.14553)  
 
 #### v0.1.0  
 \- (DEBUG VERSION)  
