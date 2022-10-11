@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using NebulaModel.Networking;
 using NebulaModel.Packets.Logistics;
 using System.Reflection;
+using NebulaModel.Packets.Planet;
+using System.Threading.Tasks;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -60,6 +62,10 @@ namespace NebulaCompatibilityAssist.Patches
                     MethodInfo methodInfo = AccessTools.Method(classType, "ProcessPacket", new Type[] { typeof(DispenserCourierPacket), typeof(NebulaConnection) });
                     Plugin.Instance.Harmony.Patch(methodInfo, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("DispenserCourierProcessor")));
 
+                    classType = AccessTools.TypeByName("NebulaNetwork.PacketProcessors.Planet.PlanetDetailRequestProcessor");
+                    methodInfo = AccessTools.Method(classType, "ProcessPacket", new Type[] { typeof(PlanetDetailRequest), typeof(NebulaConnection) });
+                    Plugin.Instance.Harmony.Patch(methodInfo, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("PlanetDetailRequestProcessor")));
+
                     Log.Info("DispenserCourierProcessor patch success! (hotfix 0.8.11)");
                 }
                 catch (Exception e)
@@ -68,6 +74,45 @@ namespace NebulaCompatibilityAssist.Patches
                     Log.Warn(e);
                 }
             }
+        }
+
+        public static bool PlanetDetailRequestProcessor(PlanetDetailRequest packet, NebulaConnection conn)
+        {
+            PlanetData planetData = GameMain.galaxy.PlanetById(packet.PlanetID);
+            if (!planetData.calculated)
+            {
+                planetData.calculating = true;
+                Task.Run(() =>
+                {
+                    // Modify from PlanetModelingManager.PlanetCalculateThreadMain()
+                    HighStopwatch highStopwatch = new HighStopwatch();
+                    highStopwatch.Begin();
+                    planetData.data = new PlanetRawData(planetData.precision);
+                    planetData.modData = planetData.data.InitModData(planetData.modData);
+                    planetData.data.CalcVerts();
+                    planetData.aux = new PlanetAuxData(planetData);
+                    PlanetAlgorithm planetAlgorithm = PlanetModelingManager.Algorithm(planetData);
+                    planetAlgorithm.GenerateTerrain(planetData.mod_x, planetData.mod_y);
+                    planetAlgorithm.CalcWaterPercent();
+                    if (planetData.type != EPlanetType.Gas)
+                    {
+                        planetAlgorithm.GenerateVegetables();
+                        planetAlgorithm.GenerateVeins();
+                    }
+                    planetData.CalculateVeinGroups();
+                    planetData.GenBirthPoints();
+                    planetData.NotifyCalculated();
+                    // Fix for GS2 that sometimes planetData.runtimeVeinGroups is null 
+                    VeinGroup[] runtimeVeinGroups = planetData.runtimeVeinGroups ?? Array.Empty<VeinGroup>();
+                    conn.SendPacket(new PlanetDetailResponse(planetData.id, runtimeVeinGroups, planetData.landPercent));
+                    Log.Info($"PlanetCalculateThread:{planetData.displayName} time:{highStopwatch.duration:F4}s");
+                });
+                return false;
+            }
+            // Fix for GS2 that sometimes planetData.runtimeVeinGroups is null
+            conn.SendPacket(new PlanetDetailResponse(planetData.id, planetData.runtimeVeinGroups ?? Array.Empty<VeinGroup>(), planetData.landPercent));
+            Log.Info($"Return {planetData.displayName} - {planetData.runtimeVeinGroups}");
+            return false;
         }
 
         public static bool DispenserCourierProcessor(DispenserCourierPacket packet)
