@@ -2,6 +2,11 @@
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using NebulaModel.Networking;
+using NebulaModel.Packets.Logistics;
+using System.Reflection;
+using NebulaModel.Packets.Planet;
+using System.Threading.Tasks;
 
 namespace NebulaCompatibilityAssist.Patches
 {
@@ -9,6 +14,7 @@ namespace NebulaCompatibilityAssist.Patches
     {
         private const string NAME = "NebulaMultiplayerMod";
         private const string GUID = "dsp.nebula-multiplayer";
+        private static bool isPatched = false;
 
         public static void Init(Harmony harmony)
         {
@@ -20,8 +26,7 @@ namespace NebulaCompatibilityAssist.Patches
                 System.Version nebulaVersion = pluginInfo.Metadata.Version;
                 if (nebulaVersion.Major == 0 && nebulaVersion.Minor == 8 && nebulaVersion.Build == 11)
                 {
-                    Type classType = AccessTools.TypeByName("NebulaWorld.Logistics.CourierManager");
-                    harmony.Patch(AccessTools.Method(classType, "GameTick"), null, null, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("GameTick_Transpiler")));
+                    Patch0811(harmony);
                     Log.Info("Nebula hotfix 0.8.11 - OK");
                 }
             }
@@ -30,6 +35,96 @@ namespace NebulaCompatibilityAssist.Patches
                 Log.Warn($"Nebula hotfix patch fail! Current version: " + pluginInfo.Metadata.Version);
                 Log.Debug(e);
             }
+        }
+
+        private static void Patch0811(Harmony harmony)
+        {
+            Type classType = AccessTools.TypeByName("NebulaWorld.Logistics.CourierManager");
+            harmony.Patch(AccessTools.Method(classType, "GameTick"), null, null, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("GameTick_Transpiler")));
+
+            classType = AccessTools.TypeByName("NebulaWorld.Multiplayer");
+            harmony.Patch(AccessTools.Method(classType, "HostGame"), new HarmonyMethod(typeof(NebulaHotfix).GetMethod("BeforeHostGame")));
+        }
+
+        public static void BeforeHostGame()
+        {
+            if (!isPatched)
+            {
+                isPatched = true;
+                try
+                {
+                    // We need patch PacketProcessor after NebulaNetwork assembly is loaded
+                    foreach (Assembly a in AccessTools.AllAssemblies())
+                    {
+                        //Log.Info(a.GetName()); //why does iterate all assemblies stop the exception?
+                    }
+                    Type classType = AccessTools.TypeByName("NebulaNetwork.PacketProcessors.Logistics.DispenserCourierProcessor");
+                    MethodInfo methodInfo = AccessTools.Method(classType, "ProcessPacket", new Type[] { typeof(DispenserCourierPacket), typeof(NebulaConnection) });
+                    Plugin.Instance.Harmony.Patch(methodInfo, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("DispenserCourierProcessor")));
+
+                    classType = AccessTools.TypeByName("NebulaNetwork.PacketProcessors.Planet.PlanetDetailRequestProcessor");
+                    methodInfo = AccessTools.Method(classType, "ProcessPacket", new Type[] { typeof(PlanetDetailRequest), typeof(NebulaConnection) });
+                    Plugin.Instance.Harmony.Patch(methodInfo, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("PlanetDetailRequestProcessor")));
+
+                    Log.Info("DispenserCourierProcessor patch success! (hotfix 0.8.11)");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("DispenserCourierProcessor patch fail!");
+                    Log.Warn(e);
+                }
+            }
+        }
+
+        public static bool PlanetDetailRequestProcessor(PlanetDetailRequest packet, NebulaConnection conn)
+        {
+            PlanetData planetData = GameMain.galaxy.PlanetById(packet.PlanetID);
+            if (!planetData.calculated)
+            {
+                planetData.calculating = true;
+                Task.Run(() =>
+                {
+                    // Modify from PlanetModelingManager.PlanetCalculateThreadMain()
+                    HighStopwatch highStopwatch = new HighStopwatch();
+                    highStopwatch.Begin();
+                    planetData.data = new PlanetRawData(planetData.precision);
+                    planetData.modData = planetData.data.InitModData(planetData.modData);
+                    planetData.data.CalcVerts();
+                    planetData.aux = new PlanetAuxData(planetData);
+                    PlanetAlgorithm planetAlgorithm = PlanetModelingManager.Algorithm(planetData);
+                    planetAlgorithm.GenerateTerrain(planetData.mod_x, planetData.mod_y);
+                    planetAlgorithm.CalcWaterPercent();
+                    if (planetData.type != EPlanetType.Gas)
+                    {
+                        planetAlgorithm.GenerateVegetables();
+                        planetAlgorithm.GenerateVeins();
+                    }
+                    planetData.CalculateVeinGroups();
+                    planetData.GenBirthPoints();
+                    planetData.NotifyCalculated();
+                    // Fix for GS2 that sometimes planetData.runtimeVeinGroups is null 
+                    VeinGroup[] runtimeVeinGroups = planetData.runtimeVeinGroups ?? Array.Empty<VeinGroup>();
+                    conn.SendPacket(new PlanetDetailResponse(planetData.id, runtimeVeinGroups, planetData.landPercent));
+                    Log.Info($"PlanetCalculateThread:{planetData.displayName} time:{highStopwatch.duration:F4}s");
+                });
+                return false;
+            }
+            // Fix for GS2 that sometimes planetData.runtimeVeinGroups is null
+            conn.SendPacket(new PlanetDetailResponse(planetData.id, planetData.runtimeVeinGroups ?? Array.Empty<VeinGroup>(), planetData.landPercent));
+            Log.Info($"Return {planetData.displayName} - {planetData.runtimeVeinGroups}");
+            return false;
+        }
+
+        public static bool DispenserCourierProcessor(DispenserCourierPacket packet)
+        {
+            // Prevent accessing a null dispenser for host
+            PlanetFactory factory = GameMain.mainPlayer.factory;
+            DispenserComponent[] pool = factory?.transport.dispenserPool;
+            if (pool != null && packet.DispenserId > 0 && packet.DispenserId < pool.Length && pool[packet.DispenserId] != null)
+            {
+                return true;
+            }
+            return false;
         }
 
         public static IEnumerable<CodeInstruction> GameTick_Transpiler(IEnumerable<CodeInstruction> instructions)
