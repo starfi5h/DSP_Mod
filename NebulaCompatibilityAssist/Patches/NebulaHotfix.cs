@@ -2,6 +2,7 @@
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using NebulaAPI;
 using NebulaModel.Networking;
 using NebulaModel.Packets.Logistics;
 using System.Reflection;
@@ -44,6 +45,31 @@ namespace NebulaCompatibilityAssist.Patches
 
             classType = AccessTools.TypeByName("NebulaWorld.Multiplayer");
             harmony.Patch(AccessTools.Method(classType, "HostGame"), new HarmonyMethod(typeof(NebulaHotfix).GetMethod("BeforeHostGame")));
+
+            classType = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
+            harmony.Patch(AccessTools.Method(classType, "SetupInitialPlayerState"), null, new HarmonyMethod(typeof(NebulaHotfix).GetMethod("SetupInitialPlayerState")));
+        }
+
+        public static void SetupInitialPlayerState()
+        {
+            var player = NebulaModAPI.MultiplayerSession.LocalPlayer;
+            if (player.IsClient && player.IsNewPlayer)
+            {
+                // Make new client spawn higher to avoid collision
+                float altitude = GameMain.mainPlayer.transform.localPosition.magnitude;
+                if (altitude > 0)
+                    GameMain.mainPlayer.transform.localPosition *= (altitude + 20f) / altitude;
+                Log.Debug($"Starting: {GameMain.mainPlayer.transform.localPosition} {altitude}");
+            }
+            else
+            {
+                // Prevent old client from dropping into gas gaint
+                var planet = GameMain.galaxy.PlanetById(player.Data.LocalPlanetId);
+                if (planet != null && planet.type == EPlanetType.Gas)
+                {
+                    GameMain.mainPlayer.movementState = EMovementState.Fly;
+                }
+            }
         }
 
         public static void BeforeHostGame()

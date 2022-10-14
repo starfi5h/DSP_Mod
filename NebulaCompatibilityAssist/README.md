@@ -98,6 +98,10 @@ DSP Belt Reverse Direction、MoreMegaStructure必须要两端都得安装。
 
 ## Changelog
 
+#### v0.1.5 (NebulaMultiplayerMod 0.8.11)  
+\- Fix mod data doesn't sync correctly for another clients.  
+\- Fix client mecha spawning position.  
+
 #### v0.1.4 (NebulaMultiplayerMod 0.8.11)  
 \- Hotfix for nebula 0.8.11 about host sometimes get error when client request logistic on other planets.  
 \- Hotfix for GS2 star detail doesn't display correctly for clients.  
