@@ -247,7 +247,7 @@ namespace LossyCompression
 
             if (dysonShells.Count > 0)
             {
-                if (version >= 2)
+                if (LazyLoading.Enable && version >= 2)
                 {
                     LazyLoading.Add(dysonSphere);
                 }
