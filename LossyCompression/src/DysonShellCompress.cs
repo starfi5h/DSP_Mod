@@ -45,10 +45,9 @@ namespace LossyCompression
             }
 
             datalen += w.BaseStream.Length;
-            PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] -= PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell];
+            PerformanceMonitor.dataLengths[(int)ESaveDataEntry.Total] += datalen;
             PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] += datalen;
-            PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell] = datalen;
-
+            PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell] += datalen;
             Log.Info($"Compress DysonShell: {datalen:N0} bytes {stopWatch.duration}s");
         }
 
@@ -125,10 +124,11 @@ namespace LossyCompression
                     }
                 }
 
-                PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] -= PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell];
+                datalen += r.BaseStream.Length;
+                PerformanceMonitor.dataLengths[(int)ESaveDataEntry.Total] += datalen;
                 PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] += datalen;
-                PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell] = datalen;
-                Log.Info($"Decompress DysonShell: {stopWatch.duration}s");
+                PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell] += datalen;
+                Log.Info($"Decompress DysonShell: {datalen:N0} bytes {stopWatch.duration}s");
                 FreeRAM();
             }
         }
@@ -319,7 +319,7 @@ namespace LossyCompression
                     dysonShell.GenerateModelObjects();
                 t2 = stopwatch.duration;
 
-                Log.Debug($"[{dysonSphere.starData.index,2}] shell count:{dysonShells.Count,4}  Time: {t1:F4} | {t2:F4}");
+                Log.Debug($"[{dysonSphere.starData.index,2}] Generate {dysonShells.Count,4} shells.  Time: {t1:F4} | {t2:F4}");
             }
             return dysonShells.Count;
         }

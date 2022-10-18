@@ -47,10 +47,10 @@ namespace LossyCompression
             }
 
             datalen += w.BaseStream.Length;
+            PerformanceMonitor.dataLengths[(int)ESaveDataEntry.Total] += datalen;
             PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] += datalen;
             PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSwarm] += datalen;
-
-            Log.Info($"Compress DysonSwarm: {datalen:N0} bytes {stopWatch.duration} s");
+            Log.Info($"Compress DysonSwarm: {datalen:N0} bytes {stopWatch.duration}s");
         }
 
         public static void Import(BinaryReader r)
@@ -73,9 +73,11 @@ namespace LossyCompression
                     }
                 }
 
+                datalen += r.BaseStream.Length;
+                PerformanceMonitor.dataLengths[(int)ESaveDataEntry.Total] += datalen;
                 PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonSphere] += datalen;
                 PerformanceMonitor.dataLengths[(int)ESaveDataEntry.DysonShell] += datalen;
-                Log.Info($"Decompress DysonSwarm: {stopWatch.duration}s");
+                Log.Info($"Decompress DysonSwarm: {datalen:N0} bytes {stopWatch.duration}s");
             }
         }
 
@@ -184,7 +186,7 @@ namespace LossyCompression
             // Sync GPU buffer in main thread
             dysonSwarm.swarmBuffer.SetData(dysonSwarm.sailPoolForSave, 0, 0, dysonSwarm.sailCursor);
             dysonSwarm.swarmInfoBuffer.SetData(dysonSwarm.sailInfos, 0, 0, dysonSwarm.sailCursor);
-            Log.Info($"[{dysonSphere.starData.index,2}] Generate {dysonSwarm.sailCursor:N0} sails. Time:{stopwatch.duration} s");
+            Log.Debug($"[{dysonSphere.starData.index,2}] Generate {dysonSwarm.sailCursor:N0} sails. Time:{stopwatch.duration} s");
         }
 
         public static void GenerateSails(DysonSwarm dysonSwarm, int startIndex, int endIndex)
