@@ -76,6 +76,9 @@ Can reduce RAM usage by disabling layer display in Dyson editor panel.
 
 ## Changelog
 
+#### v0.2.2
+\- Fix error in multiplayer shell decompression.  
+
 #### v0.2.1
 \- Fix error when using LazyLoad with DSPOptimizations.  
 \- Fix crash when using BulletTime background save.  

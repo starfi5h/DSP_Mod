@@ -162,10 +162,11 @@ namespace LossyCompression
                             DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader, packet.GameTick);
                     }
 
-                    if (AfeterImport != null)
-                    {
-                        AfeterImport.Invoke();
-                    }
+                    // Let DSPOpt init
+                    AfeterImport?.Invoke();
+
+                    // Reset for lazy loading
+                    LazyLoading.Reset();
                 }
             }
         }
