@@ -35,10 +35,14 @@ DSP Belt Reverse Direction, MoreMegaStructure are required to install on both cl
 ### [AutoStationConfig](https://dsp.thunderstore.io/package/Pasukaru/AutoStationConfig/)
 - Sync station configuration and drone, ship, warper count.  
 - Fix advance miner power usage abnormal ([issue#17](https://github.com/Pasukaru/DSP-Mods/issues/17))  
+- Note: AutoStationConfig v1.4.0 is not compatible with DSP v0.9.27
 
 ### [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/)
 - Sync auto station config functions.  
 - Sync planetary item fill (ships, fuel) functions.  
+
+### [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)
+- Fix client crash when leaving a system.  
 
 ----
 
@@ -77,17 +81,37 @@ DSP Belt Reverse Direction, MoreMegaStructure are required to install on both cl
 ### [AutoStationConfig](https://dsp.thunderstore.io/package/Pasukaru/AutoStationConfig/)
 - 同步物流站自动配置  
 - 修复大矿机能耗异常的问题 ([issue#17](https://github.com/Pasukaru/DSP-Mods/issues/17))  
+- 注意：AutoStationConfig v1.4.0 与 游戏版本v0.9.27 不兼容  
 
 ### [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/) [辅助多功能mod](https://www.bilibili.com/video/BV1SS4y1X75n)
 - 同步物流站自动配置相关功能  
 - 同步一键填充星球上的飞机飞船翘曲器、燃料  
 
+### [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)
+- 修复客户端离开星系会使游戏崩溃的错误  
+
 主要是让主机和客户端显示的内容可以一致，或著修復建築不同步的問題。  
 DSP Belt Reverse Direction、MoreMegaStructure必须要两端都得安装。  
+热修联机0.8.11版中配送运输机出错的bug。  
 
 ----
 
 ## Changelog
+
+#### v0.1.5 (NebulaMultiplayerMod 0.8.11)  
+\- Fix mod data doesn't sync correctly for another clients.  
+\- Fix client mecha spawning position.  
+
+#### v0.1.4 (NebulaMultiplayerMod 0.8.11)  
+\- Hotfix for nebula 0.8.11 about host sometimes get error when client request logistic on other planets.  
+\- Hotfix for GS2 star detail doesn't display correctly for clients.  
+
+#### v0.1.3 (NebulaMultiplayerMod 0.8.11)
+\- Hotfix for nebula 0.8.11 about logistic bots errors.  
+\- Fix client error when host reverse belts on a remote planet.  
+
+#### v0.1.2 (NebulaMultiplayerMod 0.8.10)
+\- Support DSPOptimizations  
 
 #### v0.1.1 (NebulaMultiplayerMod 0.8.10)
 \- Support AutoStationConfig, Auxilaryfunction.  
@@ -103,6 +127,3 @@ DSP Belt Reverse Direction、MoreMegaStructure必须要两端都得安装。
 ----
 
 <a href="https://www.flaticon.com/free-icons/puzzle" title="puzzle icons">Puzzle icons created by Freepik - Flaticon</a>
-
-### Acknowledgements
-All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  

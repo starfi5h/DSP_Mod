@@ -1,7 +1,7 @@
 {
     "name": "BulletTime",
     "description": "Let user adjust world speed in performance test panel.  Autosave in background. 使玩家可以调整逻辑帧率。在背景执行自动保存。",
-    "version_number": "1.2.8",
+    "version_number": "1.2.9",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
