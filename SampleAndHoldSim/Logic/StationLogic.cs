@@ -83,6 +83,7 @@ namespace SampleAndHoldSim
                 data.tmpInc[i] = station.storage[i].inc;
             }
             data.tmpWarperCount = station.warperCount;
+            data.tmpMineralCount = 0;
         }
 
         public static void ActiveEnd(StationData data, StationComponent station)
@@ -115,7 +116,7 @@ namespace SampleAndHoldSim
                 station.storage[i].count = Math.Max(station.storage[i].count, 0);
                 station.storage[i].inc = Math.Max(station.storage[i].inc, 0);
             }
-            if (station.isVeinCollector)
+            if (station.isVeinCollector && data.tmpMineralCount > 0)
                 station.storage[0].count += data.tmpMineralCount;
             else
                 station.warperCount += data.tmpWarperCount;
