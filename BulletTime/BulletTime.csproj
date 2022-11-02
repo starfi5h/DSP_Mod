@@ -337,14 +337,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildTool_Patch.cs" />
-    <Compile Include="GameLoader_Patch.cs" />
-    <Compile Include="NebulaCompat.cs" />
-    <Compile Include="IngameUI.cs" />
-    <Compile Include="GameSave_Patch.cs" />
-    <Compile Include="GameMain_Patch.cs" />
-    <Compile Include="GameStateManager.cs" />
-    <Compile Include="BulletTimePlugin.cs" />
+    <Compile Include="src\BuildTool_Patch.cs" />
+    <Compile Include="src\GameLoader_Patch.cs" />
+    <Compile Include="src\NebulaCompat.cs" />
+    <Compile Include="src\IngameUI.cs" />
+    <Compile Include="src\GameSave_Patch.cs" />
+    <Compile Include="src\GameMain_Patch.cs" />
+    <Compile Include="src\GameStateManager.cs" />
+    <Compile Include="src\BulletTimePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

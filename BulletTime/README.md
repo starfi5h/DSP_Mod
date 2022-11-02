@@ -2,8 +2,9 @@
 
 ![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
 
-Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
-Run autosave in the background to make the game stay responsive.  
+1. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
+2. Run autosave in the background to make the game stay responsive.  
+3. Skip planet modeling for cover to speed up main menu loading.   
 
 ## Feature
 
@@ -100,6 +101,9 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 ----
 
 ## Changelog
+
+#### v1.2.10  
+\- Remove game speed indicator for 0.9.27.14546.  
 
 #### v1.2.9
 \- Add `RemoveGC`config option.  
