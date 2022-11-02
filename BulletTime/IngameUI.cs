@@ -1,8 +1,6 @@
 ﻿using Compatibility;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text;
 
 namespace BulletTime
 {
@@ -112,40 +110,6 @@ namespace BulletTime
             }
             stateMessage.transform.GetParent().gameObject.SetActive(message != "");
             stateMessage.text = message;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIFpsStat), nameof(UIFpsStat.FixedUpdate))]
-        private static void UIFpsStat_Postfix(UIFpsStat __instance, ref bool __state)
-        {
-            __state = ((__instance.watch != null) && (__instance.frame_u - __instance.lastframe_u) >= 15);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(UIFpsStat), nameof(UIFpsStat.FixedUpdate))]
-        private static void UIFpsStat_Postfix(UIFpsStat __instance, bool __state)
-        {
-            if (__state)
-            {
-                if (__instance.fpsText.Capacity < 17)
-                {
-                    __instance.fpsText = new StringBuilder("000 | 00 -00/%", 17);
-                    GameObject go = GameObject.Find("UI Root/Overlay Canvas/In Game/FPS Stats/fps-ups-text");
-                    if (go != null)
-                        go.transform.localPosition += new Vector3(20, 0, 0);
-                }
-                if (FPSController.currentUPS >= 99.0)
-                {
-                    StringBuilderUtility.WritePositiveFloat(__instance.fpsText, 6, 2, (float)FPSController.currentUPS, 0, ' ');
-                    __instance.fpsTextChanged = true;
-                }
-                if (__instance.fpsTextChanged)
-                {
-                    // assume normal ups is 60/s, realSpeed = realUps / 60f
-                    float realSpeed = ((float)FPSController.currentUPS * (1f - GameStateManager.SkipRatio)) / 60f;
-                    StringBuilderUtility.WritePositiveFloat(__instance.fpsText, 10, 3, realSpeed * 100, 0, '-');
-                }
-            }
         }
     }
 }
