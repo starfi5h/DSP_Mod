@@ -1,0 +1,7 @@
+{
+    "name": "MinerInfo",
+    "description": "Shows maximum miner output per second for all miners on a vein. 显示矿脉的矿机最大产量",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod",
+    "dependencies": ["xiaoye97-BepInEx-5.4.17"]
+}

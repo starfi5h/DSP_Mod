@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailgunsRetargetMini", "Rai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LossyCompression", "LossyCompression\LossyCompression.csproj", "{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinerInfo", "MinerInfo\MinerInfo.csproj", "{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
