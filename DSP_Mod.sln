@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DysonOrbitModifier", "DysonOrbitModifier\DysonOrbitModifier.csproj", "{8BC843E7-F406-4170-8D07-55BE46B0FD01}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "SphereEditorTools\SphereEditorTools.csproj", "{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMilestone", "NoMilestone\NoMilestone.csproj", "{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}"
@@ -13,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulletTime", "BulletTime\Bu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReorderTechQueue", "ReorderTechQueue\ReorderTechQueue.csproj", "{20BDE779-7D7B-4372-ABC0-29162F9145FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiment", "Experiment\Experiment.csproj", "{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAndHoldSim", "SampleAndHoldSim\SampleAndHoldSim.csproj", "{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{806B18C4-E083-4295-8D66-D12B7B6F9EA9}"
@@ -22,8 +18,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoverTooltipDelay", "HoverTooltipDelay\HoverTooltipDelay.csproj", "{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoMute", "AutoMute\AutoMute.csproj", "{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NebulaCompatibilityAssist", "NebulaCompatibilityAssist\NebulaCompatibilityAssist.csproj", "{7DCC6766-3FD9-4621-8E7F-70B2427794BA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1E684FD-94E2-4C84-8E00-8C9FCDC517FB}"
 	ProjectSection(SolutionItems) = preProject
@@ -42,10 +36,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BC843E7-F406-4170-8D07-55BE46B0FD01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6F6FB6-A5C8-40BE-B244-861F8232ABF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -62,10 +52,6 @@ Global
 		{20BDE779-7D7B-4372-ABC0-29162F9145FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20BDE779-7D7B-4372-ABC0-29162F9145FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20BDE779-7D7B-4372-ABC0-29162F9145FB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E380E4D6-C5B5-4A68-9FAD-16D2E1C7916E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -82,10 +68,6 @@ Global
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7DCC6766-3FD9-4621-8E7F-70B2427794BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7DCC6766-3FD9-4621-8E7F-70B2427794BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7DCC6766-3FD9-4621-8E7F-70B2427794BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7DCC6766-3FD9-4621-8E7F-70B2427794BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
