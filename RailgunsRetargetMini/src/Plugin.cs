@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using System;
 
 namespace RailgunsRetargetMini
 {
@@ -11,6 +12,7 @@ namespace RailgunsRetargetMini
         public const string GUID = "starfi5h.plugin.RailgunsRetargetMini";
         public const string NAME = "RailgunsRetargetMini";
         public const string VERSION = "1.1.0";
+        public static ManualLogSource Log;
         Harmony harmony;
 
         public void Awake()
@@ -33,13 +35,22 @@ namespace RailgunsRetargetMini
             else
                 harmony.PatchAll(typeof(Patch2));
 
-# if DEBUG
-            Log.LogSource = Logger;
-# endif
+            try
+            {
+                harmony.PatchAll(typeof(UIPatch));
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning("Can't patch ejector control UI!");
+                Logger.LogWarning(e);
+            }
+
+            Log = Logger;
         }
 
         public void OnDestroy()
         {
+            UIPatch.OnDestory();
             harmony.UnpatchSelf();
         }
     }
@@ -51,15 +62,4 @@ namespace RailgunsRetargetMini
         public static int RotatePeriod = 60;
         public static int CheckPeriod = 120;
     }
-
-# if DEBUG
-    public static class Log
-    {
-        public static ManualLogSource LogSource;
-        public static void Error(object obj) => LogSource.LogError(obj);
-        public static void Warn(object obj) => LogSource.LogWarning(obj);
-        public static void Info(object obj) => LogSource.LogInfo(obj);
-        public static void Debug(object obj) => LogSource.LogDebug(obj);
-    }
-# endif
 }
