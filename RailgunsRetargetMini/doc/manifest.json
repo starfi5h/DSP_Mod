@@ -1,0 +1,7 @@
+{
+  "name": "RailgunsRetargetMini",
+  "description": "Automatically switch EM Rail Ejectors target orbit. Remote set/unset ejectors target orbit. 自動切換电磁炮軌道.",
+  "version_number": "1.2.0",
+  "website_url": "https://github.com/starfi5h/DSP_Mod",
+  "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
+}

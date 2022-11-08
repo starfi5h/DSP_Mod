@@ -1,7 +1,12 @@
 # RailgunsRetargetMini
 
-This is a simplified version of [RailgunsRetargeting](https://dsp.thunderstore.io/package/brokenmass/RailgunsRetargeting/) as temporary replacement.   
+This is an updated version of [RailgunsRetargeting](https://dsp.thunderstore.io/package/brokenmass/RailgunsRetargeting/) as temporary replacement.   
 This mod will try to change targeting orbit of EM-Rail ejectors when the current one is not reachable.  
+![Remote set orbit](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/RailgunsRetargetMini/doc/demo1.gif)  
+In dyson editor, select an orbit and click on the icon will show a pop-up displaying the status of ejectors on the system.  
+When clicking "Set All", all ejectors on the system will set the target orbit to the selecting orbit.  
+When clicking "Unset All", all ejectors on the system will set the target orbit to none and stop firing.  
+
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manual download the file and put `RailgunsRetargetMini.dll` in `BepInEx/plugins` folder.
@@ -22,6 +27,10 @@ If you're using mod manager, you can find the file in Config editor.
 
 这个mod是[RailgunsRetargeting](https://dsp.thunderstore.io/package/brokenmass/RailgunsRetargeting/)的暂时替代品。  
 每`60`个逻辑帧，会检查有子弹的电磁弹射器。如果当前轨道无法发射，会尝试寻找可用的轨道并切换。  
+  
+在戴森球编辑器中，选择一个轨道并点击图标，将弹出窗口显示该星系中所有电磁炮的状态。  
+点击"Set All"时，星系中所有的电磁炮会将目标轨道设置为选择的轨道。  
+点击"Unset All"时，星系中所有的电磁炮会将目标轨道设置为无并停止发射。  
 
 ## 设置   
 .cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
@@ -37,11 +46,14 @@ If you're using mod manager, you can find the file in Config editor.
 
 ## Changelog
 
-#### v1.1.0 (game version 0.9.26.13034)
+#### v1.2.0 (DSP 0.9.27.15033)
+\- Add remote ejectors orbit control.  
+
+#### v1.1.0 (DSP 0.9.26.13034)
 \- Add a new method to switch orbit.  
 \- Add ForceRetargeting, Method, RotatePeriod config options.  
 
-#### v1.0.0 (game version 0.9.26.12913)  
+#### v1.0.0 (DSP 0.9.26.12913)  
 \- Initial release. 
 
 ----
