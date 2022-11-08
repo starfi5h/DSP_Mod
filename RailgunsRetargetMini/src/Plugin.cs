@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
@@ -7,6 +6,7 @@ using System;
 namespace RailgunsRetargetMini
 {
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(NebulaCompat.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.RailgunsRetargetMini";
@@ -29,6 +29,7 @@ namespace RailgunsRetargetMini
             Configs.CheckPeriod = Config.Bind<int>("Method2", "CheckPeriod", 120,
             "Check reachable orbits every x ticks.\n无法发射时,每x祯检查可用轨道一次").Value;
 
+            Log = Logger;
             harmony = new(PluginInfo.PLUGIN_GUID);
             if (Configs.Method == 1)
                 harmony.PatchAll(typeof(Patch1));
@@ -45,7 +46,7 @@ namespace RailgunsRetargetMini
                 Logger.LogWarning(e);
             }
 
-            Log = Logger;
+            NebulaCompat.Init();
         }
 
         public void OnDestroy()

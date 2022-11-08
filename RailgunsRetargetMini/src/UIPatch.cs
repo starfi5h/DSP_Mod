@@ -42,7 +42,11 @@ namespace RailgunsRetargetMini
         {
             StarData starData = UIRoot.instance.uiGame.dysonEditor.selection.viewStar;
             int orbitId = UIRoot.instance.uiGame.dysonEditor.selection.selectedSwarmOrbitIds[0];
-            ShowMessage(GetStatus(starData), starData, orbitId);
+
+            if (NebulaCompat.IsClient)
+                NebulaCompat.SendPacket(starData, -orbitId);
+            else
+                ShowMessage(GetStatus(starData), starData, orbitId);
         }
 
         public static void ShowMessage(string message, StarData starData, int orbitId)
@@ -62,6 +66,8 @@ namespace RailgunsRetargetMini
                 return;
             }
             SetOrbit(starData, orbitId);
+            if (NebulaCompat.IsMultiplayer)
+                NebulaCompat.SendPacket(starData, orbitId);
         }
 
         public static void SetOrbit(StarData starData, int orbitId)
