@@ -11,7 +11,7 @@ namespace RailgunsRetargetMini
     {
         public const string GUID = "starfi5h.plugin.RailgunsRetargetMini";
         public const string NAME = "RailgunsRetargetMini";
-        public const string VERSION = "1.1.0";
+        public const string VERSION = "1.2.0";
         public static ManualLogSource Log;
         Harmony harmony;
 
