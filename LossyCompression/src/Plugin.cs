@@ -15,7 +15,7 @@ namespace LossyCompression
     {
         public const string GUID = "starfi5h.plugin.LossyCompression";
         public const string NAME = "LossyCompression";
-        public const string VERSION = "0.2.2";
+        public const string VERSION = "0.2.3";
         public const int FORMAT_VERSION = 1;
 
         public static Plugin Instance { get; private set; }
@@ -30,6 +30,7 @@ namespace LossyCompression
             Log.LogSource = Logger;
 
             var LazyLoad = Config.Bind<bool>("Advance", "LazyLoad", false, "Delay generation of shell model until viewing\n延迟载入戴森壳的模型");
+            var ReduceRAM = Config.Bind<bool>("Advance", "ReduceRAM", false, "Further reduce RAM usage when lazy load is enabled\n启用延迟加载时进一步减少内存使用量");
             var CargoPath = Config.Bind<bool>("Dependent", "CargoPath", false, "Lossy compress for belts & cargo\n有损压缩传送带数据（将更改原档）");
             var DysonShell = Config.Bind<bool>("Independent", "DysonShell", true, "Lossless compress for dyson shells\n无损压缩戴森壳面");
             var DysonSwarm = Config.Bind<bool>("Independent", "DysonSwarm", true, "Lossy compress for dyson swarm\n有损压缩太阳帆");
@@ -38,6 +39,7 @@ namespace LossyCompression
             enableFlags += DysonShell.Value ? 2 : 0;
             enableFlags += DysonSwarm.Value ? 4 : 0;
             LazyLoading.Enable = LazyLoad.Value;
+            LazyLoading.ReduceRAM = ReduceRAM.Value;
             SetEnables(enableFlags);
             DysonShellCompress.IsMultithread = true;
             DysonSwarmCompress.IsMultithread = true;
@@ -47,17 +49,22 @@ namespace LossyCompression
             harmony.PatchAll(typeof(CargoPathCompress));
             harmony.PatchAll(typeof(DysonShellCompress));
             harmony.PatchAll(typeof(DysonSwarmCompress));
-            try
+            if (LazyLoading.Enable)
             {
-                harmony.PatchAll(typeof(LazyLoading));
-            }
-            catch(Exception e)
-            {
-                Log.Error("Lazy load patching fail! The function is now disabled");
-                Log.Error(e);
-                LazyLoading.Enable = false;
+                try
+                {
+                    harmony.PatchAll(typeof(LazyLoading));
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Lazy load patching fail! The function is now disabled");
+                    Log.Error(e);
+                    LazyLoading.Enable = false;
+                }
             }
             harmony.PatchAll(typeof(UIcontrol));
+            Log.Info($"cargoPath:{CargoPathCompress.Enable} dysonShell:{DysonShellCompress.Enable} dysonSwarm:{DysonSwarmCompress.Enable}");
+            Log.Info($"lazyLoad:{LazyLoading.Enable} reduceRAM:{LazyLoading.ReduceRAM}");
 
             ModCompatibility.DSPOptimizations.Init(harmony);
             ModCompatibility.NebulaAPI.Init(harmony);
@@ -129,7 +136,6 @@ namespace LossyCompression
 
         public void Import(BinaryReader r)
         {
-            LazyLoading.Reset();
             if (GameMain.instance.isMenuDemo) return;
 
             int format_version = r.ReadInt32();
@@ -150,8 +156,6 @@ namespace LossyCompression
 
         public void IntoOtherSave()
         {
-            LazyLoading.Reset();
-            if (GameMain.instance.isMenuDemo) return;
         }
     }
 

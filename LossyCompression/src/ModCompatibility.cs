@@ -96,19 +96,7 @@ namespace LossyCompression
                 NebulaModAPI.RegisterPackets(Assembly.GetExecutingAssembly());
                 var classType = AccessTools.TypeByName("NebulaWorld.Universe.DysonSphereManager");
                 var methodInfo = AccessTools.Method(classType, "RegisterPlayer");
-                harmony.Patch(classType.GetMethod("RegisterPlayer"), null, new HarmonyMethod(typeof(NebulaAPI), "DysonDataPostfix"));
-
-                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
-                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
-            }
-
-            public static void OnMultiplayerGameStarted()
-            {
-                LazyLoading.Reset();
-            }
-
-            public static void OnMultiplayerGameEnded()
-            {
+                harmony.Patch(methodInfo, null, new HarmonyMethod(typeof(NebulaAPI), "DysonDataPostfix"));
             }
 
             public static void DysonDataPostfix(INebulaConnection conn, int starIndex)
@@ -165,7 +153,7 @@ namespace LossyCompression
                     // Let DSPOpt init
                     AfeterImport?.Invoke();
 
-                    // Reset for lazy loading
+                    // Reset veiwing dyson sphere to check again
                     LazyLoading.Reset();
                 }
             }
