@@ -82,7 +82,7 @@ namespace LossyCompression
                             w.Write(dysonShell.nodes.Count);
                             for (int i = 0; i < dysonShell.nodes.Count; i++)
                                 w.Write(dysonShell.nodes[i].id);
-                            //nodecps.Count = this.nodes.Count + 1, the last one is sum			
+                            //nodecps.Count = this.nodes.Count + 1, the last one is sum            
                             for (int j = 0; j < dysonShell.nodes.Count + 1; j++)
                                 w.Write(dysonShell.nodecps[j]);
                             //vertexCount, vertsqOffset , cpPerVertex are needed in constructCp
@@ -272,7 +272,7 @@ namespace LossyCompression
             }
         }
 
-        public static int GenerateModel(DysonSphere dysonSphere, int bitMask)
+        public static int GenerateModel(DysonSphere dysonSphere, int bitMask, bool generateModel = true)
         {
             double t1, t2;
             var stopwatch = new HighStopwatch();
@@ -314,12 +314,16 @@ namespace LossyCompression
                 }
                 t1 = stopwatch.duration;
 
-                stopwatch.Begin();
-                foreach (var dysonShell in dysonShells)
-                    dysonShell.GenerateModelObjects();
-                t2 = stopwatch.duration;
-
-                Log.Debug($"[{dysonSphere.starData.index,2}] Generate {dysonShells.Count,4} shells.  Time: {t1:F4} | {t2:F4}");
+                t2 = 0;
+                if (generateModel)
+                {
+                    // Note: GenerateModelObjects will halt when there are too many objects
+                    stopwatch.Begin();
+                    foreach (var dysonShell in dysonShells)
+                        dysonShell.GenerateModelObjects();
+                    t2 = stopwatch.duration;
+                }
+                Log.Debug($"[{dysonSphere.starData.index,2}] Generated {dysonShells.Count,4} shells.  Time: {t1:F4} | {t2:F4}");
             }
             return dysonShells.Count;
         }

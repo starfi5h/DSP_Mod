@@ -24,9 +24,12 @@ The compressed data is stored in separated file `.moddsv`.
 The new save can load without this mod or the file, it will appear like there is no sails.  
 
 - `LazyLoad` (Default:`false`)  
-Delay generation of shell model until needed (veiwing, exporting).  
-Only takes effect when loading a save with compressed dyson shell.  
+Delay generation of shell model until needed (veiwing, vanilla exporting).  
 Can reduce RAM usage by disabling layer display in Dyson editor panel.  
+
+- `ReduceRAM` (Default:`false`)  
+Further reduce RAM usage when lazy load is enabled by deleting shell model data after vanilla save export.  
+Recommend to enable it when there are too many shells in a save.  
 
 ## Compatibility  
 
@@ -61,10 +64,12 @@ Can reduce RAM usage by disabling layer display in Dyson editor panel.
 在没有mod或档案时存档依然可以开启, 只是会丢失所有的太阳帆。  
 
 - `LazyLoad` (默认停用 `false`)  
-延迟载入戴森壳的模型。存档需要先压缩过戴森壳才能生效。  
-只有在需要时(看到模型, 写入原生存档)才会产生模型。
+延迟载入戴森壳的模型，只有在需要时(看到模型, 写入原生存档)才会产生模型。  
 因此只要在戴森球面板隐藏壳层显示就不会载入，可以减少内存的使用量。  
 
+- `ReduceRAM` (默认停用 `false`)  
+当启用延迟加载时，在写入原生存档后删除戴森球模型数据。  
+可以进一步减少内存使用量。  
 
 ## MOD相容性  
 
@@ -75,6 +80,10 @@ Can reduce RAM usage by disabling layer display in Dyson editor panel.
 ----
 
 ## Changelog
+
+#### v0.2.3  
+\- Add `ReduceRAM` config to further reduce RAM usage.  
+\- Enable LazyLoad function in vanilla save.  
 
 #### v0.2.2
 \- Fix error in multiplayer shell decompression.  
