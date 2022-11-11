@@ -57,6 +57,13 @@ namespace LossyCompression
             }
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(GameData), nameof(GameData.Export))]
+        public static void AfterGameDataExport()
+        {
+            DysonShellCompress.FreeRAM();
+        }
+
+
         static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
 
         [HarmonyPrefix, HarmonyPatch(typeof(DysonSphere), nameof(DysonSphere.Export))]
@@ -65,31 +72,36 @@ namespace LossyCompression
             // Generate data for vanilla save
             if (!DysonShellCompress.Enable && dysonSphereMasks.ContainsKey(__instance))
             {
+                bool generateModel = !ReduceRAM;
                 if (ThreadingHelper.Instance.InvokeRequired)
                 {
                     // Wait for GenerateModel run on main thread
                     autoEvent.Reset();
                     ThreadingHelper.Instance.StartSyncInvoke(() =>
                     {
-                        DysonShellCompress.GenerateModel(__instance, -1);
+                        DysonShellCompress.GenerateModel(__instance, -1, generateModel);
                         autoEvent.Set();
                     });
                     autoEvent.WaitOne(-1);
                 }
                 else
                 {
-                    DysonShellCompress.GenerateModel(__instance, -1);
+                    DysonShellCompress.GenerateModel(__instance, -1, generateModel);
                 }
-                if (!ReduceRAM)
+                if (generateModel)
+                {
+                    // If all data is generate for dyson shell, we can safely remove it from watch list
                     dysonSphereMasks.Remove(__instance);
-                DysonShellCompress.FreeRAM();
+                }
             }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(DysonSphere), nameof(DysonSphere.Export))]
         public static void Export_Postfix(DysonSphere __instance)
         {
-            if (!DysonShellCompress.Enable && dysonSphereMasks.ContainsKey(__instance) && __instance != viewingSphere)
+            // FreeRAM: models are not generated, so set shells data back to basic
+            // set visibleMask back to all disabled
+            if (!DysonShellCompress.Enable && dysonSphereMasks.ContainsKey(__instance))
             {
                 if (ThreadingHelper.Instance.InvokeRequired)
                 {
@@ -106,13 +118,16 @@ namespace LossyCompression
                 {
                     RemoveAllVerts(__instance);
                 }
-                // Set visibleMask to all disabled
-                dysonSphereMasks[__instance] = 0;
             }
         }
 
         private static void RemoveAllVerts(DysonSphere dysonSphere)
         {
+            // Reset viewing sphere to check mask again
+            if (dysonSphere == viewingSphere)
+                viewingSphere = null;
+            dysonSphereMasks[dysonSphere] = 0;
+
             int count = 0;
             for (int lid = 1; lid < dysonSphere.layersIdBased.Length; lid++)
             {

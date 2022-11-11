@@ -129,6 +129,7 @@ namespace LossyCompression
                 }
                 GameTick = GameMain.gameTick;
                 Log.Debug($"Send compressed data {Bytes.Length:N0}");
+                DysonShellCompress.FreeRAM();
             }
         }
 
@@ -149,6 +150,7 @@ namespace LossyCompression
                         if ((packet.EnableFlags & 4) != 0)
                             DysonSwarmCompress.Decode(dysonSphere, r.BinaryReader, packet.GameTick);
                     }
+                    DysonShellCompress.FreeRAM();
 
                     // Let DSPOpt init
                     AfeterImport?.Invoke();

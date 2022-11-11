@@ -272,7 +272,7 @@ namespace LossyCompression
             }
         }
 
-        public static int GenerateModel(DysonSphere dysonSphere, int bitMask)
+        public static int GenerateModel(DysonSphere dysonSphere, int bitMask, bool generateModel = true)
         {
             double t1, t2;
             var stopwatch = new HighStopwatch();
@@ -314,12 +314,16 @@ namespace LossyCompression
                 }
                 t1 = stopwatch.duration;
 
-                stopwatch.Begin();
-                foreach (var dysonShell in dysonShells)
-                    dysonShell.GenerateModelObjects();
-                t2 = stopwatch.duration;
-
-                Log.Debug($"[{dysonSphere.starData.index,2}] Generate {dysonShells.Count,4} shells.  Time: {t1:F4} | {t2:F4}");
+                t2 = 0;
+                if (generateModel)
+                {
+                    // Note: GenerateModelObjects will halt when there are too many objects
+                    stopwatch.Begin();
+                    foreach (var dysonShell in dysonShells)
+                        dysonShell.GenerateModelObjects();
+                    t2 = stopwatch.duration;
+                }
+                Log.Debug($"[{dysonSphere.starData.index,2}] Generated {dysonShells.Count,4} shells.  Time: {t1:F4} | {t2:F4}");
             }
             return dysonShells.Count;
         }
