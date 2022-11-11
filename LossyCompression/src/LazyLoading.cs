@@ -171,7 +171,7 @@ namespace LossyCompression
             dysonShell.vertsqOffset = vertsqOffset;
             dysonShell.vertexCount = vertexCount;
             dysonShell.cpPerVertex = cpPerVertex;
-            
+
             dysonShell.nodes = nodes;
             dysonShell.nodeIndexMap = nodeIndexMap;
             dysonShell.frames = frames;
@@ -202,7 +202,7 @@ namespace LossyCompression
                     .End()
                     .MatchBack(true, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "GenerateModelObjects"))
                     .SetOperandAndAdvance(typeof(LazyLoading).GetMethod(nameof(LazyLoading.GenerateModelObjectsGuard)));
-                    
+
                 return codeMatcher.InstructionEnumeration();
             }
             catch (System.Exception err)
@@ -268,7 +268,7 @@ namespace LossyCompression
                         a = 1 - a;
                         b = 1 - b;
                     }
-                    Vector3 point = (1 - a - b) * centerPoint +  a * vert1 + b * vert2;
+                    Vector3 point = (1 - a - b) * centerPoint + a * vert1 + b * vert2;
                     point = __instance.orbitRadius * point.normalized;
 
                     Vector3 velocity = __instance.currentRotation * (Vector3.Cross(point, Vector3.up) * __instance.orbitAngularSpeed * 0.017453292f);

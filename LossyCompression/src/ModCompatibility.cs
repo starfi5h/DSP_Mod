@@ -75,7 +75,7 @@ namespace LossyCompression
             {
                 try
                 {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) 
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                         return;
                     Patch(harmony);
                     Log.Info("Nebula compatibility - OK");

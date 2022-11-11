@@ -82,7 +82,7 @@ namespace LossyCompression
                             w.Write(dysonShell.nodes.Count);
                             for (int i = 0; i < dysonShell.nodes.Count; i++)
                                 w.Write(dysonShell.nodes[i].id);
-                            //nodecps.Count = this.nodes.Count + 1, the last one is sum			
+                            //nodecps.Count = this.nodes.Count + 1, the last one is sum            
                             for (int j = 0; j < dysonShell.nodes.Count + 1; j++)
                                 w.Write(dysonShell.nodecps[j]);
                             //vertexCount, vertsqOffset , cpPerVertex are needed in constructCp

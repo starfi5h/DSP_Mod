@@ -22,12 +22,12 @@ namespace LossyCompression
         private const int DIVISION = 350; // default = 70
 
         public static void Export(BinaryWriter w)
-		{
-			if (!Enable)
-			{
-				w.Write(0);
-				return;
-			}
+        {
+            if (!Enable)
+            {
+                w.Write(0);
+                return;
+            }
 
             var stopWatch = new HighStopwatch();
             stopWatch.Begin();
@@ -82,7 +82,7 @@ namespace LossyCompression
         }
 
         public static void Encode(DysonSphere dysonSphere, BinaryWriter w)
-		{
+        {
             // Modify from CalculateSailLifeDistribution
             ExpiryOrder[] expiryOrder = dysonSphere.swarm.expiryOrder;
             long step = (long)(GameMain.history.solarSailLife * 60 / DIVISION);
@@ -130,7 +130,7 @@ namespace LossyCompression
                 return;
 
             // Clean all sails
-            RemoveSailsByOrbit_NoSync(dysonSwarm , - 1); 
+            RemoveSailsByOrbit_NoSync(dysonSwarm, -1);
             int newCap = 512;
             while (newCap <= totalSailCount)
                 newCap *= 2;
@@ -221,7 +221,7 @@ namespace LossyCompression
                 ss.vx = (float)vectorLF.x;
                 ss.vy = (float)vectorLF.y;
                 ss.vz = (float)vectorLF.z;
-                ss.gs = 1f;                
+                ss.gs = 1f;
             }
         }
 
@@ -235,42 +235,42 @@ namespace LossyCompression
 
             int sailCapacity, sailCursor, sailRecycleCursor;
             int expiryCursor, expiryEnding, absorbCursor, absorbEnding;
-			ExpiryOrder[] expiryOrder;
-			AbsorbOrder[] absorbOrder;
+            ExpiryOrder[] expiryOrder;
+            AbsorbOrder[] absorbOrder;
 
-			sailCapacity = __instance.sailCapacity;
+            sailCapacity = __instance.sailCapacity;
             sailCursor = __instance.sailCursor;
             sailRecycleCursor = __instance.sailRecycleCursor;
             expiryCursor = __instance.expiryCursor;
             expiryEnding = __instance.expiryEnding;
             absorbCursor = __instance.absorbCursor;
             absorbEnding = __instance.absorbEnding;
-			expiryOrder = __instance.expiryOrder;
-			absorbOrder = __instance.absorbOrder;
+            expiryOrder = __instance.expiryOrder;
+            absorbOrder = __instance.absorbOrder;
 
-			__instance.sailCapacity = 512;
+            __instance.sailCapacity = 512;
             __instance.sailCursor = 0;
             __instance.sailRecycleCursor = 0;
             __instance.expiryCursor = 0;
             __instance.expiryEnding = 0;
             __instance.absorbCursor = 0;
             __instance.absorbEnding = 0;
-			__instance.expiryOrder = Array.Empty<ExpiryOrder>();
-			__instance.absorbOrder = Array.Empty<AbsorbOrder>();
+            __instance.expiryOrder = Array.Empty<ExpiryOrder>();
+            __instance.absorbOrder = Array.Empty<AbsorbOrder>();
 
-			DysonSwarm_Export_NoGPU(__instance, w);
+            DysonSwarm_Export_NoGPU(__instance, w);
 
-			__instance.sailCapacity = sailCapacity;
+            __instance.sailCapacity = sailCapacity;
             __instance.sailCursor = sailCursor;
             __instance.sailRecycleCursor = sailRecycleCursor;
             __instance.expiryCursor = expiryCursor;
             __instance.expiryEnding = expiryEnding;
             __instance.absorbCursor = absorbCursor;
             __instance.absorbEnding = absorbEnding;
-			__instance.expiryOrder = expiryOrder;
-			__instance.absorbOrder = absorbOrder;
+            __instance.expiryOrder = expiryOrder;
+            __instance.absorbOrder = absorbOrder;
 
-			return false;
+            return false;
         }
 
         [HarmonyReversePatch]
