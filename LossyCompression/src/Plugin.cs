@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using crecheng.DSPModSave;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace LossyCompression
@@ -72,6 +73,9 @@ namespace LossyCompression
 #if DEBUG
             harmony.PatchAll(typeof(DebugPatch));
             UIcontrol.Init();
+            // Refresh DSPModSave dictionary for script engine
+            var dict = (Dictionary<string, IModCanSave>)AccessTools.Field(typeof(crecheng.DSPModSave.Patches), "allModData").GetValue(null);
+            dict[GUID] = Instance;
 #endif
         }
 
