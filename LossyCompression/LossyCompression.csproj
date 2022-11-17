@@ -366,6 +366,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Utils.cs" />
     <Compile Include="src\LazyLoading.cs" />
     <Compile Include="src\ModCompatibility.cs" />
     <Compile Include="src\DysonSwarmCompress.cs" />
