@@ -46,7 +46,7 @@ namespace LossyCompression
         }
 
 
-        private static void Test(Action<BinaryWriter> decode, Action<BinaryReader> encode, Action middle = null)
+        private static void Test(Action<BinaryWriter> encode, Action<BinaryReader> decode, Action middle = null)
         {
             HighStopwatch stopwatch = new HighStopwatch();
             double decode_time = 0, encode_time = 0;
@@ -55,7 +55,7 @@ namespace LossyCompression
             {
                 stopwatch.Begin();
                 BinaryWriter writer = new BinaryWriter(stream);
-                decode(writer);
+                encode(writer);
                 encode_time = stopwatch.duration;
 
                 stream.Seek(0, SeekOrigin.Begin);
@@ -63,7 +63,7 @@ namespace LossyCompression
 
                 stopwatch.Begin();
                 BinaryReader reader = new BinaryReader(stream);
-                encode(reader);
+                decode(reader);
                 decode_time = stopwatch.duration;
             }
 
@@ -89,6 +89,7 @@ namespace LossyCompression
 
         private static void TestCargoPath()
         {
+            CargoPathCompress.Reset();
             HighStopwatch stopwatch = new HighStopwatch();
             stopwatch.Begin();
 
@@ -98,6 +99,7 @@ namespace LossyCompression
             }
 
             Log.Info($"Time cost: {stopwatch.duration}s");
+            CargoPathCompress.Print();
         }
 
         private static void EncodePlanetBelt(CargoTraffic cargoTraffic)
