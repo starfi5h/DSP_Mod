@@ -33,12 +33,14 @@ namespace LossyCompression
             var LazyLoad = Config.Bind<bool>("Advance", "LazyLoad", false, "Delay generation of shell model until viewing\n延迟载入戴森壳的模型");
             var ReduceRAM = Config.Bind<bool>("Advance", "ReduceRAM", false, "Further reduce RAM usage when lazy load is enabled\n启用延迟加载时进一步减少内存使用量");
             var CargoPath = Config.Bind<bool>("Dependent", "CargoPath", false, "Lossy compress for belts & cargo\n有损压缩传送带数据（将更改原档）");
+            var EntityData = Config.Bind<bool>("Dependent", "EntityData", true, "Lossy compress for entity data\n有损建筑公共数据（将更改原档）");
             var DysonShell = Config.Bind<bool>("Independent", "DysonShell", true, "Lossless compress for dyson shells\n无损压缩戴森壳面");
             var DysonSwarm = Config.Bind<bool>("Independent", "DysonSwarm", true, "Lossy compress for dyson swarm\n有损压缩太阳帆");
 
             enableFlags += CargoPath.Value ? 1 : 0;
             enableFlags += DysonShell.Value ? 2 : 0;
             enableFlags += DysonSwarm.Value ? 4 : 0;
+            enableFlags += EntityData.Value ? 8 : 0;
             LazyLoading.Enable = LazyLoad.Value;
             LazyLoading.ReduceRAM = ReduceRAM.Value;
             SetEnables(enableFlags);
@@ -48,7 +50,17 @@ namespace LossyCompression
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
             harmony.PatchAll(typeof(CargoPathCompress));
-            harmony.PatchAll(typeof(EntityDataCompress));
+            try
+            {
+                if (EntityDataCompress.Enable)
+                    harmony.PatchAll(typeof(EntityDataCompress));
+            }
+            catch (Exception e)
+            {
+                Log.Error("EntityDataCompress patching fail! The function is now disabled");
+                Log.Error(e);
+                EntityDataCompress.Enable = false;
+            }
             harmony.PatchAll(typeof(DysonShellCompress));
             harmony.PatchAll(typeof(DysonSwarmCompress));
             if (LazyLoading.Enable)
@@ -95,6 +107,8 @@ namespace LossyCompression
                 mask |= 2;
             if (DysonSwarmCompress.Enable)
                 mask |= 4;
+            if (EntityDataCompress.Enable)
+                mask |= 8;
             return mask;
         }
 
@@ -103,6 +117,7 @@ namespace LossyCompression
             CargoPathCompress.Enable = (mask & 1) != 0;
             DysonShellCompress.Enable = (mask & 2) != 0;
             DysonSwarmCompress.Enable = (mask & 4) != 0;
+            EntityDataCompress.Enable = (mask & 8) != 0;
         }
 
         [HarmonyPrefix]
