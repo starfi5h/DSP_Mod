@@ -48,6 +48,7 @@ namespace LossyCompression
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
             harmony.PatchAll(typeof(CargoPathCompress));
+            harmony.PatchAll(typeof(EntityDataCompress));
             harmony.PatchAll(typeof(DysonShellCompress));
             harmony.PatchAll(typeof(DysonSwarmCompress));
             if (LazyLoading.Enable)
