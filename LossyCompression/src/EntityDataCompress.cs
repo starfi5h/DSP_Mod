@@ -159,15 +159,25 @@ namespace LossyCompression
 				.Advance(1)
 				.CreateLabel(out var nextLebel)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldloc_0),
-					new CodeInstruction(OpCodes.Ldc_I4, ModdedStartVersion),
-					new CodeInstruction(OpCodes.Ble_S, nextLebel),
 					HarmonyLib.Transpilers.EmitDelegate<Action>(
 					() =>
 					{
-						Log.Warn("!");
+						Log.Warn("pass1");
 					}
 					),
+					new CodeInstruction(OpCodes.Ldloc_0),
+					new CodeInstruction(OpCodes.Ldc_I4, ModdedStartVersion),
+					new CodeInstruction(OpCodes.Ble, nextLebel),
+					new CodeInstruction(OpCodes.Nop),
+					HarmonyLib.Transpilers.EmitDelegate<Action>(
+					() =>
+					{
+						Log.Warn("pass2");
+					}
+					),
+					new CodeInstruction(OpCodes.Nop),
+					new CodeInstruction(OpCodes.Ret),
+					/*
 					new CodeInstruction(OpCodes.Ldarg_0),
 					new CodeInstruction(OpCodes.Ldarg_1),
 					new CodeInstruction(OpCodes.Ldarg_2),
@@ -180,6 +190,7 @@ namespace LossyCompression
 						PlanetFactoryImportMod(factroy, index, data, r);					
 					}					
 					),
+					*/
 					new CodeInstruction(OpCodes.Ret)
 				);
 
