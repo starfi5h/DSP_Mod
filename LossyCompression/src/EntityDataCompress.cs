@@ -19,94 +19,6 @@ namespace LossyCompression
 		public static long len;
 #pragma warning disable CS8321, IDE0060
 		
-		[HarmonyPostfix, HarmonyPatch(typeof(PerformanceMonitor), nameof(PerformanceMonitor.EndData))]
-		static void EndData(ESaveDataEntry entry)
-        {
-			if (entry == ESaveDataEntry.Entity)
-            {
-				//Log.Debug(System.Environment.StackTrace);
-            }
-        }
-
-
-		//[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
-		public static bool PlanetFactory_Prefix(PlanetFactory __instance, BinaryWriter w)
-		{
-			if (!Enable)
-				return true;
-			w.Write(CurrentVersion);
-
-			w.Write(7);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Planet);
-			w.Write(__instance.planetId);
-			w.Write(__instance.planet.theme);
-			w.Write(__instance.planet.algoId);
-			w.Write(__instance.planet.style);
-			__instance.planet.ExportRuntime(w);
-			w.Write(__instance.landed);
-			PerformanceMonitor.EndData(ESaveDataEntry.Planet);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Entity);
-			//EntityExport(__instance, w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Entity);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Planet);
-			w.Write(__instance.vegeCapacity);
-			w.Write(__instance.vegeCursor);
-			w.Write(__instance.vegeRecycleCursor);
-			for (int num5 = 1; num5 < __instance.vegeCursor; num5++)
-			{
-				__instance.vegePool[num5].Export(w);
-			}
-			for (int num6 = 0; num6 < __instance.vegeRecycleCursor; num6++)
-			{
-				w.Write(__instance.vegeRecycle[num6]);
-			}
-			w.Write(__instance.veinCapacity);
-			w.Write(__instance.veinCursor);
-			w.Write(__instance.veinRecycleCursor);
-			for (int num7 = 1; num7 < __instance.veinCursor; num7++)
-			{
-				__instance.veinPool[num7].Export(w);
-			}
-			for (int num8 = 0; num8 < __instance.veinRecycleCursor; num8++)
-			{
-				w.Write(__instance.veinRecycle[num8]);
-			}
-			for (int num9 = 1; num9 < __instance.veinCursor; num9++)
-			{
-				w.Write(__instance.veinAnimPool[num9].time);
-				w.Write(__instance.veinAnimPool[num9].prepare_length);
-				w.Write(__instance.veinAnimPool[num9].working_length);
-				w.Write(__instance.veinAnimPool[num9].state);
-				w.Write(__instance.veinAnimPool[num9].power);
-			}
-			PerformanceMonitor.EndData(ESaveDataEntry.Planet);
-			PerformanceMonitor.BeginData(ESaveDataEntry.BeltAndCargo);
-			__instance.cargoContainer.Export(w);
-			__instance.cargoTraffic.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.BeltAndCargo);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Storage);
-			__instance.factoryStorage.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Storage);
-			PerformanceMonitor.BeginData(ESaveDataEntry.PowerSystem);
-			__instance.powerSystem.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.PowerSystem);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Facility);
-			__instance.factorySystem.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Facility);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Transport);
-			__instance.transport.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Transport);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Platform);
-			__instance.platformSystem.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Platform);
-			PerformanceMonitor.BeginData(ESaveDataEntry.Digital);
-			__instance.digitalSystem.Export(w);
-			PerformanceMonitor.EndData(ESaveDataEntry.Digital);
-
-			return false;
-		}
-
-
 		[HarmonyTranspiler, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Export))]
 		static IEnumerable<CodeInstruction> PlanetFactoryExport_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iL)
 		{
@@ -193,8 +105,7 @@ namespace LossyCompression
 
 			return codeMatcher.InstructionEnumeration();
 		}
-
-		/*
+		
 		[HarmonyReversePatch, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.Import))]
 		public static void PlanetFactoryImportMod(PlanetFactory __instance, int _index, GameData _gameData, BinaryReader r)
 		{
@@ -223,7 +134,6 @@ namespace LossyCompression
 				return codeMatcher.InstructionEnumeration();
 			}
 		}
-		*/
 
 		public static void EntityExport(PlanetFactory factory, BinaryWriter w)
         {
@@ -233,27 +143,28 @@ namespace LossyCompression
 			
 			for (int i = 1; i < factory.entityCursor; i++)
 			{
-				factory.entityPool[i].Export(w);
-				
+				//factory.entityPool[i].Export(w);
+				EntityData_Export(ref factory.entityPool[i], w);
+
 				if (factory.entityPool[i].id != 0)
 				{
 					bool flag = factory.entitySignPool[i].count0 > 0.0001f;
 					w.Write(factory.entityAnimPool[i].time);
 					w.Write(factory.entityAnimPool[i].prepare_length);
 					w.Write(factory.entityAnimPool[i].working_length);
-					w.Write(factory.entityAnimPool[i].state);
-					w.Write(factory.entityAnimPool[i].power);
-					w.Write((byte)factory.entitySignPool[i].signType);
+					//w.Write(factory.entityAnimPool[i].state);
+					//w.Write(factory.entityAnimPool[i].power);
+					//w.Write((byte)factory.entitySignPool[i].signType);
 					w.Write((byte)((ulong)factory.entitySignPool[i].iconType + (ulong)(flag ? 128L : 0L)));
 					w.Write((ushort)factory.entitySignPool[i].iconId0);
 					if (flag)
 					{
 						w.Write(factory.entitySignPool[i].count0);
 					}
-					w.Write(factory.entitySignPool[i].x);
-					w.Write(factory.entitySignPool[i].y);
-					w.Write(factory.entitySignPool[i].z);
-					w.Write(factory.entitySignPool[i].w);
+					//w.Write(factory.entitySignPool[i].x);
+					//w.Write(factory.entitySignPool[i].y);
+					//w.Write(factory.entitySignPool[i].z);
+					//w.Write(factory.entitySignPool[i].w);
 
 					int bitmask = 0; // optimize by bit mask
 					int connStart = i * 16;
@@ -307,7 +218,6 @@ namespace LossyCompression
 
 		public static void EntityImport(PlanetFactory factory, BinaryReader r)
         {
-			Log.Info("Import!");
 			int num2 = r.ReadInt32();
 			factory.SetEntityCapacity(num2);
 			factory.entityCursor = r.ReadInt32();
@@ -315,17 +225,26 @@ namespace LossyCompression
 			
 			for (int i = 1; i < factory.entityCursor; i++)
 			{
-				factory.entityPool[i].Import(r);
-				
+				//factory.entityPool[i].Import(r);
+				EntityData_Import(ref factory.entityPool[i], r);
+
 				if (factory.entityPool[i].id != 0)
 				{
 					bool flag3 = false;
 					factory.entityAnimPool[i].time = r.ReadSingle();
 					factory.entityAnimPool[i].prepare_length = r.ReadSingle();
 					factory.entityAnimPool[i].working_length = r.ReadSingle();
-					factory.entityAnimPool[i].state = r.ReadUInt32();
-					factory.entityAnimPool[i].power = r.ReadSingle();
-					factory.entitySignPool[i].signType = (uint)r.ReadByte();
+					//factory.entityAnimPool[i].state = r.ReadUInt32();
+					//factory.entityAnimPool[i].power = r.ReadSingle();
+					//factory.entitySignPool[i].signType = (uint)r.ReadByte();
+
+					
+					ItemProto itemProto = LDB.items.Select(factory.entityPool[i].protoId);
+					if (itemProto != null) // Reconstruct position from entity
+					{
+						float signHegiht = factory.entityPool[i].beltId > 0 ? 1.2f : itemProto.prefabDesc.signHeight;
+						factory.entitySignPool[i].Reset(factory.entityPool[i].pos, signHegiht, itemProto.prefabDesc.signSize);
+					}
 					factory.entitySignPool[i].iconType = (uint)r.ReadByte();
 					if (factory.entitySignPool[i].iconType >= 128U)
 					{
@@ -339,10 +258,11 @@ namespace LossyCompression
 					{
 						factory.entitySignPool[i].count0 = r.ReadSingle();
 					}
-					factory.entitySignPool[i].x = r.ReadSingle();
-					factory.entitySignPool[i].y = r.ReadSingle();
-					factory.entitySignPool[i].z = r.ReadSingle();
-					factory.entitySignPool[i].w = r.ReadSingle();
+					//factory.entitySignPool[i].x = r.ReadSingle();
+					//factory.entitySignPool[i].y = r.ReadSingle();
+					//factory.entitySignPool[i].z = r.ReadSingle();
+					//factory.entitySignPool[i].w = r.ReadSingle();
+
 
 					int connStart = i * 16;
 					short bitmask = r.ReadInt16(); // optimize by bit mask
@@ -386,184 +306,6 @@ namespace LossyCompression
 						}
 						else
 							factory.entityConnPool[connStart + j] = 0;
-					}
-				}
-			}
-			for (int n = 0; n < factory.prebuildRecycleCursor; n++)
-			{
-				factory.prebuildRecycle[n] = r.ReadInt32();
-			}
-		}
-
-		public static void EntityExport2(PlanetFactory factory, BinaryWriter w)
-		{
-			long pos = w.BaseStream.Position;
-			//w.Write((byte)0);
-			w.Write(factory.entityCapacity);
-			w.Write(factory.entityCursor);
-			w.Write(factory.entityRecycleCursor);
-
-			for (int i = 1; i < factory.entityCursor; i++)
-			{
-				//__instance.entityPool[i].Export(w);
-				EntityData_Export(ref factory.entityPool[i], w);
-
-				
-				if (factory.entityPool[i].id != 0)
-				{
-					bool flag = factory.entitySignPool[i].count0 > 0.0001f;
-					w.Write(factory.entityAnimPool[i].time);
-					w.Write(factory.entityAnimPool[i].prepare_length);
-					w.Write(factory.entityAnimPool[i].working_length);
-					//w.Write(__instance.entityAnimPool[i].state); // Change every tick
-					//w.Write(__instance.entityAnimPool[i].power); // Change every tick
-					//w.Write((byte)__instance.entitySignPool[i].signType); // Change every tick
-					w.Write((byte)((ulong)factory.entitySignPool[i].iconType + (ulong)(flag ? 128L : 0L)));
-					w.Write((ushort)factory.entitySignPool[i].iconId0);
-					if (flag)
-					{
-						w.Write(factory.entitySignPool[i].count0);
-					}
-					//w.Write(__instance.entitySignPool[i].x); // Can be gained by reconstruct
-					//w.Write(__instance.entitySignPool[i].y);
-					//w.Write(__instance.entitySignPool[i].z);
-					//w.Write(__instance.entitySignPool[i].w);
-
-					
-					short bitmask = 0; // optimize by bit mask
-					int connStart = i * 16;
-					int connEnd = connStart + 16;
-					for (int j = connStart; j < connEnd; j++)
-					{
-						if (factory.entityConnPool[j] != 0)
-							bitmask |= (short)(1 << (j- connStart));
-					}
-					w.Write(bitmask);
-					for (int j = connStart; j < connEnd; j++) 
-					{
-						if (factory.entityConnPool[j] != 0)
-							w.Write(factory.entityConnPool[j]);
-					}					
-				}
-				
-			}
-
-			for (int k = 0; k < factory.entityRecycleCursor; k++)
-			{
-				w.Write(factory.entityRecycle[k]);
-			}
-			w.Write(factory.prebuildCapacity);
-			w.Write(factory.prebuildCursor);
-			w.Write(factory.prebuildRecycleCursor);
-			for (int l = 1; l < factory.prebuildCursor; l++)
-			{
-				factory.prebuildPool[l].Export(w);
-				if (factory.prebuildPool[l].id != 0)
-				{
-					short bitmask = 0; // optimize by bit mask
-					int connStart = l * 16;
-					int connEnd = connStart + 16;
-					for (int j = connStart; j < connEnd; j++)
-					{
-						if (factory.prebuildConnPool[j] != 0)
-							bitmask |= (short)(1 << (j - connStart));
-					}
-					w.Write(bitmask); 
-					for (int j = connStart; j < connEnd; j++)
-					{
-						if (factory.prebuildConnPool[j] != 0)
-							w.Write(factory.prebuildConnPool[j]);
-					}
-				}
-			}
-			for (int n = 0; n < factory.prebuildRecycleCursor; n++)
-			{
-				w.Write(factory.prebuildRecycle[n]);
-			}
-			
-			Log.Debug(w.BaseStream.Position - pos);
-			len += w.BaseStream.Position - pos;
-		}
-
-		public static void EntityImport2(PlanetFactory factory, BinaryReader r)
-		{
-			Log.Info("Import!");
-			//int version = r.ReadByte();
-			int capacity = r.ReadInt32();
-			factory.SetEntityCapacity(capacity);
-			factory.entityCursor = r.ReadInt32();
-			factory.entityRecycleCursor = r.ReadInt32();
-			for (int i = 1; i < factory.entityCursor; i++)
-			{
-				//factory.entityPool[i].Import(r);
-				EntityData_Import(ref factory.entityPool[i], r);
-
-				
-				if (factory.entityPool[i].id != 0)
-				{
-					bool flag = false;
-					factory.entityAnimPool[i].time = r.ReadSingle();
-					factory.entityAnimPool[i].prepare_length = r.ReadSingle();
-					factory.entityAnimPool[i].working_length = r.ReadSingle();
-					//factory.entityAnimPool[i].state = r.ReadUInt32();
-					//factory.entityAnimPool[i].power = r.ReadSingle();
-					//factory.entitySignPool[i].signType = (uint)r.ReadByte();
-					factory.entitySignPool[i].iconType = r.ReadByte();
-					if (factory.entitySignPool[i].iconType >= 128U)
-					{
-						flag = true;
-						factory.entitySignPool[i].iconType -= 128U;
-					}
-					factory.entitySignPool[i].iconId0 = r.ReadUInt16();
-					if (flag)
-					{
-						factory.entitySignPool[i].count0 = r.ReadSingle();
-					}
-					//factory.entitySignPool[i].x = r.ReadSingle();
-					//factory.entitySignPool[i].y = r.ReadSingle();
-					//factory.entitySignPool[i].z = r.ReadSingle();
-					//factory.entitySignPool[i].w = r.ReadSingle();
-					
-					
-					int connStart = i * 16;
-					short bitmask = r.ReadInt16(); // optimize by bit mask
-					for (int j = 0; j < 16; j++)
-					{
-						if ((bitmask & (1 << j)) > 0)
-							factory.entityConnPool[connStart + j] = r.ReadInt32();
-						else
-							factory.entityConnPool[connStart + j] = 0;
-					}
-					if (factory.entityPool[i].beltId == 0 && factory.entityPool[i].inserterId == 0 && factory.entityPool[i].splitterId == 0 && factory.entityPool[i].monitorId == 0 && factory.entityPool[i].spraycoaterId == 0 && factory.entityPool[i].pilerId == 0)
-					{
-						factory.entityMutexs[i] = new Mutex(i);
-					}
-				}
-				
-			}
-
-			for (int k = 0; k < factory.entityRecycleCursor; k++)
-			{
-				factory.entityRecycle[k] = r.ReadInt32();
-			}
-			capacity = r.ReadInt32();
-			factory.SetPrebuildCapacity(capacity);
-			factory.prebuildCursor = r.ReadInt32();
-			factory.prebuildRecycleCursor = r.ReadInt32();
-			for (int l = 1; l < factory.prebuildCursor; l++)
-			{
-				factory.prebuildPool[l].Import(r);
-
-				if (factory.prebuildPool[l].id != 0)
-				{
-					int connStart = l * 16;
-					short bitmask = r.ReadInt16(); // optimize by bitmask
-					for (int j = 0; j < 16; j++)
-					{
-						if ((bitmask & (1 << j)) > 0)
-							factory.prebuildConnPool[connStart + j] = r.ReadInt32();
-						else
-							factory.prebuildConnPool[connStart + j] = 0;
 					}
 				}
 			}
@@ -659,6 +401,22 @@ namespace LossyCompression
 		//[HarmonyPrefix, HarmonyPatch(typeof(EntityData), nameof(EntityData.Import))]
 		public static bool EntityData_Import(ref EntityData __instance, BinaryReader r)
         {
+			__instance.id = r.ReadInt32();
+			if (__instance.id <= 0)
+			{
+				return false;
+			}
+			__instance.protoId = r.ReadInt16();
+			__instance.modelIndex = r.ReadInt16();
+			__instance.pos.x = r.ReadSingle();
+			__instance.pos.y = r.ReadSingle();
+			__instance.pos.z = r.ReadSingle();
+			__instance.rot = Utils.ReadCompressedRotation(r, in __instance.pos);
+			//__instance.rot.x = r.ReadSingle();
+			//__instance.rot.y = r.ReadSingle();
+			//__instance.rot.z = r.ReadSingle();
+			//__instance.rot.w = r.ReadSingle();
+
 			int bitmask0 = r.ReadInt32();
 			if ((bitmask0 & 255) > 0)
 			{
@@ -717,34 +475,6 @@ namespace LossyCompression
 				cid = (num1 | num2 << 8 | num3 << 16);
 			}
 		}
-
-		[HarmonyPostfix, HarmonyPatch(typeof(UIEntityBriefInfo), "_OnOpen")]
-		public static void UIEntityBriefInfo_OnOpen(UIEntityBriefInfo __instance)
-		{
-			ref EntityData entity = ref __instance.factory.entityPool[__instance.entityId];
-			//Log.Debug(entity.rot);
-			//entity.rot = Quaternion.Euler(90, 0, 0);
-
-			//this.yaw = (Quaternion.Inverse(Maths.SphericalRotation(entityPool[objectId].pos, 0f)) * entityPool[objectId].rot).eulerAngles.y;
-
-
-			var q1 = Quaternion.LookRotation(entity.pos);
-			var q2 = Maths.SphericalRotation(entity.pos, 0f);
-			Maths.SphericalRotation(Vector3.zero, 0f);
-
-			var q3 = (Quaternion.Inverse(Maths.SphericalRotation(entity.pos, 0f)) * entity.rot);
-			float yaw = (Quaternion.Inverse(Maths.SphericalRotation(entity.pos, 0f)) * entity.rot).eulerAngles.y;
-
-			Maths.GetLatitudeLongitude(entity.pos, out int latd, out int latf, out int logd, out int logf, out bool north, out bool south, out bool west, out bool east);
-			Log.Debug($"N{north} {latd} E{east} {logd} - {entity.pos} {entity.rot}");
-
-
-			//Log.Info(q3 + " " + q3.eulerAngles);
-			//Log.Warn(yaw);
-
-			//entity.rot = q1;
-		}
-
 #pragma warning restore CS8321, IDE0060
 	}
 }
