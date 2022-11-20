@@ -148,6 +148,21 @@ namespace LossyCompression
 
 				if (factory.entityPool[i].id != 0)
 				{
+					// entityConnPool : move forward and optimize by bit mask
+					int bitmask = 0;
+					int connStart = i * 16;
+					for (int j = 0; j < 16; j++)
+					{
+						if (factory.entityConnPool[connStart + j] != 0)
+							bitmask |= 1 << j;
+					}
+					w.Write((short)bitmask);
+					for (int j = 0; j < 16; j++)
+					{
+						if (factory.entityConnPool[connStart + j] != 0)
+							w.Write(factory.entityConnPool[connStart + j]);
+					}
+
 					bool flag = factory.entitySignPool[i].count0 > 0.0001f;
 					w.Write(factory.entityAnimPool[i].time);
 					w.Write(factory.entityAnimPool[i].prepare_length);
@@ -165,22 +180,7 @@ namespace LossyCompression
 					//w.Write(factory.entitySignPool[i].y);
 					//w.Write(factory.entitySignPool[i].z);
 					//w.Write(factory.entitySignPool[i].w);
-
-					int bitmask = 0; // optimize by bit mask
-					int connStart = i * 16;
-					for (int j = 0; j < 16; j++)
-					{
-						if (factory.entityConnPool[connStart + j] != 0)
-							bitmask |= 1 << j;
-					}
-					w.Write((short)bitmask);
-					for (int j = 0; j < 16; j++)
-					{
-						if (factory.entityConnPool[connStart + j] != 0)
-							w.Write(factory.entityConnPool[connStart + j]);
-					}
 				}
-
 			}
 
 			for (int k = 0; k < factory.entityRecycleCursor; k++)
@@ -230,6 +230,17 @@ namespace LossyCompression
 
 				if (factory.entityPool[i].id != 0)
 				{
+					// entityConnPool : move forward and optimize by bit mask
+					int connStart = i * 16;
+					short bitmask = r.ReadInt16();
+					for (int j = 0; j < 16; j++)
+					{
+						if ((bitmask & (1 << j)) != 0)
+							factory.entityConnPool[connStart + j] = r.ReadInt32();
+						else
+							factory.entityConnPool[connStart + j] = 0;
+					}
+
 					bool flag3 = false;
 					factory.entityAnimPool[i].time = r.ReadSingle();
 					factory.entityAnimPool[i].prepare_length = r.ReadSingle();
@@ -237,12 +248,23 @@ namespace LossyCompression
 					//factory.entityAnimPool[i].state = r.ReadUInt32();
 					//factory.entityAnimPool[i].power = r.ReadSingle();
 					//factory.entitySignPool[i].signType = (uint)r.ReadByte();
-
 					
 					ItemProto itemProto = LDB.items.Select(factory.entityPool[i].protoId);
 					if (itemProto != null) // Reconstruct position from entity
 					{
-						float signHegiht = factory.entityPool[i].beltId > 0 ? 1.2f : itemProto.prefabDesc.signHeight;
+						float signHegiht = itemProto.prefabDesc.signHeight;
+						if (factory.entityPool[i].beltId > 0)
+                        {
+							// From CargoTraffic.SetBeltSignalIcon
+							bool flag = false;
+							factory.ReadObjectConn(i, 0, out _, out int objId, out _);
+							if (objId > 0 && (factory.entityPool[objId].stationId > 0 || factory.entityPool[objId].powerExcId > 0))
+								flag = true;
+							factory.ReadObjectConn(i, 1, out _, out objId, out _);
+							if (objId > 0 && (factory.entityPool[objId].stationId > 0 || factory.entityPool[objId].powerExcId > 0))
+								flag = true;
+							signHegiht = flag ? 1.2f : 0.5f;
+						}
 						factory.entitySignPool[i].Reset(factory.entityPool[i].pos, signHegiht, itemProto.prefabDesc.signSize);
 					}
 					factory.entitySignPool[i].iconType = (uint)r.ReadByte();
@@ -262,17 +284,6 @@ namespace LossyCompression
 					//factory.entitySignPool[i].y = r.ReadSingle();
 					//factory.entitySignPool[i].z = r.ReadSingle();
 					//factory.entitySignPool[i].w = r.ReadSingle();
-
-
-					int connStart = i * 16;
-					short bitmask = r.ReadInt16(); // optimize by bit mask
-					for (int j = 0; j < 16; j++)
-					{
-						if ((bitmask & (1 << j)) != 0)
-							factory.entityConnPool[connStart + j] = r.ReadInt32();
-						else
-							factory.entityConnPool[connStart + j] = 0;
-					}
 
 					if (factory.entityPool[i].beltId == 0 && factory.entityPool[i].inserterId == 0 && factory.entityPool[i].splitterId == 0 && factory.entityPool[i].monitorId == 0 && factory.entityPool[i].spraycoaterId == 0 && factory.entityPool[i].pilerId == 0)
 					{
@@ -300,12 +311,10 @@ namespace LossyCompression
 					{
 						if ((bitmask & (1 << j)) != 0)
 						{
-							factory.entityConnPool[connStart + j] = r.ReadInt32();
-							//if (factory.entityConnPool[connStart + j] == 0)
-							//	Log.Warn($"entityConnPool[{connStart + j}] == 0");
+							factory.prebuildConnPool[connStart + j] = r.ReadInt32();
 						}
 						else
-							factory.entityConnPool[connStart + j] = 0;
+							factory.prebuildConnPool[connStart + j] = 0;
 					}
 				}
 			}
