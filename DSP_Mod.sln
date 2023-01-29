@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LossyCompression", "LossyCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinerInfo", "MinerInfo\MinerInfo.csproj", "{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlterTickrate", "AlterTickrate\AlterTickrate.csproj", "{45586200-ECD0-42EB-82FA-C855FDB91A91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,7 @@
+{
+    "name": "AlterTickrate",
+    "description": "Change update frequency of buildings to improve UPS. 調整各項建築的更新頻率",
+    "version_number": "1.0.1",
+    "website_url": "https://github.com/starfi5h/DSP_Mod_Support",
+    "dependencies": ["CommonAPI-CommonAPI-1.5.6"]
+}
