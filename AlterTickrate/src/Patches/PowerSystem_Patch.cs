@@ -43,7 +43,7 @@ namespace AlterTickrate.Patches
 					}
 					else if (genPool[i].fuelMask > 1)
                     {
-						animData.Step2(animData.state, DELTA_TIME, animData.power, 0.7f);
+						animData.Step2(animData.state, DELTA_TIME, animData.power, 2f);
 					}
 					else if (genPool[i].geothermal)
                     {
@@ -51,7 +51,7 @@ namespace AlterTickrate.Patches
 					}
 					else
                     {
-						animData.Step2(animData.state, DELTA_TIME, animData.power, 0.7f);
+						animData.Step2(animData.state, DELTA_TIME, animData.power, 1f);
 					}
 				}
             }
@@ -221,6 +221,7 @@ namespace AlterTickrate.Patches
 		[HarmonyPatch(typeof(PowerGeneratorComponent), nameof(PowerGeneratorComponent.GameTick_Gamma))]
 		static IEnumerable<CodeInstruction> GameTick_Gamma_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			// scale gravition len consumption, photon production
 			try
 			{
 				var codeMatcher = new CodeMatcher(instructions);
@@ -276,6 +277,41 @@ namespace AlterTickrate.Patches
 			catch (Exception e)
 			{
 				Log.Error("Transpiler PowerGeneratorComponent.GameTick_Gamma failed");
+				Log.Error(e);
+				return instructions;
+			}
+		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(PowerGeneratorComponent), nameof(PowerGeneratorComponent.GenEnergyByFuel))]
+		static IEnumerable<CodeInstruction> GenEnergyByFuel_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			// scale fuel consumption
+			try
+			{
+				var codeMatcher = new CodeMatcher(instructions);
+
+				// Insert: num *= scale;
+				// Before  if (this.fuelEnergy >= num)
+				codeMatcher.MatchForward(false,
+					new CodeMatch(OpCodes.Ldarg_0),
+					new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "fuelEnergy"),
+					new CodeMatch(OpCodes.Ldloc_0),
+					new CodeMatch(OpCodes.Blt)
+				)
+				.Insert(
+					new CodeInstruction(OpCodes.Ldloc_0),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Conv_I8),
+					new CodeInstruction(OpCodes.Mul),
+					new CodeInstruction(OpCodes.Stloc_0)
+				);
+
+				return codeMatcher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Log.Error("Transpiler PowerGeneratorComponent.GenEnergyByFuel failed");
 				Log.Error(e);
 				return instructions;
 			}
