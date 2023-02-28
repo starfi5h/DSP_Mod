@@ -36,6 +36,7 @@ namespace AlterTickrate.Patches
                 beltFactories = new PlanetFactory[GameMain.data.factories.Length];
             }
             int gameTick = (int)GameMain.gameTick;
+			PlanetFactory localFactory = GameMain.localPlanet?.factory;
 
             if (ConfigSettings.EnableFacility)
             {
@@ -48,7 +49,19 @@ namespace AlterTickrate.Patches
                         facilityFactoryCount++;
                     }
                 }
-            }
+				if (localFactory != null && (localFactory.index + gameTick) % ConfigSettings.FacilityUpdatePeriod != 0)
+                {
+					//Log.Warn($"{ConfigSettings.FacilityUpdatePeriod} {gameTick % ConfigSettings.FacilityUpdatePeriod} {(localFactory.index + gameTick) % ConfigSettings.FacilityUpdatePeriod}");
+					facilityFactories[facilityFactoryCount++] = localFactory;
+					Facility_Patch.AnimOnlyFactory = localFactory;
+				}
+				else
+                {
+					Facility_Patch.AnimOnlyFactory = null;
+
+				}
+
+			}
             if (ConfigSettings.EnableSorter)
             {
                 inserterFactoryCount = 0;
@@ -178,7 +191,7 @@ namespace AlterTickrate.Patches
             return codeMatcher.InstructionEnumeration();
         }
 
-		[HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
+		//[HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
 		public static bool GameTick(FactorySystem __instance, long time, bool isActive, int _usedThreadCnt, int _curThreadIdx, int _minimumMissionCnt)
 		{
 			GameHistoryData history = GameMain.history;

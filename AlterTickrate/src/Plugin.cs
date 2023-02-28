@@ -105,7 +105,7 @@ namespace AlterTickrate
             {
                 if (ConfigSettings.FacilityUpdatePeriod == 1)
                 {
-                    ConfigSettings.FacilityUpdatePeriod = 4;
+                    ConfigSettings.FacilityUpdatePeriod = 5;
                     ConfigSettings.SorterUpdatePeriod = 2;
                     ConfigSettings.BeltUpdatePeriod = 2;
                     ConfigSettings.EnableBelt = true;
