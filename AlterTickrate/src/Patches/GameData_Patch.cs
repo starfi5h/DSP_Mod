@@ -54,13 +54,13 @@ namespace AlterTickrate.Patches
 					//Log.Warn($"{ConfigSettings.FacilityUpdatePeriod} {gameTick % ConfigSettings.FacilityUpdatePeriod} {(localFactory.index + gameTick) % ConfigSettings.FacilityUpdatePeriod}");
 					facilityFactories[facilityFactoryCount++] = localFactory;
 					Facility_Patch.AnimOnlyFactory = localFactory;
+					PowerSystem_Patch.AnimOnlyFactory = localFactory;
 				}
 				else
                 {
 					Facility_Patch.AnimOnlyFactory = null;
-
+					PowerSystem_Patch.AnimOnlyFactory = null;
 				}
-
 			}
             if (ConfigSettings.EnableSorter)
             {

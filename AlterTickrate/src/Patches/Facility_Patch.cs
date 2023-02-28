@@ -243,12 +243,5 @@ namespace AlterTickrate.Patches
         {
             return __instance.factory != AnimOnlyFactory;
         }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
-        static bool LocalAnim_Lab_Guard(PowerSystem __instance)
-        {
-            return __instance.factory != AnimOnlyFactory;
-        }
     }
 }

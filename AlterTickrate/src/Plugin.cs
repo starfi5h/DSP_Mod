@@ -71,6 +71,7 @@ namespace AlterTickrate
             if (ConfigSettings.EnableFacility)
             {
                 harmony.PatchAll(typeof(Facility_Patch));
+                harmony.PatchAll(typeof(PowerSystem_Patch));
                 harmony.PatchAll(typeof(UITech_Patch));
             }
             if (ConfigSettings.EnableSorter)
