@@ -7,13 +7,9 @@ using UnityEngine;
 
 namespace AlterTickrate.Patches
 {
-    // TODO: Make silo, ejector always runs on local planet
-    // SiloComponent.planetId
-    // EjectorComponent.planetId
-
     public class Facility_Patch
     {
-        public static float FacilitySpeedRate = 3.0f;
+        public static float FacilitySpeedRate = 5.0f;
         public static PlanetFactory AnimOnlyFactory = null;
 
         [HarmonyPrefix]
@@ -32,7 +28,16 @@ namespace AlterTickrate.Patches
             }
         }
 
-        static float animTime, time;
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
+        private static void AnimPowerCorrection(ref EjectorComponent __instance, float power, AnimData[] animPool)
+        {
+            if (power >= 0.1f)
+            {
+                animPool[__instance.entityId].power = power / FacilitySpeedRate;
+                //Log.Info(animPool[__instance.entityId].time + ":" + (__instance.time + deltaTime) + " " + deltaTime);
+            }
+        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SiloComponent), nameof(SiloComponent.InternalUpdate))]
@@ -40,12 +45,7 @@ namespace AlterTickrate.Patches
         {
             if (power >= 0.1f)
             {
-                //animPool[__instance.entityId].power = power / FacilitySpeedRate;
-                //Log.Warn(GameMain.gameTick % 100);
-                //Log.Info(animPool[__instance.entityId].time + " " + (animPool[__instance.entityId].time - animTime));
-                //Log.Info(animPool[__instance.entityId].time + ": " + __instance.time + "," + (__instance.time - time));
-                animTime = animPool[__instance.entityId].time;
-                time = __instance.time;
+                animPool[__instance.entityId].power = power / FacilitySpeedRate;
             }
         }
 
@@ -122,10 +122,10 @@ namespace AlterTickrate.Patches
                         }
                     }
                 }
+                // ejector and slio update anim time before its time, so tickOffset has to be negative
                 int tickOffset = (AnimOnlyFactory.index + (int)time) % ConfigSettings.FacilityUpdatePeriod - ConfigSettings.FacilityUpdatePeriod;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.ejectorCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
-                    end = 0;
                     for (int i = start; i < end; i++)
                     {
                         if (__instance.ejectorPool[i].id == i)
@@ -142,7 +142,7 @@ namespace AlterTickrate.Patches
                     {
                         if (__instance.siloPool[i].id == i)
                         {
-                            int entityId = __instance.ejectorPool[i].entityId;
+                            int entityId = __instance.siloPool[i].entityId;
                             ref AnimData animData = ref entityAnimPool[entityId];
                             AnimUpdate(ref __instance.siloPool[i], ref animData, tickOffset);
                         }
@@ -176,14 +176,14 @@ namespace AlterTickrate.Patches
 
                     if (ejector.direction > 0)
                     {
-                        float animTime = ejector.time + deltaTime / ejector.chargeSpend;
-                        animData.time = Mathf.Min(animTime / ejector.chargeSpend, 1f);
-
+                        float animTime = (ejector.time + deltaTime) / (float)ejector.chargeSpend;
+                        animData.time = Mathf.Min(animTime, 1f);
+                        //Log.Debug(animData.time + ":" + (ejector.time + deltaTime) + " " + deltaTime);
                     }
                     else
                     {
-                        float animTime = -(ejector.time - deltaTime) / ejector.coldSpend;
-                        animData.time = Mathf.Min(animTime / ejector.coldSpend, 0f);
+                        float animTime = -(ejector.time - deltaTime) / (float)ejector.coldSpend;
+                        animData.time = Mathf.Min(animTime, 0f);
                     }
                 }
             }
@@ -250,7 +250,5 @@ namespace AlterTickrate.Patches
         {
             return __instance.factory != AnimOnlyFactory;
         }
-
-
     }
 }
