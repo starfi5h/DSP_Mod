@@ -29,17 +29,6 @@ namespace AlterTickrate.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
-        private static void AnimPowerCorrection(ref EjectorComponent __instance, float power, AnimData[] animPool)
-        {
-            if (power >= 0.1f)
-            {
-                animPool[__instance.entityId].power = power / FacilitySpeedRate;
-                //Log.Info(animPool[__instance.entityId].time + ":" + (__instance.time + deltaTime) + " " + deltaTime);
-            }
-        }
-
-        [HarmonyPostfix]
         [HarmonyPatch(typeof(SiloComponent), nameof(SiloComponent.InternalUpdate))]
         private static void AnimPowerCorrection(ref SiloComponent __instance, float power, AnimData[] animPool)
         {
@@ -75,7 +64,7 @@ namespace AlterTickrate.Patches
                     new CodeMatch(OpCodes.Stfld)
                 );
 
-                
+
                 codeMatcher.Advance(-1)
                     .SetOperandAndAdvance(600000) // (7200/min input => 20000 progress added) * 30 tick
                     .Advance(-4)
@@ -91,14 +80,14 @@ namespace AlterTickrate.Patches
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTick), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) } )]
+        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTick), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
         static bool GameTick(FactorySystem __instance, long time, int _usedThreadCnt, int _curThreadIdx, int _minimumMissionCnt)
         {
             if (__instance.factory == AnimOnlyFactory)
             {
                 AnimData[] entityAnimPool = __instance.factory.entityAnimPool;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.minerCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out int start, out int end))
-                {                    
+                {
                     for (int i = start; i < end; i++)
                     {
                         if (__instance.minerPool[i].id == i)
@@ -126,13 +115,16 @@ namespace AlterTickrate.Patches
                 int tickOffset = (AnimOnlyFactory.index + (int)time) % ConfigSettings.FacilityUpdatePeriod - ConfigSettings.FacilityUpdatePeriod;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.ejectorCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
+                    float[] networkServes = __instance.factory.powerSystem.networkServes;
+                    PowerConsumerComponent[] consumerPool = __instance.factory.powerSystem.consumerPool;
                     for (int i = start; i < end; i++)
                     {
                         if (__instance.ejectorPool[i].id == i)
                         {
                             int entityId = __instance.ejectorPool[i].entityId;
                             ref AnimData animData = ref entityAnimPool[entityId];
-                            AnimUpdate(ref __instance.ejectorPool[i], ref animData, tickOffset);
+                            float power = networkServes[consumerPool[__instance.ejectorPool[i].pcId].networkId];
+                            AnimUpdate(ref __instance.ejectorPool[i], ref animData, tickOffset, power);
                         }
                     }
                 }
@@ -153,7 +145,7 @@ namespace AlterTickrate.Patches
             return true;
         }
 
-        static void AnimUpdate(ref EjectorComponent ejector, ref AnimData animData, int tickOffset)
+        static void AnimUpdate(ref EjectorComponent ejector, ref AnimData animData, int tickOffset, float power)
         {
             if (ejector.targetState == EjectorComponent.ETargetState.OK)
             {
@@ -168,7 +160,6 @@ namespace AlterTickrate.Patches
                 }
                 else if (ejector.direction != 0)
                 {
-                    float power = animData.power;
                     float num = (float)Cargo.accTableMilli[ejector.incLevel];
                     int deltaTime = (int)(power * 10000f * (1f + num) + 0.1f) * tickOffset;
                     if (ejector.boost)
@@ -232,7 +223,7 @@ namespace AlterTickrate.Patches
                         }
                     }
                 }
-                 return false;
+                return false;
             }
             return true;
         }
