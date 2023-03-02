@@ -9,7 +9,6 @@ namespace AlterTickrate.Patches
 {
     public class PowerSystem_Patch
     {
-        public static float PowerSystem_SpeedRate = 5.0f;
         public static PlanetFactory AnimOnlyFactory = null;
 		const float DELTA_TIME = 0.016666668f; // num6 in PowerSystem.GameTick
 
@@ -107,7 +106,7 @@ namespace AlterTickrate.Patches
 			// Opening / Closing speed of PowerExchangerComponent
 			if (__instance.state < __instance.targetState)
 			{
-				__instance.state += 0.00557f * Facility_Patch.FacilitySpeedRate;
+				__instance.state += 0.00557f * Facility_Patch.FacilitySpeedRate * 5.0f; // speed up process by 5 times
 				if (__instance.state >= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -115,7 +114,7 @@ namespace AlterTickrate.Patches
 			}
 			else if (__instance.state > __instance.targetState)
 			{
-				__instance.state -= 0.00557f * Facility_Patch.FacilitySpeedRate;
+				__instance.state -= 0.00557f * Facility_Patch.FacilitySpeedRate * 5.0f; // speed up process by 5 times
 				if (__instance.state <= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -124,97 +123,125 @@ namespace AlterTickrate.Patches
 			return false;
 		}
 
-
-		[HarmonyPrefix]
+		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(PowerExchangerComponent), nameof(PowerExchangerComponent.InputUpdate))]
-		static bool InputUpdate(ref PowerExchangerComponent __instance, long remaining, AnimData[] animPool, int[] productRegister, int[] consumeRegister, ref long __result)
+		static IEnumerable<CodeInstruction> InputUpdate_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			if (__instance.state != 1f)
+			// scale enegry increase in buffer
+			try
 			{
-				__result = 0L;
-				return false;
+				var codeMatcher = new CodeMatcher(instructions);
+
+				// Change: if (num >= this.maxPoolEnergy - this.currPoolEnergy)
+				// To:     if (num * scale >= this.maxPoolEnergy - this.currPoolEnergy)
+				codeMatcher.MatchForward(false,
+					new CodeMatch(i => i.IsLdloc()),
+					new CodeMatch(i => i.IsLdarg()),
+					new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "maxPoolEnergy"),
+					new CodeMatch(i => i.IsLdarg()),
+					new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "currPoolEnergy"),
+					new CodeMatch(OpCodes.Sub),
+					new CodeMatch(OpCodes.Blt)
+				)
+				.Advance(1)
+				.Insert(
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Conv_I8),
+					new CodeInstruction(OpCodes.Mul)
+				);
+
+
+				// Change: this.currPoolEnergy += num;
+				// To:     this.currPoolEnergy = Math.Min(this.currPoolEnergy + num * scale, this.maxPoolEnergy);
+				codeMatcher.End()
+					.MatchBack(false,
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "currPoolEnergy"),
+						new CodeMatch(i => i.IsLdloc()),
+						new CodeMatch(OpCodes.Add),
+						new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "currPoolEnergy")
+					)
+					.Advance(4)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+						new CodeInstruction(OpCodes.Conv_I8),
+						new CodeInstruction(OpCodes.Mul)
+					)
+					.Advance(1)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldarg_0),
+						new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PowerExchangerComponent), "maxPoolEnergy")),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Math), "Min", new Type[] { typeof(long), typeof(long) }))
+					);
+
+				return codeMatcher.InstructionEnumeration();
 			}
-			long num = remaining;
-			num = ((num < __instance.energyPerTick) ? num : __instance.energyPerTick);
-			if (num * ConfigSettings.FacilityUpdatePeriod >= __instance.maxPoolEnergy - __instance.currPoolEnergy) // Populate 
+			catch (Exception e)
 			{
-				if (__instance.emptyCount > 0 && __instance.fullCount < 20) // Assume charge speed is less than 1/tick
-				{
-					if (num != remaining)
-					{
-						num = __instance.energyPerTick;
-					}
-					__instance.currPoolEnergy -= __instance.maxPoolEnergy;
-					__instance.emptyCount -= 1;
-					__instance.fullCount += 1;
-					int[] obj = productRegister;
-					lock (obj)
-					{
-						productRegister[__instance.fullId]++;
-					}
-					obj = consumeRegister;
-					lock (obj)
-					{
-						consumeRegister[__instance.emptyId]++;
-						goto IL_EF;
-					}
-				}
-				num = __instance.maxPoolEnergy - __instance.currPoolEnergy;
+				Log.Error("Transpiler PowerExchangerComponent.InputUpdate failed");
+				Log.Error(e);
+				return instructions;
 			}
-		IL_EF:
-			__instance.currEnergyPerTick = num;
-			__instance.currPoolEnergy += num * ConfigSettings.FacilityUpdatePeriod; // Populate
-			__instance.currPoolEnergy = __instance.currPoolEnergy < __instance.maxPoolEnergy ? __instance.currPoolEnergy : __instance.maxPoolEnergy; // Clamp to limit
-			animPool[__instance.entityId].state = (uint)Mathf.CeilToInt((float)num / (float)__instance.energyPerTick * 100f);
-			animPool[__instance.entityId].power = (float)__instance.currPoolEnergy / (float)__instance.maxPoolEnergy;
-			__result = num;
-			return false;
 		}
 
-		[HarmonyPrefix]
+		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(PowerExchangerComponent), nameof(PowerExchangerComponent.OutputUpdate))]
-		static bool OutputUpdate(ref PowerExchangerComponent __instance, long energyPay, AnimData[] animPool, int[] productRegister, int[] consumeRegister, ref long __result)
+		static IEnumerable<CodeInstruction> OutputUpdate_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			if (__instance.state != -1f)
+			// scale enegry decrease in buffer
+			try
 			{
-				__result = 0L;
-				return false;
+				var codeMatcher = new CodeMatcher(instructions);
+
+				// Change: if (num >= this.currPoolEnergy)
+				// To:     if (num * scale >= this.currPoolEnergy)
+				codeMatcher.MatchForward(false,
+					new CodeMatch(i => i.IsLdloc()),
+					new CodeMatch(i => i.IsLdarg()),
+					new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "currPoolEnergy"),
+					new CodeMatch(OpCodes.Blt)
+				)
+				.Advance(1)
+				.Insert(
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Conv_I8),
+					new CodeInstruction(OpCodes.Mul)
+				);
+
+
+				// Change: this.currPoolEnergy -= num;
+				// To:     this.currPoolEnergy = Math.Max(this.currPoolEnergy + num * scale, 0);
+				codeMatcher.End()
+					.MatchBack(false,
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(i => i.IsLdarg()),
+						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "currPoolEnergy"),
+						new CodeMatch(i => i.IsLdloc()),
+						new CodeMatch(OpCodes.Sub),
+						new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "currPoolEnergy")
+					)
+					.Advance(4)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+						new CodeInstruction(OpCodes.Conv_I8),
+						new CodeInstruction(OpCodes.Mul)
+					)
+					.Advance(1)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldc_I4_0),
+						new CodeInstruction(OpCodes.Conv_I8),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Math), "Max", new Type[] { typeof(long), typeof(long) }))
+					);
+
+				return codeMatcher.InstructionEnumeration();
 			}
-			long num = energyPay;
-			num = ((num < __instance.energyPerTick) ? num : __instance.energyPerTick);
-			if (num * ConfigSettings.FacilityUpdatePeriod >= __instance.currPoolEnergy)  // Populate 
+			catch (Exception e)
 			{
-				if (__instance.fullCount > 0 && __instance.emptyCount < 20)  // Assume discharge speed is less than 1/tick
-				{
-					if (num != energyPay)
-					{
-						num = __instance.energyPerTick;
-					}
-					__instance.currPoolEnergy += __instance.maxPoolEnergy;
-					__instance.fullCount -= 1;
-					__instance.emptyCount += 1;
-					int[] obj = productRegister;
-					lock (obj)
-					{
-						productRegister[__instance.emptyId]++;
-					}
-					obj = consumeRegister;
-					lock (obj)
-					{
-						consumeRegister[__instance.fullId]++;
-						goto IL_E1;
-					}
-				}
-				num = __instance.currPoolEnergy;
+				Log.Error("Transpiler PowerExchangerComponent.OutputUpdate failed");
+				Log.Error(e);
+				return instructions;
 			}
-		IL_E1:
-			__instance.currEnergyPerTick = -num;
-			__instance.currPoolEnergy -= num * ConfigSettings.FacilityUpdatePeriod; // Populate
-			__instance.currPoolEnergy = __instance.currPoolEnergy > 0 ? __instance.currPoolEnergy : 0; // Clamp to limit
-			animPool[__instance.entityId].state = (uint)Mathf.CeilToInt((float)num / (float)__instance.energyPerTick * 100f);
-			animPool[__instance.entityId].power = (float)__instance.currPoolEnergy / (float)__instance.maxPoolEnergy;
-			__result = num;
-			return false;
 		}
 
 		[HarmonyTranspiler]
@@ -316,10 +343,5 @@ namespace AlterTickrate.Patches
 				return instructions;
 			}
 		}
-
 	}
-
-
-
-
 }
