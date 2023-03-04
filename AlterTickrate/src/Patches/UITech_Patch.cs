@@ -19,7 +19,7 @@ namespace AlterTickrate.Patches
         static void RecordTechHashed_Postfix(GameStatData __instance)
         {
             // sliding window
-            techHashedThisFrame += __instance.techHashedHistory[0] - __instance.techHashedHistory[ConfigSettings.FacilityUpdatePeriod];
+            techHashedThisFrame += __instance.techHashedHistory[0] - __instance.techHashedHistory[Parameters.FacilityUpdatePeriod];
         }
 
         [HarmonyTranspiler]

@@ -9,14 +9,13 @@ namespace AlterTickrate.Patches
 {
     public class PowerSystem_Patch
     {
-        public static PlanetFactory AnimOnlyFactory = null;
 		const float DELTA_TIME = 0.016666668f; // num6 in PowerSystem.GameTick
 
 		[HarmonyPrefix]
         [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
         static bool GameTick(PowerSystem __instance)
         {
-            if (__instance.factory != AnimOnlyFactory)
+            if (__instance.factory != Parameters.AnimOnlyFactory)
                 return true;
 
 			var entityPool = __instance.factory.entityPool;
@@ -106,7 +105,7 @@ namespace AlterTickrate.Patches
 			// Opening / Closing speed of PowerExchangerComponent
 			if (__instance.state < __instance.targetState)
 			{
-				__instance.state += 0.00557f * Facility_Patch.FacilitySpeedRate * 5.0f; // speed up process by 5 times
+				__instance.state += 0.00557f * Parameters.FacilitySpeedRate * 5.0f; // speed up process by 5 times
 				if (__instance.state >= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -114,7 +113,7 @@ namespace AlterTickrate.Patches
 			}
 			else if (__instance.state > __instance.targetState)
 			{
-				__instance.state -= 0.00557f * Facility_Patch.FacilitySpeedRate * 5.0f; // speed up process by 5 times
+				__instance.state -= 0.00557f * Parameters.FacilitySpeedRate * 5.0f; // speed up process by 5 times
 				if (__instance.state <= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -145,7 +144,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(1)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -164,7 +163,7 @@ namespace AlterTickrate.Patches
 					)
 					.Advance(4)
 					.InsertAndAdvance(
-						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 						new CodeInstruction(OpCodes.Conv_I8),
 						new CodeInstruction(OpCodes.Mul)
 					)
@@ -204,7 +203,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(1)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -223,7 +222,7 @@ namespace AlterTickrate.Patches
 					)
 					.Advance(4)
 					.InsertAndAdvance(
-						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 						new CodeInstruction(OpCodes.Conv_I8),
 						new CodeInstruction(OpCodes.Mul)
 					)
@@ -265,7 +264,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(2)
 				.InsertAndAdvance(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 					new CodeInstruction(OpCodes.Mul)
 				);
 
@@ -280,7 +279,7 @@ namespace AlterTickrate.Patches
 						new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "catalystPoint")
 					)
 					.Advance(3)
-					.SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod"));
+					.SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod)));
 
 				// Change: this.productCount += (float)((double)this.capacityCurrentTick / (double)this.productHeat);
 				// To:	   this.productCount += (float)((double)this.capacityCurrentTick * (double)scale / (double)this.productHeat);
@@ -294,7 +293,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(6)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_R8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -328,7 +327,7 @@ namespace AlterTickrate.Patches
 				)
 				.Insert(
 					new CodeInstruction(OpCodes.Ldloc_0),
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(ConfigSettings), "_facilityUpdatePeriod")),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul),
 					new CodeInstruction(OpCodes.Stloc_0)

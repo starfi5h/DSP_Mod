@@ -9,10 +9,10 @@ namespace AlterTickrate.Patches
 {
     public class Facility_Patch
     {
-        public static float FacilitySpeedRate = 5.0f;
-        public static PlanetFactory AnimOnlyFactory = null;
+        //public static float FacilitySpeedRate = 5.0f;
+        //public static PlanetFactory AnimOnlyFactory = null;
 
-        [HarmonyPrefix]
+        [HarmonyPrefix, HarmonyPriority(Priority.High)]
         [HarmonyPatch(typeof(MinerComponent), nameof(MinerComponent.InternalUpdate))]
         [HarmonyPatch(typeof(AssemblerComponent), nameof(AssemblerComponent.InternalUpdate))]
         [HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
@@ -24,7 +24,7 @@ namespace AlterTickrate.Patches
             // only multiply speed when power > 10%
             if (power >= 0.1f)
             {
-                power *= FacilitySpeedRate;
+                power *= Parameters.FacilitySpeedRate;
             }
         }
 
@@ -34,16 +34,16 @@ namespace AlterTickrate.Patches
         {
             if (power >= 0.1f)
             {
-                animPool[__instance.entityId].power = power / FacilitySpeedRate;
+                animPool[__instance.entityId].power = power / Parameters.FacilitySpeedRate;
             }
         }
 
-        [HarmonyPrefix]
+        [HarmonyPrefix, HarmonyPriority(Priority.High)]
         [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
         private static void ResearchSpeedModify(ref float speed)
         {
             // Note: LabComponent.InternalUpdateResearch need to handle by speed due to matrixPoints (num)
-            speed *= FacilitySpeedRate;
+            speed *= Parameters.FacilitySpeedRate;
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
@@ -83,7 +83,7 @@ namespace AlterTickrate.Patches
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTick), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
         static bool GameTick(FactorySystem __instance, long time, int _usedThreadCnt, int _curThreadIdx, int _minimumMissionCnt)
         {
-            if (__instance.factory == AnimOnlyFactory)
+            if (__instance.factory == Parameters.AnimOnlyFactory)
             {
                 AnimData[] entityAnimPool = __instance.factory.entityAnimPool;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.minerCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out int start, out int end))
@@ -112,7 +112,7 @@ namespace AlterTickrate.Patches
                     }
                 }
                 // ejector and slio update anim time before its time, so tickOffset has to be negative
-                int tickOffset = (AnimOnlyFactory.index + (int)time) % ConfigSettings.FacilityUpdatePeriod - ConfigSettings.FacilityUpdatePeriod;
+                int tickOffset = (Parameters.AnimOnlyFactory.index + (int)time) % Parameters.FacilityUpdatePeriod - Parameters.FacilityUpdatePeriod;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.ejectorCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
                     float[] networkServes = __instance.factory.powerSystem.networkServes;
@@ -209,7 +209,7 @@ namespace AlterTickrate.Patches
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabProduceMode), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
         static bool LocalAnim_Lab(FactorySystem __instance, int _usedThreadCnt, int _curThreadIdx, int _minimumMissionCnt)
         {
-            if (__instance.factory == AnimOnlyFactory)
+            if (__instance.factory == Parameters.AnimOnlyFactory)
             {
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.labCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out int start, out int end))
                 {
@@ -232,7 +232,7 @@ namespace AlterTickrate.Patches
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabResearchMode))]
         static bool LocalAnim_Lab_Guard(FactorySystem __instance)
         {
-            return __instance.factory != AnimOnlyFactory;
+            return __instance.factory != Parameters.AnimOnlyFactory;
         }
     }
 }

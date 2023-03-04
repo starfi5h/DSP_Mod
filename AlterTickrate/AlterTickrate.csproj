@@ -19,6 +19,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="src\UI\**" />
+    <EmbeddedResource Remove="src\UI\**" />
+    <None Remove="src\UI\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.17" />
     <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.9.27.15033-r.0" />
