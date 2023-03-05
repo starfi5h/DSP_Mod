@@ -8,6 +8,7 @@ using BepInEx.Configuration;
 namespace AlterTickrate
 {
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(Compat.ModCompatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.AlterSim";
@@ -40,12 +41,12 @@ namespace AlterTickrate
         {
             if (enable)
             {
-                Parameters.SetValues(Period_FacilityUpdate.Value, Period_SorterUpdate.Value);
+                Parameters.SetValues(Period_FacilityUpdate.Value, Period_SorterUpdate.Value, Period_StorageUpdate.Value);
                 Enable = true;
             }
             else
             {
-                Parameters.SetValues(1, 1);
+                Parameters.SetValues(1, 1, 1);
                 Enable = false;
             }
         }

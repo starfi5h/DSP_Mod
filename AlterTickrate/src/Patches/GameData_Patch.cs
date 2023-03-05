@@ -11,9 +11,10 @@ namespace AlterTickrate.Patches
     {
         static PlanetFactory[] facilityFactories = new PlanetFactory[0];
         static PlanetFactory[] inserterFactories = new PlanetFactory[0];
-        static PlanetFactory[] beltFactories = new PlanetFactory[0];
+        //static PlanetFactory[] beltFactories = new PlanetFactory[0];
         static int facilityFactoryCount;
         static int inserterFactoryCount;
+        static int storageFacotryCount;
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         static void GameMain_Begin()
@@ -32,27 +33,25 @@ namespace AlterTickrate.Patches
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
-        static void GameTick_Prefix()
+        static void GameTick_Prefix(long time)
         {
             if (GameMain.data.factories.Length != facilityFactories.Length)
             {
                 facilityFactories = new PlanetFactory[GameMain.data.factories.Length];
                 inserterFactories = new PlanetFactory[GameMain.data.factories.Length];
-                beltFactories = new PlanetFactory[GameMain.data.factories.Length];
             }
-            int gameTick = (int)GameMain.gameTick;
 			PlanetFactory localFactory = GameMain.localPlanet?.factory;
 
             facilityFactoryCount = 0;
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                if ((i + gameTick) % Parameters.FacilityUpdatePeriod == 0)
+                if ((i + time) % Parameters.FacilityUpdatePeriod == 0)
                 {
                     facilityFactories[facilityFactoryCount] = GameMain.data.factories[i];
                     facilityFactoryCount++;
                 }
             }
-			if (localFactory != null && (localFactory.index + gameTick) % Parameters.FacilityUpdatePeriod != 0)
+			if (localFactory != null && (localFactory.index + time) % Parameters.FacilityUpdatePeriod != 0)
             {
 				//Log.Warn($"{ConfigSettings.FacilityUpdatePeriod} {gameTick % ConfigSettings.FacilityUpdatePeriod} {(localFactory.index + gameTick) % ConfigSettings.FacilityUpdatePeriod}");
 				facilityFactories[facilityFactoryCount++] = localFactory;
@@ -66,11 +65,20 @@ namespace AlterTickrate.Patches
             inserterFactoryCount = 0;
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                if ((i + gameTick) % Parameters.SorterUpdatePeriod == 0)
+                if ((i + time) % Parameters.SorterUpdatePeriod == 0)
                 {
                     inserterFactories[inserterFactoryCount] = GameMain.data.factories[i];
                     inserterFactoryCount++;
                 }
+            }
+
+            if (time % Parameters.StorageUpdatePeriod == 0)
+            {
+                storageFacotryCount = GameMain.data.factoryCount;
+            }
+            else
+            {
+                storageFacotryCount = 0;
             }
         }
 
@@ -81,7 +89,7 @@ namespace AlterTickrate.Patches
             {
                 IEnumerable<CodeInstruction> newInstructions = instructions;
 
-                if (true) // EnableFacility
+                if (true) // Facility & Power
                 {
                     // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Factory);
                     // End:   PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
@@ -98,7 +106,7 @@ namespace AlterTickrate.Patches
                     newInstructions = ReplaceFactories(newInstructions, startPos, endPos, nameof(facilityFactories), nameof(facilityFactoryCount));
                 }
 
-                if (true) // EnableSorter
+                if (true) // Sorter
                 {
                     // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Inserter);
                     // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Inserter); 
@@ -113,6 +121,26 @@ namespace AlterTickrate.Patches
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
                     int endPos = codeMatcher.Pos;
                     newInstructions = ReplaceFactories(newInstructions, startPos, endPos, nameof(inserterFactories), nameof(inserterFactoryCount));
+                }
+
+                if (true) // Storage
+                {
+                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Storage);
+                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Storage);
+                    var codeMatcher = new CodeMatcher(newInstructions);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        codeMatcher.MatchForward(false,
+                            new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Storage), //19
+                            new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
+                        int startPos = codeMatcher.Pos;
+
+                        codeMatcher.MatchForward(false,
+                            new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Storage), //19
+                            new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
+                        int endPos = codeMatcher.Pos;
+                        newInstructions = ReplaceFactories(newInstructions, startPos, endPos, "", nameof(storageFacotryCount));
+                    }
                 }
 
                 /*
@@ -147,22 +175,30 @@ namespace AlterTickrate.Patches
             }
         }
 
-        public static IEnumerable<CodeInstruction> ReplaceFactories(IEnumerable<CodeInstruction> instructions, int start, int end, string factoriesField, string factoryCountField)
+        public static IEnumerable<CodeInstruction> ReplaceFactories(IEnumerable<CodeInstruction> instructions, int start, int end, string factoriesName, string factoryCountName)
         {
-            // replace GameData.factories with factoriesField
-            var codeMatcher = new CodeMatcher(instructions).Advance(start);
-            while (true) {
-                codeMatcher.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "factories"));
-                if (codeMatcher.IsInvalid || codeMatcher.Pos >= end)
-                    break;
+            var codeMatcher = new CodeMatcher(instructions);
 
-                codeMatcher
-                    .Advance(-1)
-                    .SetAndAdvance(OpCodes.Nop, null)
-                    .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), factoriesField));
+            // replace GameData.factories with factoriesField
+            if (factoriesName != "")
+            {
+                var factoriesField = AccessTools.Field(typeof(GameData_Patch), factoriesName);
+                codeMatcher.Start().Advance(start);
+                while (true)
+                {
+                    codeMatcher.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "factories"));
+                    if (codeMatcher.IsInvalid || codeMatcher.Pos >= end)
+                        break;
+
+                    codeMatcher
+                        .Advance(-1)
+                        .SetAndAdvance(OpCodes.Nop, null)
+                        .SetAndAdvance(OpCodes.Ldsfld, factoriesField);
+                }
             }
 
             // replace GameData.factoryCount with factoryCountField
+            var factoryCountField = AccessTools.Field(typeof(GameData_Patch), factoryCountName);
             codeMatcher.Start().Advance(start);
             while (true)
             {
@@ -173,7 +209,7 @@ namespace AlterTickrate.Patches
                 codeMatcher
                     .Advance(-1)
                     .SetAndAdvance(OpCodes.Nop, null)
-                    .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), factoryCountField));
+                    .SetAndAdvance(OpCodes.Ldsfld, factoryCountField);
             }
 
             return codeMatcher.InstructionEnumeration();

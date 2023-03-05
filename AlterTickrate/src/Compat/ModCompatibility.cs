@@ -40,6 +40,11 @@ namespace AlterTickrate.Compat
                 try
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("DSPOptimizations.StationStorageOpt");
+                    harmony.Patch(AccessTools.Method(classType, "RunStorageLogic"), new HarmonyMethod(typeof(DSPOptimizations).GetMethod("RunStorageLogic_Prefix")));
+
                     Log.Debug("DSPOptimizations compatibility - OK");
                 }
                 catch (Exception e)
@@ -48,6 +53,14 @@ namespace AlterTickrate.Compat
                     Log.Warn(e);
                 }
             }
+
+            public static bool RunStorageLogic_Prefix()
+            {
+                //Log.Debug(GameMain.gameTick % Parameters.StorageUpdatePeriod);
+                return GameMain.gameTick % Parameters.StorageUpdatePeriod == 0;
+            }
         }
     }
+
+
 }
