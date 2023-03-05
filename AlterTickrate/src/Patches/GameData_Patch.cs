@@ -25,6 +25,12 @@ namespace AlterTickrate.Patches
             }
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
+        static void GameMain_End()
+        {
+            Plugin.plugin.SaveConfig();
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
         static void GameTick_Prefix()
         {

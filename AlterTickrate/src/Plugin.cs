@@ -31,6 +31,11 @@ namespace AlterTickrate
             Log.Info($"Parameters: {Period_FacilityUpdate.Value}, {Period_SorterUpdate.Value}, {Period_StorageUpdate.Value}");
         }
 
+        public void SaveConfig()
+        {
+            General_Enable.Value = Enable;
+        }
+
         public void SetEnable(bool enable)
         {
             if (enable)
@@ -50,6 +55,9 @@ namespace AlterTickrate
             plugin = this;
             Log.LogSource = Logger;
             harmony = new(GUID);
+
+            if (!Compat.ModCompatibility.Init(harmony))
+                return;
 
             LoadConfig();
             SetEnable(General_Enable.Value);
