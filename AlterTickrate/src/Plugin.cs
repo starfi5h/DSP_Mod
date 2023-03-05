@@ -14,6 +14,7 @@ namespace AlterTickrate
         public const string NAME = "AlterSim";
         public const string VERSION = "0.0.1";
         public static Plugin plugin;
+        public static bool Enable;
 
         Harmony harmony;
         ConfigEntry<bool> General_Enable;
@@ -35,12 +36,12 @@ namespace AlterTickrate
             if (enable)
             {
                 Parameters.SetValues(Period_FacilityUpdate.Value, Period_SorterUpdate.Value);
-                General_Enable.Value = true;
+                Enable = true;
             }
             else
             {
                 Parameters.SetValues(1, 1);
-                General_Enable.Value = false;
+                Enable = false;
             }
         }
 
@@ -58,6 +59,7 @@ namespace AlterTickrate
             harmony.PatchAll(typeof(PowerSystem_Patch));
             harmony.PatchAll(typeof(Inserter_Patch));
             harmony.PatchAll(typeof(UITech_Patch));
+            harmony.PatchAll(typeof(UIcontrol));
         }
 
 
@@ -66,7 +68,7 @@ namespace AlterTickrate
         {
             if (Input.GetKeyDown(KeyCode.F4))
             {
-                SetEnable(!General_Enable.Value);
+                SetEnable(!Enable);
                 Log.Debug("FacilityUpdatePeriod = " + Parameters.FacilityUpdatePeriod);
             }
         }
@@ -75,6 +77,7 @@ namespace AlterTickrate
         {
             harmony.UnpatchSelf();
             plugin = null;
+            UIcontrol.OnDestory();
         }
 #endif
     }
