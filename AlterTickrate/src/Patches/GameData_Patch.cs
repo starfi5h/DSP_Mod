@@ -65,7 +65,7 @@ namespace AlterTickrate.Patches
             inserterFactoryCount = 0;
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                if ((i + time) % Parameters.SorterUpdatePeriod == 0)
+                if ((i + time) % Parameters.InserterUpdatePeriod == 0)
                 {
                     inserterFactories[inserterFactoryCount] = GameMain.data.factories[i];
                     inserterFactoryCount++;

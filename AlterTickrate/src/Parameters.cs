@@ -3,7 +3,7 @@
     public static class Parameters
     {
         public static int FacilityUpdatePeriod = 1;
-        public static int SorterUpdatePeriod = 1;
+        public static int InserterUpdatePeriod = 1;
         public static int StorageUpdatePeriod = 1;
 
         public static float FacilitySpeedRate = 1.0f;
@@ -14,7 +14,7 @@
         {
             FacilityUpdatePeriod = facilityPeriod;
             FacilitySpeedRate = facilityPeriod;
-            SorterUpdatePeriod = inserterPeriod;
+            InserterUpdatePeriod = inserterPeriod;
             InserterSpeedRate = inserterPeriod;
             StorageUpdatePeriod = storageUpdatePeriod;
         }
