@@ -67,6 +67,7 @@ namespace AlterTickrate
             harmony.PatchAll(typeof(Facility_Patch));
             harmony.PatchAll(typeof(PowerSystem_Patch));
             harmony.PatchAll(typeof(Inserter_Patch));
+            harmony.PatchAll(typeof(ProductionStatistics_Patch));
             harmony.PatchAll(typeof(UITech_Patch));
             harmony.PatchAll(typeof(UIcontrol));
         }
