@@ -13,7 +13,7 @@ namespace AlterTickrate
     {
         public const string GUID = "starfi5h.plugin.AlterTickrate";
         public const string NAME = "AlterTickrate";
-        public const string VERSION = "0.1.0";
+        public const string VERSION = "0.1.1";
         public static Plugin plugin;
         public static bool Enable;
 

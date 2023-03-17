@@ -1,12 +1,13 @@
 # AlterTickrate
 
 Change buildings update priod from 1 tick to x ticks and scale the progress accordingly to reduce CPU calculation without affecting game pace.  
-Warning: The mod is still in development state. Recommend to make a backup save before using it.  
-Because this mod change production workflow, if it does not work as intend, it may diable Milkyway upload.  
 
 ![compare](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AlterTickrate/doc/compare.png)  
 In the test file by default settings, Belt time reduce by 50%, Sorter time reduce by 50%,  Power System reduce by 73%, Various Facility reduce by 80%, Storage by 50%. Overall the UPS is doubled.  
 The button on stat - performance test page can switch on/off the mod.  
+
+Warning: The mod is still in development state. Recommend to make a backup save before using it.  
+Because this mod change production workflow, if it does not work as intend, it may diable Milkyway upload.  
 
 ## How does it work
 
@@ -23,7 +24,7 @@ As long as the period is multiple of 5, the mod can maintain the same production
 
 Run the game one time with the mod to generate `starfi5h.plugin.AlterTickrate.cfg` file.  
 The update period (update every x ticks) of each group can be configured:     
-`FacilityUpdate` - (Default: 5) Recommend to set as factor of 20.  
+`FacilityUpdate` - (Default: 5) Recommend to set as a factor of 20.  
 `BeltUpdate` - (Default: 2) Max limit: 2.  
 `StorageUpdate` - (Default: 2)  
 `SorterUpdate` - (Default: 2)  
@@ -90,7 +91,7 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 
 ### 分检器
 `SorterUpdate`: 默认为2。  
-超过2时会造成机率性漏接/漏放, 造成混带失效或着满带压缩程度降低。  
+超过2时爪子可能会漏接/漏放, 造成混带失效或着满带压缩程度降低。  
 
 ## Mod兼容性
 
@@ -102,4 +103,5 @@ GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在
 
 ## Changelog
 
+v0.1.1 - Fix belt feature doesn't apply
 v0.1.0 - Initial release. (DSP 0.9.27.15466)  
