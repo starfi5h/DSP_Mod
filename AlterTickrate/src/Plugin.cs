@@ -13,22 +13,30 @@ namespace AlterTickrate
     {
         public const string GUID = "starfi5h.plugin.AlterTickrate";
         public const string NAME = "AlterTickrate";
-        public const string VERSION = "0.1.1";
+        public const string VERSION = "0.2.0";
         public static Plugin plugin;
         public static bool Enable;
 
         Harmony harmony;
+        ConfigEntry<int> Period_PowerUpdate;
         ConfigEntry<int> Period_FacilityUpdate;
+        ConfigEntry<int> Period_LabProduceUpdate;
+        ConfigEntry<int> Period_LabResearchUpdate;
+        ConfigEntry<int> Period_LabLiftUpdate;
         ConfigEntry<int> Period_SorterUpdate;
         ConfigEntry<int> Period_StorageUpdate;
         ConfigEntry<int> Period_BeltUpdate;
 
         public void LoadConfig()
         {
-            Period_FacilityUpdate = Config.Bind("Period", "FacilityUpdate", 5, "Update facilities every x ticks.\n每x帧更新一次电力与生产设施");
-            Period_SorterUpdate = Config.Bind("Period", "SorterUpdate", 2, "Update sorters every x ticks.\n每x帧更新一次分拣器");
-            Period_StorageUpdate = Config.Bind("Period", "StorageUpdate", 2, "Update storage every x ticks.\n每x帧更新一次仓储");
-            Period_BeltUpdate = Config.Bind("Period", "BeltUpdate", 2, "Update belt every x ticks.(Max:2)\n每x帧更新一次传送带(最大:2)");
+            Period_PowerUpdate = Config.Bind("Facility", "PowerSystem", 10, "Update power system every x ticks.\n每x帧更新一次电力系统");
+            Period_FacilityUpdate = Config.Bind("Facility", "Facility", 10, "Update facilities every x ticks.\n每x帧更新一次生产设施");
+            Period_LabProduceUpdate = Config.Bind("Lab", "Produce", 10, "Update producing lab every x ticks.\n每x帧更新一次生产模式的研究站");
+            Period_LabResearchUpdate = Config.Bind("Lab", "Research", 10, "Update researching lab every x ticks.\n每x帧更新一次科研模式的研究站");
+            Period_LabLiftUpdate = Config.Bind("Lab", "Lift", 2, "Transfer matrixes in lab tower every x ticks.(Max:4)\n每x帧搬运最多x个研究站的矩阵(最大:4)");
+            Period_SorterUpdate = Config.Bind("Transport", "Sorter", 2, "Update sorters every x ticks.\n每x帧更新一次分拣器");
+            Period_StorageUpdate = Config.Bind("Transport", "Storage", 2, "Update storage every x ticks.\n每x帧更新一次仓储");
+            Period_BeltUpdate = Config.Bind("Transport", "Belt", 1, "Update belt every x ticks.(Max:2)\n每x帧更新一次传送带(最大:2)");
         }
 
         public void SaveConfig(int beltUpdate, int storageUpdate)
@@ -41,12 +49,16 @@ namespace AlterTickrate
         {
             if (enable)
             {
-                Parameters.SetValues(Period_FacilityUpdate.Value, Period_SorterUpdate.Value, Period_StorageUpdate.Value, Period_BeltUpdate.Value);
+                Parameters.SetFacilityValues(Period_PowerUpdate.Value, Period_FacilityUpdate.Value);
+                Parameters.SetLabValues(Period_LabProduceUpdate.Value, Period_LabResearchUpdate.Value, Period_LabLiftUpdate.Value);
+                Parameters.SetBeltValues(Period_SorterUpdate.Value, Period_StorageUpdate.Value, Period_BeltUpdate.Value);
                 Enable = true;
             }
             else
             {
-                Parameters.SetValues(1, 1, 1, 1);
+                Parameters.SetFacilityValues(1, 1);
+                Parameters.SetLabValues(1, 1, 1);
+                Parameters.SetBeltValues(1, 1, 1);
                 Enable = false;
             }
         }
@@ -61,18 +73,39 @@ namespace AlterTickrate
             if (!Compat.ModCompatibility.Init(harmony))
                 return;
             SetEnable(true);
-            Log.Info($"Parameters: {Period_FacilityUpdate.Value}, {Period_SorterUpdate.Value}, {Period_StorageUpdate.Value}, {Period_BeltUpdate.Value}");
+            Log.Info($"Facility:({Parameters.PowerUpdatePeriod}, {Parameters.FacilityUpdatePeriod}) " +
+                $"Lab:({Parameters.LabProduceUpdatePeriod}, {Parameters.LabResearchUpdatePeriod}, {Parameters.LabLiftUpdatePeriod}) " +
+                $"Belt:({Parameters.InserterUpdatePeriod}, {Parameters.StorageUpdatePeriod}, {Parameters.BeltUpdatePeriod})");
 
+            harmony.PatchAll(typeof(GameData_Patch));
+            if (Parameters.PowerUpdatePeriod > 1)
+            {
+                harmony.PatchAll(typeof(PowerSystem_Patch));
+            }            
+            if (Parameters.FacilityUpdatePeriod > 1)
+            {
+                harmony.PatchAll(typeof(Facility_Patch));
+            }
+            if (Parameters.LabProduceUpdatePeriod > 1)
+            {
+                harmony.PatchAll(typeof(LabProduce_Patch));
+            }
+            if (Parameters.LabResearchUpdatePeriod > 1)
+            {
+                harmony.PatchAll(typeof(LabResearch_Patch));
+            }
+            if (Parameters.LabLiftUpdatePeriod > 1 || Parameters.LabProduceUpdatePeriod > 2)
+            {
+                harmony.PatchAll(typeof(LabLift_Patch));
+            }
+            if (Parameters.InserterUpdatePeriod > 1)
+            {
+                harmony.PatchAll(typeof(Inserter_Patch));
+            }
             if (Parameters.BeltUpdatePeriod > 1)
             {
-                Log.Debug("Patch cargo path");
                 harmony.PatchAll(typeof(CargoPath_Patch));
             }
-            harmony.PatchAll(typeof(GameData_Patch));
-            harmony.PatchAll(typeof(Facility_Patch));
-            harmony.PatchAll(typeof(PowerSystem_Patch));
-            harmony.PatchAll(typeof(Inserter_Patch));
-            harmony.PatchAll(typeof(UITech_Patch));
             harmony.PatchAll(typeof(UIcontrol));
         }
 

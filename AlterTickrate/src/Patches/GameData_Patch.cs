@@ -7,76 +7,50 @@ namespace AlterTickrate.Patches
 {
     public class GameData_Patch
     {
-        static PlanetFactory[] facilityFactories = new PlanetFactory[0];
-        static PlanetFactory[] beltFactories = new PlanetFactory[0];
-        static int facilityFactoryCount;
+        static PlanetFactory[] powerFactories = new PlanetFactory[0];
+        static int powerFactoryCount;
+        static int researchLabFactoryCount;
+        static int liftLabFactoryCount;
         static int inserterFactoryCount;
         static int storageFacotryCount;
         static int beltFactoryCount;
         static int beltAddonFactoryCount; // Splitter, Monitor, Spraycoater, Piler
 
-        [HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
-        static void GameMain_Begin()
-        {
-            if (GameMain.data != null)
-            {
-                facilityFactories = new PlanetFactory[GameMain.data.factories.Length];
-                beltFactories = new PlanetFactory[GameMain.data.factories.Length];
-            }
-        }
-
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
         static void GameTick_Prefix(GameData __instance, long time)
         {
-            if (__instance.factories.Length != facilityFactories.Length)
+            if (__instance.factories.Length != powerFactories.Length)
             {
-                facilityFactories = new PlanetFactory[__instance.factories.Length];
-                beltFactories = new PlanetFactory[__instance.factories.Length];
+                powerFactories = new PlanetFactory[__instance.factories.Length];
             }
 			PlanetFactory localFactory = GameMain.localPlanet?.factory;
 
-            facilityFactoryCount = 0;
+            powerFactoryCount = 0;
+            researchLabFactoryCount = 0;
             for (int i = 0; i < __instance.factoryCount; i++)
             {
-                if ((i + time) % Parameters.FacilityUpdatePeriod == 0)
-                {
-                    facilityFactories[facilityFactoryCount++] = __instance.factories[i];
-                }
+                int offsetIndex = __instance.factories[i].index + (int)time;
+                if (offsetIndex % Parameters.PowerUpdatePeriod == 0)
+                    powerFactories[powerFactoryCount++] = __instance.factories[i];
             }
-			if (localFactory != null && (localFactory.index + time) % Parameters.FacilityUpdatePeriod != 0)
+            if (localFactory != null)
             {
-				//Log.Warn($"{ConfigSettings.FacilityUpdatePeriod} {gameTick % ConfigSettings.FacilityUpdatePeriod} {(localFactory.index + gameTick) % ConfigSettings.FacilityUpdatePeriod}");
-				facilityFactories[facilityFactoryCount++] = localFactory;
-				Parameters.AnimOnlyFactory = localFactory;
-			}
-			else
-            {
-				Parameters.AnimOnlyFactory = null;
-			}
+                int offsetIndex = localFactory.index + (int)time;
+                if (offsetIndex % Parameters.PowerUpdatePeriod != 0)
+                    powerFactories[powerFactoryCount++] = localFactory;
+            }
 
+            researchLabFactoryCount = time % Parameters.LabResearchUpdatePeriod == 0 ? __instance.factoryCount : 0;
+            liftLabFactoryCount = time % Parameters.LabLiftUpdatePeriod == 0 ? __instance.factoryCount : 0;
             inserterFactoryCount = time % Parameters.InserterUpdatePeriod == 0 ? __instance.factoryCount : 0;
             storageFacotryCount = time % Parameters.StorageUpdatePeriod == 0 ? __instance.factoryCount : 0;
 
             beltFactoryCount = 0;
             beltAddonFactoryCount = 0;
-            Parameters.LocalCargoContainer = null;
             if (time % Parameters.BeltUpdatePeriod == 0)
             {
-                for (int i = 0; i < __instance.factoryCount; i++)
-                {
-                    beltFactories[beltFactoryCount++] = __instance.factories[i];
-                }
+                beltFactoryCount = __instance.factoryCount;
                 beltAddonFactoryCount = __instance.factoryCount;
-            }
-            else
-            {
-#if !DEBUG
-                if (localFactory != null) // Make belt always update on local planet to make blue belt looks normal
-                {
-                    beltFactories[beltFactoryCount++] = localFactory;
-                    Parameters.LocalCargoContainer = localFactory.cargoContainer;
-                }
-#endif
             }
         }
 
@@ -85,107 +59,103 @@ namespace AlterTickrate.Patches
         {
             try
             {
-                IEnumerable<CodeInstruction> newInstructions = instructions;
+                var codeMatcher = new CodeMatcher(instructions);
+                int startPos, endPos;
 
-                if (true) // Facility & Power
+                // Power system
                 {
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Factory);
-                    // End:   PerformanceMonitor.BeginSample(ECpuWorkEntry.Facility);
-                    var codeMatcher = new CodeMatcher(newInstructions);
                     codeMatcher.MatchForward(false,
-                        new CodeMatch(OpCodes.Ldc_I4_5), // ECpuWorkEntry.Factory = 5
+                        new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_8), // ECpuWorkEntry.PowerSystem = 8
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
-                    int startPos = codeMatcher.Pos; //IL #92
-                    
+                    startPos = codeMatcher.Pos; //IL #94
+
                     codeMatcher.MatchForward(false,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Facility), //12
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
-                    int endPos = codeMatcher.Pos; //IL #198
-                    newInstructions = ReplaceFactories(newInstructions, startPos, endPos, nameof(facilityFactories), nameof(facilityFactoryCount));
+                    endPos = codeMatcher.Pos; //IL #198
+                    ReplaceFactories(codeMatcher, startPos, endPos, nameof(powerFactories), nameof(powerFactoryCount));
+                }
 
+                // Facility is done in Facility_Patch
+                // Lab Produce is done in LabProduce_Patch
 
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Lab);
-                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Facility);
+                // Lab
+                if (Parameters.LabResearchUpdatePeriod > 1 || Parameters.LabLiftUpdatePeriod > 1)
+                {
                     codeMatcher.MatchForward(false,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Lab), // 17
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
                     startPos = codeMatcher.Pos; //IL #212
-
                     codeMatcher.MatchForward(false,
-                        new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Facility), //12
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "get_multithreadSystem"));
+                    endPos = codeMatcher.Pos; //IL #247
+                    ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(researchLabFactoryCount));
+
+                    startPos = endPos;
+                    codeMatcher.MatchForward(false,
+                        new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Lab), //17
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
-                    endPos = codeMatcher.Pos; //IL #261
-                    newInstructions = ReplaceFactories(newInstructions, startPos, endPos, nameof(facilityFactories), nameof(facilityFactoryCount));
+                    endPos = codeMatcher.Pos; //IL #259
+                    ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(liftLabFactoryCount));
                 }
 
-                if (true) // Sorter
+                if (Parameters.InserterUpdatePeriod > 1)
                 {
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Inserter);
-                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Inserter); 
-                    var codeMatcher = new CodeMatcher(newInstructions);
                     codeMatcher.MatchForward(false,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Inserter), //10
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
-                    int startPos = codeMatcher.Pos;
+                    startPos = codeMatcher.Pos; //IL #307
 
                     codeMatcher.MatchForward(false,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Inserter), //10
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
-                    int endPos = codeMatcher.Pos;
-                    newInstructions = ReplaceFactories(newInstructions, startPos, endPos, "", nameof(inserterFactoryCount));
+                    endPos = codeMatcher.Pos; //IL #321
+                    ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(inserterFactoryCount));
                 }
 
-                if (true) // Storage
+                if (Parameters.StorageUpdatePeriod > 1)
                 {
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Storage);
-                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Storage);
-                    var codeMatcher = new CodeMatcher(newInstructions);
+                    codeMatcher.Start();
                     for (int i = 0; i < 3; i++)
                     {
                         codeMatcher.MatchForward(false,
                             new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Storage), //19
                             new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
-                        int startPos = codeMatcher.Pos;
+                        startPos = codeMatcher.Pos;
 
                         codeMatcher.MatchForward(false,
                             new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Storage), //19
                             new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
-                        int endPos = codeMatcher.Pos;
-                        newInstructions = ReplaceFactories(newInstructions, startPos, endPos, "", nameof(storageFacotryCount));
+                        endPos = codeMatcher.Pos;
+                        ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(storageFacotryCount));
                     }
                 }
-
                 
                 if (Parameters.BeltUpdatePeriod > 1)
                 {
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Belt);
-                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Belt);
-                    var codeMatcher = new CodeMatcher(newInstructions);
+                    codeMatcher.Start();
                     codeMatcher.MatchForward(false,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Belt), //9
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
-                    int startPos = codeMatcher.Pos;
+                    startPos = codeMatcher.Pos; //IL #360
 
-                    codeMatcher
-                        .MatchForward(true,
+                    codeMatcher.MatchForward(true,
                         new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Belt),
                         new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
-                    int endPos = codeMatcher.Pos;
-                    newInstructions = ReplaceFactories(newInstructions, startPos, endPos, nameof(beltFactories), nameof(beltFactoryCount));
+                    endPos = codeMatcher.Pos; //IL #375
+                    ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(beltFactoryCount));
 
 
-                    // Start: PerformanceMonitor.BeginSample(ECpuWorkEntry.Splitter);
-                    // End:   PerformanceMonitor.EndSample(ECpuWorkEntry.Belt);
+                    // DspOpt remove the dup Belt sample so it needs to mark with next line BeginSample(ECpuWorkEntry.Storage)
                     startPos = codeMatcher.Pos;
-                    codeMatcher
-                        .MatchForward(true,
-                        new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Belt),
-                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "EndSample"));
-                    endPos = codeMatcher.Pos;
-                    newInstructions = ReplaceFactories(newInstructions, startPos, endPos, "", nameof(beltAddonFactoryCount));
+                    codeMatcher.MatchForward(true,
+                        new CodeMatch(i => i.opcode == OpCodes.Ldc_I4_S && (sbyte)i.operand == (sbyte)ECpuWorkEntry.Storage),
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "BeginSample"));
+                    endPos = codeMatcher.Pos; //IL #444
+                    ReplaceFactories(codeMatcher, startPos, endPos, "", nameof(beltAddonFactoryCount));
                 }
 
-                return newInstructions;
+                return codeMatcher.InstructionEnumeration();
             }
             catch
             {
@@ -194,9 +164,9 @@ namespace AlterTickrate.Patches
             }
         }
 
-        public static IEnumerable<CodeInstruction> ReplaceFactories(IEnumerable<CodeInstruction> instructions, int start, int end, string factoriesName, string factoryCountName)
+        public static void ReplaceFactories(CodeMatcher codeMatcher, int start, int end, string factoriesName, string factoryCountName)
         {
-            var codeMatcher = new CodeMatcher(instructions);
+            //Log.Debug($"{start} {end} {factoryCountName}");
 
             // replace GameData.factories with factoriesField
             if (factoriesName != "")
@@ -231,7 +201,7 @@ namespace AlterTickrate.Patches
                     .SetAndAdvance(OpCodes.Ldsfld, factoryCountField);
             }
 
-            return codeMatcher.InstructionEnumeration();
+            codeMatcher.Start().Advance(end);
         }
 	}
 }
