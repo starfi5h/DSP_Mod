@@ -5,8 +5,16 @@ using System.Reflection.Emit;
 
 namespace AlterTickrate.Patches
 {
-    public class UITech_Patch
+    public class LabResearch_Patch
     {
+        [HarmonyPrefix, HarmonyPriority(Priority.High)]
+        [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
+        private static void ResearchSpeedModify(ref float speed)
+        {
+            // Note: LabComponent.InternalUpdateResearch need to handle by speed due to matrixPoints (num)
+            speed *= Parameters.LabResearchUpdatePeriod;
+        }
+
         static int techHashedThisFrame;
 
         [HarmonyPostfix, HarmonyPatch(typeof(GameStatData), nameof(GameStatData.RecordTechHashed))]
@@ -14,9 +22,9 @@ namespace AlterTickrate.Patches
         {
             // When FacilityUpdatePeriod > 0, use the average hash in x tick
             techHashedThisFrame = 0;
-            for (int i = 0; i < Parameters.FacilityUpdatePeriod; i++)
+            for (int i = 0; i < Parameters.LabResearchUpdatePeriod; i++)
                 techHashedThisFrame += __instance.techHashedHistory[i];
-            techHashedThisFrame /= Parameters.FacilityUpdatePeriod;
+            techHashedThisFrame /= Parameters.LabResearchUpdatePeriod;
         }
 
         [HarmonyTranspiler]
@@ -34,7 +42,7 @@ namespace AlterTickrate.Patches
                     )
                     .Repeat(matcher => matcher
                         .SetAndAdvance(OpCodes.Nop, null)
-                        .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(UITech_Patch), nameof(techHashedThisFrame)))
+                        .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(LabResearch_Patch), nameof(techHashedThisFrame)))
                     );
 
                 return codeMatcher.InstructionEnumeration();

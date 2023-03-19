@@ -2,8 +2,8 @@
 
 Change buildings update priod from 1 tick to x ticks and scale the progress accordingly to reduce CPU calculation without affecting game pace.  
 
-![compare](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AlterTickrate/doc/compare.png)  
-In the test file by default settings, Belt time reduce by 50%, Sorter time reduce by 50%,  Power System reduce by 73%, Various Facility reduce by 80%, Storage by 50%. Overall the UPS is doubled.  
+![compare](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AlterTickrate/doc/compare.jpg)  
+In the test file, Sorter time reduce by 50%,  Power System reduce by 80%, Various Facility reduce by 70%, Storage reduce by 50%. Overall the UPS is doubled.  
 The button on stat - performance test page can switch on/off the mod.  
 
 Warning: The mod is still in development state. Recommend to make a backup save before using it.  
@@ -24,19 +24,24 @@ As long as the period is multiple of 5, the mod can maintain the same production
 
 Run the game one time with the mod to generate `starfi5h.plugin.AlterTickrate.cfg` file.  
 The update period (update every x ticks) of each group can be configured:     
-`FacilityUpdate` - (Default: 5) Recommend to set as a factor of 20.  
-`BeltUpdate` - (Default: 2) Max limit: 2.  
-`StorageUpdate` - (Default: 2)  
-`SorterUpdate` - (Default: 2)  
+
+`Facility`-`PowerSystem` (Default: 10) Recommend to set as a factor of 30.  
+`Facility`-`Facility` (Default: 10) Recommend to set as a factor of 20.  
+`Lab`-`Produce` (Default: 10) Update producing lab every x ticks.  
+`Lab`-`Research` (Default: 10) Update researching lab every x ticks.  
+`Lab`-`Lift` (Default: 2) Transfer up to x matrixes in lab tower every x ticks.(Max:4)  
+`Transport`-`Sorter` (Default: 2) Setting value higher than 2 may cause sorters to miss cargo.  
+`Transport`-`Storage` (Default: 2) Recommend to set at the same value of belt.   
+`Transport`-`Belt` (Default: 1) Update belt every x ticks.(Max:2) Lower update frequence may break some mixed belt design.  
 
 ## Mod Compatibility
-Compat: NebulaMultiplayerMod, DSPOptimizations  
-Incompat: SampleAndHoldSim, Blackbox  
-If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnhancement), the belt feature will be disabled.  
+Compat: [NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/), [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
+Incompat: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)  
+If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnhancement), the belt feature will be disabled, `Belt` and `Storage` will be set to 1.  
 
 ----
 
-# AlterTickrate
+# AlterTickrate 降频mod
 
 目标: 改变建筑的更新频率, 在不偏离原版计算规则的条件下减少CPU运算量。  
 此mod处于早期测试阶段，使用前建议备份存档。另外由于参与了生产过程，想上榜请自行考虑风险。  
@@ -63,7 +68,7 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 
 缺点
 - 减少运算的效果相对有限
-- 部分设施的动画更新频率(分检器)下降
+- 部分设施的动画更新频率(传送带, 分检器)下降
 - 在电力不足时, 效率可能会因为取整问题下降
 - 可容忍的设施速度有一定上限, 和改变设施速度(例:创世之书)的mod兼容性不佳
 
@@ -74,34 +79,52 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 
 ### 电力与生产设施
 
-`FacilityUpdate`: 默认为5。建议设为20(三级制造台增产剂I: 60*0.5/1.5)的因数。  
-生产设施补偿: 矿机, 组装机, 弹射器, 发射井进度x倍。   
-电力设施补偿: 火力燃料消耗进度x倍, 充/放电电量x倍, 光子进度x倍。  
+`Facility`-`PowerSystem`: 默认为10。  
+建议设为30的因数。  
+电力设施补偿: 燃料消耗进度, 能量枢纽:充/放电电量, 射线接收站:透镜,光子进度。  
+
+`Facility`-`Facility`: 默认为10。  
+建议设为20(三级制造台增产剂I: 60*0.5/1.5)的因数。  
+生产设施补偿: 矿机, 组装机, 弹射器, 发射井进度。  
 在空闲的逻辑帧会利用计算好的状态来继续更新设施的动画。  
 
-### 传送带
+### 研究站
 
-`BeltUpdate`: 默认为2, 最大值为2。
+`Lab`-`Produce`: 默认为10。  
+每x帧更新一次生产模式的研究站。  
+
+`Lab`-`Research`: 默认为10。  
+每x帧更新一次科研模式的研究站。可以依照研究速度调整适合的倍率。  
+
+`Lab`-`Lift`: 默认为2, 最大值为4。  
+每x帧搬运最多x个研究站的矩阵。在原版中每1帧最多搬运1个原料往上/产物往下。   
+改变之后可能会因为矩阵冗余变化而改变矩阵产量, 需要一些时间重新平衡。  
+
+### 传送带
+`Transport`-`Belt`: 默认为1, 最大值为2。  
 原版最高速为蓝带(30每秒 = 0.5每帧), 可允许每2帧更新一次。  
-为了使用者体验, 在本地星球的传送带仍为每1帧更新1次。  
+注意当传送带更新频率降低时, 可能会破坏某些混带的设计。  
 在更改传送带速度的mod同时存在时, 此项功能将停用。  
 
 ### 仓储/入塔/出塔
-`StorageUpdate`: 默认为2。建议设为和传送带的参数相同。
+`Transport`-`Storage`: 默认为2。  
+建议设为和传送带的参数相同。  
 
-### 分检器
-`SorterUpdate`: 默认为2。  
+### 分捡器
+`Transport`-`Sorter`: 默认为2。  
 超过2时爪子可能会漏接/漏放, 造成混带失效或着满带压缩程度降低。  
 
 ## Mod兼容性
 
-相容: 联机mod(NebulaMultiplayerMod), 优化mod(DSPOptimizations)。  
-不相容: SampleAndHoldSim, Blackbox。  
-GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带抽帧功能。
+相容: 联机mod([NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)), 优化mod([DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/))。  
+不相容: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)。  
+GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。
 
 ----
 
 ## Changelog
 
-v0.1.1 - Fix belt feature doesn't apply
+v0.2.0 - Rework to fix lab. Renew config settings.  
+v0.1.2 - Fix power stat value. Fix local fractionators abnormal.  
+v0.1.1 - Fix belt feature doesn't apply.  
 v0.1.0 - Initial release. (DSP 0.9.27.15466)  

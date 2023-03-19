@@ -11,7 +11,6 @@ namespace AlterTickrate.Patches
         [HarmonyPatch(typeof(AssemblerComponent), nameof(AssemblerComponent.InternalUpdate))]
         [HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
         [HarmonyPatch(typeof(SiloComponent), nameof(SiloComponent.InternalUpdate))]
-        [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateAssemble))]
         private static void FacilitySpeedModify(ref float power)
         {
             // only multiply speed when power > 10%
@@ -29,14 +28,6 @@ namespace AlterTickrate.Patches
             {
                 animPool[__instance.entityId].power = power / Parameters.FacilitySpeedRate;
             }
-        }
-
-        [HarmonyPrefix, HarmonyPriority(Priority.High)]
-        [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
-        private static void ResearchSpeedModify(ref float speed)
-        {
-            // Note: LabComponent.InternalUpdateResearch need to handle by speed due to matrixPoints (num)
-            speed *= Parameters.FacilitySpeedRate;
         }
 
         [HarmonyPrefix]
@@ -93,7 +84,7 @@ namespace AlterTickrate.Patches
                 }
             }
 
-            if (__instance.factory == Parameters.AnimOnlyFactory)
+            if (__instance.factory == GameMain.localPlanet?.factory)
             {
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.minerCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
@@ -103,8 +94,13 @@ namespace AlterTickrate.Patches
                         {
                             int entityId = __instance.minerPool[i].entityId;
                             ref AnimData animData = ref entityAnimPool[entityId];
+                            int stationMinerEffect = (int)Mathf.Floor(animData.time / 10f);
                             animData.time %= 10f;
                             animData.Step(animData.state, 0.016666668f);
+                            if (stationMinerEffect > 0)
+                            {
+                                animData.time += stationMinerEffect * 10;
+                            }
                         }
                     }
                 }
@@ -121,7 +117,7 @@ namespace AlterTickrate.Patches
                     }
                 }
                 // ejector and slio update anim time before its time, so tickOffset has to be negative
-                int tickOffset = (Parameters.AnimOnlyFactory.index + (int)time) % Parameters.FacilityUpdatePeriod - Parameters.FacilityUpdatePeriod;
+                int tickOffset = (__instance.factory.index + (int)time) % Parameters.FacilityUpdatePeriod - Parameters.FacilityUpdatePeriod;
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.ejectorCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
                     float[] networkServes = __instance.factory.powerSystem.networkServes;
@@ -210,39 +206,6 @@ namespace AlterTickrate.Patches
                     animData.time = Mathf.Min(animTime, 0f);
                 }
             }
-        }
-
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabProduceMode), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-        static bool LocalAnim_Lab(FactorySystem __instance, int _usedThreadCnt, int _curThreadIdx, int _minimumMissionCnt)
-        {
-            if ((__instance.factory.index + GameMain.gameTick) % Parameters.FacilityUpdatePeriod == 0) // normal tick
-                return true;
-
-            if (__instance.factory == Parameters.AnimOnlyFactory)
-            {
-                if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.labCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out int start, out int end))
-                {
-                    AnimData[] entityAnimPool = __instance.factory.entityAnimPool;
-                    for (int i = start; i < end; i++)
-                    {
-                        if (__instance.labPool[i].id == i)
-                        {
-                            ref AnimData animData = ref entityAnimPool[__instance.labPool[i].entityId];
-                            animData.Step01(animData.state, 0.016666668f); // advance time by dt without updating state
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabResearchMode))]
-        static bool LocalAnim_Lab_Guard(FactorySystem __instance)
-        {
-            return __instance.factory != Parameters.AnimOnlyFactory;
         }
     }
 }

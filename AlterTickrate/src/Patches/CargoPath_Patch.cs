@@ -31,13 +31,8 @@ namespace AlterTickrate.Patches
 					new CodeMatch(OpCodes.Stloc_S)
 				)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldarg_0),
-					HarmonyLib.Transpilers.EmitDelegate<Func<int, CargoPath, int>>((beltSpeed, cargoPath) =>
-					{
-						if (cargoPath.cargoContainer != Parameters.LocalCargoContainer) // scale if not local
-							return beltSpeed * Parameters.BeltUpdatePeriod;
-						return beltSpeed; // local remain normal speed
-					})
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.BeltUpdatePeriod))),
+					new CodeInstruction(OpCodes.Mul)
 				);
 
 				return codeMatcher.InstructionEnumeration();

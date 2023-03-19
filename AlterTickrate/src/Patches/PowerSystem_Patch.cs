@@ -13,9 +13,9 @@ namespace AlterTickrate.Patches
 
 		[HarmonyPrefix]
         [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
-        static bool GameTick(PowerSystem __instance)
+        static bool GameTick(PowerSystem __instance, long time)
         {
-            if (__instance.factory != Parameters.AnimOnlyFactory)
+            if (__instance.factory != GameMain.localPlanet?.factory || (__instance.factory.index + (int)time) % Parameters.PowerUpdatePeriod == 0)
                 return true;
 
 			var entityPool = __instance.factory.entityPool;
@@ -97,6 +97,30 @@ namespace AlterTickrate.Patches
 			return false;
         }
 
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.PrepareTick))]
+		static bool PrepareTick(ProductionStatistics __instance)
+        {
+			for (int i = 0; i < __instance.gameData.factoryCount; i++)
+			{
+				// replace this.factoryStatPool[i].PrepareTick():
+				var factoryStat = __instance.factoryStatPool[i];
+				Array.Clear(factoryStat.productRegister, 0, 12000);
+				Array.Clear(factoryStat.consumeRegister, 0, 12000);
+
+				// Clear power related registers only when power will be updated in this tick
+				if ((i + GameMain.gameTick) % Parameters.PowerUpdatePeriod == 0)					
+				{
+					factoryStat.powerGenRegister = 0L;
+					factoryStat.powerConRegister = 0L;
+					factoryStat.powerDisRegister = 0L;
+					factoryStat.powerChaRegister = 0L;
+				}
+				factoryStat.hashRegister = 0L;
+				__instance.factoryStatPool[i].itemChanged = false;
+			}
+			return false;
+		}
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(PowerExchangerComponent), nameof(PowerExchangerComponent.StateUpdate))]
@@ -105,7 +129,7 @@ namespace AlterTickrate.Patches
 			// Opening / Closing speed of PowerExchangerComponent
 			if (__instance.state < __instance.targetState)
 			{
-				__instance.state += 0.00557f * Parameters.FacilitySpeedRate * 5.0f; // speed up process by 5 times
+				__instance.state += 0.00557f * Parameters.PowerUpdatePeriod * 5.0f; // speed up process by 5 times
 				if (__instance.state >= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -113,7 +137,7 @@ namespace AlterTickrate.Patches
 			}
 			else if (__instance.state > __instance.targetState)
 			{
-				__instance.state -= 0.00557f * Parameters.FacilitySpeedRate * 5.0f; // speed up process by 5 times
+				__instance.state -= 0.00557f * Parameters.PowerUpdatePeriod * 5.0f; // speed up process by 5 times
 				if (__instance.state <= __instance.targetState)
 				{
 					__instance.state = __instance.targetState;
@@ -144,7 +168,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(1)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -163,7 +187,7 @@ namespace AlterTickrate.Patches
 					)
 					.Advance(4)
 					.InsertAndAdvance(
-						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
+						new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
 						new CodeInstruction(OpCodes.Conv_I8),
 						new CodeInstruction(OpCodes.Mul)
 					)
@@ -203,7 +227,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(1)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -279,7 +303,7 @@ namespace AlterTickrate.Patches
 						new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "catalystPoint")
 					)
 					.Advance(3)
-					.SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod)));
+					.SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod)));
 
 				// Change: this.productCount += (float)((double)this.capacityCurrentTick / (double)this.productHeat);
 				// To:	   this.productCount += (float)((double)this.capacityCurrentTick * (double)scale / (double)this.productHeat);
@@ -293,7 +317,7 @@ namespace AlterTickrate.Patches
 				)
 				.Advance(6)
 				.Insert(
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_R8),
 					new CodeInstruction(OpCodes.Mul)
 				);
@@ -327,7 +351,7 @@ namespace AlterTickrate.Patches
 				)
 				.Insert(
 					new CodeInstruction(OpCodes.Ldloc_0),
-					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.FacilityUpdatePeriod))),
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
 					new CodeInstruction(OpCodes.Conv_I8),
 					new CodeInstruction(OpCodes.Mul),
 					new CodeInstruction(OpCodes.Stloc_0)
