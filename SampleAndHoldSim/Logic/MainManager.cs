@@ -5,20 +5,19 @@ namespace SampleAndHoldSim
 {
     public static class MainManager
     {
-        public static int MaxFactoryCount { get; set; } = 100;
+        public static int UpdatePeriod { get; set; } = 1;
         public static bool FocusLocalFactory { get; set; } = true;
+        public static int StationStoreLowerbound { get; private set; } = -64;
         public static List<FactoryManager> Factories { get; } = new List<FactoryManager>();
         public static Dictionary<int, FactoryManager> Planets { get; } = new Dictionary<int, FactoryManager>();
-
-        static int factoryCursor;
-        static int remainCount;
+        public static int FocusStarIndex { get; set; } = -1; // Use by DSP_Battle
 
         public static void Init()
         {
             Factories.Clear();
             Planets.Clear();
-            factoryCursor = 0;
-            remainCount = GameMain.data.factoryCount;
+            StationStoreLowerbound = UpdatePeriod * -64; // 16 slot * 4 stack
+            Log.Debug("UpdatePeriod = " + UpdatePeriod + ", FocusLocalFactory = " + FocusLocalFactory + ", StoreLowerbound = " + StationStoreLowerbound);
         }
 
         public static int SetFactories(PlanetFactory[] workFactories, PlanetFactory[] idleFactories)
@@ -29,80 +28,33 @@ namespace SampleAndHoldSim
                 Factories.Add(manager);
                 Planets.Add(GameMain.data.factories[index].planetId, manager);
             }
-            int workFactoryCount = Math.Min(MaxFactoryCount, GameMain.data.factoryCount);
-            int step = workFactoryCount;
-            int workIndex = 0;
-            int idleIndex = 0;
-            int localId = FocusLocalFactory ? (GameMain.localPlanet?.factoryIndex ?? -1) : -1;
-            if (localId != -1)
+
+            int workFactoryCount = 0;
+            int idleFactoryCount = 0;
+            int time = (int)GameMain.gameTick;
+            PlanetFactory[] factories = GameMain.data.factories;
+            int localFactoryId = GameMain.localPlanet?.factory.index ?? -1;
+            for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                workFactories[workIndex++] = GameMain.data.factories[localId];
-                Factories[localId].IsActive = true;
-                Factories[localId].IsNextIdle = false;
-                Factories[localId].IsNextWork = false;
-                step--;
-                if (FocusLocalFactory && MaxFactoryCount == 1 && GameMain.data.factoryCount > 1)
+                if ((i + time) % UpdatePeriod == 0)
                 {
-                    // There are remote planet factories unreachable
-                    Log.Debug("Remote factories unreachable, set MaxFactoryCount from 1 to 2");
-                    MaxFactoryCount = 2;
-                    workFactoryCount = 2;
-                    step = 1;
-                    UIcontrol.OnFactroyCountChange();
-                }
-            }
-
-            if (step < remainCount)
-            {
-                remainCount -= step;
-            }
-            else
-            {
-                workFactoryCount = remainCount;
-                remainCount = GameMain.data.factoryCount;
-                if (localId != -1)
-                {
-                    workFactoryCount++;
-                    remainCount--;
-                }
-            }
-            int idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
-
-            int newCursor = 0;
-            int nextIdleCount = 0;
-            int nextWorkCount = 0;
-
-            int i = factoryCursor;
-            do
-            {
-                i = (++i) % GameMain.data.factoryCount;
-                if (i == localId)
-                    continue;
-
-                if (workIndex < workFactoryCount)
-                {
-                    workFactories[workIndex++] = GameMain.data.factories[i];
+                    workFactories[workFactoryCount++] = factories[i];
                     Factories[i].IsActive = true;
-                    Factories[i].IsNextIdle = nextIdleCount++ < idleFactoryCount;
-                    Factories[i].IsNextWork = false;
-                    newCursor = i;
+                    Factories[i].IsNextIdle = UpdatePeriod > 1; // vanilla: UpdatePeriod = 1
+                }
+                else if ((FocusLocalFactory && (i == localFactoryId)) || (factories[i].planetId / 100 -1) == FocusStarIndex)
+                {                    
+                    workFactories[workFactoryCount++] = factories[i];
+                    Factories[i].IsActive = true;
+                    Factories[i].IsNextIdle = false; // focused local factory always active
                 }
                 else
                 {
-                    idleFactories[idleIndex++] = GameMain.data.factories[i];
+                    idleFactories[idleFactoryCount++] = factories[i];
                     Factories[i].IsActive = false;
-                    Factories[i].IsNextWork = nextWorkCount++ < workFactoryCount;
                     Factories[i].IsNextIdle = false;
                 }
-            } while (i != factoryCursor);
-            factoryCursor = newCursor;
-
-            /*
-            string str = $"count{workFactoryCount}: "; // for debug
-            for (workIndex = 0; workIndex < workFactoryCount; workIndex++)
-                str += workFactories[workIndex].index + " ";
-            Log.Debug(str);
-            */
+            }
 
             return workFactoryCount;
         }
@@ -122,8 +74,7 @@ namespace SampleAndHoldSim
     public partial class FactoryManager
     {
         public bool IsActive; // is working, excuting functions in GameData.GameTick()
-        public bool IsNextIdle; // will idle next tick
-        public bool IsNextWork; // will work next tick
+        public bool IsNextIdle; // will turn into idle next tick
         public int Index;
         readonly PlanetFactory factory;
 

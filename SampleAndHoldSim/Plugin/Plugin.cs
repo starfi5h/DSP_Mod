@@ -9,43 +9,46 @@ namespace SampleAndHoldSim
     [BepInDependency(Compatibility.NebulaAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.CommonAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(Compatibility.Auxilaryfunction.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.DSP_Battle_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string GUID = "com.starfi5h.plugin.SampleAndHoldSim";
+        public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.4.2";
+        public const string VERSION = "0.5.0";
         public static Plugin instance;
         Harmony harmony;
 
-        ConfigEntry<int> MaxFactoryCount;
+        ConfigEntry<int> UpdatePeriod;
+        ConfigEntry<bool> FocusLocalFactory;
+        ConfigEntry<int> SliderMaxUpdatePeriod;
         ConfigEntry<int> UIStationStoragePeriod;
-        ConfigEntry<int> UIVeinConsumptionPeriod;
         ConfigEntry<bool> UnitPerMinute;
 
         public void LoadConfig()
         {
-            MaxFactoryCount = Config.Bind<int>("General", "MaxFactoryCount", 100, "Maximum number of factories allow to active and run per tick\n每个逻辑帧所能运行的最大工厂数量");
-            UIStationStoragePeriod = Config.Bind<int>("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");
-            UIVeinConsumptionPeriod = Config.Bind<int>("UI", "UIVeinConsumptionPeriod", 1800, "Display mineral consumption rate of mineral in x ticks. 0 = no display\n显示过去x帧内矿脉的矿物消耗速率, 0 = 不显示");
-            UnitPerMinute = Config.Bind<bool>("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
-            MainManager.MaxFactoryCount = MaxFactoryCount.Value;
+            UpdatePeriod = Config.Bind("General", "UpdatePeriod", 3, "Compute actual factory simulation every x ticks.\n更新周期: 每x逻辑帧运行一次实际计算");
+            FocusLocalFactory = Config.Bind("General", "FocusLocalFactory", true, "Let local planet factory always active.使本地工厂保持每帧运行\n");
+            SliderMaxUpdatePeriod = Config.Bind("UI", "SliderMaxUpdatePeriod", 10, "Max value of upate period slider\n更新周期滑动条的最大值");
+            UIStationStoragePeriod = Config.Bind("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");
+            UnitPerMinute = Config.Bind("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
+            
+            MainManager.UpdatePeriod = UpdatePeriod.Value;
+            MainManager.FocusLocalFactory = FocusLocalFactory.Value;
+            UIcontrol.SliderMax = SliderMaxUpdatePeriod.Value;
             UIstation.Period = (int)Math.Ceiling(UIStationStoragePeriod.Value / (float)UIstation.STEP);
             UIstation.UnitPerMinute = UnitPerMinute.Value;
-            UIvein.Period = (int)Math.Ceiling(UIVeinConsumptionPeriod.Value / (float)UIvein.STEP);
-            UIvein.UnitPerMinute = UnitPerMinute.Value;
 
-            Log.Debug(string.Format("MaxFactoryCount:{0} StationUI:{1} VeinUI:{2} {3}",
-                MainManager.MaxFactoryCount,
-                UIstation.Period * UIstation.STEP,
-                UIvein.Period * UIvein.STEP,
-                UnitPerMinute.Value ? "/min" : "/s"
+            Log.Debug(string.Format("UpdatePeriod:{0} StationUI:{1}",
+                MainManager.UpdatePeriod,
+                UIstation.Period * UIstation.STEP
                 ));
         }
 
-        public void SaveConfig(int maxFactoryCount)
+        public void SaveConfig(int updatePeriod, bool focusLocalFactory)
         {
-            MaxFactoryCount.Value = maxFactoryCount;
+            UpdatePeriod.Value = updatePeriod;
+            FocusLocalFactory.Value = focusLocalFactory;
         }
 
         public void Awake()
@@ -62,14 +65,9 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(Dyson_Patch));
 
             if (UIstation.Period > 0)
-                harmony.PatchAll(typeof(UIvein));
-            if (UIvein.Period > 0)
                 harmony.PatchAll(typeof(UIstation));
 
-            Compatibility.CommonAPI.Init(harmony);
-            Compatibility.DSPOptimizations.Init(harmony);
-            Compatibility.Auxilaryfunction.Init(harmony);
-            Compatibility.NebulaAPI.Init(harmony);
+            Compatibility.Init(harmony);
         }
 
         public void OnDestroy()

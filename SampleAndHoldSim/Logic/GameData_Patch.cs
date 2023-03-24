@@ -20,10 +20,6 @@ namespace SampleAndHoldSim
                 workFactories = new PlanetFactory[GameMain.data.factories.Length];
                 idleFactories = new PlanetFactory[GameMain.data.factories.Length];
                 MainManager.Init();
-                workFactoryCount = MainManager.SetFactories(workFactories, idleFactories);
-                idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
-                Log.Debug($"factoryCount total:{GameMain.data.factoryCount} work:{workFactoryCount} idle:{idleFactoryCount}");
-                UIvein.ViewFactoryIndex = -1;
                 UIstation.SetVeiwStation(-1, -1, 0);
             }
         }
@@ -32,7 +28,7 @@ namespace SampleAndHoldSim
         [HarmonyPrefix, HarmonyPatch(typeof(GameMain), nameof(GameMain.End))]
         public static void GameMain_End()
         {
-            Plugin.instance.SaveConfig(MainManager.MaxFactoryCount);
+            Plugin.instance.SaveConfig(MainManager.UpdatePeriod, MainManager.FocusLocalFactory);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]

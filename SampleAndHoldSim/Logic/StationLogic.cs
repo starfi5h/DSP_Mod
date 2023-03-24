@@ -20,15 +20,21 @@ namespace SampleAndHoldSim
         public void StationAfterTransport()
         {
             if (IsActive)
+            {
                 Traversal(StationData.ActiveBegin, false);
+            }
         }
 
         public void StationAfterTick()
         {
             if (IsActive)
+            {
                 Traversal(StationData.ActiveEnd, Index == UIstation.ViewFactoryIndex);
+            }
             else
+            {
                 Traversal(StationData.IdleEnd, false);
+            }
         }
 
         private void Traversal(Action<StationData, StationComponent> action, bool record)
@@ -68,7 +74,7 @@ namespace SampleAndHoldSim
         }
 
         public static void SetMinearl(StationData data, int mineralCount)
-        {
+        {            
             data.tmpMineralCount = mineralCount;
         }
 
@@ -83,6 +89,7 @@ namespace SampleAndHoldSim
                 data.tmpInc[i] = station.storage[i].inc;
             }
             data.tmpWarperCount = station.warperCount;
+            // tmpMineralCount is set inside PlanetTransport.GameTick()
         }
 
         public static void ActiveEnd(StationData data, StationComponent station)
@@ -112,10 +119,13 @@ namespace SampleAndHoldSim
             {
                 station.storage[i].count += data.tmpCount[i];
                 station.storage[i].inc += data.tmpInc[i];
-                station.storage[i].count = Math.Max(station.storage[i].count, 0);
-                station.storage[i].inc = Math.Max(station.storage[i].inc, 0);
+                if (station.storage[i].count < MainManager.StationStoreLowerbound)
+                {
+                    Log.Warn($"station{station.id} - store{i}: {station.storage[i].count}");
+                    station.storage[i].count = MainManager.StationStoreLowerbound;
+                }
             }
-            if (station.isVeinCollector)
+            if (station.isVeinCollector && data.tmpMineralCount > 0)
                 station.storage[0].count += data.tmpMineralCount;
             else
                 station.warperCount += data.tmpWarperCount;

@@ -8,15 +8,13 @@ namespace SampleAndHoldSim
 {
     class UIcontrol
     {
-        static int minFactoryCount = 1;
-        static int factoryCount = -1;
+        public static int SliderMax = 10;
 
         static bool initialized;
         static GameObject group;
         static Slider slider;
         static InputField input;
         static Text text_factory;
-        static Text text_Cycle;
         static Toggle toggle_local;
         static bool eventLock;
         static UItooltip tip1, tip2, tip3;
@@ -43,48 +41,44 @@ namespace SampleAndHoldSim
                     tmp.name = "text_factory";
                     tmp.transform.localPosition = new Vector3(-50, 9);
                     text_factory = tmp.GetComponent<Text>();
-                    text_factory.text = "factory";
-                    tmp.AddComponent<UItooltip>().Text = "Maximum number of factories allow to active and run per tick.";
+                    text_factory.text = "Ratio".Translate();
 
                     tmp = GameObject.Instantiate(input0.gameObject, group.transform);
-                    tmp.name = "input_MaxFactoryCount";
+                    tmp.name = "input_UpdatePeriod";
                     tmp.transform.localPosition = new Vector3(155, 1);
+                    tmp.GetComponent<RectTransform>().sizeDelta = new Vector2(36, 20);
                     input = tmp.GetComponent<InputField>();
                     input.characterValidation = InputField.CharacterValidation.Integer;
                     input.contentType = InputField.ContentType.IntegerNumber;
                     input.onEndEdit.AddListener(new UnityAction<string>(OnInputValueEnd));
                     tip1 = tmp.AddComponent<UItooltip>();
-                    tip1.Title = "MaxfactoryCount";
-                    tip1.Text = "Maximum number of factories allow to active and run per tick.";
+                    tip1.Title = "Update Period".Translate();
+                    tip1.Text = "Compute actual factory simulation every x ticks.".Translate();
 
                     tmp = GameObject.Instantiate(slider0.gameObject, group.transform);
-                    tmp.name = "slider_factoryCount";
+                    tmp.name = "slider_UpdatePeriod";
                     tmp.transform.localPosition = new Vector3(60, -20, -2);
                     slider = tmp.GetComponent<Slider>();
                     slider.minValue = 1;
+                    slider.maxValue = SliderMax;
                     slider.wholeNumbers = true;
                     slider.onValueChanged.AddListener(new UnityAction<float>(OnSliderChange));
                     tip2 = tmp.AddComponent<UItooltip>();
-                    tip2.Title = "Cycle";
-                    tip2.Text = "Game ticks for a factory to be active agagin.";
-
-                    tmp = GameObject.Instantiate(text0.gameObject, group.transform);
-                    tmp.name = "text_Cycle";
-                    tmp.transform.localPosition = new Vector3(-3, -27, 0);
-                    text_Cycle = tmp.GetComponent<Text>();
+                    tip2.Title = "Update Period".Translate();
+                    tip2.Text = "Compute actual factory simulation every x ticks.".Translate();
 
                     tmp = GameObject.Instantiate(checkBox, group.transform);
                     tmp.name = "checkbox_local";
-                    tmp.transform.localPosition = new Vector3(60, -43, 0);
+                    tmp.transform.localPosition = new Vector3(60, -25, 0);
                     GameObject.Destroy(tmp.GetComponent<Localizer>());
                     Text text_local = tmp.GetComponent<Text>();
-                    text_local.font = text_Cycle.font;
+                    text_local.font = text_factory.font;
                     text_local.fontSize = 14;
-                    text_local.text = "Focus local";
+                    text_local.text = "Focus local".Translate();
 
                     tip3 = tmp.AddComponent<UItooltip>();
-                    tip3.Title = "FocusLocalFactory";
-                    tip3.Text = "Let local factory always active.";
+                    tip3.Title = "Focus on local factory".Translate();
+                    tip3.Text = "Let local planet factory always active.".Translate();
 
                     toggle_local = tmp.GetComponentInChildren<UIToggle>().toggle;
                     toggle_local.onValueChanged.AddListener(new UnityAction<bool>(OnToggleChange));
@@ -92,15 +86,14 @@ namespace SampleAndHoldSim
                     tmp.transform.localPosition = new Vector3(70, 0); //60
                     tmp.transform.localScale = new Vector3(0.75f, 0.75f);
                     initialized = true;
+
+                    RefreshUI();
                 }
                 catch
                 {
                     Log.Error("UI component initial fail!");
                 }
             }
-
-            if (factoryCount != GameMain.data.factoryCount)
-                OnFactroyCountChange();
         }
 
         public static void OnDestory()
@@ -112,24 +105,13 @@ namespace SampleAndHoldSim
             initialized = false;
         }
 
-        public static void OnFactroyCountChange()
+        public static void RefreshUI()
         {
             eventLock = true;
-            factoryCount = GameMain.data.factoryCount;
-            int workingCount = Math.Min(MainManager.MaxFactoryCount, factoryCount);
-            // If there are remote facotries, set minFactoryCount to 2 (1 always on local + 1 circular remote)
-            minFactoryCount = (MainManager.FocusLocalFactory && GameMain.localPlanet != null && factoryCount > 1) ? 2 : 1;
-
             if (initialized)
             {
-                input.text = MainManager.MaxFactoryCount.ToString();
-                slider.maxValue = factoryCount;
-                slider.minValue = minFactoryCount;
-                slider.value = workingCount;
-                if (workingCount > (minFactoryCount - 1))
-                    text_Cycle.text = string.Format("Cycle:{0,5:F0} ticks", Math.Ceiling((float)(factoryCount - (minFactoryCount - 1)) / (workingCount - (minFactoryCount - 1))));
-                else
-                    text_Cycle.text = "Only local planet";
+                input.text = MainManager.UpdatePeriod.ToString();
+                slider.value = MainManager.UpdatePeriod;
                 toggle_local.isOn = MainManager.FocusLocalFactory;
             }
             eventLock = false;
@@ -141,8 +123,9 @@ namespace SampleAndHoldSim
             {
                 val = Mathf.Round(val / 1f) * 1f;
                 slider.value = val;
-                MainManager.MaxFactoryCount = (int)val;
-                OnFactroyCountChange();
+                MainManager.UpdatePeriod = (int)val;
+                MainManager.Init();
+                RefreshUI();
             }
         }
 
@@ -150,11 +133,12 @@ namespace SampleAndHoldSim
         {
             if (!eventLock)
             {
-                if (int.TryParse(val, out int value) && value >= minFactoryCount)
+                if (int.TryParse(val, out int value) && value >= 1)
                 {
-                    MainManager.MaxFactoryCount = value;
+                    MainManager.UpdatePeriod = value;
+                    MainManager.Init();
                 }
-                OnFactroyCountChange();
+                RefreshUI();
             }
         }
 
@@ -163,7 +147,7 @@ namespace SampleAndHoldSim
             if (!eventLock)
             {
                 MainManager.FocusLocalFactory = val;
-                OnFactroyCountChange();
+                RefreshUI();
             }
         }
     }
