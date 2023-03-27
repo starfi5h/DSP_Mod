@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.5.1
+\- Fix error when player land on an unexplored planet.  
+\- Reduce memory allocation to fix stuttering.  
+
 #### v0.5.0 (DSP0.9.27.15466)
 \- Rework: Change logic from MaxFactoryCount to UpdatePeriod, add related config.    
 \- Remove vein comsumption rate UI.  
