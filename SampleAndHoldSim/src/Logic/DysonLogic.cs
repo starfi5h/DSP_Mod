@@ -8,6 +8,13 @@ using UnityEngine;
 
 namespace SampleAndHoldSim
 {
+    public struct ProjectileData
+    {
+        public int PlanetId;
+        public int TargetId; // >0:bullet <0:rocket
+        public Vector3 LocalPos;
+    }
+
     partial class FactoryManager
     {
         public long EnergyReqCurrentTick { get; set; } // requested energy in this factory from ray receivers
@@ -15,11 +22,11 @@ namespace SampleAndHoldSim
         readonly List<ProjectileData> dysonList = new List<ProjectileData>();
         int idleCount;
 
-        public void AddDysonData(ProjectileData data)
+        public void AddDysonData(int planetId, int targetId, in Vector3 localPos)
         {
             if (dysonBag == null)
                 dysonBag = new ConcurrentBag<ProjectileData>(); // may miss few data?
-            dysonBag.Add(data);
+            dysonBag.Add(new ProjectileData() { PlanetId = planetId, TargetId = targetId, LocalPos = localPos });
         }
 
         public void DysonColletEnd()
@@ -47,7 +54,7 @@ namespace SampleAndHoldSim
                     foreach (var data in dysonList)
                     {
                         if (data.TargetId < 0)
-                            Dyson_Patch.AddBullet(factory.dysonSphere.swarm, data, idleCount);
+                            Dyson_Patch.AddBullet(factory.dysonSphere.swarm, data);
                         else
                             Dyson_Patch.AddRocket(factory.dysonSphere, data, idleCount);
                     }
@@ -111,13 +118,7 @@ namespace SampleAndHoldSim
                         {
                             if (MainManager.Planets.TryGetValue(planetId, out var factoryData) && factoryData.IsNextIdle)
                             {
-                                ProjectileData data = new ProjectileData
-                                {
-                                    PlanetId = planetId,
-                                    TargetId = -orbitId,
-                                    LocalPos = localPos
-                                };
-                                factoryData.AddDysonData(data);
+                                factoryData.AddDysonData(planetId, -orbitId, localPos);
                             }
                         })
                     );
@@ -151,13 +152,7 @@ namespace SampleAndHoldSim
                             if (MainManager.Planets.TryGetValue(planetId, out var factoryData) && factoryData.IsNextIdle)
                             {
                                 // Assume layerId < 16, nodeId < 4096
-                                ProjectileData data = new ProjectileData
-                                {
-                                    PlanetId = planetId,
-                                    TargetId = (autoDysonNode.layerId << 12) | (autoDysonNode.id & 0x0FFF),
-                                    LocalPos = localPos
-                                };
-                                factoryData.AddDysonData(data);
+                                factoryData.AddDysonData(planetId, (autoDysonNode.layerId << 12) | (autoDysonNode.id & 0x0FFF), localPos);
                             }
                         })
                     );
@@ -170,7 +165,7 @@ namespace SampleAndHoldSim
             }
         }
 
-        public static void AddBullet(DysonSwarm swarm, ProjectileData projectile, int idleCount)
+        public static void AddBullet(DysonSwarm swarm, ProjectileData projectile)
         {
             ref AstroData[] astroDatas = ref GameMain.data.galaxy.astrosData;
             int orbitId = -projectile.TargetId;
@@ -217,12 +212,5 @@ namespace SampleAndHoldSim
                 }
             }
         }
-    }
-
-    public struct ProjectileData
-    {
-        public int PlanetId;
-        public int TargetId; // >0:bullet <0:rocket
-        public Vector3 LocalPos;
     }
 }

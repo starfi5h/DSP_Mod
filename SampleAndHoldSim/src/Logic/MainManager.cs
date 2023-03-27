@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SampleAndHoldSim
 {
@@ -33,7 +32,7 @@ namespace SampleAndHoldSim
             int idleFactoryCount = 0;
             int time = (int)GameMain.gameTick;
             PlanetFactory[] factories = GameMain.data.factories;
-            int localFactoryId = GameMain.localPlanet?.factory.index ?? -1;
+            int localFactoryId = GameMain.localPlanet?.factory?.index ?? -1; // unexplored planet may not have factory on it
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
                 if ((i + time) % UpdatePeriod == 0)

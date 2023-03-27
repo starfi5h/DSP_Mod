@@ -1,7 +1,7 @@
 {
     "name": "SampleAndHoldSim",
     "description": "Change how game simulation works to reduce computation (warning: may trigger abnormality).  模拟星球工厂的输入输出以减少运算(可能会数据异常)",
-    "version_number": "0.5.0",
+    "version_number": "0.5.1",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/SampleAndHoldSim",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

@@ -1,15 +1,17 @@
 # Sample and Hold Simulation  
 
-![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/demo5.gif)  
 Reduce factory calculation by letting factoies have active tick and idle tick.  
 When in active, the factory will run the whole simulation. When in idle, the factory will use values from last active tick to generate input and output, multiply the "result".    
-The goal is to make factories tick less but still make nearly same amount of items in ILS in the long term.  
-Recommend to set focus local factory = true to have a better experience.  
-
+The goal is to make factories tick less but still make nearly same amount of items in ILS in the long term, trade accuracy for UPS.    
+    
+![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/demo5.gif)  
+The mod control panel is on statistics panel - performance test.  
+Ratio - Factory is active every x ticks. The input field can set value higher than 10.   
+Focus Local - When enable, the local planet factory will always active. It can give better gaming experience.  
 **Warning: Because this mod manipulate stats data and item generation, it may diable Milkyway upload.**  
 
 ![UI](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/UI1.jpg)  
-Additional UI for displaying change rate of resources in stations. Configurable in options.  
+Additional UI for displaying flow-in/flow-out rate of cargo in stations. Configurable in options.  
 
 ## How does it work
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/time_chart.png)  
@@ -40,6 +42,9 @@ Run the game one time to generate `starfi5h.plugin.SampleAndHoldSim.cfg` file.
 - `UpdatePeriod` (Default:`3`)  
 Compute actual factory simulation every x ticks.  
 
+- `SliderMaxUpdatePeriod` (Default:`10`)  
+Max value of upate period slider.  
+
 - `UIStationStoragePeriod` (Default:`600`)  
 Display item count change rate in station storages in x ticks. 0 = no display  
 
@@ -60,8 +65,8 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 ## [戴森球mod - 修改游戏运算方式以提升逻辑帧率](https://b23.tv/BV1oB4y1X78J)
   
 尝试减少更新频率并倍增每次运算的产物来提升逻辑帧率。  
-使用者可以在性能测试面板设定倍率，闲置的星球将会用上一个帧的值来模拟工厂的输入和输出。  
-建议勾选Focus Local让本地工厂保持运行来维持游戏体验，倍率调整至能让逻辑帧高过60就好。  
+使用者可以在性能测试面板设定倍率(Ratio)，闲置的星球将会用上一个帧的值来模拟工厂的输入和输出。  
+勾选Focus Local可让本地工厂保持运行来维持游戏体验，但在切换星球后可能会有残留货物的问题。  
 **警告: 此mod会改动统计资料和虛空產物。可能会让存档无法上传银河系。**  
 
 ## 运作原理
@@ -95,6 +100,9 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
   
 - `UpdatePeriod` (Default:`3`)  
 更新周期: 每x逻辑帧运行一次实际计算    
+
+- `SliderMaxUpdatePeriod` (Default:`10`)  
+更新周期滑动条的最大值  
 
 - `UIStationStoragePeriod` (Default:`600`)  
 显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示  

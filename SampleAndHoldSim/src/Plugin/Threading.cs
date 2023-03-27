@@ -7,6 +7,8 @@ namespace SampleAndHoldSim
 {
     public class Threading
     {
+        private static readonly ManualResetEvent completeEvent = new ManualResetEvent(false);
+
         // Modify from https://github.com/BepInEx/BepInEx/blob/0894d3552e4fdd96899d5209313ebb551ed17b62/BepInEx.Unity/ThreadingHelper.cs
         public static void ForEachParallel(Action<int> work, int dataCount, int workerCount = -1)
         {
@@ -17,7 +19,7 @@ namespace SampleAndHoldSim
 
             var currentIndex = dataCount;
 
-            var are = new ManualResetEvent(false);
+            completeEvent.Reset();
             var runningCount = workerCount;
             Exception exceptionThrown = null;
 
@@ -45,7 +47,7 @@ namespace SampleAndHoldSim
                 {
                     var decCount = Interlocked.Decrement(ref runningCount);
                     if (decCount <= 0)
-                        are.Set();
+                        completeEvent.Set();
                 }
             }
 
@@ -55,7 +57,7 @@ namespace SampleAndHoldSim
 
             DoWork(null);
 
-            are.WaitOne();
+            completeEvent.WaitOne();
 
             if (exceptionThrown != null)
                 throw new TargetInvocationException("An exception was thrown inside one of the threads", exceptionThrown);
