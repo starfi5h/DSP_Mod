@@ -192,6 +192,13 @@ namespace SampleAndHoldSim
                 Lab_IdleTick(index);
                 manager.DysonIdleTick();
             }
+            
+            if (!manager.IsActive || manager.IsNextIdle)
+            {
+                // If stats is not going to reset in the next frame, remove stats add by Blackbox
+                if (Compatibility.Blackbox_Patch.IsPatched)
+                    Compatibility.Blackbox_Patch.Warper.RevertStats(index);
+            }
         }
 
         static void Lab_IdleTick(int index)

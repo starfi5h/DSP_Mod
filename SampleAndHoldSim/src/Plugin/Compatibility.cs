@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using DysonSphereProgram.Modding.Blackbox;
+using HarmonyLib;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace SampleAndHoldSim
             DSPOptimizations.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             DSP_Battle_Patch.Init(harmony);
+            Blackbox_Patch.Init(harmony);
         }
 
         public static class NebulaAPI
@@ -225,6 +227,77 @@ namespace SampleAndHoldSim
                     else
                     {
                         MainManager.FocusStarIndex = -1;
+                    }
+                }
+            }
+        }
+
+        public static class Blackbox_Patch
+        {
+            public const string GUID = "dev.raptor.dsp.Blackbox";
+            public static bool IsPatched { get; private set; } = false;
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    harmony.PatchAll(typeof(Warper));
+                    IsPatched = true;
+                    Log.Debug("Blackbox compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("Blackbox compatibility failed! Last working version: 0.2.4");
+                    Log.Warn(e);
+                }
+            }
+
+            public static class Warper
+            {
+                public static void RevertStats(int factoryIndex)
+                {
+                    foreach (var blackbox in BlackboxManager.Instance.blackboxes)
+                    {
+                        var simulation = blackbox.Simulation;
+                        if (simulation == null || simulation.factoryRef == null) continue;
+
+                        if (simulation.factoryRef.TryGetTarget(out var factory) && factory.index == factoryIndex)
+                        {
+                            if (!simulation.isWorking) continue;
+
+                            var Recipe = blackbox.Recipe;
+                            var timeIdx = simulation.timeIdx <= 0 ? Recipe.timeSpend - 1 : simulation.timeIdx - 1; // revert to last time
+                            
+                            //if (BlackboxSimulation.continuousStats)
+                            {
+                                var totalTimeSpend = (float)Recipe.timeSpend;
+                                var curPercent = timeIdx / totalTimeSpend;
+                                var nextPercent = (timeIdx + 1) / totalTimeSpend;
+                                var factoryStatPool = GameMain.data.statistics.production.factoryStatPool[factory.index];
+
+                                foreach (var production in Recipe.produces)
+                                {
+                                    var countToAdd = (int)(nextPercent * production.Value) - (int)(curPercent * production.Value);
+                                    factoryStatPool.productRegister[production.Key] -= countToAdd; // revert count
+                                }
+                                foreach (var consumption in Recipe.consumes)
+                                {
+                                    var countToAdd = (int)(nextPercent * consumption.Value) - (int)(curPercent * consumption.Value);
+                                    factoryStatPool.consumeRegister[consumption.Key] -= countToAdd; // revert count
+                                }
+                            }
+                            /* BlackboxSimulation.continuousStats is always true
+                            else if (simulation.timeIdx == 0)
+                            {
+                                var factoryStatPool = GameMain.data.statistics.production.factoryStatPool[factory.index];
+                                foreach (var production in Recipe.produces)
+                                    factoryStatPool.productRegister[production.Key] -= production.Value;
+                                foreach (var consumption in Recipe.consumes)
+                                    factoryStatPool.consumeRegister[consumption.Key] -= consumption.Value;
+                            }
+                            */
+                        }
                     }
                 }
             }

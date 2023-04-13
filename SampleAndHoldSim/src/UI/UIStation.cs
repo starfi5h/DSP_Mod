@@ -36,6 +36,10 @@ namespace SampleAndHoldSim
                     changeRateText[i].alignment = TextAnchor.MiddleLeft;
                 }
             }
+            for (int i = 0; i < changeRateText.Length; i++)
+            {
+                changeRateText[i].gameObject.SetActive(false);
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIStationWindow), "_OnClose")]
@@ -59,7 +63,18 @@ namespace SampleAndHoldSim
             {
                 if (__instance.storageUIs[i].station != null)
                 {
-                    changeRateText[i].text = GetRateString(GetStorageChangeRate(i));
+                    float rate = GetStorageChangeRate(i);
+                    if (rate != 0)
+                    {
+                        changeRateText[i].text = GetRateString(rate);
+                        if (!changeRateText[i].gameObject.activeSelf)
+                            changeRateText[i].gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        if (changeRateText[i].gameObject.activeSelf)
+                            changeRateText[i].gameObject.SetActive(false);
+                    }
                 }
             }
         }

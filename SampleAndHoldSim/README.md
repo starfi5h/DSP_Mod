@@ -32,7 +32,7 @@ In the example chart, the upper one is the original game which runs 3 factories 
 Simulation in action. Above: vanilla game, ratio = 1. Below: mod enable, ratio = 2.  
 In the gif, both vein amount go from 100 to 90, and station storage go from 55 to 65.  
   
-![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats1.jpg)  
+![stats](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/SampleAndHoldSim/img/stats2.jpg)  
 The production throughput will catch up with original one in long term if it is stable. In short term there are some differences, for example statistic data will be more sparse. Also local conponents inside the factory will be slower, so storage boxes or tanks will have fewer items than vanilla.  
 
 ## Configuration
@@ -46,7 +46,7 @@ Compute actual factory simulation every x ticks.
 Max value of upate period slider.  
 
 - `UIStationStoragePeriod` (Default:`600`)  
-Display item count change rate in station storages in x ticks. 0 = no display  
+Display item flow in/out from belts in station storages in x ticks. 0 = no display  
 
 - `UnitPerMinute` (Default:`false`)  
 If true, show rate in unit per minute. otherwise show rate in unit per second.  
@@ -59,7 +59,7 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 (✅) [TheyComeFromVoid](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/) - The star system being attacked will run at normal speed to make turrets work correctly.  
 (🛠️) [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/) - Fix veins get removed when pausing the factoires.  
 (🛠️) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Fix solar sail number incorrected when skipping bullets.  
-(⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Conflicts: The production stats of blackbox will be multiplied. Analysis won't start.  
+(🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.  
 
 ----
 ## [戴森球mod - 修改游戏运算方式以提升逻辑帧率](https://b23.tv/BV1oB4y1X78J)
@@ -105,7 +105,7 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 更新周期滑动条的最大值  
 
 - `UIStationStoragePeriod` (Default:`600`)  
-显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示  
+显示过去x帧内物流塔经传送带的货物的流入或流出速率, 0 = 不显示  
 
 - `UnitPerMinute` (Default:`false`)  
 true: 显示单位设为每分钟速率 false: 显示每秒速率  
@@ -117,7 +117,7 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 (✅) [深空来敌](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/)(战斗mod) - 在战斗过程中, 被攻击的星系将会恢复为原速好让炮塔运作正常  
 (🛠️) [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/)(辅助mod) - 修复停止工厂时矿物会被移除的问题  
 (🛠️) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 修复跳过子弹时, 太阳帆的数量没有被倍增的问题  
-(⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 不太相容, 低速下产物统计会倍增  
+(🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复产物统计会倍增的问题    
 
 ----
 

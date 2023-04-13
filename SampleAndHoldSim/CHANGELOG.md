@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.5.2
+\- Add Blackbox compat  
+\- Hide station UI when flow rate = 0.  
+
 #### v0.5.1
 \- Fix error when player land on an unexplored planet.  
 \- Reduce memory allocation to fix stuttering.  
