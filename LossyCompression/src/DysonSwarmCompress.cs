@@ -56,6 +56,7 @@ namespace LossyCompression
         public static void Import(BinaryReader r)
         {
             int version = r.ReadInt32();
+            if (version == 0) return; // No swarm compressed data
             if (version == EncodedVersion)
             {
                 long datalen = -r.BaseStream.Length;

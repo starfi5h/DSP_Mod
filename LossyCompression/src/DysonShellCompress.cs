@@ -107,7 +107,8 @@ namespace LossyCompression
         public static void Import(BinaryReader r)
         {
             int version = r.ReadInt32();
-            if (version <= EncodedVersion)
+            if (version == 0) return; // No shell compressed data
+            if (version == EncodedVersion || version == 1)
             {
                 long datalen = -r.BaseStream.Length;
                 var stopWatch = new HighStopwatch();

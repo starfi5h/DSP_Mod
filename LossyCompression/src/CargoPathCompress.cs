@@ -13,7 +13,8 @@ namespace LossyCompression
         // Format: (int)capactiy - (int)bufferLength - [point][point][line start point, length, line end point][point]....
 
         public static bool Enable { get; set; }
-        public static readonly int EncodedVersion = 61; //PeekChar() max is 127
+        public static readonly int EncodedVersion = 60 + 2; //PeekChar() max is 127
+        private static int version = 62;
 
         public static void Encode(CargoPath cargoPath, BinaryWriter w)
         {
@@ -21,7 +22,7 @@ namespace LossyCompression
             w.Write(cargoPath.bufferLength);
             int len = 0;
             Vector3 prevPos = Vector3.zero;
-            Quaternion prevRot = Quaternion.identity, headRot = Quaternion.identity;
+            Quaternion prevRot = Quaternion.identity, headRot = Quaternion.Euler(180, 0, 0); // Make sure the first point won't get into run
             Vector3[] pointPos = cargoPath.pointPos;
             Quaternion[] pointRot = cargoPath.pointRot;
 
@@ -41,19 +42,13 @@ namespace LossyCompression
                         w.Write(prevPos.x); // write the ending point of the sequence
                         w.Write(prevPos.y);
                         w.Write(prevPos.z);
-                        w.Write(prevRot.x);
-                        w.Write(prevRot.y);
-                        w.Write(prevRot.z);
-                        w.Write(prevRot.w);
+                        Utils.WriteCompressedRotation(w, in prevPos, in prevRot);
                         len = 0;
                     }
                     w.Write(pointPos[i].x);
                     w.Write(pointPos[i].y);
                     w.Write(pointPos[i].z);
-                    w.Write(pointRot[i].x);
-                    w.Write(pointRot[i].y);
-                    w.Write(pointRot[i].z);
-                    w.Write(pointRot[i].w);
+                    Utils.WriteCompressedRotation(w, in pointPos[i], in pointRot[i]);
                     headRot = pointRot[i];
                 }
                 prevPos = pointPos[i];
@@ -65,10 +60,7 @@ namespace LossyCompression
                 w.Write(prevPos.x);
                 w.Write(prevPos.y);
                 w.Write(prevPos.z);
-                w.Write(prevRot.x);
-                w.Write(prevRot.y);
-                w.Write(prevRot.z);
-                w.Write(prevRot.w);
+                Utils.WriteCompressedRotation(w, in prevPos, in prevRot);
             }
         }
 
@@ -92,10 +84,17 @@ namespace LossyCompression
                     pos2.x = r.ReadSingle();
                     pos2.y = r.ReadSingle();
                     pos2.z = r.ReadSingle();
-                    rot2.x = r.ReadSingle();
-                    rot2.y = r.ReadSingle();
-                    rot2.z = r.ReadSingle();
-                    rot2.w = r.ReadSingle();
+                    if (version >= 62)
+                    {
+                        rot2 = Utils.ReadCompressedRotation(r, in pos2);
+                    }
+                    else
+                    {
+                        rot2.x = r.ReadSingle();
+                        rot2.y = r.ReadSingle();
+                        rot2.z = r.ReadSingle();
+                        rot2.w = r.ReadSingle();
+                    }
 
                     // Interpolate 
                     for (int j = 1; j <= len; j++)
@@ -112,20 +111,34 @@ namespace LossyCompression
                     pos1.x = token;
                     pos1.y = r.ReadSingle();
                     pos1.z = r.ReadSingle();
-                    rot1.x = r.ReadSingle();
-                    rot1.y = r.ReadSingle();
-                    rot1.z = r.ReadSingle();
-                    rot1.w = r.ReadSingle();
+                    if (version >= 62)
+                    {
+                        rot1 = Utils.ReadCompressedRotation(r, in pos1);
+                    }
+                    else
+                    {
+                        rot1.x = r.ReadSingle();
+                        rot1.y = r.ReadSingle();
+                        rot1.z = r.ReadSingle();
+                        rot1.w = r.ReadSingle();
+                    }
                     pointPos[i] = pos1;
                     pointRot[i] = rot1;
                     i++;
+
+                    if (pos1.sqrMagnitude < 100f*100f)
+                    {
+                        //Log.Warn(pos1);
+                        //Maths.GetLatitudeLongitude(pos1, out int latd, out int latf, out int logd, out int logf, out bool north, out bool south, out bool west, out bool east);
+                        //Log.Warn($"N{north} {latd} E{east} {logd}");
+                    }
                 }
 
             }
 
 #if DEBUG
-            //Log.Info($"Total: {bufferLength} Compressed: {compressedLength} ({100f * compressedLength / bufferLength}%)");
-            //Compare(bufferLength, cargoPath.pointPos, pointPos);
+            compressed += compressedLength;
+            Compare(bufferLength, cargoPath.pointPos, pointPos, cargoPath.pointRot, pointRot);
 #endif
             cargoPath.capacity = capactiy;
             cargoPath.bufferLength = bufferLength;
@@ -133,21 +146,58 @@ namespace LossyCompression
             cargoPath.pointRot = pointRot;
         }
 
-        static void Compare(int length, Vector3[] oldPos, Vector3[] newPos)
+#if DEBUG
+        public static int total, compressed;
+        public static float maxPosError, avgPosError;
+        public static float maxRotError = float.MaxValue, avgRotError;
+
+        public static void Reset()
         {
+            version = EncodedVersion;
+            total = compressed = 0;
+            maxPosError = avgPosError = avgRotError = 0f;
+            maxRotError = float.MaxValue;
+        }
+        
+        public static void Print()
+        {
+            Log.Info($"Total: {total} Compressed: {compressed} ({100f * compressed / total}%)");
+            Log.Info($"Pos err max:{maxPosError} avg:{avgPosError}");
+            //Log.Info($"Rot err max:{maxRotError} avg:{avgRotError}");
+            Log.Info($"Rot err (deg) max:{Mathf.Acos(maxRotError)*180f/Mathf.PI} avg:{Mathf.Acos(avgRotError) * 180f / Mathf.PI}");
+        }
+
+        static void Compare(int length, Vector3[] oldPos, Vector3[] newPos, Quaternion[] oldRot, Quaternion[] newRot)
+        {
+            if (oldPos == null || oldRot == null)
+                return;
+
             int count = 0;
             for (int i = 0; i < length; i++)
             {
-                float diff = (oldPos[i] - newPos[i]).sqrMagnitude;
-                if (diff > 0.5f)
+                float posDiff = (oldPos[i] - newPos[i]).sqrMagnitude;
+                maxPosError = posDiff > maxPosError ? posDiff : maxPosError;
+                avgPosError = (avgPosError * total + posDiff) / (total + 1);
+                if (posDiff > 1f)
                 {
-                    count++;
-                    //Log.Debug($"{oldPos[i]} {newPos[i]} => {diff}");
+                    Maths.GetLatitudeLongitude(oldPos[i], out int latd, out int latf, out int logd, out int logf, out bool north, out bool south, out bool west, out bool east);
+                    Log.Info($"N{north} {latd} E{east} {logd}");
+                    Log.Debug($"{oldPos[i]} {newPos[i]} => {posDiff}");
                 }
+
+                float rotDot = Mathf.Max(Quaternion.Dot(oldRot[i], newRot[i]), Quaternion.Dot(oldRot[i], new Quaternion(-newRot[i].x, -newRot[i].y, -newRot[i].z, -newRot[i].w)));
+                maxRotError = rotDot < maxRotError ? rotDot : maxRotError;
+                avgRotError = (avgRotError * total + rotDot) / (total + 1);
+                if (rotDot < 0.7071f) // cos(45degree)
+                {
+                    //Log.Warn(newPos[i]);
+                    Log.Debug($"{oldRot[i]} {newRot[i]} => {rotDot}");
+
+                }
+                total++;
             }
-            if (count > 0)
-                Log.Warn($"Diff count: {count}");
         }
+#endif
 
 #pragma warning disable CS8321, IDE0060
 
@@ -189,13 +239,11 @@ namespace LossyCompression
             return false;
         }
 
-        static int version;
-
         [HarmonyPrefix, HarmonyPatch(typeof(CargoPath), nameof(CargoPath.Import))]
         public static bool CargoPathImport_Prefix(CargoPath __instance, BinaryReader r)
         {
             version = r.ReadInt32();
-            if (version != EncodedVersion)
+            if (version <= 60) // Assume vanilla CargoPath version <= 60
             {
                 CargoPathImport(__instance, r);
                 return false;
