@@ -41,8 +41,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.17.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BepInEx.BaseLib.5.4.17\lib\net35\BepInEx.dll</HintPath>
@@ -105,8 +104,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.dll</HintPath>
@@ -201,8 +199,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\UnityEngine.Networking.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ParticleSystemModule.dll</HintPath>
@@ -233,8 +230,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\UnityEngine.SpatialTracking.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteMaskModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.SpriteMaskModule.dll</HintPath>
@@ -277,8 +273,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.Timeline, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\UnityEngine.Timeline.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\UnityEngine.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TimelineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TimelineModule.dll</HintPath>
@@ -289,8 +284,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15033-r.0\lib\net45\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.9.27.15466-r.0\lib\net45\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UIElementsModule.dll</HintPath>
