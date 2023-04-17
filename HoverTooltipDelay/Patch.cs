@@ -20,7 +20,7 @@ namespace HoverTooltipDelay
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(UIEntityBriefInfo), "_OnUpdate")]
-        public static IEnumerable<CodeInstruction> Real_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator IL)
+        public static IEnumerable<CodeInstruction> Real_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             try
             {

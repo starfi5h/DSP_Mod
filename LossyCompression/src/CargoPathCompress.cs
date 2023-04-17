@@ -147,6 +147,7 @@ namespace LossyCompression
         }
 
 #if DEBUG
+#pragma warning disable IDE0059 // 指派了不必要的值
         public static int total, compressed;
         public static float maxPosError, avgPosError;
         public static float maxRotError = float.MaxValue, avgRotError;
@@ -172,7 +173,6 @@ namespace LossyCompression
             if (oldPos == null || oldRot == null)
                 return;
 
-            int count = 0;
             for (int i = 0; i < length; i++)
             {
                 float posDiff = (oldPos[i] - newPos[i]).sqrMagnitude;
@@ -197,6 +197,7 @@ namespace LossyCompression
                 total++;
             }
         }
+#pragma warning restore IDE0059 // 指派了不必要的值
 #endif
 
 #pragma warning disable CS8321, IDE0060
