@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using crecheng.DSPModSave;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace LossyCompression
