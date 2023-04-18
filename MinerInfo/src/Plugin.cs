@@ -25,7 +25,7 @@ namespace MinerInfo
             ShowItemsPerSecond = Config.Bind("MinerInfo", "ShowItemsPerSecond", true,
                 "If true, display unit per second.").Value;
 
-            ShowItemsPerMinute = Config.Bind("MinerInfo", "ShowItemsPerMinute", true,
+            ShowItemsPerMinute = Config.Bind("MinerInfo", "ShowItemsPerMinute", false,
                 "If true, display unit per minute.").Value;
 
             ShowVeinMaxMinerOutput = Config.Bind("MaxMinerOutput", "Enable", true,
@@ -39,6 +39,7 @@ namespace MinerInfo
             harmony.PatchAll(typeof(CurrentOutputPatch));
             if (ShowVeinMaxMinerOutput)
                 harmony.PatchAll(typeof(MaxOutputPatch));
+            harmony.PatchAll(typeof(VeinFilterPatch));
         }
 
         public void OnDestroy()
