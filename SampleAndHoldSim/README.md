@@ -56,7 +56,7 @@ If true, show rate in unit per minute. otherwise show rate in unit per second.
 (✅) [CommonAPI](https://dsp.thunderstore.io/package/CommonAPI/CommonAPI/)  
 (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
 (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/) - SampleAndHoldSim will be diabled in client mode. Only host can use it.  
-(✅) [TheyComeFromVoid](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/) - The star system being attacked will run at normal speed to make turrets work correctly.  
+(🛠️) [TheyComeFromVoid](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/) - The star system being attacked will run at normal speed to make turrets work correctly. Fix shields don't regenerate on some planets.  
 (🛠️) [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/) - Fix veins get removed when pausing the factoires.  
 (🛠️) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Fix solar sail number incorrected when skipping bullets.  
 (🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.  
@@ -114,7 +114,7 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 ## MOD相容性:
 (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)(优化mod)  
 (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod) - 只有主机可使用, 客户端会自动停用并关闭介面  
-(✅) [深空来敌](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/)(战斗mod) - 在战斗过程中, 被攻击的星系将会恢复为原速好让炮塔运作正常  
+(🛠️) [深空来敌](https://dsp.thunderstore.io/package/ckcz123/TheyComeFromVoid/)(战斗mod) - 在战斗过程中, 被攻击的星系将会恢复为原速。修复护盾在部分星球无法补充的bug。  
 (🛠️) [Auxilaryfunction](https://dsp.thunderstore.io/package/blacksnipebiu/Auxilaryfunction/)(辅助mod) - 修复停止工厂时矿物会被移除的问题  
 (🛠️) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 修复跳过子弹时, 太阳帆的数量没有被倍增的问题  
 (🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复产物统计会倍增的问题    

@@ -198,6 +198,7 @@ namespace SampleAndHoldSim
         public static class DSP_Battle_Patch
         {
             public const string GUID = "com.ckcz123.DSP_Battle";
+            public static bool IsPatched { get; private set; } = false;
 
             public static void Init(Harmony harmony)
             {
@@ -205,11 +206,12 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(Warper));
+                    IsPatched = true;
                     Log.Debug("DSP_Battle compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSP_Battle compatibility failed! Last working version: 2.1.4");
+                    Log.Warn("DSP_Battle compatibility failed! Last working version: 2.2.4");
                     Log.Warn(e);
                 }
             }
@@ -228,6 +230,44 @@ namespace SampleAndHoldSim
                     {
                         MainManager.FocusStarIndex = -1;
                     }
+                }
+
+                public static void IdleTick(PlanetFactory factory)
+                {
+                    if (GameMain.instance.timei % 30 != 1) return; //ShieldGenPowerUpdatePatch1: 每半秒檢查1次
+
+                    PowerSystem powerSystem = factory.powerSystem;
+                    for (int i = 1; i < powerSystem.netCursor; i++)
+                    {
+                        PowerNetwork powerNetwork = powerSystem.netPool[i];
+                        if (powerNetwork != null && powerNetwork.id == i)
+                        {
+                            List<int> exchangers = powerNetwork.exchangers;
+                            int count = exchangers.Count;
+                            for (int k = 0; k < count; k++)
+                            {
+                                ref PowerExchangerComponent exchanger = ref powerSystem.excPool[exchangers[k]];
+                                exchanger.currEnergyPerTick *= MainManager.UpdatePeriod; // 低速狀態下, 補償護盾恢復值
+                                DSP_Battle.ShieldGenerator.ShieldGenPowerUpdatePatch1(ref exchanger);
+                                exchanger.currEnergyPerTick /= MainManager.UpdatePeriod;
+                            }
+                        }
+                    }
+                }
+
+                [HarmonyPrefix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
+                public static void RefreshPowerNetworkUI_Prefix(int planetId)
+                {
+                    // 在UI中, 顯示正確的護盾恢復值。(假設UI是當地星球)
+                    if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
+                        DSP_Battle.ShieldGenerator.curShieldIncUI /= MainManager.UpdatePeriod;
+                }
+
+                [HarmonyPostfix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
+                public static void RefreshPowerNetworkUI_Postfix(int planetId)
+                {
+                    if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
+                        DSP_Battle.ShieldGenerator.curShieldIncUI *= MainManager.UpdatePeriod;
                 }
             }
         }

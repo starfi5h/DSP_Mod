@@ -191,6 +191,8 @@ namespace SampleAndHoldSim
                 manager.VeinIdleEnd();
                 Lab_IdleTick(index);
                 manager.DysonIdleTick();
+                if (Compatibility.DSP_Battle_Patch.IsPatched)
+                    Compatibility.DSP_Battle_Patch.Warper.IdleTick(GameMain.data.factories[index]);
             }
             
             if (!manager.IsActive || manager.IsNextIdle)

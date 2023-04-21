@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.5.3
+\- Fix TCFV compat: fix that sheild doesn't regenerate on some planets.  
+
 #### v0.5.2
 \- Add Blackbox compat  
 \- Hide station UI when flow rate = 0.  
