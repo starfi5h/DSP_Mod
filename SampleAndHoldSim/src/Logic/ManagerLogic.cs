@@ -151,6 +151,19 @@ namespace SampleAndHoldSim
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PowerSystem), "GameTick")]
+        static void PowerSystem_Gametick(PowerSystem __instance, ref long time)
+        {
+            if (MainManager.TryGet(__instance.factory.index, out var manager))
+            {
+                // Fix len consumption rate in idle factory
+                // bool useCata = time % 10L == 0L;
+                if (manager.IsNextIdle)
+                    time /= MainManager.UpdatePeriod;
+            }
+        }
+
         static void PrepareTick(int index)
         {
             var factoryStat = GameMain.data.statistics.production.factoryStatPool[index];
