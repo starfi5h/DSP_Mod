@@ -1,5 +1,10 @@
 ## Changelog
 
+#### v0.5.4
+\- Fix len consumption rate abnormal on idle factories.  
+\- Fix IsNextIdle value of focus factories.  
+\- Add PlanetMiner 3.0.7 compat.  
+
 #### v0.5.3
 \- Fix TCFV compat: fix that sheild doesn't regenerate on some planets.  
 
