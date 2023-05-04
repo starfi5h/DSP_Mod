@@ -10,12 +10,13 @@ namespace SampleAndHoldSim
     [BepInDependency(Compatibility.CommonAPI.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.PlanetMiner.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSP_Battle_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.5.3";
+        public const string VERSION = "0.5.4";
         public static Plugin instance;
         Harmony harmony;
 

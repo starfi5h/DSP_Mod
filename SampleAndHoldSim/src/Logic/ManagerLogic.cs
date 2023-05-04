@@ -60,6 +60,9 @@ namespace SampleAndHoldSim
                     .Insert(
                         HarmonyLib.Transpilers.EmitDelegate<Action>(() => 
                         {
+                            if (Compatibility.PlanetMiner.IsPatched)
+                                Compatibility.PlanetMiner.Update_PlanetMiners();
+
                             totalHash = 0;
                             Threading.ForEachParallel(GameTick, GameMain.data.factoryCount, threadCount);
                             // NotifyTechUnlock() use unity api so needs to be in main thread
@@ -148,6 +151,19 @@ namespace SampleAndHoldSim
             {
                 Log.Error("PlanetTransport_Transpiler2 failed.");
                 return instructions;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PowerSystem), "GameTick")]
+        static void PowerSystem_Gametick(PowerSystem __instance, ref long time)
+        {
+            if (MainManager.TryGet(__instance.factory.index, out var manager))
+            {
+                // Fix len consumption rate in idle factory
+                // bool useCata = time % 10L == 0L;
+                if (manager.IsNextIdle)
+                    time /= MainManager.UpdatePeriod;
             }
         }
 

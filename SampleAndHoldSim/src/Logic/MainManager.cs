@@ -35,17 +35,17 @@ namespace SampleAndHoldSim
             int localFactoryId = GameMain.localPlanet?.factory?.index ?? -1; // unexplored planet may not have factory on it
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                if ((i + time) % UpdatePeriod == 0)
+                if ((FocusLocalFactory && (i == localFactoryId)) || (factories[i].planetId / 100 - 1) == FocusStarIndex)
+                {
+                    workFactories[workFactoryCount++] = factories[i];
+                    Factories[i].IsActive = true;
+                    Factories[i].IsNextIdle = false; // focused local factory always active
+                }
+                else if ((i + time) % UpdatePeriod == 0)
                 {
                     workFactories[workFactoryCount++] = factories[i];
                     Factories[i].IsActive = true;
                     Factories[i].IsNextIdle = UpdatePeriod > 1; // vanilla: UpdatePeriod = 1
-                }
-                else if ((FocusLocalFactory && (i == localFactoryId)) || (factories[i].planetId / 100 -1) == FocusStarIndex)
-                {                    
-                    workFactories[workFactoryCount++] = factories[i];
-                    Factories[i].IsActive = true;
-                    Factories[i].IsNextIdle = false; // focused local factory always active
                 }
                 else
                 {
@@ -75,7 +75,7 @@ namespace SampleAndHoldSim
         public bool IsActive; // is working, excuting functions in GameData.GameTick()
         public bool IsNextIdle; // will turn into idle next tick
         public int Index;
-        readonly PlanetFactory factory;
+        public readonly PlanetFactory factory;
 
         public FactoryManager(int index, PlanetFactory factory)
         {

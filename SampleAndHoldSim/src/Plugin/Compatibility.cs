@@ -16,6 +16,7 @@ namespace SampleAndHoldSim
             CommonAPI.Init(harmony);
             DSPOptimizations.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
+            PlanetMiner.Init(harmony);
             DSP_Battle_Patch.Init(harmony);
             Blackbox_Patch.Init(harmony);
         }
@@ -191,6 +192,88 @@ namespace SampleAndHoldSim
                     int times = MainManager.FocusLocalFactory && ejector.planetId == GameMain.localPlanet?.id ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
+                }
+            }
+        }
+
+        public static class PlanetMiner
+        {
+            public const string GUID = "crecheng.PlanetMiner";
+            public static bool IsPatched { get; private set; } = false;
+
+            static Action<FactorySystem> PlanetMinerAction;
+            static bool enablePlanetMiner = false;
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    MethodInfo methodInfo = AccessTools.Method(assembly.GetType("PlanetMiner.PlanetMiner"), "Miner");
+                    PlanetMinerAction = AccessTools.MethodDelegate<Action<FactorySystem>>(methodInfo);
+                    harmony.Patch(methodInfo, 
+                        new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Prefix))),
+                        null,
+                        new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Transpiler))));
+
+                    IsPatched = true;
+                    Log.Debug("PlanetMiner compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("PlanetMiner compatibility failed! Last working version: 3.0.7");
+                    Log.Warn(e);
+                }
+            }
+
+            public static void Update_PlanetMiners()
+            {
+                float miningSpeedScale = GameMain.history.miningSpeedScale;
+                int peroid = (int)(120f / miningSpeedScale);
+                peroid = (peroid <= 0) ? 1 : peroid;
+                bool flag1 = GameMain.gameTick % peroid == 0; //normal
+                bool flag2 = (GameMain.gameTick / MainManager.UpdatePeriod) % peroid == 0; //idle
+
+                if (flag1 || flag2)
+                {
+                    enablePlanetMiner = true;
+                    foreach (var manager in MainManager.Factories)
+                    {
+                        if (manager.IsActive) // Update PlanetMiners for active factories
+                        {
+                            if (flag2 && manager.IsNextIdle)
+                                PlanetMinerAction(manager.factory.factorySystem);
+                            else if (flag1 && (!manager.IsNextIdle))
+                                PlanetMinerAction(manager.factory.factorySystem);
+                        }
+                    }
+                    enablePlanetMiner = false;
+                }
+            }
+
+            static bool Miner_Prefix()
+            {
+                return enablePlanetMiner;
+            }
+
+            static IEnumerable<CodeInstruction> Miner_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                try
+                {
+                    CodeMatcher matcher = new CodeMatcher(instructions)
+                        .MatchForward(true, new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame"))
+                        .RemoveInstruction()
+                        .Insert(
+                            new CodeInstruction(OpCodes.Ldc_I4_0),
+                            new CodeInstruction(OpCodes.Conv_I8)
+                        );
+                    return matcher.InstructionEnumeration();
+                }
+                catch
+                {
+                    Log.Warn("Transpiler Miner failed.");
+                    return instructions;
                 }
             }
         }
