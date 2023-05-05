@@ -1,10 +1,12 @@
 ﻿using DysonSphereProgram.Modding.Blackbox;
+using Multfunction_mod;
 using HarmonyLib;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace SampleAndHoldSim
 {
@@ -156,6 +158,10 @@ namespace SampleAndHoldSim
                     // TODO: Fix skip bullet
                     harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod("EjectorComponentPatch_Transpiler")));
 
+                    // Remove added stats after recording
+                    harmony.Patch(AccessTools.Method(classType, "Prefix", new Type[] { typeof(ProductionStatistics) }), new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Prefix")));
+                    harmony.Patch(AccessTools.Method(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick)), null, new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Postfix")));
+
                     Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
@@ -192,6 +198,91 @@ namespace SampleAndHoldSim
                     int times = MainManager.FocusLocalFactory && ejector.planetId == GameMain.localPlanet?.id ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
+                }
+
+                static bool clearFlag;
+
+                public static bool AddStatDic_Prefix(ref bool __result)
+                {
+                    // 將星球礦機視為工廠外部, 覆寫原本的邏輯
+                    var factoryStatPool = GameMain.data.statistics.production.factoryStatPool;
+                    clearFlag = false;
+                    __result = true;
+                    if (!GameMain.instance.running || !Multifunction.FinallyInit)
+                    {
+                        Multifunction.addStatDic = new Dictionary<int, Dictionary<int, long>>();
+                        Multifunction.consumeStatDic = new Dictionary<int, Dictionary<int, long>>();
+                        return false;
+                    }
+                    if (GameMain.galaxy != null && (Time.time - Multifunctionpatch.time) > 0.5f)
+                    {
+                        Multifunctionpatch.time = Time.time;
+                        if (Multifunction.addStatDic != null)
+                        {
+                            foreach (var planetEntry in Multifunction.addStatDic)
+                            {
+                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
+                                foreach (var kvp in planetEntry.Value)
+                                {
+                                    int itemId = kvp.Key;
+                                    int itemNum = (int)kvp.Value; // Assume addStatDic[planetId][itemId] doesn't exceed the range of int
+                                    factoryStatPool[factoryIndex].productRegister[itemId] += itemNum;
+                                }
+                            }
+                        }
+                        if (Multifunction.consumeStatDic != null)
+                        {
+                            foreach (var planetEntry in Multifunction.consumeStatDic)
+                            {
+                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
+                                foreach (var kvp in planetEntry.Value)
+                                {
+                                    int itemId = kvp.Key;
+                                    int itemNum = (int)kvp.Value; // Assume consumeStatDic[planetId][itemId] doesn't exceed the range of int
+                                    factoryStatPool[factoryIndex].consumeRegister[itemId] += itemNum;
+                                }
+                            }
+                        }
+                        clearFlag = true;
+                    }
+                    return false; // Overwrite original mod function
+                }
+
+                public static void AddStatDic_Postfix()
+                {
+                    if (clearFlag)
+                    {
+                        // 將額外的統計減去, 回歸原本數值
+                        var factoryStatPool = GameMain.data.statistics.production.factoryStatPool;
+                        if (Multifunction.addStatDic != null)
+                        {
+                            foreach (var planetEntry in Multifunction.addStatDic)
+                            {
+                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
+                                foreach (var kvp in planetEntry.Value)
+                                {
+                                    int itemId = kvp.Key;
+                                    int itemNum = (int)kvp.Value;
+                                    factoryStatPool[factoryIndex].productRegister[itemId] -= itemNum; // restore stats
+                                }
+                                planetEntry.Value.Clear();
+                            }
+                        }
+                        if (Multifunction.consumeStatDic != null)
+                        {
+                            foreach (var planetEntry in Multifunction.consumeStatDic)
+                            {
+                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
+                                foreach (var kvp in planetEntry.Value)
+                                {
+                                    int itemId = kvp.Key;
+                                    int itemNum = (int)kvp.Value;
+                                    factoryStatPool[factoryIndex].productRegister[itemId] -= itemNum; // restore stats
+                                }
+                                planetEntry.Value.Clear();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -339,7 +430,7 @@ namespace SampleAndHoldSim
                 }
 
                 [HarmonyPrefix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
-                public static void RefreshPowerNetworkUI_Prefix(int planetId)
+                public static void RefreshPowerNetworkUI_Prefix()
                 {
                     // 在UI中, 顯示正確的護盾恢復值。(假設UI是當地星球)
                     if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
@@ -347,7 +438,7 @@ namespace SampleAndHoldSim
                 }
 
                 [HarmonyPostfix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
-                public static void RefreshPowerNetworkUI_Postfix(int planetId)
+                public static void RefreshPowerNetworkUI_Postfix()
                 {
                     if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
                         DSP_Battle.ShieldGenerator.curShieldIncUI *= MainManager.UpdatePeriod;
