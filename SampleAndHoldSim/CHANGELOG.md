@@ -1,9 +1,15 @@
 ## Changelog
 
+#### v0.5.5 (DSP0.9.27.15466)
+\- Fix stats incorrect for Multfuntion mod planet miners.  
+
 #### v0.5.4
 \- Fix len consumption rate abnormal on idle factories.  
 \- Fix IsNextIdle value of focus factories.  
 \- Add PlanetMiner 3.0.7 compat.  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v0.5.3
 \- Fix TCFV compat: fix that sheild doesn't regenerate on some planets.  
@@ -22,9 +28,6 @@
 \- Enable station storage to have negative values to prevent generating extra item.  
 \- Fix compat with Auxilaryfunction. Add guard to prevent all vein disappear.  
 \- Add compat with Multfuntion mod, TheyComeFromVoid.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.4.2
 \- Fix error when NebulaAPI is not enabled.  
