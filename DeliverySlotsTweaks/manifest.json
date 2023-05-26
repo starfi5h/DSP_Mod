@@ -1,0 +1,7 @@
+{
+    "name": "DeliverySlotsTweaks",
+    "description": "Let replicator and build tools use items in logistic slots. Tweak slots count and stacksize. 机甲物流清单修改",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/DeliverySlotsTweaks",
+    "dependencies": ["xiaoye97-BepInEx-5.4.17"]
+}
