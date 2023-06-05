@@ -89,10 +89,10 @@ namespace AlterTickrate.Patches
 							int len = __instance.served.Length;
 							for (int i = 0; i < len; i++)
 							{
-								if (__instance.needs[i] == 0 && labPool[__instance.nextLabId].needs[i] == __instance.requires[i] && __instance.served[i] >= 1)
+								if (__instance.needs[i] == 0 && labPool[__instance.nextLabId].needs[i] == __instance.requires[i] && __instance.served[i] >= 2)
 								{
 									// Produce mode: Move at most LabLiftUpdatePeriod extra input material to uppper lab
-									int count = __instance.served[i] >= Parameters.LabLiftUpdatePeriod ? Parameters.LabLiftUpdatePeriod : __instance.served[i];
+									int count = __instance.served[i] / 2;
 									int inc = ( count * __instance.incServed[i]) / __instance.served[i];
 									__instance.served[i] -= count;
 									__instance.incServed[i] -= inc;
