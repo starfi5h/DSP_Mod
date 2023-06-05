@@ -26,46 +26,46 @@ namespace AlterTickrate.Patches
 						int[] obj2 = array2;
 						lock (obj2)
 						{
-							// Research mode: Move all extra matrix to the upper lab
+							// Research mode: Move half of matrix to the upper lab if item count >= 2
 							int matrixCount, matrixInc;
-							if (__instance.needs[0] == 0 && labPool[__instance.nextLabId].needs[0] == 6001 && __instance.matrixServed[0] >= 3600)
+							if (__instance.needs[0] == 0 && labPool[__instance.nextLabId].needs[0] == 6001 && __instance.matrixServed[0] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[0] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[0] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[0], ref __instance.matrixIncServed[0], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[0] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[0] += matrixCount;
 							}
-							if (__instance.needs[1] == 0 && labPool[__instance.nextLabId].needs[1] == 6002 && __instance.matrixServed[1] >= 3600)
+							if (__instance.needs[1] == 0 && labPool[__instance.nextLabId].needs[1] == 6002 && __instance.matrixServed[1] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[1] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[1] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[1], ref __instance.matrixIncServed[1], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[1] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[1] += matrixCount;
 							}
-							if (__instance.needs[2] == 0 && labPool[__instance.nextLabId].needs[2] == 6003 && __instance.matrixServed[2] >= 3600)
+							if (__instance.needs[2] == 0 && labPool[__instance.nextLabId].needs[2] == 6003 && __instance.matrixServed[2] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[2] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[2] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[2], ref __instance.matrixIncServed[2], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[2] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[2] += matrixCount;
 							}
-							if (__instance.needs[3] == 0 && labPool[__instance.nextLabId].needs[3] == 6004 && __instance.matrixServed[3] >= 3600)
+							if (__instance.needs[3] == 0 && labPool[__instance.nextLabId].needs[3] == 6004 && __instance.matrixServed[3] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[3] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[3] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[3], ref __instance.matrixIncServed[3], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[3] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[3] += matrixCount;
 							}
-							if (__instance.needs[4] == 0 && labPool[__instance.nextLabId].needs[4] == 6005 && __instance.matrixServed[4] >= 3600)
+							if (__instance.needs[4] == 0 && labPool[__instance.nextLabId].needs[4] == 6005 && __instance.matrixServed[4] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[4] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[4] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[4], ref __instance.matrixIncServed[4], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[4] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[4] += matrixCount;
 							}
-							if (__instance.needs[5] == 0 && labPool[__instance.nextLabId].needs[5] == 6006 && __instance.matrixServed[5] >= 3600)
+							if (__instance.needs[5] == 0 && labPool[__instance.nextLabId].needs[5] == 6006 && __instance.matrixServed[5] >= 7200)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[5] / 3600);
+								matrixCount = 3600 * (__instance.matrixServed[5] / 7200);
 								matrixInc = __instance.split_inc(ref __instance.matrixServed[5], ref __instance.matrixIncServed[5], matrixCount);
 								labPool[__instance.nextLabId].matrixIncServed[5] += matrixInc;
 								labPool[__instance.nextLabId].matrixServed[5] += matrixCount;
