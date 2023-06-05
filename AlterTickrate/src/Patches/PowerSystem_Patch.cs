@@ -13,10 +13,15 @@ namespace AlterTickrate.Patches
 
 		[HarmonyPrefix]
         [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
-        static bool GameTick(PowerSystem __instance, long time)
+        static bool GameTick(PowerSystem __instance, ref long time)
         {
-            if (__instance.factory != GameMain.localPlanet?.factory || (__instance.factory.index + (int)time) % Parameters.PowerUpdatePeriod == 0)
-                return true;
+			if (__instance.factory != GameMain.localPlanet?.factory || (__instance.factory.index + (int)time) % Parameters.PowerUpdatePeriod == 0)
+			{
+				// bool useCata = time % 10L == 0L;
+				// 透鏡每PowerUpdatePeriod * 10L消耗一次, 每次減少PowerUpdatePeriod的量
+				time /= Parameters.PowerUpdatePeriod;
+				return true;
+			}
 
 			var entityPool = __instance.factory.entityPool;
 			var entityAnimPool = __instance.factory.entityAnimPool;			
