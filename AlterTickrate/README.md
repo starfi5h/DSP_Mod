@@ -3,11 +3,10 @@
 Change buildings update priod from 1 tick to x ticks and scale the progress accordingly to reduce CPU calculation without affecting game pace.  
 
 ![compare](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AlterTickrate/doc/compare.jpg)  
-In the test file, Sorter time reduce by 50%,  Power System reduce by 80%, Various Facility reduce by 70%, Storage reduce by 50%. Overall the UPS is doubled.  
-The button on stat - performance test page can switch on/off the mod.  
+In the test file, Sorter time reduce by 50%,  Power System reduce by 80%, Various Facility reduce by 70%, Storage reduce by 50%.  
+The button on stat - performance test page (AlterTick - ON) can switch on/off the mod.  
 
 Warning: The mod is still in development state. Recommend to make a backup save before using it.  
-Because this mod change production workflow, if it does not work as intend, it may diable Milkyway upload.  
 
 ## How does it work
 
@@ -19,6 +18,8 @@ In the vanilla version (left side), the assembler is calculated every tick:
 In the modded version (right side), the assembler is set to calculate once every 5 ticks:  
 6 updates per cycle, and the progress increases 5/30 each times.  
 As long as the period is multiple of 5, the mod can maintain the same production speed as the vanilla version and reduce the amount of computation by four-fifths.
+  
+This mod only changes facilities operating speed, it doesn't generate items from thin air. So it's safer than SampleAndHoldSim. At the same time the performance gain is not huge as SampleAndHoldSim.  
 
 ## Settings
 
@@ -29,15 +30,20 @@ The update period (update every x ticks) of each group can be configured:
 `Facility`-`Facility` (Default: 10) Recommend to set as a factor of 20.  
 `Lab`-`Produce` (Default: 10) Update producing lab every x ticks.  
 `Lab`-`Research` (Default: 10) Update researching lab every x ticks.  
-`Lab`-`Lift` (Default: 2) Transfer up to x matrixes in lab tower every x ticks.(Max:4)  
+`Lab`-`Lift` (Default: 5) Transfer items in lab tower every x ticks.  
 `Transport`-`Sorter` (Default: 2) Setting value higher than 2 may cause sorters to miss cargo.  
 `Transport`-`Storage` (Default: 2) Recommend to set at the same value of belt.   
 `Transport`-`Belt` (Default: 1) Update belt every x ticks.(Max:2) Lower update frequence may break some mixed belt design.  
+
+Kown issues:
+- Oil Extrator will output oil in stack of 4 regardless of production rate. (Facility)  
+- Lab towers sometimes can't run in full speed. (Lab)  
 
 ## Mod Compatibility
 Compat: [NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/), [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
 Incompat: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)  
 If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnhancement), the belt feature will be disabled, `Belt` and `Storage` will be set to 1.  
+When using mods that add new buildings, it's recommend to use SampleAndHoldSim for better compatibility.  
 
 ----
 
@@ -70,12 +76,13 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 - 减少运算的效果相对有限
 - 部分设施的动画更新频率(传送带, 分检器)下降
 - 在电力不足时, 效率可能会因为取整问题下降
-- 可容忍的设施速度有一定上限, 和改变设施速度(例:创世之书)的mod兼容性不佳
+- 可容忍的设施速度有一定上限, 和改变设施速度或加入新设施的mod(例:创世之书)兼容性不佳
 
 ## 设置参数
 
 在`starfi5h.plugin.AlterTickrate.cfg`可调整设施更新的周期(每x帧运算1次)。  
-安装和配置文件请参考其他mod的说明。
+安装和配置文件请参考其他mod的说明。  
+当参数设为1时默认为原版, 不套用修改。  
 
 ### 电力与生产设施
 
@@ -87,6 +94,7 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 建议设为20(三级制造台增产剂I: 60*0.5/1.5)的因数。  
 生产设施补偿: 矿机, 组装机, 弹射器, 发射井进度。  
 在空闲的逻辑帧会利用计算好的状态来继续更新设施的动画。  
+**已知问题: 原油萃取站输出为4堆叠**  
 
 ### 研究站
 
@@ -96,9 +104,12 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 `Lab`-`Research`: 默认为10。  
 每x帧更新一次科研模式的研究站。可以依照研究速度调整适合的倍率。  
 
-`Lab`-`Lift`: 默认为2, 最大值为4。  
-每x帧搬运最多x个研究站的矩阵。在原版中每1帧最多搬运1个原料往上/产物往下。   
+`Lab`-`Lift`: 默认为5。  
+每x帧搬运研究站塔内的物料。
+在原版中每1帧最多搬运1个原料往上/产物往下。   
+在修改后, 研究模式的塔每次可以搬运一半的糖往上, 生产模式的塔每次可以搬运(一半+1)的原料往上, (9-目前存量)的产物往下。  
 改变之后可能会因为矩阵冗余变化而改变矩阵产量, 需要一些时间重新平衡。  
+**已知问题: 塔中研究站有时无法跑满, 需要精准输出时不建议使用**  
 
 ### 传送带
 `Transport`-`Belt`: 默认为1, 最大值为2。  
@@ -118,13 +129,25 @@ If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnh
 
 相容: 联机mod([NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)), 优化mod([DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/))。  
 不相容: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)。  
-GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。
+GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。  
+使用添加新建筑的mod时，建议使用SampleAndHoldSim以获得更好的兼容性。  
 
 ----
 
 ## Changelog
 
+#### v0.2.1  
+\- Rework lab lift. Now it no longer limit to max 4.  
+\- Fix ray receiver graviton lens usage.  
+\- Fix mining machine output stack to match mining speed.  
+\- Fix inserter wait idle tick.  
+
+<details>
+<summary>Previous Changelog</summary>
+
 v0.2.0 - Rework to fix lab. Renew config settings.  
 v0.1.2 - Fix power stat value. Fix local fractionators abnormal.  
 v0.1.1 - Fix belt feature doesn't apply.  
 v0.1.0 - Initial release. (DSP 0.9.27.15466)  
+
+</details>

@@ -10,76 +10,48 @@ namespace AlterTickrate.Patches
         {
 			if (!Plugin.Enable) return true;
 
-			if (labPool[__instance.nextLabId].id == 0 || labPool[__instance.nextLabId].id != __instance.nextLabId)
+			ref LabComponent nextLab = ref labPool[__instance.nextLabId];
+			if (nextLab.id == 0 || nextLab.id != __instance.nextLabId)
 			{
 				__instance.nextLabId = 0;
+				return false;
 			}
-			if (labPool[__instance.nextLabId].needs != null && __instance.recipeId == labPool[__instance.nextLabId].recipeId && __instance.techId == labPool[__instance.nextLabId].techId)
+			if (nextLab.needs != null && __instance.recipeId == nextLab.recipeId && __instance.techId == nextLab.techId)
 			{
-				if (__instance.matrixServed != null && labPool[__instance.nextLabId].matrixServed != null)
+				if (__instance.matrixServed != null && nextLab.matrixServed != null)
 				{
-					int[] array = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? __instance.matrixServed : labPool[__instance.nextLabId].matrixServed;
-					int[] array2 = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? labPool[__instance.nextLabId].matrixServed : __instance.matrixServed;
+					int[] array = (__instance.entityId > nextLab.entityId) ? __instance.matrixServed : nextLab.matrixServed;
+					int[] array2 = (__instance.entityId > nextLab.entityId) ? nextLab.matrixServed : __instance.matrixServed;
 					int[] obj = array;
 					lock (obj)
 					{
 						int[] obj2 = array2;
 						lock (obj2)
 						{
-							// Research mode: Move all extra matrix to the upper lab
+							// Research mode: Move half of matrix to the upper lab if item count >= 10
 							int matrixCount, matrixInc;
-							if (__instance.needs[0] == 0 && labPool[__instance.nextLabId].needs[0] == 6001 && __instance.matrixServed[0] >= 3600)
+							for (int i = 0; i < 6; i++)
 							{
-								matrixCount = 3600 * (__instance.matrixServed[0] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[0], ref __instance.matrixIncServed[0], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[0] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[0] += matrixCount;
+								if (__instance.matrixServed[i] >= 36000 && nextLab.needs[i] == (6001 + i))
+								{
+									matrixCount = 3600 * (__instance.matrixServed[i] / 7200);
+									matrixInc = __instance.split_inc(ref __instance.matrixServed[i], ref __instance.matrixIncServed[i], matrixCount);									
+									nextLab.matrixIncServed[i] += matrixInc;
+									nextLab.matrixServed[i] += matrixCount;
+
+									// UpdateNeedsResearch
+									__instance.needs[i] = __instance.matrixServed[i] < 36000 ? (6001 + i): 0;
+									nextLab.needs[0] = nextLab.matrixServed[i] < 36000 ? (6001 + i) : 0;
+								}
 							}
-							if (__instance.needs[1] == 0 && labPool[__instance.nextLabId].needs[1] == 6002 && __instance.matrixServed[1] >= 3600)
-							{
-								matrixCount = 3600 * (__instance.matrixServed[1] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[1], ref __instance.matrixIncServed[1], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[1] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[1] += matrixCount;
-							}
-							if (__instance.needs[2] == 0 && labPool[__instance.nextLabId].needs[2] == 6003 && __instance.matrixServed[2] >= 3600)
-							{
-								matrixCount = 3600 * (__instance.matrixServed[2] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[2], ref __instance.matrixIncServed[2], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[2] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[2] += matrixCount;
-							}
-							if (__instance.needs[3] == 0 && labPool[__instance.nextLabId].needs[3] == 6004 && __instance.matrixServed[3] >= 3600)
-							{
-								matrixCount = 3600 * (__instance.matrixServed[3] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[3], ref __instance.matrixIncServed[3], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[3] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[3] += matrixCount;
-							}
-							if (__instance.needs[4] == 0 && labPool[__instance.nextLabId].needs[4] == 6005 && __instance.matrixServed[4] >= 3600)
-							{
-								matrixCount = 3600 * (__instance.matrixServed[4] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[4], ref __instance.matrixIncServed[4], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[4] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[4] += matrixCount;
-							}
-							if (__instance.needs[5] == 0 && labPool[__instance.nextLabId].needs[5] == 6006 && __instance.matrixServed[5] >= 3600)
-							{
-								matrixCount = 3600 * (__instance.matrixServed[5] / 3600);
-								matrixInc = __instance.split_inc(ref __instance.matrixServed[5], ref __instance.matrixIncServed[5], matrixCount);
-								labPool[__instance.nextLabId].matrixIncServed[5] += matrixInc;
-								labPool[__instance.nextLabId].matrixServed[5] += matrixCount;
-							}
-							__instance.UpdateNeedsResearch();
-							labPool[__instance.nextLabId].UpdateNeedsResearch();
 							goto END;
 						}
 					}
 				}
-				if (__instance.served != null && labPool[__instance.nextLabId].served != null)
+				if (__instance.served != null && nextLab.served != null)
 				{
-					int[] array3 = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? __instance.served : labPool[__instance.nextLabId].served;
-					int[] array4 = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? labPool[__instance.nextLabId].served : __instance.served;
+					int[] array3 = (__instance.entityId > nextLab.entityId) ? __instance.served : nextLab.served;
+					int[] array4 = (__instance.entityId > nextLab.entityId) ? nextLab.served : __instance.served;
 					int[] obj = array3;
 					lock (obj)
 					{
@@ -89,40 +61,43 @@ namespace AlterTickrate.Patches
 							int len = __instance.served.Length;
 							for (int i = 0; i < len; i++)
 							{
-								if (__instance.needs[i] == 0 && labPool[__instance.nextLabId].needs[i] == __instance.requires[i] && __instance.served[i] >= 1)
+								if (__instance.needs[i] == 0 && nextLab.needs[i] == __instance.requires[i] && __instance.served[i] >= 1)
 								{
 									// Produce mode: Move at most LabLiftUpdatePeriod extra input material to uppper lab
-									int count = __instance.served[i] >= Parameters.LabLiftUpdatePeriod ? Parameters.LabLiftUpdatePeriod : __instance.served[i];
+									int count = __instance.served[i] / 2 + 1;
 									int inc = ( count * __instance.incServed[i]) / __instance.served[i];
 									__instance.served[i] -= count;
 									__instance.incServed[i] -= inc;
-									labPool[__instance.nextLabId].served[i] += count;
-									labPool[__instance.nextLabId].incServed[i] += inc;
+									nextLab.served[i] += count;
+									nextLab.incServed[i] += inc;
+
+									// UpdateNeedsAssemble
+									__instance.needs[i] =  __instance.served[i] < 4 ? __instance.requires[i] : 0;
+									nextLab.needs[i] = nextLab.served[i] < 4 ? nextLab.requires[i] : 0;
 								}
 							}
-							__instance.UpdateNeedsAssemble();
-							labPool[__instance.nextLabId].UpdateNeedsAssemble();
 						}
 					}
 				}
 
 			END:
-				if (__instance.produced != null && labPool[__instance.nextLabId].produced != null)
+				if (__instance.produced != null && nextLab.produced != null)
 				{
-					int[] array5 = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? __instance.produced : labPool[__instance.nextLabId].produced;
-					int[] array6 = (__instance.entityId > labPool[__instance.nextLabId].entityId) ? labPool[__instance.nextLabId].produced : __instance.produced;
+					int[] array5 = (__instance.entityId > nextLab.entityId) ? __instance.produced : nextLab.produced;
+					int[] array6 = (__instance.entityId > nextLab.entityId) ? nextLab.produced : __instance.produced;
 					int[] obj = array5;
 					lock (obj)
 					{
 						int[] obj2 = array6;
 						lock (obj2)
 						{
-							if (__instance.produced[0] < 10 && labPool[__instance.nextLabId].produced[0] > 0)
+							if (__instance.produced[0] < 9 && nextLab.produced[0] > 0)
 							{
-								// Produce mode: Move at most LabLiftUpdatePeriod extra output maxtrix to lower lab
-								int count = labPool[__instance.nextLabId].produced[0] > Parameters.LabLiftUpdatePeriod ? Parameters.LabLiftUpdatePeriod : labPool[__instance.nextLabId].produced[0];
+								// Produce mode: Move as most as it can from upper lab until product count reach 9
+								int count = 9 - __instance.produced[0];
+								count = nextLab.produced[0] < count ? nextLab.produced[0] : count;
 								__instance.produced[0] += count;
-								labPool[__instance.nextLabId].produced[0] -= count;
+								nextLab.produced[0] -= count;
 							}
 						}
 					}

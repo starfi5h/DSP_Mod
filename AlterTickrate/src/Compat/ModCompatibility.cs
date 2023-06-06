@@ -17,7 +17,7 @@ namespace AlterTickrate.Compat
 
         public static class Incompat
         {
-            static string message = "AlterTickrate is not compat with following mods:";
+            static string message = "";
 
             public static bool Check(Harmony harmony)
             {
@@ -33,9 +33,13 @@ namespace AlterTickrate.Compat
                     message += "\nBlackbox";
                     isCompat = false;
                 }
+                if (!isCompat)
+                {
+                    message = "AlterTickrate is not compat with following mods:" + message;
+                }
 
-                if (pluginInfos.ContainsKey("org.LoShin.GenesisBook") 
-                    || pluginInfos.ContainsKey("org.kremnev8.plugin.BetterMachines") 
+                if (pluginInfos.ContainsKey("org.LoShin.GenesisBook")
+                    || pluginInfos.ContainsKey("org.kremnev8.plugin.BetterMachines")
                     || pluginInfos.ContainsKey("top.awbugl.DSP.BeltSpeedEnhancement"))
                 {
                     // These mods change belt speed, which make the max speed > 5
@@ -53,7 +57,8 @@ namespace AlterTickrate.Compat
             [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
             static void OnGameLoaded()
             {
-                UIMessageBox.Show("AlterTickrate", message, "确定".Translate(), 3);
+                if (message != "")
+                    UIMessageBox.Show("AlterTickrate", message, "确定".Translate(), 3);
             }
         }
 
