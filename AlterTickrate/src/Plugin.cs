@@ -13,7 +13,7 @@ namespace AlterTickrate
     {
         public const string GUID = "starfi5h.plugin.AlterTickrate";
         public const string NAME = "AlterTickrate";
-        public const string VERSION = "0.2.0";
+        public const string VERSION = "0.2.1";
         public static Plugin plugin;
         public static bool Enable;
 
@@ -33,7 +33,7 @@ namespace AlterTickrate
             Period_FacilityUpdate = Config.Bind("Facility", "Facility", 10, "Update facilities every x ticks.\n每x帧更新一次生产设施");
             Period_LabProduceUpdate = Config.Bind("Lab", "Produce", 10, "Update producing lab every x ticks.\n每x帧更新一次生产模式的研究站");
             Period_LabResearchUpdate = Config.Bind("Lab", "Research", 10, "Update researching lab every x ticks.\n每x帧更新一次科研模式的研究站");
-            Period_LabLiftUpdate = Config.Bind("Lab", "Lift", 2, "Transfer matrixes in lab tower every x ticks.(Max:4)\n每x帧搬运最多x个研究站的矩阵(最大:4)");
+            Period_LabLiftUpdate = Config.Bind("Lab", "Lift", 5, "Transfer items in lab tower every x ticks.\n每x帧搬运研究站塔内的物料");
             Period_SorterUpdate = Config.Bind("Transport", "Sorter", 2, "Update sorters every x ticks.\n每x帧更新一次分拣器");
             Period_StorageUpdate = Config.Bind("Transport", "Storage", 2, "Update storage every x ticks.\n每x帧更新一次仓储");
             Period_BeltUpdate = Config.Bind("Transport", "Belt", 1, "Update belt every x ticks.(Max:2)\n每x帧更新一次传送带(最大:2)");
@@ -94,7 +94,7 @@ namespace AlterTickrate
             {
                 harmony.PatchAll(typeof(LabResearch_Patch));
             }
-            if (Parameters.LabLiftUpdatePeriod > 1 || Parameters.LabProduceUpdatePeriod > 2)
+            if (Parameters.LabLiftUpdatePeriod > 1)
             {
                 harmony.PatchAll(typeof(LabLift_Patch));
             }
