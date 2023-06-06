@@ -64,6 +64,7 @@ namespace AlterTickrate.Patches
                 // output cargo in miner to belt
                 if (WorkerThreadExecutor.CalculateMissionIndex(1, __instance.minerCursor - 1, _usedThreadCnt, _curThreadIdx, _minimumMissionCnt, out start, out end))
                 {
+                    float miningSpeed = GameMain.data.history.miningSpeedScale;
                     for (int i = start; i < end; i++)
                     {
                         if (__instance.minerPool[i].id == i)
@@ -71,7 +72,14 @@ namespace AlterTickrate.Patches
                             ref var miner = ref __instance.minerPool[i];
                             if (miner.productCount > 0 && miner.insertTarget > 0 && miner.productId > 0)
                             {
-                                int insertCount = (miner.productCount < 4) ? miner.productCount : 4;
+                                int maxStack = 4;
+                                if (miner.type == EMinerType.Vein)
+                                {
+                                    float miningRate = 36000000.0f / miner.period * miningSpeed * miner.veinCount;
+                                    maxStack = (int)(miningRate - 0.009999999776482582f) / 1800 + 1;
+                                    maxStack = ((maxStack < 4) ? ((maxStack < 1) ? 1 : maxStack) : 4);
+                                }
+                                int insertCount = (miner.productCount < maxStack) ? miner.productCount : maxStack;
                                 int transferCount = __instance.factory.InsertInto(miner.insertTarget, 0, miner.productId, (byte)insertCount, 0, out _);
                                 miner.productCount -= transferCount;
                                 if (miner.productCount == 0 && miner.type == EMinerType.Vein)
