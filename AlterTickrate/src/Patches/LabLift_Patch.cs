@@ -89,19 +89,21 @@ namespace AlterTickrate.Patches
 							int len = __instance.served.Length;
 							for (int i = 0; i < len; i++)
 							{
-								if (__instance.needs[i] == 0 && labPool[__instance.nextLabId].needs[i] == __instance.requires[i] && __instance.served[i] >= 2)
+								if (__instance.needs[i] == 0 && labPool[__instance.nextLabId].needs[i] == __instance.requires[i] && __instance.served[i] >= 1)
 								{
 									// Produce mode: Move at most LabLiftUpdatePeriod extra input material to uppper lab
-									int count = __instance.served[i] / 2;
+									int count = __instance.served[i] / 2 + 1;
 									int inc = ( count * __instance.incServed[i]) / __instance.served[i];
 									__instance.served[i] -= count;
 									__instance.incServed[i] -= inc;
 									labPool[__instance.nextLabId].served[i] += count;
 									labPool[__instance.nextLabId].incServed[i] += inc;
+
+									// UpdateNeedsAssemble
+									__instance.needs[i] =  __instance.served[i] < 4 ? __instance.requires[i] : 0;
+									labPool[__instance.nextLabId].needs[i] = labPool[__instance.nextLabId].served[i] < 4 ? labPool[__instance.nextLabId].requires[i] : 0;
 								}
 							}
-							__instance.UpdateNeedsAssemble();
-							labPool[__instance.nextLabId].UpdateNeedsAssemble();
 						}
 					}
 				}
@@ -117,10 +119,11 @@ namespace AlterTickrate.Patches
 						int[] obj2 = array6;
 						lock (obj2)
 						{
-							if (__instance.produced[0] < 10 && labPool[__instance.nextLabId].produced[0] > 0)
+							if (__instance.produced[0] < 9 && labPool[__instance.nextLabId].produced[0] > 0)
 							{
-								// Produce mode: Move at most LabLiftUpdatePeriod extra output maxtrix to lower lab
-								int count = labPool[__instance.nextLabId].produced[0] > Parameters.LabLiftUpdatePeriod ? Parameters.LabLiftUpdatePeriod : labPool[__instance.nextLabId].produced[0];
+								// Produce mode: Move as most as it can from upper lab until product count reach 9
+								int count = 9 - __instance.produced[0];
+								count = labPool[__instance.nextLabId].produced[0] < count ? labPool[__instance.nextLabId].produced[0] : count;
 								__instance.produced[0] += count;
 								labPool[__instance.nextLabId].produced[0] -= count;
 							}

@@ -16,7 +16,6 @@ namespace AlterTickrate
         public static float FacilitySpeedRate = 1.0f;
         public static float InserterSpeedRate = 1.0f;
 
-        const int MaxLabLiftUpdatePeriod = 4;
         const int MaxBeltUpdatePeriod = 2;
 
         public static void SetFacilityValues(int powerPeriod, int facilityPeriod)
@@ -30,7 +29,7 @@ namespace AlterTickrate
         {
             LabProduceUpdatePeriod = produceLabPeriod;
             LabResearchUpdatePeriod = researchLabPeriod;
-            LabLiftUpdatePeriod = Math.Min(liftLabPeriod, MaxLabLiftUpdatePeriod);
+            LabLiftUpdatePeriod = liftLabPeriod;
         }
 
         public static void SetBeltValues(int inserterPeriod, int storageUpdatePeriod, int beltUpdatePeriod)
