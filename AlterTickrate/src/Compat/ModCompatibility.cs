@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace AlterTickrate.Compat
@@ -12,6 +13,9 @@ namespace AlterTickrate.Compat
                 return false;
 
             DSPOptimizations.Init(harmony);
+#if DEBUG
+            Incompat.OnGameLoaded();
+#endif
             return true;
         }
 
@@ -21,21 +25,14 @@ namespace AlterTickrate.Compat
 
             public static bool Check(Harmony harmony)
             {
-                bool isCompat = true;
                 var pluginInfos = BepInEx.Bootstrap.Chainloader.PluginInfos;
                 if (pluginInfos.ContainsKey("com.starfi5h.plugin.SampleAndHoldSim"))
                 {
                     message += "\nSampleAndHoldSim";
-                    isCompat = false;
                 }
                 if (pluginInfos.ContainsKey("dev.raptor.dsp.Blackbox"))
                 {
                     message += "\nBlackbox";
-                    isCompat = false;
-                }
-                if (!isCompat)
-                {
-                    message = "AlterTickrate is not compat with following mods:" + message;
                 }
 
                 if (pluginInfos.ContainsKey("org.LoShin.GenesisBook")
@@ -46,19 +43,48 @@ namespace AlterTickrate.Compat
                     Plugin.plugin.SaveConfig(1, 1);
                 }
 
-                if  (!isCompat)
+                harmony.PatchAll(typeof(Incompat));
+                if  (message != "")
                 {
-                    harmony.PatchAll(typeof(Incompat));
+                    message = "AlterTickrate is not compat with following mods:" + message;                    
+                    return false;
                 }
-                return isCompat;
+                return true;
             }
 
             [HarmonyPostfix]
             [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
-            static void OnGameLoaded()
+            public static void OnGameLoaded()
             {
                 if (message != "")
                     UIMessageBox.Show("AlterTickrate", message, "确定".Translate(), 3);
+                else if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("me.xiaoye97.plugin.Dyson.LDBTool"))
+                {
+                    var type = AccessTools.TypeByName("xiaoye97.LDBTool");
+                    if (type != null)
+                    {
+                        Log.Debug("Checking LDBTool proto...");
+                        List<List<Proto>> TotalDict = (List<List<Proto>>)AccessTools.Field(type, "TotalDict").GetValue(null);
+                        bool flag = false;
+                        foreach (var list in TotalDict)
+                        {
+                            foreach (var proto in list)
+                            {
+                                if (proto is ItemProto || proto is RecipeProto)
+                                {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (flag)
+                        {
+                            message = "Proto is modified! Please use SampleAndHoldSim for better compatibility.\n侦测到物品和配方修改,可能无法兼容.请改用SampleAndHoldSim";
+                            Log.Warn(message);
+                            UIMessageBox.Show("AlterTickrate", message, "确定".Translate(), 3);
+                        }
+                    }
+                }
             }
         }
 
