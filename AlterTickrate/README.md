@@ -34,6 +34,7 @@ The update period (update every x ticks) of each group can be configured:
 `Transport`-`Sorter` (Default: 2) Setting value higher than 2 may cause sorters to miss cargo.  
 `Transport`-`Storage` (Default: 2) Recommend to set at the same value of belt.   
 `Transport`-`Belt` (Default: 1) Update belt every x ticks.(Max:2) Lower update frequence may break some mixed belt design.  
+`UI`-`SmoothProgress` (Default: true) Interpolates progress animation in UI.   
 
 Kown issues:
 - Oil Extrator will output oil in stack of 4 regardless of production rate. (Facility)  
@@ -50,7 +51,7 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 # AlterTickrate 降频mod
 
 目标: 改变建筑的更新频率, 在不偏离原版计算规则的条件下减少CPU运算量。  
-此mod处于早期测试阶段，使用前建议备份存档。另外由于参与了生产过程，想上榜请自行考虑风险。  
+此mod尚未成熟，使用前建议备份存档。另外由于参与了生产过程，想上榜请自行考虑风险。  
 在性能测试面板点击AlterTick按钮可以开启或关闭mod。  
 
 ## 运作原理
@@ -83,6 +84,8 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 在`starfi5h.plugin.AlterTickrate.cfg`可调整设施更新的周期(每x帧运算1次)。  
 安装和配置文件请参考其他mod的说明。  
 当参数设为1时默认为原版, 不套用修改。  
+默认的参数可以稳定运行这个[10万糖存档](https://www.bilibili.com/video/BV1so4y1679M/)。若发现产量大幅改变, 请尝试调小参数或关闭功能。  
+降频功能稳定程度: 电力 > 仓储 > 生产设施 > 研究站(生产/科研) > 研究站(搬运) > 分捡器 > 传送带  
 
 ### 电力与生产设施
 
@@ -91,7 +94,7 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 电力设施补偿: 燃料消耗进度, 能量枢纽:充/放电电量, 射线接收站:透镜,光子进度。  
 
 `Facility`-`Facility`: 默认为10。  
-建议设为20(三级制造台增产剂I: 60*0.5/1.5)的因数。  
+建议设为10的因数。  
 生产设施补偿: 矿机, 组装机, 弹射器, 发射井进度。  
 在空闲的逻辑帧会利用计算好的状态来继续更新设施的动画。  
 **已知问题: 原油萃取站输出为4堆叠**  
@@ -100,6 +103,7 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 
 `Lab`-`Produce`: 默认为10。  
 每x帧更新一次生产模式的研究站。  
+当参数在2以上时, 需要启用搬运修改(`Lab`-`Lift`)否则塔内运力会不足。  
 
 `Lab`-`Research`: 默认为10。  
 每x帧更新一次科研模式的研究站。可以依照研究速度调整适合的倍率。  
@@ -125,6 +129,11 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 `Transport`-`Sorter`: 默认为2。  
 超过2时爪子可能会漏接/漏放, 造成混带失效或着满带压缩程度降低。  
 
+### 介面
+`UI`-`SmoothProgress`: 默认为true。  
+利用插植使进度圆圈动画平滑。代价是进度圆圈和实际时间有x帧的延迟。  
+套用的介面: 熔炉, 制造台, 研究站(生产), 弹射器, 发射井, 发电厂。  
+
 ## Mod兼容性
 
 相容: 联机mod([NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)), 优化mod([DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/))。  
@@ -136,14 +145,18 @@ GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在
 
 ## Changelog
 
+#### v0.2.2
+\- Add UI-SmoothProgress config option.  
+\- Add additional notification for incompat mods check (ItemProto/RecipeProto).  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.2.1  
 \- Rework lab lift. Now it no longer limit to max 4.  
 \- Fix ray receiver graviton lens usage.  
 \- Fix mining machine output stack to match mining speed.  
 \- Fix inserter wait idle tick.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 v0.2.0 - Rework to fix lab. Renew config settings.  
 v0.1.2 - Fix power stat value. Fix local fractionators abnormal.  
