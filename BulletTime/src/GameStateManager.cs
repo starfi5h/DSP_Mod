@@ -1,6 +1,4 @@
-﻿using Compatibility;
-
-namespace BulletTime
+﻿namespace BulletTime
 {
     public static class GameStateManager
     {
@@ -79,7 +77,7 @@ namespace BulletTime
 
         public static void SetInteractable(bool value)
         {
-            Log.Debug($"Interactable = {value}");
+            //Log.Debug($"Interactable = {value}");
             Interactable = value;
             if (Interactable)
             { 
@@ -90,7 +88,7 @@ namespace BulletTime
 
         public static void SetLockFactory(bool value)
         {
-            Log.Debug($"LockFactory = {value}");
+            //Log.Debug($"LockFactory = {value}");
             LockFactory = value;
             if (!LockFactory)
             {                
