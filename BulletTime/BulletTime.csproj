@@ -346,6 +346,7 @@
     <Compile Include="src\GameStateManager.cs" />
     <Compile Include="src\BulletTimePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\UIBlueprint_Patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
