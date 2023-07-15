@@ -14,7 +14,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.10";
+        public const string VERSION = "1.2.11";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
