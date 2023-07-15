@@ -1,5 +1,4 @@
-﻿using Compatibility;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace BulletTime
@@ -61,7 +60,7 @@ namespace BulletTime
             {
                 infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
                 infoText.name = "pause info-text";
-                infoText.GetComponent<Text>().text = "Pause";
+                infoText.GetComponent<Text>().text = "Pause".Translate();
                 infoText.GetComponent<Text>().enabled = true;
             }
             if (timeText != null && infoText != null)
@@ -70,7 +69,7 @@ namespace BulletTime
                 infoText.SetActive(pause);
             }            
             if (text != null)
-                text.text = pause ? "pause".Translate() : $"{(int)slider.value}%";
+                text.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
         }
 
         private static void OnSliderChange(float value)

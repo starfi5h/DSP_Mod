@@ -168,7 +168,7 @@ namespace BulletTime
         {
             if (!GameStateManager.Interactable)
             {
-                Log.Debug("Export player data start");
+                //Log.Debug("Export player data start");
                 Monitor.Enter(GameMain.data.mainPlayer);
             }
         }
@@ -180,7 +180,7 @@ namespace BulletTime
             if (!GameStateManager.Interactable)
             {
                 Monitor.Exit(GameMain.data.mainPlayer);
-                Log.Debug("Export player data end");
+                //Log.Debug("Export player data end");
             }
         }
 
@@ -190,7 +190,7 @@ namespace BulletTime
         {
             if (!GameStateManager.Interactable && __instance.planetId == GameMain.localPlanet?.id)
             {
-                Log.Debug("Export local PlanetFactory start");
+                //Log.Debug("Export local PlanetFactory start");
                 GameStateManager.SetLockFactory(true);
                 Thread.Sleep((int)(1000 / FPSController.currentUPS));
             }
@@ -203,7 +203,7 @@ namespace BulletTime
             if (!GameStateManager.Interactable && __instance.planetId == GameMain.localPlanet?.id)
             {                
                 GameStateManager.SetLockFactory(false);
-                Log.Debug("Export local PlanetFactory end");
+                //Log.Debug("Export local PlanetFactory end");
             }
         }
 

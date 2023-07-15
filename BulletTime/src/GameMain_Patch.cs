@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System.Threading;
 using UnityEngine;
-using Compatibility;
 
 namespace BulletTime
 {

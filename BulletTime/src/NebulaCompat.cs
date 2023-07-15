@@ -1,5 +1,4 @@
-﻿using BulletTime;
-using HarmonyLib;
+﻿using HarmonyLib;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
-namespace Compatibility
+namespace BulletTime
 {
     public static class NebulaCompat
     {
@@ -51,7 +50,7 @@ namespace Compatibility
                 harmony.PatchAll(typeof(NebulaPatch));
                 AccessTools.Field(type, "MinUPS").SetValue(null, BulletTimePlugin.MinimumUPS.Value);
 
-                Log.Info("Nebula Compatibility OK");
+                Log.Debug("Nebula Compatibility OK");
             }
             catch (Exception e)
             {
@@ -248,7 +247,7 @@ namespace Compatibility
             UIDETopFunction topFunction = UIRoot.instance.uiGame.dysonEditor.controlPanel.topFunction;
             topFunction.pauseButton.highlighted = !NebulaCompat.DysonSpherePaused;
             topFunction.pauseImg.sprite = (NebulaCompat.DysonSpherePaused ? topFunction.pauseSprite : topFunction.playSprite);
-            topFunction.pauseText.text = (NebulaCompat.DysonSpherePaused ? "Dyson sphere is stopped" : "Dyson sphere is rotating").Translate();
+            topFunction.pauseText.text = (NebulaCompat.DysonSpherePaused ? "Click to resume rotating" : "Click to stop rotating").Translate();
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(DysonSphereLayer), nameof(DysonSphereLayer.GameTick))]

@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Compatibility;
 using HarmonyLib;
 using System;
 using System.Diagnostics;
@@ -15,11 +14,12 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.10";
+        public const string VERSION = "1.2.11";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<bool> RemoveGC;
+        public static ConfigEntry<bool> UIBlueprintAsync;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<float> StartingSpeed;
         public static ConfigEntry<float> MinimumUPS;
@@ -32,6 +32,7 @@ namespace BulletTime
             KeyAutosave = Config.Bind("Save", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             EnableFastLoading = Config.Bind<bool>("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind<bool>("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
+            UIBlueprintAsync = Config.Bind<bool>("Speed", "UIBlueprintAsync", true, "Optimize blueprint UI to reduce freezing time\n使蓝图非同步载入,减少卡顿时间");
             StartingSpeed = Config.Bind<float>("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
         }
 
@@ -67,6 +68,17 @@ namespace BulletTime
                     catch
                     {
                         Log.Warn("BuildTool no GC patch didn't success!");
+                    }
+                }
+                if (UIBlueprintAsync.Value)
+                {
+                    try
+                    {
+                        harmony.PatchAll(typeof(UIBlueprint_Patch));
+                    }
+                    catch
+                    {
+                        Log.Warn("UIBlueprint async patch didn't success!");
                     }
                 }
 
