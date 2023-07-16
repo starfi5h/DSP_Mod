@@ -65,6 +65,8 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 ----
 
+![UIBlueprintAsync](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo2.gif)  
+
 ## 调整游戏速度
 
 在性能测试面板可以调整游戏速度(0~100%)，只影响工厂，机甲仍保持正常速度。  

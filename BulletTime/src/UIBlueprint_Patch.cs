@@ -22,24 +22,28 @@ namespace BulletTime
         public static bool BlueprintData_Clone(BlueprintData __instance, ref BlueprintData __result)
         {
             // Optimize BlueprintData.Clone to use only export and import
-            BlueprintData blueprintData = new BlueprintData();
-            blueprintData.HeaderFromBase64String(__instance.headerStr);
+            __result = new BlueprintData();
+            __result.HeaderFromBase64String(__instance.headerStr);
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-                __instance.Export(binaryWriter);
-                binaryWriter.Flush();
-                memoryStream.Position = 0;
-                BinaryReader binaryReader = new BinaryReader(memoryStream);
-                blueprintData.Import(binaryReader);
+                using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+                {
+                    __instance.Export(binaryWriter);
+                    binaryWriter.Flush();
+                    memoryStream.Position = 0;
+
+                    using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+                    {
+                        __result.Import(binaryReader);
+                    }
+                }
             }
 
-            if (blueprintData.isValid)
+            if (!__result.isValid)
             {
-                __result = blueprintData;
-                return false;
+                Log.Warn("BlueprintData Clone is invalid!");
+                __result = null;
             }
-            __result = null;
             return false;
         }
 
@@ -66,15 +70,12 @@ namespace BulletTime
 
                 ThreadingHelper.Instance.StartAsyncInvoke(() =>
                 {                    
-                    HighStopwatch highStopwatch = new HighStopwatch();
                     StringBuilder stringBuilder = null;                    
-                    lock (__instance)
+                    lock (__instance) // MD5F is single-threaded
                     {
                         if (blueprint != __instance.blueprint) return () => {};
-                        highStopwatch.Begin();
                         stringBuilder = blueprint.ToBase64StringBuilder();
                     }
-                    //Log.Debug($"Background blueprint string generation end. Duration: {highStopwatch.duration}s Length:{stringBuilder.Length}");
 
                     return () =>
                     {
@@ -89,7 +90,7 @@ namespace BulletTime
                         }
                         else
                         {
-                            //Log.Debug("Blueprint does not match!");
+                            //Log.Debug("Blueprint preview string is outdated!");
                         }
                     };
                 });
@@ -153,7 +154,7 @@ namespace BulletTime
                     UIRealtimeTip.Popup("Blueprint is not ready yet!".Translate());
                     return false;
                 }
-                BlueprintData blueprint = __instance.browser.inspector.blueprint;
+                BlueprintData blueprint = __instance.browser.inspector.blueprint.Clone(); // Make a clone to separte from UI
                 GameMain.mainPlayer.controller.OpenBlueprintPasteMode(blueprint, __instance.fullPath);
                 __instance.browser._Close();
             }
@@ -168,15 +169,12 @@ namespace BulletTime
 
             ThreadingHelper.Instance.StartAsyncInvoke(() =>
             {
-                HighStopwatch highStopwatch = new HighStopwatch();                
                 BlueprintData blueprintData = null;
-                lock (__instance.browser.inspector)
+                lock (__instance.browser.inspector) // MD5F is single-threaded
                 {
                     if (lastClickTime != time) return () => {};
-                    highStopwatch.Begin();
                     blueprintData = BlueprintData.CreateFromFile(__instance.fullPath);
                 }
-                //Log.Debug($"CreateFromFile_OnThisClick end. Duration: {highStopwatch.duration}s");
 
                 return () =>
                 {
@@ -197,7 +195,7 @@ namespace BulletTime
                     }
                     else
                     {
-                        //Log.Debug("CreateFromFile_OnThisClick mismatch!");
+                        //Log.Debug("CreateFromFile_OnThisClick is outdated!");
                     }
                 };
             });
