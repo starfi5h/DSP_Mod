@@ -10,7 +10,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.0.1";
 
         public static Plugin Instance;
         public static ManualLogSource Log;

@@ -44,6 +44,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 
 ## Changelog
 
+v1.0.1 - Fix a bug that some logistics  solts are not usable.  
 v1.0.0 - Initial release. (DSPv0.9.27.15466)  
 
 ----
