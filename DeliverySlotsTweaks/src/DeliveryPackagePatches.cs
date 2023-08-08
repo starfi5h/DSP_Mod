@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,20 +9,38 @@ namespace DeliverySlotsTweaks
 {
     public class DeliveryPackagePatches
     {
+		static int maxDeliveryGridIndex = 0;
+
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(DeliveryPackage), nameof(DeliveryPackage.NotifySizeChange))]
+		public static void ParameterOverwrite(DeliveryPackage __instance)
+        {
+			if (Plugin.ColCount.Value > 0 && Plugin.ColCount.Value <= 5)
+				__instance.colCount = Plugin.ColCount.Value;
+			if (Plugin.StackSizeMultiplier.Value > 0)
+				__instance.stackSizeMultiplier = Plugin.StackSizeMultiplier.Value;
+			__instance.RecalcIndexMaps();
+
+			maxDeliveryGridIndex = 0;
+			for (int i = __instance.gridLength - 1; i >= 0; i--)
+			{
+				if (__instance.IsGridActive(i)) // max active grid index is not same as activeCount
+				{
+					maxDeliveryGridIndex = i;
+					break;
+				}
+			}
+
+			Plugin.Log.LogDebug($"DeliveryPackage:{__instance.rowCount}x{__instance.colCount} stack:{__instance.stackSizeMultiplier} maxIndex:{maxDeliveryGridIndex}");
+		}
+
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(Player), nameof(Player.Import))]
 		[HarmonyPatch(typeof(Player), nameof(Player.SetForNewGame))]
 		public static void ParameterOverwrite(Player __instance)
 		{
 			Plugin.Instance.Config.Reload();
-			var deliveryPackage = __instance.deliveryPackage;
-			if (Plugin.ColCount.Value > 0 && Plugin.ColCount.Value <= 5)
-				deliveryPackage.colCount = Plugin.ColCount.Value;
-			if (Plugin.StackSizeMultiplier.Value > 0)
-				deliveryPackage.stackSizeMultiplier = Plugin.StackSizeMultiplier.Value;
-			deliveryPackage.RecalcIndexMaps();
-
-			Plugin.Log.LogDebug($"DeliveryPackage:{deliveryPackage.rowCount}x{deliveryPackage.colCount} stack:{deliveryPackage.stackSizeMultiplier}");
+			ParameterOverwrite(__instance.deliveryPackage);
 		}
 
 		[HarmonyPrefix]
@@ -61,8 +78,7 @@ namespace DeliverySlotsTweaks
 			deliveryItemCount.Clear();
 			deliveryGridindex.Clear();
 			DeliveryPackage.GRID[] grids = package.grids;
-			int length = (package.rowCount * package.colCount) < grids.Length ? (package.rowCount * package.colCount) : grids.Length;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i <= maxDeliveryGridIndex; i++)
 			{
 				int itemId = grids[i].itemId;
 				if (itemId > 0) // No duplicate items in delivery slots
@@ -306,8 +322,7 @@ namespace DeliverySlotsTweaks
 				@this.SetFactoryReferences();
 
 				// Include delivery items in tmpPackage
-				int totalsize = @this.player.package.size + @this.player.deliveryPackage.activeCount;
-				//Plugin.Log.LogDebug($"{@this.player.package.size} {@this.player.deliveryPackage.activeCount}");
+				int totalsize = @this.player.package.size + maxDeliveryGridIndex + 1;
 				if (@this.tmpPackage == null)
 				{
 					@this.tmpPackage = new StorageComponent(totalsize);
