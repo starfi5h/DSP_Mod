@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using System.Diagnostics;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AutoMute
@@ -11,71 +11,146 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "1.0.0";
-        public static Plugin Instance;
-        Harmony harmony;
+        public const string VERSION = "1.1.0";
 
-        public static ConfigEntry<bool> MuteInBackground;
-        public static ConfigEntry<string> MuteBuildingIds;
+        internal static Plugin Instance;
+        internal Harmony harmony;
+        internal ConfigEntry<bool> MuteInBackground;
+        internal ConfigEntry<string> MuteBuildingIds;
+        internal ConfigEntry<string> MuteList;
+        
+        // Audio volume backups
+        static float? OriginalVolume = null;
+        readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
+        readonly static Dictionary<int, float> ModelVolumes = new Dictionary<int, float>();
 
         public void LoadConfig()
         {
-            MuteInBackground = Config.Bind("- General -", "Mute In Background", true, "Whether to mute the game when in the background, i.e. alt-tabbed.");
-            MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by comma");
+            Config.Reload();
+            MuteInBackground = Config.Bind("- General -", "Mute In Background", true, "Enable to mute the game when in the background, i.e. alt-tabbed.\n游戏在后台时自动静音，切换到前台时恢复");
+            MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by white spaces.\n消除指定建筑的音讯。输入:建筑物品id, 以空白分隔。");
+            MuteList = Config.Bind("- General -", "MuteList", "", "The list of audio name to mute, separated by white spaces. Check mod page wiki for available names.\n消除指定的音讯。输入:音讯名称, 以空白分隔(名称可以在mod页面wiki查询)");
         }
 
-        public void Awake()
+        internal void Awake()
         {
             LoadConfig();
             Instance = this;
             harmony = new Harmony(GUID);
-            harmony.PatchAll(typeof(Patch));
+            harmony.PatchAll(typeof(Plugin));
         }
 
-        [Conditional("DEBUG")]
-        public void OnDestroy()
+#if DEBUG
+        internal void OnDestroy()
         {
             harmony.UnpatchSelf();
         }
+#endif
 
-        public static void LogWarn(object data) => Instance.Logger.LogWarning(data);
-        public static void LogInfo(object data) => Instance.Logger.LogInfo(data);
-    }
-
-    class Patch
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GlobalObject), "OnApplicationFocus")]
-        public static void OnApplicationFocus(bool focus)
+        internal void OnApplicationFocus(bool hasFocus)
         {
-            if (Plugin.MuteInBackground.Value)
+            // origin from https://github.com/BepInEx/BepInEx.Utility/blob/master/BepInEx.MuteInBackground/MuteInBackground.cs
+            if (hasFocus)
             {
-                AudioListener.pause = !focus;
+                if (OriginalVolume != null)
+                    AudioListener.volume = (float)OriginalVolume;
+                OriginalVolume = null;
             }
+            else if (MuteInBackground.Value)
+            {
+                OriginalVolume = AudioListener.volume;
+                AudioListener.volume = 0;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(UIOptionWindow), nameof(UIOptionWindow.OnApplyClick))]
+        internal static void OnApplyClick()
+        {
+            Instance.LoadConfig(); // Refresh config file when click
+            ChangeVolumes(); // Apply changes to LDB.audios
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(VFPreload), "InvokeOnLoadWorkEnded")]
         [HarmonyAfter("me.xiaoye97.plugin.Dyson.LDBTool")]
-        public static void InvokeOnLoadWorkEnded()
+        internal static void ChangeVolumes()
         {
-            MuteBuildings();
+            ChangeAudioVolumes();
+            ChangeBuildingVolumes();
+
+            if (AudioVolumes.Count + ModelVolumes.Count > 0)
+            {
+                Instance.Logger.LogDebug($"Mute {AudioVolumes.Count} audios and {ModelVolumes.Count} buildings.");
+            }
         }
 
-        public static void MuteBuildings()
+        static void ChangeAudioVolumes()
         {
-            foreach (var str in Plugin.MuteBuildingIds.Value.Split(','))
+            foreach (var pair in AudioVolumes) // Restore original volumes
             {
-                if (int.TryParse(str, out int itemId))
+                var audioProto = LDB.audios[pair.Key];
+                if (audioProto != null)
                 {
-                    var item = LDB.items.Select(itemId);
-                    Plugin.LogInfo($"Mute {itemId} {item.Name.Translate()}");
-                    int modelIndex = item.ModelIndex;
-                    LDB.models.Select(modelIndex).prefabDesc.audioVolume = 0;
+                    audioProto.Volume = pair.Value;
+                    //Instance.Logger.LogDebug($"Restore {pair.Key}: {pair.Value}");
+                }
+            }
+            AudioVolumes.Clear();
+
+            foreach (var audioName in Instance.MuteList.Value.Split(new char[] { ' ', ',', '\n'}))
+            {
+                if (audioName.IsNullOrWhiteSpace()) continue;
+                var audioProto = LDB.audios[audioName];
+                if (audioProto != null)
+                {
+                    AudioVolumes.Add(audioName, audioProto.Volume); // Backup for original volumes
+                    //Instance.Logger.LogDebug($"Mute {audioName}: {audioProto.Volume}");
+                    audioProto.Volume = 0;
                 }
                 else
                 {
-                    Plugin.LogWarn($"Can't parse {str} to int");
+                    Instance.Logger.LogWarning("Can't find audio name: " + audioName);
+                }
+            }
+        }
+
+        static void ChangeBuildingVolumes()
+        {
+            foreach (var pair in ModelVolumes) // Restore original volumes
+            {
+                var model = LDB.models.Select(pair.Key);
+                if (model != null)
+                {
+                    model.prefabDesc.audioVolume = pair.Value;
+                    //Instance.Logger.LogDebug($"Restore {pair.Key}: {pair.Value}");
+                }
+            }
+            ModelVolumes.Clear();
+
+            foreach (var str in Instance.MuteBuildingIds.Value.Split(new char[] { ' ', ',' }))
+            {
+                if (str.IsNullOrWhiteSpace()) continue;
+                if (int.TryParse(str, out int itemId))
+                {
+                    var item = LDB.items.Select(itemId);
+                    if (item == null)
+                    {
+                        Instance.Logger.LogWarning($"Can't find item {itemId}");
+                    }
+                    string itemName = item.Name;
+                    int modelIndex = item.ModelIndex;
+                    var model = LDB.models.Select(modelIndex);
+                    if (model != null)
+                    {
+                        //Instance.Logger.LogDebug($"Mute [{itemId}]{itemName}: {model.prefabDesc.audioVolume}");
+                        ModelVolumes.Add(modelIndex, model.prefabDesc.audioVolume);
+                        model.prefabDesc.audioVolume = 0;
+                    }
+                }
+                else
+                {
+                    Instance.Logger.LogWarning($"Can't parse \"{str}\" to int");
                 }
             }
         }
