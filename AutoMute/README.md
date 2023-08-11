@@ -33,6 +33,9 @@ For example, to mute UI button click sounds, key in `ui-click-0 ui-click-1 ui-cl
 
 ## Changelog
 
+#### v1.1.1
+\- Fix error when installing for the first time.  
+
 #### v1.1.0
 \- Add config option `MuteList`  
 \- Config changes now can apply when clicking in-game setting apply button.  

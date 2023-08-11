@@ -11,7 +11,7 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "1.1.0";
+        public const string VERSION = "1.1.1";
 
         internal static Plugin Instance;
         internal Harmony harmony;
@@ -24,9 +24,8 @@ namespace AutoMute
         readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
         readonly static Dictionary<int, float> ModelVolumes = new Dictionary<int, float>();
 
-        public void LoadConfig()
-        {
-            Config.Reload();
+        public void BindConfig()
+        {            
             MuteInBackground = Config.Bind("- General -", "Mute In Background", true, "Enable to mute the game when in the background, i.e. alt-tabbed.\n游戏在后台时自动静音，切换到前台时恢复");
             MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by white spaces.\n消除指定建筑的音讯。输入:建筑物品id, 以空白分隔。");
             MuteList = Config.Bind("- General -", "MuteList", "", "The list of audio name to mute, separated by white spaces. Check mod page wiki for available names.\n消除指定的音讯。输入:音讯名称, 以空白分隔(名称可以在mod页面wiki查询)");
@@ -34,7 +33,7 @@ namespace AutoMute
 
         internal void Awake()
         {
-            LoadConfig();
+            BindConfig();
             Instance = this;
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
@@ -67,7 +66,7 @@ namespace AutoMute
         [HarmonyPatch(typeof(UIOptionWindow), nameof(UIOptionWindow.OnApplyClick))]
         internal static void OnApplyClick()
         {
-            Instance.LoadConfig(); // Refresh config file when click
+            Instance.Config.Reload(); // Refresh config file when click
             ChangeVolumes(); // Apply changes to LDB.audios
         }
 
