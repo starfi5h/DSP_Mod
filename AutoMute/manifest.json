@@ -1,7 +1,7 @@
 {
     "name": "AutoMute",
-    "description": "Auto-mute sound when in background. Mute user-specified building. 后台时静音；消音指定建筑",
-    "version_number": "1.0.0",
-    "website_url": "https://github.com/starfi5h/DSP_Mod",
+    "description": "Auto-mute sound when in background. Mute user-specified audios. 消音器:后台自动静音 消除指定音效",
+    "version_number": "1.1.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/AutoMute",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
