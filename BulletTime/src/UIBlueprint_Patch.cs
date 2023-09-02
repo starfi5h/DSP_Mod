@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using HarmonyLib;
 using System.IO;
-using System.Text;
 using UnityEngine;
 
 namespace BulletTime
@@ -47,65 +46,14 @@ namespace BulletTime
             return false;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.Refresh))]
-        public static void UIBlueprintInspector_Refresh(ref bool refreshCode, ref bool __state)
-        {
-            if (refreshCode)
-            {
-                refreshCode = false;
-                __state = true;
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.Refresh))]
-        public static void UIBlueprintInspector_Refresh(UIBlueprintInspector __instance, bool __state)
-        {
-            lastRefreshTime = Time.time;
-            if (__state)
-            {
-                BlueprintData blueprint = __instance.blueprint;
-                float time = lastRefreshTime;
-                __instance.shareLengthText.text = "Generating...".Translate();
-                __instance.shareCodeText.text = "Generating...".Translate();
-
-                ThreadingHelper.Instance.StartAsyncInvoke(() =>
-                {                    
-                    StringBuilder stringBuilder = null;                    
-                    lock (__instance) // MD5F is single-threaded
-                    {
-                        if (blueprint != __instance.blueprint) return () => {};
-                        stringBuilder = blueprint.ToBase64StringBuilder();
-                    }
-
-                    return () =>
-                    {
-                        if (blueprint == __instance.blueprint)
-                        {
-                            __instance.shareLengthText.text = string.Format("几字节".Translate(), stringBuilder.Length);
-                            if (stringBuilder.Length > 256)
-                            {
-                                stringBuilder.Length = 256;
-                            }
-                            __instance.shareCodeText.text = stringBuilder.ToString();
-                        }
-                        else
-                        {
-                            //Log.Debug("Blueprint preview string is outdated!");
-                        }
-                    };
-                });
-            }
-        }
-
-
         [HarmonyPrefix, HarmonyPatch(typeof(UIBlueprintFileItem), nameof(UIBlueprintFileItem.OnThisClick))]
         public static bool UIBlueprintFileItem_OnThisClick(UIBlueprintFileItem __instance)
         {    
             VFAudio.Create("ui-click-0", null, Vector3.zero, true, 1, -1, -1L);
-            if (__instance.time - __instance.lastClickTime < 0.3f) // Switch order to reduce duplicate load
+            if (__instance.time - __instance.lastClickTime < (0.5f * Time.timeScale)) // Adjust time to fit speed change mods
             {
                 __instance.lastClickTime = -1f;
-                __instance.OnThisDoubleClick();
+                __instance.OnThisDoubleClick(); // Switch click events execute order to reduce duplicate load
                 return false;
             }
             __instance.lastClickTime = __instance.time;
@@ -199,6 +147,39 @@ namespace BulletTime
                     }
                 };
             });
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector._OnOpen)), HarmonyPriority(Priority.Last)]
+        public static bool UIBlueprintInspector_OnOpen(UIBlueprintInspector __instance)
+        {
+            __instance.player.package.onStorageChange += __instance.OnPlayerPackageChange;
+            __instance.Refresh(false, true, false); // code preview will use info of the file instead of generate from blueprint data
+
+            __instance.shareLengthText.text = "";
+            __instance.shareCodeText.text = "";
+            string fullPath = GameConfig.blueprintFolder + __instance.newPath + ".txt";
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    FileInfo fi = new FileInfo(fullPath);
+                    __instance.shareLengthText.text = string.Format("几字节".Translate(), fi.Length);
+
+                    char[] buffer = new char[256];
+                    using (StreamReader reader = new StreamReader(fullPath))
+                    {
+                        reader.ReadBlock(buffer, 0, buffer.Length);
+                    }
+                    __instance.shareCodeText.text = new string(buffer);
+                }
+                catch (System.Exception e)
+                {
+                    Log.Warn("UIBlueprintInspector_OnOpen: " + e);
+                }
+            }
+
+            return false;
         }
     }
 }
