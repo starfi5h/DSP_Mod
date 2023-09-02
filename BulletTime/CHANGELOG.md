@@ -1,13 +1,17 @@
 ## Changelog
 
+#### v1.2.13
+\- Fix a bug that corrupts large blueprint when editing its title or desc.  
+\- `UIBlueprintAsync` default value is false now.  
+
 #### v1.2.12
 \- Fix a bug that Ctrl+V no longer load the previous blueprint.  
 
-<details>
-<summary>Previous Changelog</summary>
-
 #### v1.2.11 (DSP0.9.27.15466)  
 \- Add `UIBlueprintAsync` config option.  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v1.2.10  
 \- Remove game speed indicator for 0.9.27.14546.  

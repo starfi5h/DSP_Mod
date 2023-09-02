@@ -20,7 +20,7 @@ To make sure factory data is consistent, the game will enter pause mode during a
 The interaction with the factory is prohibited during the time exporting local factory data.  
 
 ### Async blueprint loading
-When clicking on a blueprint file, it will be loaded asynchronously to prevent interface freezing.   
+When clicking on a blueprint file, it will be loaded asynchronously to prevent UI from freezing.   
 The loading time is proportional to the size of the blueprint. After the loading is complete, the blueprint can be used by double-clicking.  
 
 ## Configuration
@@ -44,7 +44,7 @@ Increase main menu loading speed. (Default:`true`)
 Remove force garbage collection of build tools. (Default:`true`)  
 
 - `UIBlueprintAsync`
-Optimize blueprint UI to reduce freezing time. (Default:`true`)  
+Optimize blueprint UI to reduce freezing time. (Default:`false`)  
 
 - `EnableFastLoading`  
 Minimum UPS in client of multiplayer game. (Default:`50.0`)  
@@ -77,7 +77,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 在背景自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
 使用这项功能时建议先测试。
 
-## 蓝图非同步载入
+## 蓝图异步载入
 
 当单击蓝图档案时, 会采用非同步载入的方式避免介面卡顿。  
 载入的时间和蓝图的大小成正比。在载入完成后双击才能使用蓝图。  
@@ -103,7 +103,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 移除建筑工具的强制内存回收 (预设为开启`true`)  
 
 - `UIBlueprintAsync`  
-使蓝图非同步载入,减少卡顿时间 (预设为开启`true`)  
+使蓝图非同步载入,减少卡顿时间 (预设为关闭`false`)  
 
 - `MinimumUPS`  
 联机mod-客户端的最小逻辑帧 (预设为`50.0`)  
