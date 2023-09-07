@@ -10,6 +10,40 @@ namespace LossyCompression
     {
         public static Action AfeterImport;
 
+        public static class SphereOpt
+        {
+            public const string GUID = "SphereOpt";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+
+                    if (LazyLoading.Enable)
+                    {
+                        harmony.PatchAll(typeof(SphereOpt));
+                        LazyLoading.Enable = false;
+                        Log.Debug("SphereOpt compatibility - OK");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("SphereOpt compatibility failed! Last working version: 0.8.1");
+                    Log.Warn(e);
+                }
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
+            public static void OnGameLoaded()
+            {
+                var message = "Lazy loading is disabled due to compat with SphereOpt.\n侦测到SphereOpt,已将延迟载入功能关闭";
+                UIMessageBox.Show("LossyCompression", message, "确定".Translate(), 3);
+            }
+        }
+
+
         public static class DSPOptimizations
         {
             public const string GUID = "com.Selsion.DSPOptimizations";
@@ -28,7 +62,7 @@ namespace LossyCompression
                     // ShellShaderVarOpt will call SetMaterialDynamicVars so guard is needed
                     harmony.PatchAll(typeof(DSPOptimizations));
 
-                    Log.Info("DSPOptimizations compatibility - OK");
+                    Log.Debug("DSPOptimizations compatibility - OK");
                 }
                 catch (Exception e)
                 {
@@ -78,7 +112,7 @@ namespace LossyCompression
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo))
                         return;
                     Patch(harmony);
-                    Log.Info("Nebula compatibility - OK");
+                    Log.Debug("Nebula compatibility - OK");
                 }
                 catch (Exception e)
                 {
