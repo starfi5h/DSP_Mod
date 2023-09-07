@@ -131,11 +131,26 @@ namespace LossyCompression
                 var classType = AccessTools.TypeByName("NebulaWorld.Universe.DysonSphereManager");
                 var methodInfo = AccessTools.Method(classType, "RegisterPlayer");
                 harmony.Patch(methodInfo, null, new HarmonyMethod(typeof(NebulaAPI), "DysonDataPostfix"));
+
+                harmony.Patch(AccessTools.Method(typeof(DysonSwarm), nameof(DysonSwarm.RemoveSailsByOrbit)), new HarmonyMethod(typeof(NebulaAPI), "RemoveSailsByOrbitPrefix"));
             }
 
             public static void DysonDataPostfix(INebulaConnection conn, int starIndex)
             {
                 conn.SendPacket(new LC_DysonData(starIndex));
+            }
+
+            public static bool RemoveSailsByOrbitPrefix(int orbitId)
+            {
+                if (orbitId == 0)
+                {
+                    if ((bool)AccessTools.Property(AccessTools.TypeByName("NebulaWorld.Multiplayer"), "IsDedicated")?.GetValue(null) == true)
+                    {
+                        Log.Debug("Skip sails rearrange");
+                        return false;
+                    }
+                }
+                return true;
             }
         }
 
