@@ -1,11 +1,17 @@
 ## Changelog
 
-#### v0.3.0 (DPS 0.9.27,15466)
-\- Update CargoPath comprssion version to v2 (compress quaternion).  
-\- Fix import error when DysonShell compression is disabled.  
+#### v0.3.1
+\- Fix orbitId of generated sails so they don't disappear after optimizing memory.  
+\- Disable lazy loading when using together with SphereOpt.  
+\- Fix sails vanish when optimizing sails memory in Nebula dedicated server.  
 
 <details>
 <summary>Previous Changelog</summary>
+
+#### v0.3.0 (DSP 0.9.27.15466)
+\- Update CargoPath comprssion version to v2 (compress quaternion).  
+\- Fix import error when DysonShell compression is disabled.  
+
 
 #### v0.2.3  
 \- Add `ReduceRAM` config to further reduce RAM usage.  

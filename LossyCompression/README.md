@@ -36,6 +36,7 @@ Recommend to enable it when there are too many shells in a save.
 - (✅) [CompressSave](https://dsp.thunderstore.io/package/soarqin/CompressSave/)  
 - (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
 - (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)  
+- (⚠️) [SphereOpt](https://dsp.thunderstore.io/package/Andy/SphereOpt/): Will disable lazy load function to avoid conflict.  
 
 ----
 # 有损/无损压缩
@@ -75,7 +76,9 @@ Recommend to enable it when there are too many shells in a save.
 
 - (✅) [CompressSave](https://dsp.thunderstore.io/package/soarqin/CompressSave/)(LZ4,ZSTD压缩)  
 - (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)(优化mod)  
-- (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod)
+- (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod)  
+- (⚠️) [SphereOpt](https://dsp.thunderstore.io/package/Andy/SphereOpt/): 会关闭延迟载入的功能避免冲突   
+
 ----
 
 #### Acknowledgements
