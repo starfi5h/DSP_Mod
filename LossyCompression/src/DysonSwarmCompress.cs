@@ -138,6 +138,18 @@ namespace LossyCompression
             dysonSwarm.SetSailCapacity(newCap);
             dysonSwarm.sailPoolForSave = new DysonSail[newCap];
 
+            // Get active orbit ids
+            List<int> activeOrbitIds = new List<int>();
+            for (int i = 1; i < dysonSwarm.orbitCursor; i++)
+            {
+                if (dysonSwarm.orbits[i].id == i && dysonSwarm.orbits[i].enabled)
+                    activeOrbitIds.Add(i);
+            }
+            if (activeOrbitIds.Count == 0)
+            {
+                activeOrbitIds.Add(1); // Orbit 1 cannot be deleted
+            }
+
             // Setting sails life
             dysonSwarm.sailCursor = 0;
             dysonSwarm.sailRecycleCursor = 0;
@@ -157,6 +169,7 @@ namespace LossyCompression
                     dysonSwarm.expiryOrder[dysonSwarm.expiryEnding].time = expiryTime;
                     dysonSwarm.expiryOrder[dysonSwarm.expiryEnding].index = dysonSwarm.sailCursor;
                     dysonSwarm.sailInfos[dysonSwarm.sailCursor].kill = (uint)((ulong)expiryTime & uint.MaxValue);
+                    dysonSwarm.sailInfos[dysonSwarm.sailCursor].orbit = (uint)activeOrbitIds[dysonSwarm.sailCursor % activeOrbitIds.Count]; // Split evenly
 
                     dysonSwarm.expiryEnding++;
                     dysonSwarm.sailCursor++;
@@ -167,7 +180,7 @@ namespace LossyCompression
             // Setting sails position and velocity
             if (!IsMultithread || dysonSwarm.sailCursor < 1000)
             {
-                GenerateSails(dysonSwarm, 0, dysonSwarm.sailCursor);
+                GenerateSails(dysonSwarm, 0, dysonSwarm.sailCursor, activeOrbitIds);
             }
             else
             {
@@ -178,9 +191,9 @@ namespace LossyCompression
                 {
                     int startIndex = batchSize * i;
                     int endIndex = batchSize * (i + 1);
-                    tasks[i] = Task.Run(() => GenerateSails(dysonSwarm, startIndex, endIndex));
+                    tasks[i] = Task.Run(() => GenerateSails(dysonSwarm, startIndex, endIndex, activeOrbitIds));
                 }
-                GenerateSails(dysonSwarm, batchSize * (numThread - 1), dysonSwarm.sailCursor);
+                GenerateSails(dysonSwarm, batchSize * (numThread - 1), dysonSwarm.sailCursor, activeOrbitIds);
                 Task.WaitAll(tasks);
             }
 
@@ -190,19 +203,8 @@ namespace LossyCompression
             Log.Debug($"[{dysonSphere.starData.index,2}] Generate {dysonSwarm.sailCursor:N0} sails. Time:{stopwatch.duration} s");
         }
 
-        public static void GenerateSails(DysonSwarm dysonSwarm, int startIndex, int endIndex)
+        public static void GenerateSails(DysonSwarm dysonSwarm, int startIndex, int endIndex, List<int> activeOrbitIds)
         {
-            List<int> activeOrbitIds = new List<int>();
-            for (int i = 1; i < dysonSwarm.orbitCursor; i++)
-            {
-                if (dysonSwarm.orbits[i].id == i && dysonSwarm.orbits[i].enabled)
-                    activeOrbitIds.Add(i);
-            }
-            if (activeOrbitIds.Count == 0)
-            {
-                activeOrbitIds.Add(1); // Orbit 1 cannot be deleted
-            }
-
             // Formula modify from AutoConstruct
             float gravity = dysonSwarm.dysonSphere.gravity;
             for (int id = startIndex; id < endIndex; id++)
