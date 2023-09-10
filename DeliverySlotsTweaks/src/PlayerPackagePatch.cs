@@ -7,7 +7,17 @@ namespace DeliverySlotsTweaks
 {
     public class PlayerPackagePatch
     {
-        public static int packageStacksize = 1000;
+        static int packageStacksize = 1000;
+
+        public static void OnConfigChange()
+        {
+            if (Plugin.PlayerPackageStackSize.Value > 0)
+            {
+                packageStacksize = Plugin.PlayerPackageStackSize.Value;
+                GameMain.mainPlayer.mecha.warpStorage.SetFilter(0, 1210, packageStacksize);
+                Plugin.Log.LogDebug("PlayerPackage stack:" + PlayerPackagePatch.packageStacksize);
+            }
+        }
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.AddItem),
@@ -17,10 +27,10 @@ new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Norm
         [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.Sort))]
         static IEnumerable<CodeInstruction> OverwritePlayerPackageStacksize(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
-            CodeMatcher matcher = new CodeMatcher(instructions, il);
+            var matcher = new CodeMatcher(instructions, il);
 
             // Change: num2 = StorageComponent.itemStackCount[itemId];
-            // To:     num2 = this == GameMain.mainPlayer.package ? PlayerPackagePatch.packageStacksize : StorageComponent.itemStackCount[itemId];
+            // To:     num2 = IsPlayerStorage(this) ? PlayerPackagePatch.packageStacksize : StorageComponent.itemStackCount[itemId];
 
             matcher
                 .MatchForward(false, new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(StorageComponent), nameof(StorageComponent.itemStackCount))))
@@ -35,15 +45,46 @@ new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Norm
             matcher.Advance(startPos - matcher.Pos);
             matcher.Insert(
                     new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameMain), "get_mainPlayer")),
-                    new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Player), "get_package")),
-                    new CodeInstruction(OpCodes.Bne_Un_S, jmpNormalFlow),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlayerPackagePatch), nameof(IsPlayerStorage))),
+                    new CodeInstruction(OpCodes.Brfalse_S, jmpNormalFlow),
                     new CodeInstruction(OpCodes.Pop),
-                    new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(PlayerPackagePatch), "packageStacksize")),
+                    new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(PlayerPackagePatch), nameof(packageStacksize))),
                     new CodeInstruction(OpCodes.Br_S, jmpEnd)
                 );
 
             return matcher.Instructions();
+        }
+
+        public static bool IsPlayerStorage(StorageComponent storageComponent)
+        {
+            return storageComponent == GameMain.mainPlayer.package
+                || storageComponent == GameMain.mainPlayer.mecha.reactorStorage;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PackageStatistics), nameof(PackageStatistics.Count))]
+        static bool CountOverwrite(PackageStatistics __instance, StorageComponent package)
+        {
+            if (!IsPlayerStorage(package)) return true;
+
+            __instance.itemBundle.Clear();
+            ref StorageComponent.GRID[] grids = ref package.grids;
+            int emptySlotCount = 0;
+            for (int i = 0; i < package.size; i++)
+            {
+                int itemId = grids[i].itemId;
+                if (itemId > 0)
+                    __instance.itemBundle.Add(itemId, grids[i].count, packageStacksize - grids[i].count); // Fix capactiy
+                else
+                    emptySlotCount++;
+            }
+            if (emptySlotCount > 0)
+            {
+                int[] itemIds = ItemProto.itemIds;
+                for (int j = 0; j < itemIds.Length; j++)
+                    __instance.itemBundle.Add(itemIds[j], 0, packageStacksize * emptySlotCount); // Fix capactiy
+            }
+            return false;
         }
     }
 }

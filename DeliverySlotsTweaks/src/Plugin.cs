@@ -10,7 +10,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.1.0";
+        public const string VERSION = "1.1.1";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -56,13 +56,16 @@ namespace DeliverySlotsTweaks
         internal static void OnApplyClick()
         {
             Instance.Config.Reload(); // Reload config file when clicking 'Apply' in game settings
-            if (GameMain.mainPlayer != null)
-                DeliveryPackagePatch.ParameterOverwrite(GameMain.mainPlayer.deliveryPackage);
-            if (PlayerPackageStackSize.Value > 0)
-            {
-                PlayerPackagePatch.packageStacksize = PlayerPackageStackSize.Value;
-                Log.LogDebug("PlayerPackage stack:" + PlayerPackagePatch.packageStacksize);
-            }
+            OnConfigChange();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), nameof(Player.Import))]
+        [HarmonyPatch(typeof(Player), nameof(Player.SetForNewGame))]
+        internal static void OnConfigChange()
+        {
+            DeliveryPackagePatch.ParameterOverwrite(GameMain.mainPlayer.deliveryPackage);
+            PlayerPackagePatch.OnConfigChange();
         }
     }
 }
