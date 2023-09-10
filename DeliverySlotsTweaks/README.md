@@ -5,7 +5,7 @@
 1. Let replicator and build tools use items in logistic slots.
 2. When logistic bots deliver items to mecha, Let logistic slots fill first.   
 3. Change the parameters of logistic slots (size, stack size).  
-4. Overwrite default item stack size count in player inventory.  
+4. Overwrite default item stack size count in mecha inventory and fuel chamber.  
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually download the file and put `DeliverySlotsTweaks.dll` in `BepInEx/plugins` folder.
@@ -15,7 +15,6 @@ Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually 
 Run the game one time to generate `BepInEx\config\starfi5h.plugin.DeliverySlotsTweaks.cfg` file.  
 If you're using mod manager, you can find the file in Config editor.  
 The changes will take effects after reboost, or go to game settings and click 'Apply' button.  
-Inventory stacksize overwrite only apply when the value is set to a positive number before entering the game.  
 Some effects will last in save after the mod is disabled.  
 When reducing ColCount, please clean up logistic slots first to prevent hidden slots not being accessible.  
 
@@ -24,7 +23,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | `ColCount`             | 0    | No Change:0 TechMax:2 Limit:5 |
 | `StackSizeMultiplier`  | 0    | No Change:0 TechMax:10 |
 | `DeliveryFirst`        | true | When logistic bots send items to mecha, send them to delivery slots first. |
-| `PlayerPackage` - `StackSize`  | 0    | No Change:0 |
+| `PlayerPackage` - `StackSize`  | 0    | Unify item stack size in mecha inventory. Load game with this value ≤ 0 will skip this patch. |
 
 ----
 
@@ -33,12 +32,11 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 1. 改变物流清单的逻辑行为, 使手动制造和建筑工具也可以使用物流清单内的物品。  
 2. 当配送物品至机甲时, 优先补充物流清单的栏位。  
 3. 改变物流清单的参数(列,堆叠数量)。  
-4. 覆蓋玩家背包中的物品堆疊上限。  
+4. 覆蓋机甲背包及燃烧室中的物品堆疊上限。  
 
 ## 配置   
 配置文件(.cfg)需要先运行过游戏一次才会出现。  
-在修改完配置文件后重启游戏, 或进入游戏设置, 点击'应用设置'即可套用新的数值设定。  
-注意玩家背包物品堆叠上限要在进入游戏前先预先设置一个正数, 才能使用以上的方法调整数值。  
+在修改完配置文件后重启游戏, 或进入游戏设置, 点击'应用设置'即可立即套用新的数值设定。  
 部分修改后的效果在停用mod后依然会存在。   
 
 管理器安装: 左边选项Config editor -> 找到`starfi5h.plugin.DeliverySlotsTweaks` -> Edit Config  
@@ -50,13 +48,14 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | `ColCount`             | 0    | 物流清单容量-列(不变:0 原版科技:2 最高上限:5) |
 | `StackSizeMultiplier`  | 0    | 物流清单物品堆叠倍率(不变:0 原版科技:10) |
 | `DeliveryFirst`        | true | 配送机会优先将物品送入物流清单的栏位 |
-| `PlayerPackage` - `StackSize`  | 0    | 覆蓋玩家背包中的物品堆疊上限(不变:0) |
+| `PlayerPackage` - `StackSize`  | 0    | 统一覆蓋机甲背包中的物品堆疊上限。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
 
 ----
 
 ## Changelog
 
-v1.1.0 - Add playerpackage stacksize config option. Now can apply mod config changes in game settings.  
+v1.1.1 - Apply `PlayerPackage` - `StackSize` setting to fuel chamber and warper slot.  
+v1.1.0 - Add `PlayerPackage` - `StackSize` config option. Now can apply mod config changes in game settings.  
 v1.0.1 - Fix a bug that some logistics  solts are not usable.  
 v1.0.0 - Initial release. (DSPv0.9.27.15466)  
 
