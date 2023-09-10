@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace DeliverySlotsTweaks
 {
-    public class DeliveryPackagePatches
+    public class DeliveryPackagePatch
     {
 		static int maxDeliveryGridIndex = 0;
 
@@ -39,7 +39,6 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(Player), nameof(Player.SetForNewGame))]
 		public static void ParameterOverwrite(Player __instance)
 		{
-			Plugin.Instance.Config.Reload();
 			ParameterOverwrite(__instance.deliveryPackage);
 		}
 
@@ -166,9 +165,9 @@ namespace DeliverySlotsTweaks
 			{
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(GetItemCount)))
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCount)))
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(TakeTailItems)));
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
 
 				return codeMacher.InstructionEnumeration();
 			}
@@ -193,7 +192,7 @@ namespace DeliverySlotsTweaks
 			{
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "TryAddTaskIterate"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(TryAddTaskIterate)));
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TryAddTaskIterate)));
 
 				return codeMacher.InstructionEnumeration();
 			}
@@ -223,7 +222,7 @@ namespace DeliverySlotsTweaks
 			{
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeItem"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(TakeItem)));
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeItem)));
 
 				return codeMacher.InstructionEnumeration();
 			}
@@ -251,7 +250,7 @@ namespace DeliverySlotsTweaks
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
 					.Repeat(matcher => matcher
-						.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(GetItemCount))));
+						.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCount))));
 
 				return codeMacher.InstructionEnumeration();
 			}
@@ -278,7 +277,7 @@ namespace DeliverySlotsTweaks
 				var codeMacher = new CodeMatcher(instructions)
 					.End()
 					.MatchBack(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(TakeTailItems)));
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
 
 				return codeMacher.InstructionEnumeration();
 			}
@@ -299,7 +298,7 @@ namespace DeliverySlotsTweaks
 			{				
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "_GameTick"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatches), nameof(BuildTool_GameTick)));
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(BuildTool_GameTick)));
 
 				return codeMacher.InstructionEnumeration();
 			}
