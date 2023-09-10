@@ -34,14 +34,6 @@ namespace DeliverySlotsTweaks
 			Plugin.Log.LogDebug($"DeliveryPackage:{__instance.rowCount}x{__instance.colCount} stack:{__instance.stackSizeMultiplier} maxIndex:{maxDeliveryGridIndex}");
 		}
 
-		[HarmonyPostfix]
-		[HarmonyPatch(typeof(Player), nameof(Player.Import))]
-		[HarmonyPatch(typeof(Player), nameof(Player.SetForNewGame))]
-		public static void ParameterOverwrite(Player __instance)
-		{
-			ParameterOverwrite(__instance.deliveryPackage);
-		}
-
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(PlayerPackageUtility), nameof(PlayerPackageUtility.AddItemToAllPackages))]
 		public static void AddItemToAllPackages(ref bool deliveryFirst)
