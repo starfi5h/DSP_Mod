@@ -63,39 +63,8 @@ namespace SampleAndHoldSim
         }
     }
 
-    class Dyson_Patch
+    class Ejector_Patch // Separate to compat with CheatEnabler
     {
-        [HarmonyTranspiler, HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.RequestDysonSpherePower))]
-        static IEnumerable<CodeInstruction> RequestDysonSpherePower_Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            try
-            {
-                // Record num in this.dysonSphere.energyReqCurrentTick += num;
-                CodeMatcher matcher = new CodeMatcher(instructions)
-                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "energyReqCurrentTick"));
-                CodeInstruction loadInstruction = matcher.InstructionAt(-2); //ldloc.3
-                matcher.Advance(1)
-                    .InsertAndAdvance(
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PowerSystem), nameof(PowerSystem.factory))),
-                        loadInstruction,
-                        HarmonyLib.Transpilers.EmitDelegate<Action<PlanetFactory, long>>((factory, energyReq) =>
-                        {
-                            if (factory.index < MainManager.Factories.Count)
-                            {
-                                MainManager.Factories[factory.index].EnergyReqCurrentTick = energyReq;
-                            }
-                        })
-                    );
-                return matcher.InstructionEnumeration();
-            }
-            catch
-            {
-                Log.Warn("PowerSystem.RequestDysonSpherePower Transpiler failed.");
-                return instructions;
-            }
-        }
-
         [HarmonyTranspiler, HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
         public static IEnumerable<CodeInstruction> EjectorComponent_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -127,6 +96,40 @@ namespace SampleAndHoldSim
             catch
             {
                 Log.Warn("EjectorComponent.InternalUpdate Transpiler failed.");
+                return instructions;
+            }
+        }
+    }
+
+    class Dyson_Patch
+    {
+        [HarmonyTranspiler, HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.RequestDysonSpherePower))]
+        static IEnumerable<CodeInstruction> RequestDysonSpherePower_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            try
+            {
+                // Record num in this.dysonSphere.energyReqCurrentTick += num;
+                CodeMatcher matcher = new CodeMatcher(instructions)
+                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "energyReqCurrentTick"));
+                CodeInstruction loadInstruction = matcher.InstructionAt(-2); //ldloc.3
+                matcher.Advance(1)
+                    .InsertAndAdvance(
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PowerSystem), nameof(PowerSystem.factory))),
+                        loadInstruction,
+                        HarmonyLib.Transpilers.EmitDelegate<Action<PlanetFactory, long>>((factory, energyReq) =>
+                        {
+                            if (factory.index < MainManager.Factories.Count)
+                            {
+                                MainManager.Factories[factory.index].EnergyReqCurrentTick = energyReq;
+                            }
+                        })
+                    );
+                return matcher.InstructionEnumeration();
+            }
+            catch
+            {
+                Log.Warn("PowerSystem.RequestDysonSpherePower Transpiler failed.");
                 return instructions;
             }
         }
