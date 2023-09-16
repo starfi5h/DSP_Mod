@@ -25,6 +25,11 @@ namespace SampleAndHoldSim
             CheatEnabler_Patch.Init(harmony);
         }
 
+        public static void OnDestory()
+        {
+            CheatEnabler_Patch.OnDestory();
+        }
+
         public static class NebulaAPI
         {
             public const string GUID = "dsp.nebula-multiplayer-api";
@@ -197,7 +202,7 @@ namespace SampleAndHoldSim
                 public static void AddTempSail(List<Multfunction_mod.Tempsail> list, Multfunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
                 {
                     // Do not multiply if it is local focus planet
-                    int times = MainManager.FocusLocalFactory && ejector.planetId == GameMain.localPlanet?.id ? 1 : MainManager.UpdatePeriod;
+                    int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
                 }
@@ -546,68 +551,111 @@ namespace SampleAndHoldSim
                 }
             }
 
+            public static void OnDestory()
+            {
+                Warper.OnDestory();
+            }
+
             private static class Warper
             {
-                private static Harmony _patch = null;
-                private static VectorLF3 localPlanetUpos;
+                private static Harmony patch_sample = null;
+                private static Harmony patch_cheatEnabler = null;
 
                 public static void Init()
                 {
+                    if (CheatEnabler.DysonSpherePatch._skipBulletPatch != null)
+                    {
+                        CheatEnabler.DysonSpherePatch._skipBulletPatch.UnpatchSelf();
+                        CheatEnabler.DysonSpherePatch._skipBulletPatch = null;
+                    }                    
                     CheatEnabler.DysonSpherePatch.SkipBulletValueChanged();
                 }
 
-                [HarmonyPostfix, HarmonyPatch(typeof(GameData), nameof(GameData.GameTick))]
-                internal static void UpdateLocalPlanetUpos()
+                public static void OnDestory()
                 {
-                    if (MainManager.FocusLocalFactory && GameMain.localPlanet != null)
+                    if (patch_sample != null)
                     {
-                        localPlanetUpos = GameMain.localPlanet.uPosition;
+                        patch_sample.UnpatchSelf();
+                        patch_sample = null;
                     }
-                    else
-                        localPlanetUpos = VectorLF3.zero;
+                    if (patch_cheatEnabler != null)
+                    {
+                        patch_cheatEnabler.UnpatchSelf();
+                        patch_cheatEnabler = null;
+                    }
                 }
 
                 [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Prefix(ConfigEntry<bool> ___SkipBulletEnabled)
+                internal static bool SkipBulletValueChanged_Overwrite(ConfigEntry<bool> ___SkipBulletEnabled)
                 {
-                    if (___SkipBulletEnabled.Value && _patch != null)
+                    if (___SkipBulletEnabled.Value)
                     {
-                        _patch.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
-                        _patch = null;
+                        if (patch_sample != null)
+                        {
+                            patch_sample.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
+                            patch_sample = null;
+                        }
+                        if (patch_cheatEnabler == null)
+                        {
+                            patch_cheatEnabler = new Harmony(Plugin.GUID + "-CE");
+                            patch_cheatEnabler.Patch(
+                                AccessTools.Method(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate)),
+                                null,
+                                null,
+                                new HarmonyMethod(AccessTools.Method(typeof(Warper), nameof(EjectorComponent_InternalUpdate_Patch))));
+                        }
                     }
-                }
-
-                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Postfix(ConfigEntry<bool> ___SkipBulletEnabled)
-                {
-                    if (!___SkipBulletEnabled.Value && _patch == null)
-                        _patch = Harmony.CreateAndPatchAll(typeof(Ejector_Patch)); // Apply Ejector_Patch after CE patch is unload
-                }
-
-                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), "AddDysonSail")]
-                internal static bool AddDysonSail_Prefix(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec)
-                {
-                    // If the sail doesn't come from the focus local planet, repeat
-                    int repeatCount = (uPos == localPlanetUpos) ? 1 : MainManager.UpdatePeriod;
-                    for (int i = 0; i < repeatCount; i++)
+                    else
                     {
-                        AddDysonSail(swarm, orbitId, uPos, endVec);
+                        if (patch_cheatEnabler != null)
+                        {
+                            patch_cheatEnabler.UnpatchSelf();
+                            patch_cheatEnabler = null;
+                        }
+                        if (patch_sample == null)
+                        {
+                            patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch)); // Apply Ejector_Patch after CE patch is unload
+                        }
                     }
                     return false;
                 }
 
-#pragma warning disable IDE0060
-                [HarmonyReversePatch, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), "AddDysonSail")]
-                private static void AddDysonSail(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec)
+                private static IEnumerable<CodeInstruction> EjectorComponent_InternalUpdate_Patch(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
                 {
+                    var matcher = new CodeMatcher(instructions, generator);
+                    matcher.MatchForward(false,
+                        new CodeMatch(OpCodes.Ldc_R4, 10f)
+                    ).Advance(2);
+                    var start = matcher.Pos;
+                    matcher.MatchForward(false,
+                        new CodeMatch(OpCodes.Pop)
+                    ).Advance(1);
+                    var end = matcher.Pos;
+                    matcher.Start().Advance(start).RemoveInstructions(end - start).Insert(
+                        new CodeInstruction(OpCodes.Ldarg_2),
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.orbitId))),
+                        new CodeInstruction(OpCodes.Ldloc_S, 8),
+                        new CodeInstruction(OpCodes.Ldloc_S, 10),
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddDysonSailWithPlanetId)))
+                    );
+                    return matcher.InstructionEnumeration();
                 }
-#pragma warning restore IDE0060
 
+                private static void AddDysonSailWithPlanetId(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec, int planetId)
+                {
+                    // If the sail doesn't come from the focus local planet, repeat
+                    int repeatCount = (planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
+                    Log.Debug(repeatCount);
+                    for (int i = 0; i < repeatCount; i++)
+                    {
+                        Log.Debug("ADD AddDysonSail");
+                        CheatEnabler.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
+                    }
+                }
             }
-
-
-
-
         }
     }
 }

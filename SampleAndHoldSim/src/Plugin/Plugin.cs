@@ -74,6 +74,7 @@ namespace SampleAndHoldSim
 
         public void OnDestroy()
         {
+            Compatibility.OnDestory();
             harmony.UnpatchSelf();
             UIcontrol.OnDestory();
             UIstation.OnDestory();
