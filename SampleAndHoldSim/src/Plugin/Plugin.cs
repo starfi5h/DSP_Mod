@@ -12,6 +12,7 @@ namespace SampleAndHoldSim
     [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.PlanetMiner.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.DSP_Battle_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
@@ -73,6 +74,7 @@ namespace SampleAndHoldSim
 
         public void OnDestroy()
         {
+            Compatibility.OnDestory();
             harmony.UnpatchSelf();
             UIcontrol.OnDestory();
             UIstation.OnDestory();

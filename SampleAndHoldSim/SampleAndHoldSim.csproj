@@ -51,6 +51,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>reference\Blackbox-nstrip.dll</HintPath>
     </Reference>
+    <Reference Include="CheatEnabler-nstrip">
+      <HintPath>reference\CheatEnabler-nstrip.dll</HintPath>
+    </Reference>
     <Reference Include="DSP_Battle-nstrip">
       <HintPath>reference\DSP_Battle-nstrip.dll</HintPath>
     </Reference>
@@ -370,6 +373,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="reference\Blackbox-nstrip.dll" />
+    <Content Include="reference\CheatEnabler-nstrip.dll" />
     <Content Include="reference\DSP_Battle-nstrip.dll" />
     <Content Include="reference\Multifunction_mod-nstrip.dll" />
   </ItemGroup>
