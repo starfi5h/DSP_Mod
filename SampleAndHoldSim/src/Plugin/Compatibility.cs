@@ -524,7 +524,6 @@ namespace SampleAndHoldSim
             }
         }
     
-    
         public static class CheatEnabler_Patch
         {
             public const string GUID = "org.soardev.cheatenabler";            
@@ -563,11 +562,6 @@ namespace SampleAndHoldSim
 
                 public static void Init()
                 {
-                    if (CheatEnabler.DysonSpherePatch._skipBulletPatch != null)
-                    {
-                        CheatEnabler.DysonSpherePatch._skipBulletPatch.UnpatchSelf();
-                        CheatEnabler.DysonSpherePatch._skipBulletPatch = null;
-                    }                    
                     CheatEnabler.DysonSpherePatch.SkipBulletValueChanged();
                 }
 
@@ -586,7 +580,7 @@ namespace SampleAndHoldSim
                 }
 
                 [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static bool SkipBulletValueChanged_Overwrite(ConfigEntry<bool> ___SkipBulletEnabled)
+                internal static void SkipBulletValueChanged_Prefix(ConfigEntry<bool> ___SkipBulletEnabled)
                 {
                     if (___SkipBulletEnabled.Value)
                     {
@@ -595,6 +589,22 @@ namespace SampleAndHoldSim
                             patch_sample.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
                             patch_sample = null;
                         }
+                    }
+                    else
+                    {
+                        if (patch_cheatEnabler != null)
+                        {
+                            patch_cheatEnabler.UnpatchSelf(); // Remove the IL modification first
+                            patch_cheatEnabler = null;
+                        }
+                    }
+                }
+
+                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
+                internal static void SkipBulletValueChanged_Postfix(ConfigEntry<bool> ___SkipBulletEnabled)
+                {
+                    if (___SkipBulletEnabled.Value)
+                    {
                         if (patch_cheatEnabler == null)
                         {
                             patch_cheatEnabler = new Harmony(Plugin.GUID + "-CE");
@@ -602,41 +612,24 @@ namespace SampleAndHoldSim
                                 AccessTools.Method(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate)),
                                 null,
                                 null,
-                                new HarmonyMethod(AccessTools.Method(typeof(Warper), nameof(EjectorComponent_InternalUpdate_Patch))));
+                                new HarmonyMethod(AccessTools.Method(typeof(Warper), nameof(EjectorComponent_ReplaceAddDysonSail))));
                         }
                     }
                     else
                     {
-                        if (patch_cheatEnabler != null)
-                        {
-                            patch_cheatEnabler.UnpatchSelf();
-                            patch_cheatEnabler = null;
-                        }
                         if (patch_sample == null)
                         {
                             patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch)); // Apply Ejector_Patch after CE patch is unload
                         }
                     }
-                    return false;
                 }
 
-                private static IEnumerable<CodeInstruction> EjectorComponent_InternalUpdate_Patch(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+                private static IEnumerable<CodeInstruction> EjectorComponent_ReplaceAddDysonSail(IEnumerable<CodeInstruction> instructions)
                 {
-                    var matcher = new CodeMatcher(instructions, generator);
+                    var matcher = new CodeMatcher(instructions);
                     matcher.MatchForward(false,
-                        new CodeMatch(OpCodes.Ldc_R4, 10f)
-                    ).Advance(2);
-                    var start = matcher.Pos;
-                    matcher.MatchForward(false,
-                        new CodeMatch(OpCodes.Pop)
-                    ).Advance(1);
-                    var end = matcher.Pos;
-                    matcher.Start().Advance(start).RemoveInstructions(end - start).Insert(
-                        new CodeInstruction(OpCodes.Ldarg_2),
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.orbitId))),
-                        new CodeInstruction(OpCodes.Ldloc_S, 8),
-                        new CodeInstruction(OpCodes.Ldloc_S, 10),
+                        new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), "AddDysonSail"))
+                    ).RemoveInstruction().Insert(
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
                         new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddDysonSailWithPlanetId)))
@@ -648,12 +641,8 @@ namespace SampleAndHoldSim
                 {
                     // If the sail doesn't come from the focus local planet, repeat
                     int repeatCount = (planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
-                    Log.Debug(repeatCount);
                     for (int i = 0; i < repeatCount; i++)
-                    {
-                        Log.Debug("ADD AddDysonSail");
                         CheatEnabler.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
-                    }
                 }
             }
         }
