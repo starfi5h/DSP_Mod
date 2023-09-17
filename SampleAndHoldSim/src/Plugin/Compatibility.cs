@@ -160,7 +160,7 @@ namespace SampleAndHoldSim
                     Type classType = assembly.GetType("Multfunction_mod.Multifunctionpatch");
 
                     // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Dyson_Patch).GetMethod("EjectorComponent_Transpiler")));
+                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Ejector_Patch).GetMethod(nameof(Ejector_Patch.EjectorComponent_Transpiler))));
 
                     // TODO: Fix skip bullet
                     harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod("EjectorComponentPatch_Transpiler")));
@@ -173,7 +173,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.7.4");
+                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.0");
                     Log.Warn(e);
                 }
             }
