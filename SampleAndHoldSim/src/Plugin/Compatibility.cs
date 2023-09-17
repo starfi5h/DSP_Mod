@@ -297,10 +297,6 @@ namespace SampleAndHoldSim
         public static class PlanetMiner
         {
             public const string GUID = "crecheng.PlanetMiner";
-            public static bool IsPatched { get; private set; } = false;
-
-            static Action<FactorySystem> PlanetMinerAction;
-            static bool enablePlanetMiner = false;
 
             public static void Init(Harmony harmony)
             {
@@ -309,13 +305,14 @@ namespace SampleAndHoldSim
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
                     MethodInfo methodInfo = AccessTools.Method(assembly.GetType("PlanetMiner.PlanetMiner"), "Miner");
-                    PlanetMinerAction = AccessTools.MethodDelegate<Action<FactorySystem>>(methodInfo);
+
+                    harmony.CreateReversePatcher(methodInfo,
+                    new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Original)))).Patch();
+
                     harmony.Patch(methodInfo, 
-                        new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Prefix))),
-                        null,
+                        null, null,
                         new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Transpiler))));
 
-                    IsPatched = true;
                     Log.Debug("PlanetMiner compatibility - OK");
                 }
                 catch (Exception e)
@@ -325,47 +322,79 @@ namespace SampleAndHoldSim
                 }
             }
 
-            public static void Update_PlanetMiners()
-            {
-                float miningSpeedScale = GameMain.history.miningSpeedScale;
-                int peroid = (int)(120f / miningSpeedScale);
-                peroid = (peroid <= 0) ? 1 : peroid;
-                bool flag1 = GameMain.gameTick % peroid == 0; //normal
-                bool flag2 = (GameMain.gameTick / MainManager.UpdatePeriod) % peroid == 0; //idle
-
-                if (flag1 || flag2)
-                {
-                    enablePlanetMiner = true;
-                    foreach (var manager in MainManager.Factories)
-                    {
-                        if (manager.IsActive) // Update PlanetMiners for active factories
-                        {
-                            if (flag2 && manager.IsNextIdle)
-                                PlanetMinerAction(manager.factory.factorySystem);
-                            else if (flag1 && (!manager.IsNextIdle))
-                                PlanetMinerAction(manager.factory.factorySystem);
-                        }
-                    }
-                    enablePlanetMiner = false;
-                }
-            }
-
-            static bool Miner_Prefix()
-            {
-                return enablePlanetMiner;
-            }
-
-            static IEnumerable<CodeInstruction> Miner_Transpiler(IEnumerable<CodeInstruction> instructions)
+            static IEnumerable<CodeInstruction> Miner_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
             {
                 try
                 {
-                    CodeMatcher matcher = new CodeMatcher(instructions)
-                        .MatchForward(true, new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame"))
+                    CodeMatcher matcher = new CodeMatcher(instructions, iLGenerator);
+
+                    
+                    matcher.Advance(2)
+                        .CreateLabel(out Label start);
+
+                    // if (__instance.planet.id == MainManager.FocusPlanetId) { Miner_Original(__instance); return; }
+                    matcher.Insert(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(FactorySystem), "planet")),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PlanetData), "id")),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_FocusPlanetId")),
+                            new CodeInstruction(OpCodes.Bne_Un_S, start),
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlanetMiner), nameof(Miner_Original))),
+                            new CodeInstruction(OpCodes.Ret)
+                        );
+
+                    matcher.MatchForward(false, 
+                            new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame")
+                        )
                         .RemoveInstruction()
                         .Insert(
-                            new CodeInstruction(OpCodes.Ldc_I4_0),
-                            new CodeInstruction(OpCodes.Conv_I8)
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameMain), "get_gameTick")),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Conv_I8),
+                            new CodeInstruction(OpCodes.Div)
                         );
+                    
+                    matcher.MatchForward(false,
+                            new CodeMatch(OpCodes.Add),
+                            new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(StationComponent), "energy"))
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Conv_I8),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    // storage2[num7].count = storage2[num7].count + (int)num5 * MainManager.UpdatePeriod;
+                    matcher.MatchForward(true,
+                            new CodeMatch(OpCodes.Ldelema),
+                            new CodeMatch(OpCodes.Ldflda, AccessTools.Field(typeof(StationStore), "count")),
+                            new CodeMatch(OpCodes.Dup),
+                            new CodeMatch(OpCodes.Ldind_I4),
+                            new CodeMatch(OpCodes.Ldloc_S),
+                            new CodeMatch(OpCodes.Conv_I4),
+                            new CodeMatch(OpCodes.Add)
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    // storage3[num8].count = storage3[num8].count + 100 * MainManager.UpdatePeriod;
+                    matcher.MatchForward(true,
+                            new CodeMatch(OpCodes.Ldelema),
+                            new CodeMatch(OpCodes.Ldflda, AccessTools.Field(typeof(StationStore), "count")),
+                            new CodeMatch(OpCodes.Dup),
+                            new CodeMatch(OpCodes.Ldind_I4),
+                            new CodeMatch(OpCodes.Ldc_I4_S),
+                            new CodeMatch(OpCodes.Add)
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    //return instructions;
                     return matcher.InstructionEnumeration();
                 }
                 catch
@@ -374,6 +403,27 @@ namespace SampleAndHoldSim
                     return instructions;
                 }
             }
+
+#pragma warning disable CS8321
+            public static void Miner_Original(FactorySystem _) // reverse patch
+            {
+
+                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                {
+                    // Replace PlanetMiner.frame (FPS) to GameMain.gameTick (UPS)
+                    CodeMatcher matcher = new CodeMatcher(instructions)
+                        .MatchForward(false,
+                            new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame")
+                        )
+                        .RemoveInstruction()
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameMain), "get_gameTick"))
+                        );
+
+                    return matcher.InstructionEnumeration();
+                }
+            }
+#pragma warning restore CS8321
         }
 
         public static class DSP_Battle_Patch
