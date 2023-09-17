@@ -60,9 +60,6 @@ namespace SampleAndHoldSim
                     .Insert(
                         HarmonyLib.Transpilers.EmitDelegate<Action>(() => 
                         {
-                            if (Compatibility.PlanetMiner.IsPatched)
-                                Compatibility.PlanetMiner.Update_PlanetMiners();
-
                             totalHash = 0;
                             Threading.ForEachParallel(GameTick, GameMain.data.factoryCount, threadCount);
                             // NotifyTechUnlock() use unity api so needs to be in main thread

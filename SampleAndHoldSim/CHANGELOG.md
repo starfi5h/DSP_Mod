@@ -1,15 +1,20 @@
 ## Changelog
 
+#### v0.5.6  
+\- Add CheatEnabler 2.2.0 compat.  
+\- Fix PlanetMiner 3.0.7 compat.  
+
+
 #### v0.5.5 (DSP0.9.27.15466)
 \- Fix stats incorrect for Multfuntion mod planet miners.  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v0.5.4
 \- Fix len consumption rate abnormal on idle factories.  
 \- Fix IsNextIdle value of focus factories.  
 \- Add PlanetMiner 3.0.7 compat.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.5.3
 \- Fix TCFV compat: fix that sheild doesn't regenerate on some planets.  

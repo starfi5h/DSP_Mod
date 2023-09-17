@@ -1,6 +1,7 @@
-﻿using DysonSphereProgram.Modding.Blackbox;
-using Multfunction_mod;
+﻿using BepInEx.Configuration;
+using DysonSphereProgram.Modding.Blackbox;
 using HarmonyLib;
+using Multfunction_mod;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,12 @@ namespace SampleAndHoldSim
             PlanetMiner.Init(harmony);
             DSP_Battle_Patch.Init(harmony);
             Blackbox_Patch.Init(harmony);
+            CheatEnabler_Patch.Init(harmony);
+        }
+
+        public static void OnDestory()
+        {
+            CheatEnabler_Patch.OnDestory();
         }
 
         public static class NebulaAPI
@@ -153,7 +160,7 @@ namespace SampleAndHoldSim
                     Type classType = assembly.GetType("Multfunction_mod.Multifunctionpatch");
 
                     // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Dyson_Patch).GetMethod("EjectorComponent_Transpiler")));
+                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Ejector_Patch).GetMethod(nameof(Ejector_Patch.EjectorComponent_Transpiler))));
 
                     // TODO: Fix skip bullet
                     harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod("EjectorComponentPatch_Transpiler")));
@@ -166,7 +173,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.7.4");
+                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.0");
                     Log.Warn(e);
                 }
             }
@@ -195,7 +202,7 @@ namespace SampleAndHoldSim
                 public static void AddTempSail(List<Multfunction_mod.Tempsail> list, Multfunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
                 {
                     // Do not multiply if it is local focus planet
-                    int times = MainManager.FocusLocalFactory && ejector.planetId == GameMain.localPlanet?.id ? 1 : MainManager.UpdatePeriod;
+                    int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
                 }
@@ -290,10 +297,6 @@ namespace SampleAndHoldSim
         public static class PlanetMiner
         {
             public const string GUID = "crecheng.PlanetMiner";
-            public static bool IsPatched { get; private set; } = false;
-
-            static Action<FactorySystem> PlanetMinerAction;
-            static bool enablePlanetMiner = false;
 
             public static void Init(Harmony harmony)
             {
@@ -302,13 +305,14 @@ namespace SampleAndHoldSim
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
                     MethodInfo methodInfo = AccessTools.Method(assembly.GetType("PlanetMiner.PlanetMiner"), "Miner");
-                    PlanetMinerAction = AccessTools.MethodDelegate<Action<FactorySystem>>(methodInfo);
+
+                    harmony.CreateReversePatcher(methodInfo,
+                    new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Original)))).Patch();
+
                     harmony.Patch(methodInfo, 
-                        new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Prefix))),
-                        null,
+                        null, null,
                         new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Transpiler))));
 
-                    IsPatched = true;
                     Log.Debug("PlanetMiner compatibility - OK");
                 }
                 catch (Exception e)
@@ -318,47 +322,79 @@ namespace SampleAndHoldSim
                 }
             }
 
-            public static void Update_PlanetMiners()
-            {
-                float miningSpeedScale = GameMain.history.miningSpeedScale;
-                int peroid = (int)(120f / miningSpeedScale);
-                peroid = (peroid <= 0) ? 1 : peroid;
-                bool flag1 = GameMain.gameTick % peroid == 0; //normal
-                bool flag2 = (GameMain.gameTick / MainManager.UpdatePeriod) % peroid == 0; //idle
-
-                if (flag1 || flag2)
-                {
-                    enablePlanetMiner = true;
-                    foreach (var manager in MainManager.Factories)
-                    {
-                        if (manager.IsActive) // Update PlanetMiners for active factories
-                        {
-                            if (flag2 && manager.IsNextIdle)
-                                PlanetMinerAction(manager.factory.factorySystem);
-                            else if (flag1 && (!manager.IsNextIdle))
-                                PlanetMinerAction(manager.factory.factorySystem);
-                        }
-                    }
-                    enablePlanetMiner = false;
-                }
-            }
-
-            static bool Miner_Prefix()
-            {
-                return enablePlanetMiner;
-            }
-
-            static IEnumerable<CodeInstruction> Miner_Transpiler(IEnumerable<CodeInstruction> instructions)
+            static IEnumerable<CodeInstruction> Miner_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
             {
                 try
                 {
-                    CodeMatcher matcher = new CodeMatcher(instructions)
-                        .MatchForward(true, new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame"))
+                    CodeMatcher matcher = new CodeMatcher(instructions, iLGenerator);
+
+                    
+                    matcher.Advance(2)
+                        .CreateLabel(out Label start);
+
+                    // if (__instance.planet.id == MainManager.FocusPlanetId) { Miner_Original(__instance); return; }
+                    matcher.Insert(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(FactorySystem), "planet")),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PlanetData), "id")),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_FocusPlanetId")),
+                            new CodeInstruction(OpCodes.Bne_Un_S, start),
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlanetMiner), nameof(Miner_Original))),
+                            new CodeInstruction(OpCodes.Ret)
+                        );
+
+                    matcher.MatchForward(false, 
+                            new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame")
+                        )
                         .RemoveInstruction()
                         .Insert(
-                            new CodeInstruction(OpCodes.Ldc_I4_0),
-                            new CodeInstruction(OpCodes.Conv_I8)
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameMain), "get_gameTick")),
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Conv_I8),
+                            new CodeInstruction(OpCodes.Div)
                         );
+                    
+                    matcher.MatchForward(false,
+                            new CodeMatch(OpCodes.Add),
+                            new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(StationComponent), "energy"))
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Conv_I8),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    // storage2[num7].count = storage2[num7].count + (int)num5 * MainManager.UpdatePeriod;
+                    matcher.MatchForward(true,
+                            new CodeMatch(OpCodes.Ldelema),
+                            new CodeMatch(OpCodes.Ldflda, AccessTools.Field(typeof(StationStore), "count")),
+                            new CodeMatch(OpCodes.Dup),
+                            new CodeMatch(OpCodes.Ldind_I4),
+                            new CodeMatch(OpCodes.Ldloc_S),
+                            new CodeMatch(OpCodes.Conv_I4),
+                            new CodeMatch(OpCodes.Add)
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    // storage3[num8].count = storage3[num8].count + 100 * MainManager.UpdatePeriod;
+                    matcher.MatchForward(true,
+                            new CodeMatch(OpCodes.Ldelema),
+                            new CodeMatch(OpCodes.Ldflda, AccessTools.Field(typeof(StationStore), "count")),
+                            new CodeMatch(OpCodes.Dup),
+                            new CodeMatch(OpCodes.Ldind_I4),
+                            new CodeMatch(OpCodes.Ldc_I4_S),
+                            new CodeMatch(OpCodes.Add)
+                        )
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                            new CodeInstruction(OpCodes.Mul)
+                        );
+
+                    //return instructions;
                     return matcher.InstructionEnumeration();
                 }
                 catch
@@ -367,6 +403,27 @@ namespace SampleAndHoldSim
                     return instructions;
                 }
             }
+
+#pragma warning disable CS8321
+            public static void Miner_Original(FactorySystem _) // reverse patch
+            {
+
+                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                {
+                    // Replace PlanetMiner.frame (FPS) to GameMain.gameTick (UPS)
+                    CodeMatcher matcher = new CodeMatcher(instructions)
+                        .MatchForward(false,
+                            new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame")
+                        )
+                        .RemoveInstruction()
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameMain), "get_gameTick"))
+                        );
+
+                    return matcher.InstructionEnumeration();
+                }
+            }
+#pragma warning restore CS8321
         }
 
         public static class DSP_Battle_Patch
@@ -513,6 +570,129 @@ namespace SampleAndHoldSim
                             */
                         }
                     }
+                }
+            }
+        }
+    
+        public static class CheatEnabler_Patch
+        {
+            public const string GUID = "org.soardev.cheatenabler";            
+
+            public static void Init(Harmony harmony)
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var _))
+                {
+                    harmony.PatchAll(typeof(Ejector_Patch)); // No need to dynamic patch ejectors in this case
+                    return;
+                }
+
+                try
+                {
+                    harmony.PatchAll(typeof(Warper));
+                    Warper.Init();
+
+                    Log.Debug("CheatEnabler compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("CheatEnabler compatibility failed! Last working version: 2.2.0");
+                    Log.Warn(e);
+                }
+            }
+
+            public static void OnDestory()
+            {
+                Warper.OnDestory();
+            }
+
+            private static class Warper
+            {
+                private static Harmony patch_sample = null;
+                private static Harmony patch_cheatEnabler = null;
+
+                public static void Init()
+                {
+                    CheatEnabler.DysonSpherePatch.SkipBulletValueChanged();
+                }
+
+                public static void OnDestory()
+                {
+                    if (patch_sample != null)
+                    {
+                        patch_sample.UnpatchSelf();
+                        patch_sample = null;
+                    }
+                    if (patch_cheatEnabler != null)
+                    {
+                        patch_cheatEnabler.UnpatchSelf();
+                        patch_cheatEnabler = null;
+                    }
+                }
+
+                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
+                internal static void SkipBulletValueChanged_Prefix(ConfigEntry<bool> ___SkipBulletEnabled)
+                {
+                    if (___SkipBulletEnabled.Value)
+                    {
+                        if (patch_sample != null)
+                        {
+                            patch_sample.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
+                            patch_sample = null;
+                        }
+                    }
+                    else
+                    {
+                        if (patch_cheatEnabler != null)
+                        {
+                            patch_cheatEnabler.UnpatchSelf(); // Remove the IL modification first
+                            patch_cheatEnabler = null;
+                        }
+                    }
+                }
+
+                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
+                internal static void SkipBulletValueChanged_Postfix(ConfigEntry<bool> ___SkipBulletEnabled)
+                {
+                    if (___SkipBulletEnabled.Value)
+                    {
+                        if (patch_cheatEnabler == null)
+                        {
+                            patch_cheatEnabler = new Harmony(Plugin.GUID + "-CE");
+                            patch_cheatEnabler.Patch(
+                                AccessTools.Method(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate)),
+                                null,
+                                null,
+                                new HarmonyMethod(AccessTools.Method(typeof(Warper), nameof(EjectorComponent_ReplaceAddDysonSail))));
+                        }
+                    }
+                    else
+                    {
+                        if (patch_sample == null)
+                        {
+                            patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch)); // Apply Ejector_Patch after CE patch is unload
+                        }
+                    }
+                }
+
+                private static IEnumerable<CodeInstruction> EjectorComponent_ReplaceAddDysonSail(IEnumerable<CodeInstruction> instructions)
+                {
+                    var matcher = new CodeMatcher(instructions);
+                    matcher.MatchForward(false,
+                        new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), "AddDysonSail"))
+                    ).RemoveInstruction().Insert(
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddDysonSailWithPlanetId)))
+                    );
+                    return matcher.InstructionEnumeration();
+                }
+
+                private static void AddDysonSailWithPlanetId(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec, int planetId)
+                {
+                    // If the sail doesn't come from the focus local planet, repeat
+                    int repeatCount = (planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
+                    for (int i = 0; i < repeatCount; i++)
+                        CheatEnabler.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
                 }
             }
         }
