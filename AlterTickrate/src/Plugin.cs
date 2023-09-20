@@ -41,10 +41,17 @@ namespace AlterTickrate
             UI_SmoothProgress = Config.Bind("UI", "SmoothProgress", true, "Interpolates progress animation in UI.\n利用插植使進度動畫平滑");
         }
 
-        public void SaveConfig(int beltUpdate, int storageUpdate)
+        public void SaveBeltConfig(int beltUpdate, int storageUpdate)
         {
             Period_BeltUpdate.Value = beltUpdate;
             Period_StorageUpdate.Value = storageUpdate;
+        }
+
+        public void SaveLabConfig(int labProduceUpdate, int labResearchUpdate, int labLiftUpdate)
+        {
+            Period_LabProduceUpdate.Value = labProduceUpdate;
+            Period_LabResearchUpdate.Value = labResearchUpdate;
+            Period_LabLiftUpdate.Value = labLiftUpdate;
         }
 
         public void SetEnable(bool enable)
