@@ -13,7 +13,7 @@ namespace AlterTickrate
     {
         public const string GUID = "starfi5h.plugin.AlterTickrate";
         public const string NAME = "AlterTickrate";
-        public const string VERSION = "0.2.2";
+        public const string VERSION = "0.2.3";
         public static Plugin plugin;
         public static bool Enable;
 
@@ -83,6 +83,7 @@ namespace AlterTickrate
             if (Parameters.PowerUpdatePeriod > 1)
             {
                 harmony.PatchAll(typeof(PowerSystem_Patch));
+                harmony.PatchAll(typeof(DysonReqPower_Patch));
             }            
             if (Parameters.FacilityUpdatePeriod > 1)
             {
