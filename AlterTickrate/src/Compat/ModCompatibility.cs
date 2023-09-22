@@ -40,13 +40,19 @@ namespace AlterTickrate.Compat
                     || pluginInfos.ContainsKey("top.awbugl.DSP.BeltSpeedEnhancement"))
                 {
                     // These mods change belt speed, which make the max speed > 5
-                    Plugin.plugin.SaveConfig(1, 1);
+                    Plugin.plugin.SaveBeltConfig(1, 1);
+                }
+
+                if (pluginInfos.ContainsKey("org.soardev.labopt"))
+                {
+                    Plugin.plugin.SaveLabConfig(1, 1, 1);
+                    Log.Debug("Labopt compatibility - OK (lab parameters disabled)");
                 }
 
                 harmony.PatchAll(typeof(Incompat));
                 if  (message != "")
                 {
-                    message = "AlterTickrate is not compat with following mods:" + message;                    
+                    message = "AlterTickrate is not compatible with following mods 与以下不兼容:" + message;                    
                     return false;
                 }
                 return true;
