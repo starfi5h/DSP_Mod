@@ -38,7 +38,7 @@ namespace AlterTickrate
             Period_SorterUpdate = Config.Bind("Transport", "Sorter", 2, "Update sorters every x ticks.\n每x帧更新一次分拣器");
             Period_StorageUpdate = Config.Bind("Transport", "Storage", 2, "Update storage every x ticks.\n每x帧更新一次仓储");
             Period_BeltUpdate = Config.Bind("Transport", "Belt", 1, "Update belt every x ticks.(Max:2)\n每x帧更新一次传送带(最大:2)");
-            UI_SmoothProgress = Config.Bind("UI", "SmoothProgress", true, "Interpolates progress animation in UI.\n利用插植使進度動畫平滑");
+            UI_SmoothProgress = Config.Bind("UI", "SmoothProgress", false, "Interpolates progress animation in UI.\n利用插植使進度動畫平滑");
         }
 
         public void SaveBeltConfig(int beltUpdate, int storageUpdate)

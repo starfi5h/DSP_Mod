@@ -34,7 +34,7 @@ The update period (update every x ticks) of each group can be configured:
 `Transport`-`Sorter` (Default: 2) Setting value higher than 2 may cause sorters to miss cargo.  
 `Transport`-`Storage` (Default: 2) Recommend to set at the same value of belt.   
 `Transport`-`Belt` (Default: 1) Update belt every x ticks.(Max:2) Lower update frequence may break some mixed belt design.  
-`UI`-`SmoothProgress` (Default: true) Interpolates progress animation in UI.   
+`UI`-`SmoothProgress` (Default: false) Interpolates progress animation in UI.   
 
 Kown issues:
 - Oil Extrator will output oil in stack of 4 regardless of production rate. (Facility)  
@@ -44,6 +44,7 @@ Kown issues:
 Compat: [NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/), [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
 Incompat: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)  
 If there are belt speed changing mods (GenesisBook, BetterMachines, BeltSpeedEnhancement), the belt feature will be disabled, `Belt` and `Storage` will be set to 1.  
+If [LabOpt](https://dsp.thunderstore.io/package/soarqin/LabOpt/) is present, the lab feature will be disabled. All config values under `Lab` will be set to 1.  
 When using mods that add new buildings, it's recommend to use SampleAndHoldSim for better compatibility.  
 
 ----
@@ -130,7 +131,7 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 超过2时爪子可能会漏接/漏放, 造成混带失效或着满带压缩程度降低。  
 
 ### 介面
-`UI`-`SmoothProgress`: 默认为true。  
+`UI`-`SmoothProgress`: 默认为false。  
 利用插植使进度圆圈动画平滑。代价是进度圆圈和实际时间有x帧的延迟。  
 套用的介面: 熔炉, 制造台, 研究站(生产), 弹射器, 发射井, 发电厂。  
 
@@ -139,18 +140,23 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 相容: 联机mod([NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)), 优化mod([DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/))。  
 不相容: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)。  
 GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。  
+[LabOpt](https://dsp.thunderstore.io/package/soarqin/LabOpt/)存在时, 将取消研究站功能且`Lab`相关参数将设置为1避免冲突。  
 使用添加新建筑的mod时，建议使用SampleAndHoldSim以获得更好的兼容性。  
 
 ----
 
 ## Changelog
 
-#### v0.2.2
-\- Add UI-SmoothProgress config option.  
-\- Add additional notification for incompat mods check (ItemProto/RecipeProto).  
+#### v0.2.3
+\- Fix request power of ray receivers.  
+\- Add LabOpt compat.  
 
 <details>
 <summary>Previous Changelog</summary>
+
+#### v0.2.2
+\- Add UI-SmoothProgress config option.  
+\- Add additional notification for incompat mods check (ItemProto/RecipeProto).  
 
 #### v0.2.1  
 \- Rework lab lift. Now it no longer limit to max 4.  
