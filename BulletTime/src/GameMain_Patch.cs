@@ -35,40 +35,59 @@ namespace BulletTime
             }
             __instance.timef = __instance.timei * 0.016666666666666666;
             __instance.timef_once = __instance.timei_once * 0.016666666666666666;
+            GameData gameData = GameMain.data;
 
             PerformanceMonitor.BeginLogicFrame();
             PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);            
 
             PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
-            bool flag = GameMain.data.DetermineLocalPlanet();
-            GameMain.data.DetermineRelative();
+            bool flag = gameData.DetermineLocalPlanet();
+            gameData.DetermineRelative();
             if (flag)
                 GameCamera.instance.FrameLogic();
             VFInput.UpdateGameStates();
-            UniverseSimulatorGameTick();
+            if (UIRoot.instance.uiGame.starmap.fastTravelling) // Use original path for fast travel
+            {
+                GameMain.universeSimulator.GameTick(__instance.timef);
+                gameData.DetermineRelative();
+                PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
+                goto EndLogic;
+            }
+            else
+            {
+                UniverseSimulatorGameTick();
+            }
             PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
+
+
+            PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
+            gameData.mainPlayer.packageUtility.Count();
+            PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
 
             if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
             {
                 // update player.cmd.raycast
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
+                GameMain.localPlanet.factory.cargoTraffic.ClearStates();
                 GameMain.localPlanet.physics.GameTick();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
             }
             if (GameMain.data.guideMission != null)
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
-                GameMain.data.guideMission.GameTick();
+                gameData.guideMission.GameTick();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Scenario);
             }
             if (GameMain.mainPlayer != null)
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Player);
-                GameMain.data.DetermineRelative();
-                GameMain.data.mainPlayer.ApplyGamePauseState(false);
-                PlayerGameTick(GameMain.instance.timei);
+                gameData.mainPlayer.ApplyGamePauseState(false);
+                PlayerGameTick(__instance.timei);
+                gameData.DetermineRelative();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
             }
+
+            EndLogic:
             PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
             PerformanceMonitor.EndLogicFrame();
 
@@ -137,6 +156,18 @@ namespace BulletTime
         {
             // We will skip position check so it will not trigger when exiting pause mode
             return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIStarmap), nameof(UIStarmap.StartFastTravelToPlanet))]
+        private static bool StartFastTravelToPlanet_Prefix()
+        {
+            if (GameMain.isFullscreenPaused)
+            {
+                UIRealtimeTip.Popup("Can't teleport to another planet during BulletTime pause!");
+                return false;
+            }
+            return true;
         }
 
         private static void UniverseSimulatorGameTick()
