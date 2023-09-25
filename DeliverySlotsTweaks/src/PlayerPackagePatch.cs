@@ -39,6 +39,7 @@ new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Norm
 
             // Change: num2 = StorageComponent.itemStackCount[itemId];
             // To:     num2 = IsPlayerStorage(this) ? PlayerPackagePatch.packageStacksize : StorageComponent.itemStackCount[itemId];
+            // Or:     num2 = IsPlayerStorage(this) ? StorageComponent.itemStackCount[itemId] * PlayerPackagePatch.packageStackMultiplier : StorageComponent.itemStackCount[itemId];
 
             matcher
                 .MatchForward(false, new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(StorageComponent), nameof(StorageComponent.itemStackCount))))
@@ -50,16 +51,14 @@ new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Norm
                 .MatchForward(false, new CodeMatch(i => i.IsStloc()))
                 .CreateLabelAt(matcher.Pos, out Label jmpEnd);
 
-            matcher.Advance(startPos - matcher.Pos);
-            matcher.Insert(
+
+            if (Plugin.PlayerPackageStackSize.Value > 0)
+            {
+                matcher.Advance(startPos - matcher.Pos);
+                matcher.Insert(
                     new CodeInstruction(OpCodes.Ldarg_0),
                     new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlayerPackagePatch), nameof(IsPlayerStorage))),
-                    new CodeInstruction(OpCodes.Brfalse_S, jmpNormalFlow)
-            );
-
-            if (Plugin.PlayerPackageStackSize.Value > 0) 
-            {
-                matcher.Insert(
+                    new CodeInstruction(OpCodes.Brfalse_S, jmpNormalFlow),
                     new CodeInstruction(OpCodes.Pop),
                     new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(PlayerPackagePatch), nameof(packageStacksize))),
                     new CodeInstruction(OpCodes.Br_S, jmpEnd)
@@ -68,9 +67,12 @@ new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Norm
             else
             {
                 matcher.Insert(
-                    new CodeInstruction(OpCodes.Mul, AccessTools.Field(typeof(PlayerPackagePatch), nameof(packageStackMultiplier))),
-                    new CodeInstruction(OpCodes.Br_S, jmpEnd)
-                );
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlayerPackagePatch), nameof(IsPlayerStorage))),
+                    new CodeInstruction(OpCodes.Brfalse_S, jmpEnd),
+                    new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(PlayerPackagePatch), nameof(packageStackMultiplier))),
+                    new CodeInstruction(OpCodes.Mul)
+                ); ;
             }
 
             return matcher.Instructions();
