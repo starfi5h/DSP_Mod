@@ -18,8 +18,9 @@ namespace DeliverySlotsTweaks
         public static ConfigEntry<int> StackSizeMultiplier;
         public static ConfigEntry<bool> DeliveryFirst;
         public static ConfigEntry<int> PlayerPackageStackSize;
+        public static ConfigEntry<int> PlayerPackageStackMultiplier;
 
-        Harmony harmony;
+         Harmony harmony;
 
         public void Awake()
         {
@@ -33,7 +34,10 @@ namespace DeliverySlotsTweaks
                 "When logistic bots send items to mecha, send them to delivery slots first.\n配送机会优先将物品送入物流清单的栏位");
 
             PlayerPackageStackSize = Config.Bind("PlayerPackage", "StackSize", 0,
-                "Overwrite stacksize in inventory. NoChange:0\n覆蓋玩家背包中的物品堆疊上限(不变:0)");
+                "Overwrite stacksize in inventory. NoChange:0\n覆蓋玩家背包中的物品堆疊数量(不变:0)");
+
+            PlayerPackageStackMultiplier = Config.Bind("PlayerPackage", "StackMultiplier", 0,
+                "Apply multiplier for stack count in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率(不变:0)");
 
             Instance = this;
             Log = Logger;
@@ -41,7 +45,7 @@ namespace DeliverySlotsTweaks
 
             harmony.PatchAll(typeof(Plugin));
             harmony.PatchAll(typeof(DeliveryPackagePatch));
-            if (PlayerPackageStackSize.Value > 0)
+            if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
         }
 
