@@ -9,38 +9,8 @@ namespace DeliverySlotsTweaks
 {
     public class DeliveryPackagePatch
     {
-		static int maxDeliveryGridIndex = 0;
-
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(DeliveryPackage), nameof(DeliveryPackage.NotifySizeChange))]
-		public static void ParameterOverwrite(DeliveryPackage __instance)
-        {
-			if (Plugin.ColCount.Value > 0 && Plugin.ColCount.Value <= 5)
-				__instance.colCount = Plugin.ColCount.Value;
-			if (Plugin.StackSizeMultiplier.Value > 0)
-				__instance.stackSizeMultiplier = Plugin.StackSizeMultiplier.Value;
-			__instance.RecalcIndexMaps();
-
-			maxDeliveryGridIndex = 0;
-			for (int i = __instance.gridLength - 1; i >= 0; i--)
-			{
-				if (__instance.IsGridActive(i)) // max active grid index is not same as activeCount
-				{
-					maxDeliveryGridIndex = i;
-					break;
-				}
-			}
-
-			Plugin.Log.LogDebug($"DeliveryPackage:{__instance.rowCount}x{__instance.colCount} stack:{__instance.stackSizeMultiplier} maxIndex:{maxDeliveryGridIndex}");
-		}
-
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(PlayerPackageUtility), nameof(PlayerPackageUtility.AddItemToAllPackages))]
-		public static void AddItemToAllPackages(ref bool deliveryFirst)
-		{
-			// Use in DispenserComponent.InternalTick
-			deliveryFirst = Plugin.DeliveryFirst.Value;
-		}
+		public static bool architectMode = false;
+		public static int maxDeliveryGridIndex = 0; // Assign in Plugin.ParameterOverwrite()
 
 		static readonly Dictionary<int, int> packageItemCount = new();
 		static readonly Dictionary<int, int> deliveryItemCount = new ();
@@ -83,6 +53,8 @@ namespace DeliverySlotsTweaks
 		// Replace StorageComponent.GetItemCount
 		public static int GetItemCount(StorageComponent _, int itemId)
 		{
+			if (architectMode) return 999;
+
 			packageItemCount.TryGetValue(itemId, out int itemCount1);
 			deliveryItemCount.TryGetValue(itemId, out int itemCount2);
 			return itemCount1 + itemCount2;
@@ -104,6 +76,12 @@ namespace DeliverySlotsTweaks
 		// Replace StorageComponent.TakeTailItems
 		public static void TakeTailItems(StorageComponent storage, ref int itemId, ref int count, out int inc, bool _)
 		{
+			if (architectMode)
+			{
+				inc = 0;
+				return;
+			}
+
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
 				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc);
