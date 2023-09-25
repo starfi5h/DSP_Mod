@@ -9,6 +9,7 @@ namespace DeliverySlotsTweaks
 {
     public class DeliveryPackagePatch
     {
+		public static bool architectMode = false;
 		static int maxDeliveryGridIndex = 0;
 
 		[HarmonyPrefix]
@@ -83,6 +84,8 @@ namespace DeliverySlotsTweaks
 		// Replace StorageComponent.GetItemCount
 		public static int GetItemCount(StorageComponent _, int itemId)
 		{
+			if (architectMode) return 9999;
+
 			packageItemCount.TryGetValue(itemId, out int itemCount1);
 			deliveryItemCount.TryGetValue(itemId, out int itemCount2);
 			return itemCount1 + itemCount2;
@@ -104,6 +107,12 @@ namespace DeliverySlotsTweaks
 		// Replace StorageComponent.TakeTailItems
 		public static void TakeTailItems(StorageComponent storage, ref int itemId, ref int count, out int inc, bool _)
 		{
+			if (architectMode)
+			{
+				inc = 0;
+				return;
+			}
+
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
 				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc);
