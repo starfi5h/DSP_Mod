@@ -6,6 +6,7 @@ using HarmonyLib;
 namespace DeliverySlotsTweaks
 {
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
@@ -46,6 +47,7 @@ namespace DeliverySlotsTweaks
             Instance = this;
             Log = Logger;
             harmony = new(GUID);
+            Compatibility.Init(harmony);
 
             harmony.PatchAll(typeof(Plugin));
             if (UseLogisticSlots.Value)
