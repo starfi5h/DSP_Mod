@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.2.14
+\- Fix error by fast travel when pasueThisFrame. Fast travel to another planet is now disable during pause mode.  
+
 #### v1.2.13
 \- Fix a bug that corrupts large blueprint when editing its title or desc.  
 \- `UIBlueprintAsync` default value is false now.  

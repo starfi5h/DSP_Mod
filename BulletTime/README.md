@@ -1,6 +1,6 @@
 # Bullet Time
 
-![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/BulletTime/img/demo1.gif)  
+![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
 
 1. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
 2. Run autosave in the background to make the game stay responsive.  
@@ -43,7 +43,7 @@ Increase main menu loading speed. (Default:`true`)
 - `RemoveGC`  
 Remove force garbage collection of build tools. (Default:`true`)  
 
-- `UIBlueprintAsync`
+- `UIBlueprintAsync`  
 Optimize blueprint UI to reduce freezing time. (Default:`false`)  
 
 - `EnableFastLoading`  
@@ -54,6 +54,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 - [✅] GalacticScale  
 - [✅] NebulaMultiplayer  
+- [❔] [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/): If `RemoveGC` is enabled, don't toggle 'Finish build immediately' and 'Architect mode' features of CheatEnabler in game.  
 
 ### Extra Functions in Nebula Multiplayer  
 
@@ -101,6 +102,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 - `RemoveGC`  
 移除建筑工具的强制内存回收 (预设为开启`true`)  
+[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/)：如果启用了`RemoveGC`, 不要在游戏中切换CheatEnabler的“建造秒完成”和“建筑师模式”功能, 请于游戏外部修改配置文件。  
 
 - `UIBlueprintAsync`  
 使蓝图非同步载入,减少卡顿时间 (预设为关闭`false`)  

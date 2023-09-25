@@ -10,11 +10,12 @@ namespace BulletTime
 {
     [BepInPlugin(GUID, NAME, VERSION)]
     [BepInDependency(NebulaCompat.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("org.soardev.cheatenabler", BepInDependency.DependencyFlags.SoftDependency)] // Patch after CheatEnabler to avoid conflicts
     public class BulletTimePlugin : BaseUnityPlugin
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.2.13";
+        public const string VERSION = "1.2.14";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
