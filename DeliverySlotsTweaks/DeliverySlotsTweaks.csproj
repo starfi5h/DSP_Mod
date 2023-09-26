@@ -4,12 +4,14 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>DeliverySlotsTweaks</AssemblyName>
     <Description></Description>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Company />
     <Product />
     <Authors />
+    <PackageId />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

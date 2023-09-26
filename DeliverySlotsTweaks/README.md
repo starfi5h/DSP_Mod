@@ -61,6 +61,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 
 ## Changelog
 
+v1.2.1 - UseLogisticSlots for Auto Replenish. Add Nebula compat.  
 v1.2.0 - Add `UseLogisticSlots`, `StackMultiplier` config options. Add CheatEnabler - ArchitectMode compat.  
 v1.1.1 - Apply `StackSize` setting to fuel chamber and warper slot.  
 v1.1.0 - Add `StackSize` config option. Now can apply mod config changes in game settings.  
