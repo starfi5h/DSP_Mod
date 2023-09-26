@@ -81,6 +81,11 @@ namespace DeliverySlotsTweaks
 				inc = 0;
 				return;
 			}
+			if (Compatibility.Nebula_Patch.IsActive && Compatibility.Nebula_Patch.IsOthers())
+            {
+				inc = 0;
+				return;
+            }
 
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
@@ -213,7 +218,9 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
 		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))]
-		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions)
+		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
+		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
+		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
 			{
@@ -240,14 +247,23 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.CreatePrebuilds))]
 		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DoUpgradeObject))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))] // Note: target player.package.TakeTailItems, not tmpPackage.TakeTailItems
-		public static IEnumerable<CodeInstruction> CheckBuildConditions_Transpiler(IEnumerable<CodeInstruction> instructions)
+		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
+		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
+		public static IEnumerable<CodeInstruction> CheckBuildConditions_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
 			{
-				var codeMacher = new CodeMatcher(instructions)
-					.End()
-					.MatchBack(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
+				int count = 1;
+				if (__originalMethod.Name == "StationAutoReplenishIfNeeded") count = 2;
+				else if (__originalMethod.Name == "EntityAutoReplenishIfNeeded") count = 3;
+
+				var codeMacher = new CodeMatcher(instructions).End();
+				for (int i = 0; i < count; i++)
+				{
+					codeMacher
+						.MatchBack(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
+						.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
+				}
 
 				return codeMacher.InstructionEnumeration();
 			}
