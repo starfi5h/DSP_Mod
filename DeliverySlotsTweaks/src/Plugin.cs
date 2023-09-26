@@ -54,6 +54,9 @@ namespace DeliverySlotsTweaks
                 harmony.PatchAll(typeof(DeliveryPackagePatch));
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
+#if DEBUG
+            OnConfigChange();
+#endif
         }
 
         public void OnDestroy()
