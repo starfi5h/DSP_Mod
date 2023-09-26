@@ -81,6 +81,11 @@ namespace DeliverySlotsTweaks
 				inc = 0;
 				return;
 			}
+			if (Compatibility.Nebula_Patch.IsActive && Compatibility.Nebula_Patch.IsOthers())
+            {
+				inc = 0;
+				return;
+            }
 
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{

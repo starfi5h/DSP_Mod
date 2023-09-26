@@ -1,10 +1,8 @@
 ﻿using BepInEx.Configuration;
 using HarmonyLib;
+using NebulaAPI;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
-using UnityEngine;
 
 namespace DeliverySlotsTweaks
 {
@@ -13,6 +11,7 @@ namespace DeliverySlotsTweaks
         public static void Init(Harmony harmony)
         {
             CheatEnabler_Patch.Init(harmony);
+            Nebula_Patch.Init();
         }
 
         public static class CheatEnabler_Patch
@@ -45,6 +44,57 @@ namespace DeliverySlotsTweaks
                     DeliveryPackagePatch.architectMode = true;
                 else
                     DeliveryPackagePatch.architectMode = false;
+            }
+        }
+
+        public static class Nebula_Patch
+        {
+            public const string GUID = "dsp.nebula-multiplayer-api";
+            public static bool IsActive { get; private set; }
+            static bool IsPatched;
+
+            public static void Init()
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Patch();
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("Nebula compatibility failed!");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            public static bool IsOthers() // Action triggered by packets from other player
+            {
+                var factoryManager = NebulaModAPI.MultiplayerSession.Factories;
+                return factoryManager.IsIncomingRequest.Value && factoryManager.PacketAuthor != NebulaModAPI.MultiplayerSession.LocalPlayer.Id;
+            }
+
+
+            private static void Patch()
+            {
+                // Separate for using NebulaModAPI
+                if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
+                    return;
+                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
+                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
+#if DEBUG
+                OnMultiplayerGameStarted();
+#endif
+                IsPatched = true;
+            }
+
+            private static void OnMultiplayerGameStarted()
+            {
+                IsActive = NebulaModAPI.IsMultiplayerActive;
+            }
+
+            private static void OnMultiplayerGameEnded()
+            {
+                IsActive = false;
             }
         }
     }
