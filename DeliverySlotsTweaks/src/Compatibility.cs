@@ -13,6 +13,7 @@ namespace DeliverySlotsTweaks
             CheatEnabler_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             Nebula_Patch.Init();
+            RebindBuildBar_Patch.Init(harmony);
         }
 
         public static class CheatEnabler_Patch
@@ -130,5 +131,27 @@ namespace DeliverySlotsTweaks
                 IsActive = false;
             }
         }
+    
+        public static class RebindBuildBar_Patch
+        {
+            public const string GUID = "org.kremnev8.plugin.RebindBuildBar";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("RebindBuildBar.Patches");
+                    harmony.Patch(AccessTools.Method(classType, "EnableButton"), null, null, new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("RebindBuildBar compatibility failed! Last working version: 1.0.0");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+        }
+
     }
 }
