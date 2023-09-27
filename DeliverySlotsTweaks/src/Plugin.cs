@@ -11,11 +11,13 @@ namespace DeliverySlotsTweaks
 {
     [BepInPlugin(GUID, NAME, VERSION)]
     [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.Nebula_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.2.1";
+        public const string VERSION = "1.2.2";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -28,7 +30,7 @@ namespace DeliverySlotsTweaks
 
          Harmony harmony;
 
-        public void Awake()
+        public void Start()
         {
             UseLogisticSlots = Config.Bind("DeliveryPackage", "UseLogisticSlots", true,
                 "Let replicator and build tools use items in logistic slots.\n使手动制造和建筑工具可以使用物流清单内的物品");
