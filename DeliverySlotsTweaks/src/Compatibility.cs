@@ -11,6 +11,7 @@ namespace DeliverySlotsTweaks
         public static void Init(Harmony harmony)
         {
             CheatEnabler_Patch.Init(harmony);
+            Multfunction_mod_Patch.Init(harmony);
             Nebula_Patch.Init();
         }
 
@@ -29,11 +30,11 @@ namespace DeliverySlotsTweaks
                     harmony.Patch(AccessTools.Method(classType, "ArchitectModeValueChanged"),
                         null, new HarmonyMethod(AccessTools.Method(typeof(CheatEnabler_Patch), nameof(ArchitectModeValueChanged_Postfix))));
                     DeliveryPackagePatch.architectMode = ((ConfigEntry<bool>)(AccessTools.Field(classType, "ArchitectModeEnabled").GetValue(null))).Value;
-                    Plugin.Log.LogDebug("ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
+                    Plugin.Log.LogDebug("CheatEnabler ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.4.0");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.5.0");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -44,6 +45,38 @@ namespace DeliverySlotsTweaks
                     DeliveryPackagePatch.architectMode = true;
                 else
                     DeliveryPackagePatch.architectMode = false;
+            }
+        }
+
+        public static class Multfunction_mod_Patch
+        {
+            public const string GUID = "cn.blacksnipe.dsp.Multfuntion_mod";
+            static ConfigEntry<bool> architectMode = null;
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("Multfunction_mod.GUIDraw");
+                    harmony.Patch(AccessTools.Method(classType, "BuildPannel"), null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod(nameof(BuildPannel_Postfix))));
+
+                    architectMode = (ConfigEntry<bool>)(AccessTools.Field(AccessTools.TypeByName("Multfunction_mod.Multifunction"), "ArchitectMode").GetValue(null));
+                    DeliveryPackagePatch.architectMode = architectMode.Value;
+                    Plugin.Log.LogDebug("Multfunction_mod ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
+
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 2.8.2");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            public static void BuildPannel_Postfix()
+            {
+                DeliveryPackagePatch.architectMode = architectMode.Value;
             }
         }
 
