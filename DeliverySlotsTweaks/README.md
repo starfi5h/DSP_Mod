@@ -57,12 +57,19 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | PlayerPackage | | |
 | `StackSize`            | 0    | 统一覆蓋机甲背包中的物品堆疊上限。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
 | `StackMultiplier`      | 0    | 修改玩家背包中的物品堆疊倍率。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
+
+## MOD兼容性
+RebindBuildBar: 可改工具列会显示背包+物流清单的建筑数目  
+CheatEnabler, Multifunction_mod: 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
+NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
+
 ----
 
 ## Changelog
 
+v1.2.2 - UseLogisticSlots for blueprint paste. Add Multifunction_mod(ArchitectMode), RebindBuildBar compat.  
 v1.2.1 - UseLogisticSlots for Auto Replenish. Add Nebula compat.  
-v1.2.0 - Add `UseLogisticSlots`, `StackMultiplier` config options. Add CheatEnabler - ArchitectMode compat.  
+v1.2.0 - Add `UseLogisticSlots`, `StackMultiplier` config options. Add CheatEnabler(ArchitectMode) compat.  
 v1.1.1 - Apply `StackSize` setting to fuel chamber and warper slot.  
 v1.1.0 - Add `StackSize` config option. Now can apply mod config changes in game settings.  
 v1.0.1 - Fix a bug that some logistics  solts are not usable.  

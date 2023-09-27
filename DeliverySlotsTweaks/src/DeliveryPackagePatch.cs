@@ -214,12 +214,14 @@ namespace DeliverySlotsTweaks
 		#region BuildTool
 
 		[HarmonyTranspiler]
-		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu._OnUpdate))]
-		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
-		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
+		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.OnPlayerPackageChange))]
+		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.SetComponentItem))]
+		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu._OnUpdate))]
+		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
+		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
 		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
@@ -245,10 +247,12 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(BuildTool_Path), nameof(BuildTool_Path.CreatePrebuilds))]
 		[HarmonyPatch(typeof(BuildTool_Addon), nameof(BuildTool_Addon.CreatePrebuilds))]
 		[HarmonyPatch(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.CreatePrebuilds))]
+		[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds))]
 		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DoUpgradeObject))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))] // Note: target player.package.TakeTailItems, not tmpPackage.TakeTailItems
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
+		[HarmonyPatch(typeof(Player), nameof(Player.TakeItemFromPlayer))] // Call by EntityFastFillIn
 		public static IEnumerable<CodeInstruction> CheckBuildConditions_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
