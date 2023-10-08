@@ -67,6 +67,7 @@ NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包�
 
 ## Changelog
 
+v1.2.3 - Fix Nebula, Multfunction_mod, CheatEnabler(v2.2.7) compat.  
 v1.2.2 - UseLogisticSlots for blueprint paste. Add Multifunction_mod(ArchitectMode), RebindBuildBar compat.  
 v1.2.1 - UseLogisticSlots for Auto Replenish. Add Nebula compat.  
 v1.2.0 - Add `UseLogisticSlots`, `StackMultiplier` config options. Add CheatEnabler(ArchitectMode) compat.  

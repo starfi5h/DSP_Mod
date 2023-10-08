@@ -12,8 +12,8 @@ namespace DeliverySlotsTweaks
         {
             CheatEnabler_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
-            Nebula_Patch.Init();
             RebindBuildBar_Patch.Init(harmony);
+            Nebula_Patch.Init(harmony);
         }
 
         public static class CheatEnabler_Patch
@@ -27,22 +27,24 @@ namespace DeliverySlotsTweaks
                 try
                 {
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("CheatEnabler.FactoryPatch");
-                    harmony.Patch(AccessTools.Method(classType, "ArchitectModeValueChanged"),
+                    Type classType = assembly.GetType("CheatEnabler.FactoryPatch+ArchitectMode");
+                    harmony.Patch(AccessTools.Method(classType, "Enable"),
                         null, new HarmonyMethod(AccessTools.Method(typeof(CheatEnabler_Patch), nameof(ArchitectModeValueChanged_Postfix))));
+
+                    classType = assembly.GetType("CheatEnabler.FactoryPatch");
                     DeliveryPackagePatch.architectMode = ((ConfigEntry<bool>)(AccessTools.Field(classType, "ArchitectModeEnabled").GetValue(null))).Value;
                     Plugin.Log.LogDebug("CheatEnabler ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.5.0");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.2.7");
                     Plugin.Log.LogWarning(e);
                 }
             }
 
-            internal static void ArchitectModeValueChanged_Postfix(ConfigEntry<bool> ___ArchitectModeEnabled)
+            internal static void ArchitectModeValueChanged_Postfix(bool enable)
             {
-                if (___ArchitectModeEnabled.Value)
+                if (enable)
                     DeliveryPackagePatch.architectMode = true;
                 else
                     DeliveryPackagePatch.architectMode = false;
@@ -87,12 +89,12 @@ namespace DeliverySlotsTweaks
             public static bool IsActive { get; private set; }
             static bool IsPatched;
 
-            public static void Init()
+            public static void Init(Harmony harmony)
             {
                 try
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    Patch();
+                    Patch(harmony);
                 }
                 catch (Exception e)
                 {
@@ -108,13 +110,17 @@ namespace DeliverySlotsTweaks
             }
 
 
-            private static void Patch()
+            private static void Patch(Harmony harmony)
             {
                 // Separate for using NebulaModAPI
                 if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
                     return;
                 NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
                 NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
+
+                Type classType = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
+                harmony.Patch(AccessTools.Method(classType, "SetupInitialPlayerState"), null, new HarmonyMethod(AccessTools.Method(typeof(Plugin), nameof(Plugin.ApplyConfigs))));
+
 #if DEBUG
                 OnMultiplayerGameStarted();
 #endif

@@ -17,7 +17,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.2.2";
+        public const string VERSION = "1.2.3";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -61,7 +61,7 @@ namespace DeliverySlotsTweaks
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
 #if DEBUG
-            OnConfigChange();
+            ApplyConfigs();
 #endif
         }
 
@@ -76,30 +76,43 @@ namespace DeliverySlotsTweaks
         internal static void OnApplyClick()
         {
             Instance.Config.Reload(); // Reload config file when clicking 'Apply' in game settings
-            OnConfigChange();
+            ApplyConfigs();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), nameof(Player.Import))]
         [HarmonyPatch(typeof(Player), nameof(Player.SetForNewGame))]
-        internal static void OnConfigChange()
+        internal static void ApplyConfigs()
         {
-            ParameterOverwrite(GameMain.mainPlayer.deliveryPackage);
+            ParameterOverwrite();
             PlayerPackagePatch.OnConfigChange();
+            SetMaxDeliveryGridIndex();
         }
 
-        [HarmonyPrefix, HarmonyPriority(Priority.HigherThanNormal)]
-        [HarmonyPatch(typeof(DeliveryPackage), nameof(DeliveryPackage.NotifySizeChange))]
-        static void ParameterOverwrite(DeliveryPackage __instance)
+        [HarmonyPostfix, HarmonyPriority(Priority.HigherThanNormal)]
+        [HarmonyPatch(typeof(GameHistoryData), nameof(GameHistoryData.UnlockTechFunction))]
+        static void ParameterOverwrite()
         {
+            DeliveryPackage __instance = GameMain.mainPlayer.deliveryPackage;
             if (ColCount.Value > 0 && ColCount.Value <= 5)
-                __instance.colCount = ColCount.Value;
+            {
+                if (__instance.colCount != ColCount.Value)
+                {
+                    __instance.colCount = ColCount.Value;
+                    GameMain.mainPlayer.deliveryPackage.NotifySizeChange();
+                    SetMaxDeliveryGridIndex();
+                }
+            }
             if (StackSizeMultiplier.Value > 0)
                 __instance.stackSizeMultiplier = StackSizeMultiplier.Value;
+        }
 
+        static void SetMaxDeliveryGridIndex()
+        {
             if (UseLogisticSlots.Value)
             {
-                __instance.RecalcIndexMaps();
+                // 因為有Multifunction.player.deliveryPackage.NotifySizeChange(), 所以將找尋最高索引值的函式分離
+                DeliveryPackage __instance = GameMain.mainPlayer.deliveryPackage;
                 DeliveryPackagePatch.maxDeliveryGridIndex = 0;
                 for (int i = __instance.gridLength - 1; i >= 0; i--)
                 {
@@ -109,9 +122,8 @@ namespace DeliverySlotsTweaks
                         break;
                     }
                 }
+                Log.LogDebug($"DeliveryPackage:{__instance.rowCount}x{__instance.colCount} stack:{__instance.stackSizeMultiplier} maxIndex:{DeliveryPackagePatch.maxDeliveryGridIndex}");
             }
-
-            Log.LogDebug($"DeliveryPackage:{__instance.rowCount}x{__instance.colCount} stack:{__instance.stackSizeMultiplier} maxIndex:{DeliveryPackagePatch.maxDeliveryGridIndex}");
         }
 
         [HarmonyPrefix]
