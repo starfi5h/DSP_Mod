@@ -1,7 +1,7 @@
 ﻿using BepInEx.Configuration;
 using DysonSphereProgram.Modding.Blackbox;
 using HarmonyLib;
-using Multfunction_mod;
+using Multifunction_mod;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ namespace SampleAndHoldSim
 {
     public class Compatibility
     {
+        static string errorMessage = "";
+
         public static void Init(Harmony harmony)
         {
             NebulaAPI.Init();
@@ -23,11 +25,23 @@ namespace SampleAndHoldSim
             DSP_Battle_Patch.Init(harmony);
             Blackbox_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                harmony.PatchAll(typeof(Compatibility));
+            }
         }
 
         public static void OnDestory()
         {
             CheatEnabler_Patch.OnDestory();
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
+        static void ShowMessage()
+        {
+            errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
+            UIMessageBox.Show("SampleAndHoldSim", errorMessage, "确定".Translate(), 3);
         }
 
         public static class NebulaAPI
@@ -48,6 +62,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
+
                     Log.Warn("Nebula compatibility failed!");
                     Log.Warn(e);
                 }
@@ -106,8 +121,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.5.7");
+                    string message = "CommonAPI compatibility failed! Last working version: 1.5.7";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
         }
@@ -126,8 +143,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.13");
+                    string message = "DSPOptimizations compatibility failed! Last working version: 1.1.14";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -156,50 +175,46 @@ namespace SampleAndHoldSim
                 try
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("Multfunction_mod.Multifunctionpatch");
-
-                    // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Ejector_Patch).GetMethod(nameof(Ejector_Patch.EjectorComponent_Transpiler))));
-
-                    // TODO: Fix skip bullet
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod("EjectorComponentPatch_Transpiler")));
-
-                    // Remove added stats after recording
-                    harmony.Patch(AccessTools.Method(classType, "Prefix", new Type[] { typeof(ProductionStatistics) }), new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Prefix")));
-                    harmony.Patch(AccessTools.Method(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick)), null, new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Postfix")));
+                    harmony.PatchAll(typeof(Warper));
 
                     Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.0");
+                    string message = "Multfunction_mod compatibility failed! Last working version: 2.8.6";
+                    Log.Warn(message);
                     Log.Warn(e);
-                }
-            }
-
-            public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
-                try
-                {
-                    CodeMatcher matcher = new CodeMatcher(instructions)
-                        .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(List<Multfunction_mod.Tempsail>), "Add")))
-                        .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
-                        .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(Warper), "AddTempSail"));
-
-                    return matcher.InstructionEnumeration();
-                }
-                catch
-                {
-                    Log.Warn("Transpiler EjectorComponentPatch failed.");
-                    return instructions;
+                    errorMessage += message + "\n";
                 }
             }
 
             public static class Warper
             {
-                public static void AddTempSail(List<Multfunction_mod.Tempsail> list, Multfunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
+                [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.EjectorComponentPatch))]
+                public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
+                {
+                    // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
+                    try
+                    {
+                        // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
+                        var newinstructions = Ejector_Patch.EjectorComponent_Transpiler(instructions);
+
+                        // Fix skip bullet
+                        CodeMatcher matcher = new CodeMatcher(newinstructions)
+                            .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(List<Multifunction_mod.Tempsail>), "Add")))
+                            .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
+                            .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddTempSail)));
+
+                        return matcher.InstructionEnumeration();
+                    }
+                    catch
+                    {
+                        Log.Warn("Transpiler EjectorComponentPatch failed.");
+                        return instructions;
+                    }
+                }
+
+                static void AddTempSail(List<Multifunction_mod.Tempsail> list, Multifunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
                 {
                     // Do not multiply if it is local focus planet
                     int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
@@ -209,6 +224,7 @@ namespace SampleAndHoldSim
 
                 static bool clearFlag;
 
+                [HarmonyPrefix, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.Prefix), new Type[] { typeof(ProductionStatistics) })]
                 public static bool AddStatDic_Prefix(ref bool __result)
                 {
                     // 將星球礦機視為工廠外部, 覆寫原本的邏輯
@@ -255,6 +271,7 @@ namespace SampleAndHoldSim
                     return false; // Overwrite original mod function
                 }
 
+                [HarmonyPostfix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick))]
                 public static void AddStatDic_Postfix()
                 {
                     if (clearFlag)
@@ -317,8 +334,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("PlanetMiner compatibility failed! Last working version: 3.0.7");
+                    string message = "PlanetMiner compatibility failed! Last working version: 3.0.7";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -442,8 +461,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSP_Battle compatibility failed! Last working version: 2.2.4");
+                    string message = "DSP_Battle compatibility failed! Last working version: 2.2.8";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -519,8 +540,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Blackbox compatibility failed! Last working version: 0.2.4");
+                    string message = "Blackbox compatibility failed! Last working version: 0.2.4";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -595,8 +618,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CheatEnabler compatibility failed! Last working version: 2.2.0");
+                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.1";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -612,7 +637,7 @@ namespace SampleAndHoldSim
 
                 public static void Init()
                 {
-                    CheatEnabler.DysonSpherePatch.SkipBulletValueChanged();
+                    CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable(CheatEnabler.DysonSpherePatch.SkipBulletEnabled.Value);
                 }
 
                 public static void OnDestory()
@@ -629,10 +654,11 @@ namespace SampleAndHoldSim
                     }
                 }
 
-                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Prefix(ConfigEntry<bool> ___SkipBulletEnabled)
+                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), 
+                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
+                internal static void SkipBulletValueChanged_Prefix(bool on)
                 {
-                    if (___SkipBulletEnabled.Value)
+                    if (on)
                     {
                         if (patch_sample != null)
                         {
@@ -650,10 +676,11 @@ namespace SampleAndHoldSim
                     }
                 }
 
-                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Postfix(ConfigEntry<bool> ___SkipBulletEnabled)
+                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch),
+                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
+                internal static void SkipBulletValueChanged_Postfix(bool on)
                 {
-                    if (___SkipBulletEnabled.Value)
+                    if (on)
                     {
                         if (patch_cheatEnabler == null)
                         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 
 namespace SampleAndHoldSim
 {
@@ -62,3 +63,4 @@ namespace SampleAndHoldSim
         }
     }
 }
+*/

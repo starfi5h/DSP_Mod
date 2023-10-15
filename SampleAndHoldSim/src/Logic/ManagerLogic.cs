@@ -172,8 +172,8 @@ namespace SampleAndHoldSim
             {
                 // Reset stats for idle Gas giant, so statation collectors stats won't be double
                 factoryStat.PrepareTick();
-                if (manager != null)
-                    manager.VeinWorkBegin();
+                //if (manager != null)
+                //    manager.VeinWorkBegin();
             }
             else
             {
@@ -196,12 +196,12 @@ namespace SampleAndHoldSim
             manager.StationAfterTick();
             if (manager.IsActive)
             {
-                manager.VeinWorkEnd();
+                //manager.VeinWorkEnd();
                 manager.DysonColletEnd();
             }
             else
             {
-                manager.VeinIdleEnd();
+                //manager.VeinIdleEnd();
                 Lab_IdleTick(index);
                 manager.DysonIdleTick();
                 if (Compatibility.DSP_Battle_Patch.IsPatched)

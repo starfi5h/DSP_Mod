@@ -1,7 +1,7 @@
 # Sample and Hold Simulation  
 
-Reduce factory calculation by letting factoies have active tick and idle tick.  
-When in active, the factory will run the whole simulation. When in idle, the factory will use values from last active tick to generate input and output, multiply the "result".    
+Reduce factory calculation by changing how the game work aggressively:  
+Let factoies have active tick and idle tick. When in active, the factory will run the whole simulation. When in idle, the factory will use values from last active tick to generate input and output, multiply the "result".    
 The goal is to make factories tick less but still make nearly same amount of items in ILS in the long term, trade accuracy for UPS.    
     
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/demo5.gif)  

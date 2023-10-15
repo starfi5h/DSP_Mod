@@ -1,9 +1,13 @@
 ## Changelog
 
+#### v0.5.7  
+\- Remove vein logic.  
+\- Update CheatEnabler compat to v2.3.1  
+\- Update Multfuntion mod compat to v2.8.6  
+
 #### v0.5.6  
 \- Add CheatEnabler 2.2.0 compat.  
 \- Fix PlanetMiner 3.0.7 compat.  
-
 
 #### v0.5.5 (DSP0.9.27.15466)
 \- Fix stats incorrect for Multfuntion mod planet miners.  
