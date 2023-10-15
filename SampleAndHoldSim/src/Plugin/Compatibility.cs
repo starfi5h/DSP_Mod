@@ -591,7 +591,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CheatEnabler compatibility failed! Last working version: 2.2.0");
+                    Log.Warn("CheatEnabler compatibility failed! Last working version: 2.3.1");
                     Log.Warn(e);
                 }
             }
@@ -608,7 +608,7 @@ namespace SampleAndHoldSim
 
                 public static void Init()
                 {
-                    CheatEnabler.DysonSpherePatch.SkipBulletValueChanged();
+                    CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable(CheatEnabler.DysonSpherePatch.SkipBulletEnabled.Value);
                 }
 
                 public static void OnDestory()
@@ -625,10 +625,11 @@ namespace SampleAndHoldSim
                     }
                 }
 
-                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Prefix(ConfigEntry<bool> ___SkipBulletEnabled)
+                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), 
+                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
+                internal static void SkipBulletValueChanged_Prefix(bool on)
                 {
-                    if (___SkipBulletEnabled.Value)
+                    if (on)
                     {
                         if (patch_sample != null)
                         {
@@ -646,10 +647,11 @@ namespace SampleAndHoldSim
                     }
                 }
 
-                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch), "SkipBulletValueChanged")]
-                internal static void SkipBulletValueChanged_Postfix(ConfigEntry<bool> ___SkipBulletEnabled)
+                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch),
+                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
+                internal static void SkipBulletValueChanged_Postfix(bool on)
                 {
-                    if (___SkipBulletEnabled.Value)
+                    if (on)
                     {
                         if (patch_cheatEnabler == null)
                         {
