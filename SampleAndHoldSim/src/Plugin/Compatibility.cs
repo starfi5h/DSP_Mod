@@ -1,7 +1,7 @@
 ﻿using BepInEx.Configuration;
 using DysonSphereProgram.Modding.Blackbox;
 using HarmonyLib;
-using Multfunction_mod;
+using Multifunction_mod;
 using NebulaAPI;
 using System;
 using System.Collections.Generic;
@@ -156,50 +156,44 @@ namespace SampleAndHoldSim
                 try
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("Multfunction_mod.Multifunctionpatch");
-
-                    // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Ejector_Patch).GetMethod(nameof(Ejector_Patch.EjectorComponent_Transpiler))));
-
-                    // TODO: Fix skip bullet
-                    harmony.Patch(classType.GetMethod("EjectorComponentPatch"), null, null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod("EjectorComponentPatch_Transpiler")));
-
-                    // Remove added stats after recording
-                    harmony.Patch(AccessTools.Method(classType, "Prefix", new Type[] { typeof(ProductionStatistics) }), new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Prefix")));
-                    harmony.Patch(AccessTools.Method(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick)), null, new HarmonyMethod(typeof(Warper).GetMethod("AddStatDic_Postfix")));
+                    harmony.PatchAll(typeof(Warper));
 
                     Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.0");
+                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.6");
                     Log.Warn(e);
-                }
-            }
-
-            public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
-                try
-                {
-                    CodeMatcher matcher = new CodeMatcher(instructions)
-                        .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(List<Multfunction_mod.Tempsail>), "Add")))
-                        .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
-                        .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(Warper), "AddTempSail"));
-
-                    return matcher.InstructionEnumeration();
-                }
-                catch
-                {
-                    Log.Warn("Transpiler EjectorComponentPatch failed.");
-                    return instructions;
                 }
             }
 
             public static class Warper
             {
-                public static void AddTempSail(List<Multfunction_mod.Tempsail> list, Multfunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
+                [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.EjectorComponentPatch))]
+                public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
+                {
+                    // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
+                    try
+                    {
+                        // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
+                        var newinstructions = Ejector_Patch.EjectorComponent_Transpiler(instructions);
+
+                        // Fix skip bullet
+                        CodeMatcher matcher = new CodeMatcher(newinstructions)
+                            .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(List<Multifunction_mod.Tempsail>), "Add")))
+                            .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
+                            .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddTempSail)));
+
+                        return matcher.InstructionEnumeration();
+                    }
+                    catch
+                    {
+                        Log.Warn("Transpiler EjectorComponentPatch failed.");
+                        return instructions;
+                    }
+                }
+
+                static void AddTempSail(List<Multifunction_mod.Tempsail> list, Multifunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
                 {
                     // Do not multiply if it is local focus planet
                     int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
@@ -209,6 +203,7 @@ namespace SampleAndHoldSim
 
                 static bool clearFlag;
 
+                [HarmonyPrefix, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.Prefix), new Type[] { typeof(ProductionStatistics) })]
                 public static bool AddStatDic_Prefix(ref bool __result)
                 {
                     // 將星球礦機視為工廠外部, 覆寫原本的邏輯
@@ -255,6 +250,7 @@ namespace SampleAndHoldSim
                     return false; // Overwrite original mod function
                 }
 
+                [HarmonyPostfix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick))]
                 public static void AddStatDic_Postfix()
                 {
                     if (clearFlag)
