@@ -13,6 +13,8 @@ namespace SampleAndHoldSim
 {
     public class Compatibility
     {
+        static string errorMessage = "";
+
         public static void Init(Harmony harmony)
         {
             NebulaAPI.Init();
@@ -23,11 +25,23 @@ namespace SampleAndHoldSim
             DSP_Battle_Patch.Init(harmony);
             Blackbox_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                harmony.PatchAll(typeof(Compatibility));
+            }
         }
 
         public static void OnDestory()
         {
             CheatEnabler_Patch.OnDestory();
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
+        static void ShowMessage()
+        {
+            errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
+            UIMessageBox.Show("SampleAndHoldSim", errorMessage, "确定".Translate(), 3);
         }
 
         public static class NebulaAPI
@@ -48,6 +62,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
+
                     Log.Warn("Nebula compatibility failed!");
                     Log.Warn(e);
                 }
@@ -106,8 +121,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CommonAPI compatibility failed! Last working version: 1.5.7");
+                    string message = "CommonAPI compatibility failed! Last working version: 1.5.7";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
         }
@@ -126,8 +143,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.13");
+                    string message = "DSPOptimizations compatibility failed! Last working version: 1.1.14";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -162,8 +181,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Multfunction_mod compatibility failed! Last working version: 2.8.6");
+                    string message = "Multfunction_mod compatibility failed! Last working version: 2.8.6";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -313,8 +334,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("PlanetMiner compatibility failed! Last working version: 3.0.7");
+                    string message = "PlanetMiner compatibility failed! Last working version: 3.0.7";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -438,8 +461,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSP_Battle compatibility failed! Last working version: 2.2.4");
+                    string message = "DSP_Battle compatibility failed! Last working version: 2.2.8";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -515,8 +540,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Blackbox compatibility failed! Last working version: 0.2.4");
+                    string message = "Blackbox compatibility failed! Last working version: 0.2.4";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
@@ -591,8 +618,10 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("CheatEnabler compatibility failed! Last working version: 2.3.1");
+                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.1";
+                    Log.Warn(message);
                     Log.Warn(e);
+                    errorMessage += message + "\n";
                 }
             }
 
