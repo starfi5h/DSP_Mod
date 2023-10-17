@@ -371,5 +371,37 @@ namespace AlterTickrate.Patches
 				return instructions;
 			}
 		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
+		static IEnumerable<CodeInstruction> PowerSystemGameTick_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			// scale factoryProductionStat.energyConsumption increasement
+			// energyConsumption是總耗電量。增加的地方還有PlanetTransport.GameTick(), 不過這個mod沒有修改物流塔運輸
+			try
+			{
+				var codeMatcher = new CodeMatcher(instructions);
+
+				// Change: factoryProductionStat.energyConsumption += num5;
+				// To:	   factoryProductionStat.energyConsumption += num5 * scale;
+				codeMatcher.End().MatchBack(false,
+					new CodeMatch(OpCodes.Add),
+					new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(FactoryProductionStat), nameof(FactoryProductionStat.energyConsumption)))
+				)
+				.Insert(
+					new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Parameters), nameof(Parameters.PowerUpdatePeriod))),
+					new CodeInstruction(OpCodes.Conv_I8),
+					new CodeInstruction(OpCodes.Mul)
+				);
+
+				return codeMatcher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Log.Error("Transpiler PowerSystem.GameTick failed");
+				Log.Error(e);
+				return instructions;
+			}
+		}
 	}
 }
