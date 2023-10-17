@@ -6,7 +6,7 @@ Change buildings update priod from 1 tick to x ticks and scale the progress acco
 In the test file, Sorter time reduce by 50%,  Power System reduce by 80%, Various Facility reduce by 70%, Storage reduce by 50%.  
 The button on stat - performance test page (AlterTick - ON) can switch on/off the mod.  
 
-Warning: The mod is still in development state. Recommend to make a backup save before using it.  
+Warning: The mod is still in proof-of-concept state. Recommend to make a backup save before using it.  
 
 ## How does it work
 
@@ -139,7 +139,7 @@ When using mods that add new buildings, it's recommend to use SampleAndHoldSim f
 
 相容: 联机mod([NebulaMultiplayerMod](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)), 优化mod([DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/))。  
 不相容: [SampleAndHoldSim](https://dsp.thunderstore.io/package/starfi5h/SampleAndHoldSim/), [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)。  
-GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。  
+GenesisBook, BetterMachines, BeltSpeedEnhancement或MoreReasonableCargoTraffic等修改传送带的mod存在时, 将取消传送带功能且`Belt`, `Storage`将设置为1。  
 [LabOpt](https://dsp.thunderstore.io/package/soarqin/LabOpt/)存在时, 将取消研究站功能且`Lab`相关参数将设置为1避免冲突。  
 使用添加新建筑的mod时，建议使用SampleAndHoldSim以获得更好的兼容性。  
 
@@ -147,12 +147,16 @@ GenesisBook, BetterMachines或BeltSpeedEnhancement等修改传送带的mod存在
 
 ## Changelog
 
-#### v0.2.3
-\- Fix request power of ray receivers.  
-\- Add LabOpt compat.  
+#### v0.2.4
+\- Fix scale of total energy consumption in statistics panel.  
+\- Fix UI smooth progress when FPS is lower than UPS.  
 
 <details>
 <summary>Previous Changelog</summary>
+
+#### v0.2.3
+\- Fix request power of ray receivers.  
+\- Add LabOpt compat.  
 
 #### v0.2.2
 \- Add UI-SmoothProgress config option.  

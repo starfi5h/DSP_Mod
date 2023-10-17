@@ -1,9 +1,16 @@
-﻿using BepInEx;
+﻿using AlterTickrate.Patches;
+using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using System.Reflection;
 using UnityEngine;
-using AlterTickrate.Patches;
-using BepInEx.Configuration;
+
+[assembly: AssemblyFileVersion(AlterTickrate.Plugin.VERSION)]
+[assembly: AssemblyInformationalVersion(AlterTickrate.Plugin.VERSION)]
+[assembly: AssemblyVersion(AlterTickrate.Plugin.VERSION)]
+[assembly: AssemblyProduct(AlterTickrate.Plugin.NAME)]
+[assembly: AssemblyTitle(AlterTickrate.Plugin.NAME)]
 
 namespace AlterTickrate
 {
@@ -13,7 +20,7 @@ namespace AlterTickrate
     {
         public const string GUID = "starfi5h.plugin.AlterTickrate";
         public const string NAME = "AlterTickrate";
-        public const string VERSION = "0.2.3";
+        public const string VERSION = "0.2.4";
         public static Plugin plugin;
         public static bool Enable;
 
