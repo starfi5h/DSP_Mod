@@ -37,10 +37,13 @@ namespace AlterTickrate.Compat
 
                 if (pluginInfos.ContainsKey("org.LoShin.GenesisBook")
                     || pluginInfos.ContainsKey("org.kremnev8.plugin.BetterMachines")
-                    || pluginInfos.ContainsKey("top.awbugl.DSP.BeltSpeedEnhancement"))
+                    || pluginInfos.ContainsKey("top.awbugl.DSP.BeltSpeedEnhancement")
+                    || pluginInfos.ContainsKey("shisang_MoreReasonableCargoTraffic") //它的判斷方式為"lastUpdate = 当前游戏帧数 % 2", 在Belt兩帧更新1次時會無法判別
+                )
                 {
                     // These mods change belt speed, which make the max speed > 5
                     Plugin.plugin.SaveBeltConfig(1, 1);
+                    Log.Debug("Belt altering mods detect: belt parameters are now disabled");
                 }
 
                 if (pluginInfos.ContainsKey("org.soardev.labopt"))

@@ -3,13 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>AlterTickrate</AssemblyName>
-    <Description></Description>
-    <Version>0.2.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <Company />
-    <Product />
-    <Authors />
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>AlterTickrate</RootNamespace>
   </PropertyGroup>
 

@@ -12,122 +12,82 @@ namespace AlterTickrate.Patches
 		static int factoryIndex;
 		static float progress0, progress1;
 		static float extraProgress0, extraProgress1;
-		static bool guard = true, extraGuard = true; // Prevent progress update second times in the same gametick
+		static int lastTick = 0, lastExtraTick = 0; // Update progress end points when a cycle has passed
 
 		public static float GetFillAmount(float progress)
-        {
+		{
+			if (Parameters.FacilityUpdatePeriod == 1) return progress;
 			int t = (factoryIndex + (int)GameMain.gameTick) % Parameters.FacilityUpdatePeriod;
-			if (t == 0)
-            {
-				if (guard)
-				{
-					progress0 = progress1;
-					progress1 = Mathf.Clamp01(progress);
-					if (progress1 < progress0) // If progress1 reach end and product not stacking, start with 0
-						progress0 = 0f;
-					guard = false;
-				}
-				return progress0;
+			if (t < lastTick)
+			{
+				progress0 = progress1;
+				progress1 = progress;
+				if (progress1 < progress0) // If progress1 reach end and product not stacking, start with 0
+					progress0 -= 1f;
 			}
-			else
-            {
-				guard = true;
-				return Mathf.Lerp(progress0, progress1, (float)t / Parameters.FacilityUpdatePeriod);
-            }
-        }
+			lastTick = t;
+			return Mathf.Clamp01(Mathf.Lerp(progress0, progress1, (float)t / Parameters.FacilityUpdatePeriod));
+		}
 
 		public static float GetExtraFillAmount(float progress)
         {
+			if (Parameters.FacilityUpdatePeriod == 1) return progress;
 			int t = (factoryIndex + (int)GameMain.gameTick) % Parameters.FacilityUpdatePeriod;
-			if (t == 0 && extraGuard)
+			if (t < lastExtraTick)
 			{
-				if (extraGuard)
-				{
-					extraProgress0 = extraProgress1;
-					extraProgress1 = Mathf.Clamp01(progress);
-					if (extraProgress1 < extraProgress0)
-						extraProgress0 = 0f;
-					extraGuard = false;
-				}
-				return extraProgress0;
+				extraProgress0 = extraProgress1;
+				extraProgress1 = progress;
+				if (extraProgress1 < extraProgress0)
+					extraProgress0 -= 1f;
 			}
-			else
-			{
-				extraGuard = true;
-				return Mathf.Lerp(extraProgress0, extraProgress1, (float)t / Parameters.FacilityUpdatePeriod);
-			}
+			lastExtraTick = t;
+			//Log.Debug($"{t} {extraProgress0:F3} {progress:F3}");
+			return Mathf.Clamp01(Mathf.Lerp(extraProgress0, extraProgress1, (float)t / Parameters.FacilityUpdatePeriod));
 		}
 
 		public static float GetCoolDown(float progress)
         {
+			if (Parameters.FacilityUpdatePeriod == 1) return progress;
 			int t = (factoryIndex + (int)GameMain.gameTick) % Parameters.FacilityUpdatePeriod;
-			if (t == 0)
+			if (t < lastTick)
 			{
-				if (guard)
-				{
-					progress0 = progress1; // the ejector/silo progress will go back and forward
-					progress1 = Mathf.Clamp01(progress);
-					guard = false;
-				}
-				return progress0;
+				progress0 = progress1;  // the ejector/silo progress will go back and forward
+				progress1 = Mathf.Clamp01(progress);
 			}
-			else
-			{
-				guard = true;
-				return Mathf.Lerp(progress0, progress1, (float)t / Parameters.FacilityUpdatePeriod);
-			}
+			lastTick = t;
+			return Mathf.Lerp(progress0, progress1, (float)t / Parameters.FacilityUpdatePeriod);
 		}
 
 		public static float GetFuelAmount(float progress)
 		{
+			if (Parameters.PowerUpdatePeriod == 1) return progress;
 			int t = (factoryIndex + (int)GameMain.gameTick) % Parameters.PowerUpdatePeriod;
-			if (t == 0)
+			if (t < lastTick)
 			{
-				if (guard)
-				{
-					progress0 = progress1;
-					progress1 = progress;
-					guard = false;
-				}
-				return progress0;
-			}
-			else
-			{
-				guard = true;
+				progress0 = progress1;
+				progress1 = progress;
 				if (progress1 > progress0)
-				{
-					progress = Mathf.Lerp(progress0, progress1 - 1f, (float)t / Parameters.PowerUpdatePeriod);
-					if (progress < 0f)
-						progress = 0f;
-					return progress;
-				}
-				return Mathf.Lerp(progress0, progress1, (float)t / Parameters.PowerUpdatePeriod);
+					progress0 = progress1;
+				//Log.Debug($"{t} {progress0:F3} {progress1:F3}");
 			}
+			lastTick = t;
+			return Mathf.Clamp01(Mathf.Lerp(progress0, progress1, (float)t / Parameters.PowerUpdatePeriod));
 		}
 
 		public static float GetExtraFuelAmount(float progress)
 		{
+			if (Parameters.PowerUpdatePeriod == 1) return progress;
 			int t = (factoryIndex + (int)GameMain.gameTick) % Parameters.PowerUpdatePeriod;
-			if (t == 0)
+			if (t < lastExtraTick)
 			{
-				if (extraGuard)
-				{
-					extraProgress0 = extraProgress1;
-					extraProgress1 = progress;
-					extraGuard = false;
-				}
-				return extraProgress0;
-			}
-			else
-			{
-				extraGuard = true;
+				extraProgress0 = extraProgress1;
+				extraProgress1 = progress;
 				if (extraProgress1 > extraProgress0)
-                {
-					progress = Mathf.Lerp(extraProgress0, 0f, (float)t / Parameters.PowerUpdatePeriod);
-					return progress;
-				}
-				return Mathf.Lerp(extraProgress0, extraProgress1, (float)t / Parameters.PowerUpdatePeriod);
+					extraProgress0 = extraProgress1;
 			}
+			lastExtraTick = t;
+			//Log.Debug($"{t} {extraProgress0:F3} {progress:F3}");
+			return Mathf.Clamp01(Mathf.Lerp(extraProgress0, extraProgress1, (float)t / Parameters.PowerUpdatePeriod));
 		}
 
 		// Note: UIMinerWindow progress is too fast to look normal
@@ -211,7 +171,7 @@ namespace AlterTickrate.Patches
 			ref var assemblerComponent = ref __instance.factorySystem.assemblerPool[__instance.assemblerId];
 			progress0 = progress1 = Mathf.Clamp01((float)assemblerComponent.time / assemblerComponent.timeSpend);
 			extraProgress0 = extraProgress1 = Mathf.Clamp01((float)assemblerComponent.extraTime / assemblerComponent.extraTimeSpend);
-			Log.Debug(progress1);
+			lastTick = lastExtraTick = 0;
 		}
 
 		[HarmonyPostfix]
@@ -225,6 +185,7 @@ namespace AlterTickrate.Patches
 			ref var labComponent = ref __instance.factorySystem.labPool[__instance.labId];
 			progress0 = progress1 = Mathf.Clamp01((float)labComponent.time / labComponent.timeSpend);
 			extraProgress0 = extraProgress1 = Mathf.Clamp01((float)labComponent.extraTime / labComponent.extraTimeSpend);
+			lastTick = lastExtraTick = 0;
 		}
 
 		[HarmonyPostfix]
@@ -237,6 +198,7 @@ namespace AlterTickrate.Patches
 			factoryIndex = __instance.factory.index;
 			ref var component = ref __instance.factorySystem.ejectorPool[__instance.ejectorId];
 			progress0 = progress1 = (component.direction > 0) ? Mathf.Clamp01((float)component.time / component.chargeSpend) : Mathf.Clamp01((float)component.time / component.coldSpend);
+			lastTick = lastExtraTick = 0;
 		}
 
 		[HarmonyPostfix]
@@ -249,6 +211,7 @@ namespace AlterTickrate.Patches
 			factoryIndex = __instance.factory.index;
 			ref var component = ref __instance.factorySystem.siloPool[__instance.siloId];
 			progress0 = progress1 = (component.direction > 0) ? Mathf.Clamp01((float)component.time / component.chargeSpend) : Mathf.Clamp01((float)component.time / component.coldSpend);
+			lastTick = lastExtraTick = 0;
 		}
 
 		[HarmonyPostfix]
@@ -265,6 +228,7 @@ namespace AlterTickrate.Patches
 			{
 				progress0 = progress1 = component.fuelEnergy / itemProto.HeatValue;
 				extraProgress0 = extraProgress1 = 0.0f;
+				lastTick = lastExtraTick = 0;
 			}
 		}
 	}
