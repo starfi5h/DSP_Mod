@@ -16,7 +16,7 @@ namespace LossyCompression
     {
         public const string GUID = "starfi5h.plugin.LossyCompression";
         public const string NAME = "LossyCompression";
-        public const string VERSION = "0.3.1";
+        public const string VERSION = "0.3.2";
         public const int FORMAT_VERSION = 1;
 
         public static Plugin Instance { get; private set; }
@@ -46,7 +46,8 @@ namespace LossyCompression
             DysonSwarmCompress.IsMultithread = true;
 
             harmony = new Harmony(GUID);
-            ModCompatibility.SphereOpt.Init(harmony); // Set LazyLoading.Enable
+            ModCompatibility.Init(harmony); // Set LazyLoading.Enable
+
             harmony.PatchAll(typeof(Plugin));
             harmony.PatchAll(typeof(CargoPathCompress));
             harmony.PatchAll(typeof(DysonShellCompress));
@@ -66,9 +67,6 @@ namespace LossyCompression
             }
             harmony.PatchAll(typeof(UIcontrol));
             Log.Info($"cargoPath:{CargoPathCompress.Enable} dysonShell:{DysonShellCompress.Enable} dysonSwarm:{DysonSwarmCompress.Enable}\n" + $"lazyLoad:{LazyLoading.Enable} reduceRAM:{LazyLoading.ReduceRAM}");
-
-            ModCompatibility.DSPOptimizations.Init(harmony);
-            ModCompatibility.NebulaAPI.Init(harmony);
 
 #if DEBUG
             harmony.PatchAll(typeof(DebugPatch));

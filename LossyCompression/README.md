@@ -4,6 +4,9 @@
 Compress belt & cargo data(-80%), dyson shells(-85%) and solar sails to reduce save size.  
 There is a toggle button in performance test panel to activate/deactivate compression.  
 Suggest to backup your saves before using this mod.   
+  
+**This mod is only applicable to 0.9.27 and may not work in the newer game version!**  
+If there is an old compressed save, please roll back the game version first and then save it as a uncompressed(vanilla) save.  
 
 ## Configuration
 
@@ -44,6 +47,9 @@ Recommend to enable it when there are too many shells in a save.
 提供传送带(-80%), 戴森壳(-85%)及太阳帆的存档数据压缩。  
 在性能测试面板可以启用/停用压缩。  
 使用前建议先备份存档。游戏改版之前也建议另存原档避免mod失效。  
+
+**此mod仅适用于0.9.27, 可能无法在新的游戏版本中运作!**  
+若有压缩后的旧存档, 请先回滚游戏版本再储存成未压缩(原版)存档。  
 
 ## 設置
 .cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  

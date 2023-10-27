@@ -9,12 +9,50 @@ namespace LossyCompression
     public class ModCompatibility
     {
         public static Action AfeterImport;
+        static string dialogMessage = "";
+
+        public static void Init(Harmony harmony)
+        {
+            if (GameConfig.gameVersion != new Version(0, 9, 27))
+            {
+                if (Localization.language == Language.zhCN)
+                    dialogMessage = "此mod仅适用于0.9.27, 可能无法在新的游戏版本中运作!\n若有压缩后的旧存档, 请先回滚游戏版本再储存成未压缩(原版)存档\n";
+                else
+                    dialogMessage = "This mod is only applicable to 0.9.27 and may not work in the newer game version!\nIf there is an old compressed save, please roll back the game version first and then save it as a uncompressed(vanilla) save.\n";
+            }
+
+            SphereOpt.Init(harmony);
+            DSPOptimizations.Init(harmony);
+            NebulaAPI.Init(harmony);
+
+            if (!string.IsNullOrEmpty(dialogMessage))
+            {
+                harmony.Patch(AccessTools.Method(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded)), null,
+                    new HarmonyMethod(AccessTools.Method(typeof(ModCompatibility), nameof(ShowMessage))));
+            }
+        }
+
+        static void ShowMessage()
+        {
+            UIMessageBox.Show("Lossy Compression兼容性提示", dialogMessage, "确定".Translate(), 3);
+        }
+
+        static void LogNotice(string modName, string lastWorkingVersion)
+        {
+            string message;
+            if (Localization.language == Language.zhCN)
+                message = modName + "兼容失效! 记录中最后适用版本: " + lastWorkingVersion;
+            else
+                message = modName + " compatibility failed! Last working version: " + lastWorkingVersion;
+            dialogMessage += message + "\n";
+            Log.Warn(message);
+        }
 
         public static class SphereOpt
         {
             public const string GUID = "SphereOpt";
 
-            public static void Init(Harmony harmony)
+            public static void Init(Harmony _)
             {
                 try
                 {
@@ -22,24 +60,17 @@ namespace LossyCompression
 
                     if (LazyLoading.Enable)
                     {
-                        harmony.PatchAll(typeof(SphereOpt));
+                        var message = "Lazy loading is disabled due to compat with SphereOpt.\n侦测到SphereOpt,已将延迟载入功能关闭";
+                        dialogMessage += message + "\n";
                         LazyLoading.Enable = false;
                         Log.Debug("SphereOpt compatibility - OK");
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("SphereOpt compatibility failed! Last working version: 0.8.1");
+                    LogNotice("SphereOpt", "0.8.1");
                     Log.Warn(e);
                 }
-            }
-
-            [HarmonyPostfix]
-            [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
-            public static void OnGameLoaded()
-            {
-                var message = "Lazy loading is disabled due to compat with SphereOpt.\n侦测到SphereOpt,已将延迟载入功能关闭";
-                UIMessageBox.Show("LossyCompression", message, "确定".Translate(), 3);
             }
         }
 
@@ -66,7 +97,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("DSPOptimizations compatibility failed! Last working version: 1.1.11");
+                    LogNotice("DSPOptimizations", "1.1.14");
                     Log.Warn(e);
                 }
             }
@@ -116,7 +147,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Nebula compatibility failed!");
+                    LogNotice("Nebula", "0.8.14");
                     Log.Warn(e);
                 }
             }

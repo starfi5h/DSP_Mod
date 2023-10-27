@@ -205,22 +205,25 @@ namespace LossyCompression
 
         public static void GenerateSails(DysonSwarm dysonSwarm, int startIndex, int endIndex, List<int> activeOrbitIds)
         {
-            // Formula modify from AutoConstruct
+            // Formula modify from DysonSwarm.AutoConstruct()
+            // RandomTable.SphericNormal is not thread-safe, the seed increased by 1 everytimes it's called
+            int autoConstructSeed = dysonSwarm.autoConstructSeed + startIndex;
+            int randseed = dysonSwarm.randSeed + startIndex * 3;
             float gravity = dysonSwarm.dysonSphere.gravity;
             for (int id = startIndex; id < endIndex; id++)
             {
                 int orbitId = activeOrbitIds[id % activeOrbitIds.Count];
                 ref SailOrbit obrit = ref dysonSwarm.orbits[orbitId];
                 ref DysonSail ss = ref dysonSwarm.sailPoolForSave[id];
-                VectorLF3 vectorLF = VectorLF3.Cross(obrit.up, RandomTable.SphericNormal(ref dysonSwarm.autoConstructSeed, 1.0)).normalized * obrit.radius;
-                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 200.0);
+                VectorLF3 vectorLF = VectorLF3.Cross(obrit.up, RandomTable.SphericNormal(ref autoConstructSeed, 1.0)).normalized * obrit.radius;
+                vectorLF += RandomTable.SphericNormal(ref randseed, 200.0);
                 ss.st = (float)orbitId;
                 ss.px = (float)vectorLF.x;
                 ss.py = (float)vectorLF.y;
                 ss.pz = (float)vectorLF.z;
                 vectorLF = VectorLF3.Cross(vectorLF, obrit.up).normalized * Math.Sqrt(gravity / obrit.radius);
-                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.6000000238418579);
-                vectorLF += RandomTable.SphericNormal(ref dysonSwarm.randSeed, 0.5);
+                vectorLF += RandomTable.SphericNormal(ref randseed, 0.6000000238418579);
+                vectorLF += RandomTable.SphericNormal(ref randseed, 0.5);
                 ss.vx = (float)vectorLF.x;
                 ss.vy = (float)vectorLF.y;
                 ss.vz = (float)vectorLF.z;
