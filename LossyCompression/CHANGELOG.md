@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.3.2
+\- Fix potential RandomTable.SphericNormal error in GenerateSails.  
+\- Add pop up info when mods compat fail or the game version is not 0.9.27.  
+
 #### v0.3.1
 \- Fix orbitId of generated sails so they don't disappear after optimizing memory.  
 \- Disable lazy loading when using together with SphereOpt.  

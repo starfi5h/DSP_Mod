@@ -16,7 +16,7 @@ namespace LossyCompression
     {
         public const string GUID = "starfi5h.plugin.LossyCompression";
         public const string NAME = "LossyCompression";
-        public const string VERSION = "0.3.1";
+        public const string VERSION = "0.3.2";
         public const int FORMAT_VERSION = 1;
 
         public static Plugin Instance { get; private set; }
