@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.3.3
+\- Fix thunderstore package.  
+
 #### v0.3.2
 \- Fix potential RandomTable.SphericNormal error in GenerateSails.  
 \- Add pop up info when mods compat fail or the game version is not 0.9.27.  
