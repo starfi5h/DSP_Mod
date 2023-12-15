@@ -37,7 +37,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.2.7");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.7");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -62,17 +62,17 @@ namespace DeliverySlotsTweaks
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("Multfunction_mod.GUIDraw");
+                    Type classType = assembly.GetType("Multifunction_mod.GUIDraw");
                     harmony.Patch(AccessTools.Method(classType, "BuildPannel"), null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod(nameof(BuildPannel_Postfix))));
 
-                    architectMode = (ConfigEntry<bool>)(AccessTools.Field(AccessTools.TypeByName("Multfunction_mod.Multifunction"), "ArchitectMode").GetValue(null));
+                    architectMode = (ConfigEntry<bool>)(AccessTools.Field(AccessTools.TypeByName("Multifunction_mod.Multifunction"), "ArchitectMode").GetValue(null));
                     DeliveryPackagePatch.architectMode = architectMode.Value;
                     Plugin.Log.LogDebug("Multfunction_mod ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
 
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 2.8.2");
+                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 3.1.7");
                     Plugin.Log.LogWarning(e);
                 }
             }

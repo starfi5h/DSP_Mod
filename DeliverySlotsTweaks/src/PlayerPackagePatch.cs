@@ -15,14 +15,13 @@ namespace DeliverySlotsTweaks
             packageStackMultiplier = 1;
             if (Plugin.PlayerPackageStackSize.Value > 0)
             {
+                // TODO: Add ammo in the future
                 packageStacksize = Plugin.PlayerPackageStackSize.Value;
-                GameMain.mainPlayer.mecha.warpStorage.SetFilter(0, 1210, packageStacksize);
                 Plugin.Log.LogDebug("PlayerPackage stack count:" + packageStacksize);
             }
             else if (Plugin.PlayerPackageStackMultiplier.Value > 0)
             {
                 packageStackMultiplier = Plugin.PlayerPackageStackMultiplier.Value;
-                GameMain.mainPlayer.mecha.warpStorage.SetFilter(0, 1210, 100 * packageStackMultiplier);
                 Plugin.Log.LogDebug("PlayerPackage stack multiplier:" + packageStackMultiplier);
             }
         }

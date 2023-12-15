@@ -50,7 +50,7 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
-		// Replace StorageComponent.GetItemCount
+		// Replace StorageComponent.GetItemCount => packageUtility.GetItemCountFromAllPackages in the future?
 		public static int GetItemCount(StorageComponent _, int itemId)
 		{
 			if (architectMode) return 999;
@@ -119,28 +119,47 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
-		#region MechaDroneLogic
-
-		[HarmonyPostfix, HarmonyPatch(typeof(MechaDroneLogic), nameof(MechaDroneLogic.Prepare))]
-		public static void Prepare(MechaDroneLogic __instance, bool __result)
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(Mecha), nameof(Mecha.GameTick))]
+		public static void Prepare(Mecha __instance)
 		{
-			if (__result) // this.factory != null
+			if (__instance?.player != null && __instance.player == GameMain.mainPlayer)
 			{
 				Count(__instance.player.package);
 				Count(__instance.player.deliveryPackage);
 			}
 		}
 
+		#region MechaDroneLogic
+
 		[HarmonyTranspiler]
-		[HarmonyPatch(typeof(MechaDroneLogic), nameof(MechaDroneLogic.UpdateTargets))]
-		[HarmonyPatch(typeof(MechaDroneLogic), nameof(MechaDroneLogic.FindNext))]
-		public static IEnumerable<CodeInstruction> UpdateTargets_Transpiler(IEnumerable<CodeInstruction> instructions)
+		[HarmonyPatch(typeof(ConstructionSystem), nameof(ConstructionSystem.FindNextConstruct))]
+		public static IEnumerable<CodeInstruction> FindNextConstruct_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			try
+			{
+				// Patch only if (ownedByMecha) flag2 = ptr.itemRequired <= this.player.package.GetItemCount((int)ptr.protoId);
+				var codeMacher = new CodeMatcher(instructions)
+					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
+					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCount)));
+
+				return codeMacher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Plugin.Log.LogWarning("Transpiler FindNextConstruct error");
+				Plugin.Log.LogWarning(e);
+				return instructions;
+			}
+		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(ConstructionSystem), nameof(ConstructionSystem.TakeEnoughItemsFromPlayer))]
+		public static IEnumerable<CodeInstruction> TakeEnoughItemsFromPlayer_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try
 			{
 				var codeMacher = new CodeMatcher(instructions)
-					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCount)))
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
 					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
 
@@ -148,7 +167,7 @@ namespace DeliverySlotsTweaks
 			}
 			catch (Exception e)
 			{
-				Plugin.Log.LogWarning("Transpiler UpdateTargets error");
+				Plugin.Log.LogWarning("Transpiler TakeEnoughItemsFromPlayer error");
 				Plugin.Log.LogWarning(e);
 				return instructions;
 			}
