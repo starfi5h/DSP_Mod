@@ -23,9 +23,9 @@ namespace MinerInfo
                         float currentRate = maxOutput * ratio;
 
                         if (Plugin.ShowItemsPerSecond)
-                            __instance.entityNameText.text += $"  {currentRate:F2}/s  ({ratio:P0})";
+                            __instance.entityNameText.text += $" {currentRate:F2}/s ({ratio:P0})";
                         if (Plugin.ShowItemsPerMinute)
-                            __instance.entityNameText.text += $"  {currentRate * 60:F1}/m  ({ratio:P0})";
+                            __instance.entityNameText.text += $" {currentRate * 60:F1}/m ({ratio:P0})";
                     }
                 }
             }
