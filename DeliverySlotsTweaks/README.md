@@ -59,14 +59,15 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | `StackMultiplier`      | 0    | 修改玩家背包中的物品堆疊倍率。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
 
 ## MOD兼容性
-RebindBuildBar: 可改工具列会显示背包+物流清单的建筑数目  
-CheatEnabler, Multifunction_mod: 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
+RebindBuildBar(1.0.0): 可改工具列会显示背包+物流清单的建筑数目  
+CheatEnabler(2.3.7), Multifunction_mod(3.1.7): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
 NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
 
 ----
 
 ## Changelog
 
+v1.3.0 - Support DSP 0.10.28.20779, upgrade compats.  
 v1.2.3 - Fix Nebula, Multfunction_mod, CheatEnabler(v2.2.7) compat.  
 v1.2.2 - UseLogisticSlots for blueprint paste. Add Multifunction_mod(ArchitectMode), RebindBuildBar compat.  
 v1.2.1 - UseLogisticSlots for Auto Replenish. Add Nebula compat.  
