@@ -13,14 +13,6 @@ namespace LossyCompression
 
         public static void Init(Harmony harmony)
         {
-            if (GameConfig.gameVersion != new Version(0, 9, 27))
-            {
-                if (Localization.language == Language.zhCN)
-                    dialogMessage = "此mod仅适用于0.9.27, 可能无法在新的游戏版本中运作!\n若有压缩后的旧存档, 请先回滚游戏版本再储存成未压缩(原版)存档\n";
-                else
-                    dialogMessage = "This mod is only applicable to 0.9.27 and may not work in the newer game version!\nIf there is an old compressed save, please roll back the game version first and then save it as a uncompressed(vanilla) save.\n";
-            }
-
             SphereOpt.Init(harmony);
             DSPOptimizations.Init(harmony);
             NebulaAPI.Init(harmony);
@@ -40,10 +32,7 @@ namespace LossyCompression
         static void LogNotice(string modName, string lastWorkingVersion)
         {
             string message;
-            if (Localization.language == Language.zhCN)
-                message = modName + "兼容失效! 记录中最后适用版本: " + lastWorkingVersion;
-            else
-                message = modName + " compatibility failed! Last working version: " + lastWorkingVersion;
+            message = modName + " compatibility failed!(兼容失效) Last working version: " + lastWorkingVersion;
             dialogMessage += message + "\n";
             Log.Warn(message);
         }
@@ -68,7 +57,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    LogNotice("SphereOpt", "0.8.1");
+                    LogNotice("SphereOpt", "0.8.3");
                     Log.Warn(e);
                 }
             }
