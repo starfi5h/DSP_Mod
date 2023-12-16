@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v0.3.4
+\- Support DSP 0.10.28.20779  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.3.3
 \- Fix thunderstore package.  
 
@@ -12,13 +18,10 @@
 \- Disable lazy loading when using together with SphereOpt.  
 \- Fix sails vanish when optimizing sails memory in Nebula dedicated server.  
 
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.3.0 (DSP 0.9.27.15466)
 \- Update CargoPath comprssion version to v2 (compress quaternion).  
 \- Fix import error when DysonShell compression is disabled.  
-
 
 #### v0.2.3  
 \- Add `ReduceRAM` config to further reduce RAM usage.  
