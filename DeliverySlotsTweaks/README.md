@@ -67,6 +67,7 @@ NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包�
 
 ## Changelog
 
+v1.3.1 - Fix stack size overwirte gets reset after setting the item filter.  
 v1.3.0 - Support DSP 0.10.28.20779, upgrade compats.  
 v1.2.3 - Fix Nebula, Multfunction_mod, CheatEnabler(v2.2.7) compat.  
 v1.2.2 - UseLogisticSlots for blueprint paste. Add Multifunction_mod(ArchitectMode), RebindBuildBar compat.  
