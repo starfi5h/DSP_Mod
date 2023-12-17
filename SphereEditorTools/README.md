@@ -142,6 +142,12 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 ## Changelog
 
+#### v0.3.4
+\- Fix for DSP 0.10.28.20779  
+
+<details>
+<summary>Previous Changelog</summary>
+
 ### v2.2.1
 \- Add WindowSize option. (Game version 0.9.25.12201)  
 
@@ -178,6 +184,8 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 #### v1.0.0  
 \- Initial Release. (Game version 0.7.18.7103)  
+
+</details>
 
 ----
 

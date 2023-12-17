@@ -29,7 +29,7 @@ namespace SphereEditorTools
 
         public static void Set()
         {
-            if (Localization.language == Language.zhCN)
+            if (Localization.isZHCN)
             {
                 LAYER = "层级";
                 SymmetricTool = "[对称工具]";

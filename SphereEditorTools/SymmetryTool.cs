@@ -320,7 +320,7 @@ namespace SphereEditorTools
                 var methodRaySnap = typeof(UIDysonDrawingGrid).GetMethod("RaySnap", new Type[] { typeof(Ray), typeof(Vector3).MakeByRefType()});
                 var methodRaySnap2 = typeof(UIDysonDrawingGrid).GetMethod("RaySnap", new Type[] { typeof(Ray), typeof(Vector3).MakeByRefType(), typeof(int).MakeByRefType() });
                 var methodRayCast = typeof(UIDysonDrawingGrid).GetMethod("RayCast");
-                var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere");
+                var methodRayCastSphere = typeof(Phys).GetMethod("RayCastSphere", new Type[] { typeof(Vector3), typeof(Vector3), typeof(float), typeof(Vector3), typeof(float), typeof(RCHCPU)});
 
                 for (int i = 0; i < code.Count; i++)
                 {
