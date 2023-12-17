@@ -26,12 +26,26 @@ namespace DeliverySlotsTweaks
             }
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.SetFilter))] //玩家背包的中間鍵固定格子
+        public static void OverwritePlayerPackageStacksize2(StorageComponent __instance, int gridIndex, int filterId)
+        {
+            if (filterId > 0 && IsPlayerStorage(__instance))
+            {
+                if (Plugin.PlayerPackageStackSize.Value > 0)
+                    __instance.grids[gridIndex].stackSize = packageStacksize;
+                else
+                    __instance.grids[gridIndex].stackSize = StorageComponent.itemStackCount[filterId] * packageStackMultiplier;
+            }
+        }
+
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.AddItem),
 new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) },
 new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Out })]
         [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.AddItemStacked))]
         [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.Sort))]
+        [HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.AddItemForSort))]
         static IEnumerable<CodeInstruction> OverwritePlayerPackageStacksize(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             var matcher = new CodeMatcher(instructions, il);
