@@ -7,13 +7,13 @@ namespace BulletTime
 {
     class UIBlueprint_Patch
     {
-        static float lastRefreshTime;
+        //static float lastRefreshTime;
         static string lastFilePath;
 
         [HarmonyPrefix, HarmonyPatch(typeof(UIBlueprintBrowser), nameof(UIBlueprintBrowser._OnClose))]
         public static void UIBlueprintBrowser_OnClose()
         {
-            lastRefreshTime = -1;
+            //lastRefreshTime = -1;
             lastFilePath = null;
         }
 

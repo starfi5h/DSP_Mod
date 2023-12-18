@@ -30,7 +30,7 @@ namespace BulletTime
         private void LoadConfig()
         {
             MinimumUPS = Config.Bind<float>("Multiplayer", "MinimumUPS", 50f, new ConfigDescription("Minimum UPS in client of multiplayer game\n联机-客户端的最小逻辑帧"));
-            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", true, "Do auto-save in background thread\n在背景执行自动存档");
+            EnableBackgroundAutosave = Config.Bind<bool>("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
             EnableFastLoading = Config.Bind<bool>("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind<bool>("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
             UIBlueprintAsync = Config.Bind<bool>("Speed", "UIBlueprintAsync", false, "Optimize blueprint UI to reduce freezing time\n使蓝图非同步载入,减少卡顿时间");
@@ -50,7 +50,7 @@ namespace BulletTime
                 harmony.PatchAll(typeof(GameMain_Patch));
                 harmony.PatchAll(typeof(IngameUI));
                 if (EnableBackgroundAutosave.Value)
-                    harmony.PatchAll(typeof(GameSave_Patch));
+                    GameSave_Patch.Enable(true);
                 if (EnableFastLoading.Value)
                 {
                     try
@@ -116,6 +116,7 @@ namespace BulletTime
             harmony.UnpatchSelf();
             harmony = null;
             IngameUI.Dispose();
+            GameSave_Patch.Enable(false);
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
                 NebulaCompat.Dispose();
         }

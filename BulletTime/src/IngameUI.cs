@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace BulletTime
@@ -10,6 +11,7 @@ namespace BulletTime
         private static Text stateMessage;
         private static GameObject timeText;
         private static GameObject infoText;
+        private static UIToggle backgroundSaveToggle;
 
         public static void Dispose()
         {
@@ -28,26 +30,56 @@ namespace BulletTime
             timeText = null;
             GameObject.Destroy(infoText);
             infoText = null;
+            if (backgroundSaveToggle != null)
+            {
+                GameObject.Destroy(backgroundSaveToggle.transform.parent.gameObject);
+                backgroundSaveToggle = null;
+            }
         }
 
         public static void Init()
         {
-            if (slider == null)
+            try
             {
-                GameObject go = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/audio/Slider");
-                Transform cpuPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel").transform;
-                go = GameObject.Instantiate(go, cpuPanel);
-                go.name = "RealTickRatioSlider";
-                go.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
-                slider = go.GetComponent<Slider>();
-                text = go.GetComponentInChildren<Text>();                
-                slider.value = BulletTimePlugin.StartingSpeed.Value;
-                slider.onValueChanged.AddListener(value => OnSliderChange(value));
-                OnSliderChange(slider.value);
+                if (slider == null)
+                {
+                    // Set slider
+                    GameObject go = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/audio/Slider");
+                    Transform cpuPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel").transform;
+                    go = GameObject.Instantiate(go, cpuPanel);
+                    go.name = "RealTickRatioSlider";
+                    go.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
+                    slider = go.GetComponent<Slider>();
+                    text = go.GetComponentInChildren<Text>();
+                    slider.value = BulletTimePlugin.StartingSpeed.Value;
+                    slider.onValueChanged.AddListener(value => OnSliderChange(value));
+                    OnSliderChange(slider.value);
+
+                    // Set toggle
+                    GameObject checkBox = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
+                    Transform dataPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/data-panel").transform;
+                    GameObject backgroundSaveGo = GameObject.Instantiate(checkBox, dataPanel);
+                    backgroundSaveGo.name = "Background autosave toggle";
+                    backgroundSaveGo.transform.localPosition = new Vector3(250, 390, 0);
+                    GameObject.Destroy(backgroundSaveGo.GetComponent<Localizer>());
+                    Text text_local = backgroundSaveGo.GetComponent<Text>();
+                    //text_local.font = text_factory.font;
+                    text_local.fontSize = 14;
+                    text_local.text = "Background autosave".Translate();
+
+                    backgroundSaveToggle = backgroundSaveGo.GetComponentInChildren<UIToggle>();
+                    backgroundSaveToggle.transform.localPosition = new Vector3(65, -20, 0);
+                    backgroundSaveToggle.isOn = GameSave_Patch.isEnabled;
+                    backgroundSaveToggle.toggle.onValueChanged.AddListener(OnAutosaveToggleChange);
+                }
+                // Only host can have control slider
+                slider.gameObject.SetActive(!NebulaCompat.IsClient);
+                GameStateManager.ManualPause = false;
             }
-            // Only host can have control slider
-            slider.gameObject.SetActive(!NebulaCompat.IsClient);
-            GameStateManager.ManualPause = false;
+            catch (System.Exception e)
+            {
+                Log.Warn("IngameUI fail! error:\n" + e);
+            }
         }
 
         public static void OnPauseModeChange(bool pause)
@@ -110,6 +142,12 @@ namespace BulletTime
             {
                 OnSliderChange(slider.value);
             }
+        }
+
+        private static void OnAutosaveToggleChange(bool val)
+        {
+            GameSave_Patch.Enable(val);
+            backgroundSaveToggle.isOn = val;
         }
 
         public static void ShowStatus(string message)

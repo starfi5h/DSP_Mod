@@ -9,6 +9,25 @@ namespace BulletTime
     class GameSave_Patch
     {
         public static bool isBlocked = false;
+        public static bool isEnabled = false;
+        private static Harmony harmony = null;
+
+        public static void Enable(bool enable)
+        {
+            if (enable && harmony == null)
+            {
+                Log.Debug("Patch GameSave_Patch");
+                harmony = Harmony.CreateAndPatchAll(typeof(GameSave_Patch));
+                isEnabled = true;
+            }
+            if (!enable && harmony != null)
+            {
+                Log.Debug("Unpatch GameSave_Patch");
+                harmony.UnpatchSelf();
+                harmony = null;
+                isEnabled = false;
+            }
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(UIGame), nameof(UIGame._OnUpdate))]
