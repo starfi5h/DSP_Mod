@@ -93,7 +93,25 @@ namespace BulletTime
             }
             GameStateManager.SetSpeedRatio(value/100f);
         }
-        
+
+        public static void OnKeyPause()
+        {
+            if (NebulaCompat.IsClient) //暫時不允許客戶端啟用時停
+                return;
+
+            if (GameStateManager.Pause == false) //不在時停狀態時,切換至時停
+            {
+                GameStateManager.ManualPause = true; //進入手動時停狀態
+                if (NebulaCompat.IsMultiplayerActive)
+                    NebulaCompat.SendPacket(PauseEvent.Pause);
+                GameStateManager.SetPauseMode(true);
+            }
+            else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
+            {
+                OnSliderChange(slider.value);
+            }
+        }
+
         public static void ShowStatus(string message)
         {
             if (stateMessage == null)
