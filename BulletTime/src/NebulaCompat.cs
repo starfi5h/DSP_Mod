@@ -10,7 +10,8 @@ namespace BulletTime
 {
     public static class NebulaCompat
     {
-        public const string GUID = "dsp.nebula-multiplayer-api";
+        public const string APIGUID = "dsp.nebula-multiplayer-api";
+        public const string GUID = "dsp.nebula-multiplayer";
         public static bool NebulaIsInstalled { get; private set; }
         public static bool IsMultiplayerActive { get; private set; }
         public static bool IsClient { get; private set; }
