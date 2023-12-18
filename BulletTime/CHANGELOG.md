@@ -1,5 +1,14 @@
 ## Changelog
 
+#### v1.3.0
+\- Adapt to game version 0.10.28.20829 For game version 0.9.27, please roll back to BulletTime v1.2.14.  
+\- Add a toggle button to enable background auto feature in performance pannel. The default value is set to off now.  
+\- Add config `Hotkey`-`KeyPause`, which will toggle pause mode by hitting the hotkey.  
+\- Config option `KeyAutosave` has been move to `Hotkey` catagory.  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v1.2.14
 \- Fix error by fast travel when pasueThisFrame. Fast travel to another planet is now disable during pause mode.  
 
@@ -12,9 +21,6 @@
 
 #### v1.2.11 (DSP0.9.27.15466)  
 \- Add `UIBlueprintAsync` config option.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v1.2.10  
 \- Remove game speed indicator for 0.9.27.14546.  

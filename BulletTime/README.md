@@ -10,7 +10,7 @@
 
 ### Game speed adjustment  
 Slow game speed down to lower calculation workload. Improve FPS in late game.  
-The speed adjustment only affects factories, the mecha will still in normal speed.  
+The speed adjustment affects everything but the mecha, the mecha will still in normal speed.  
 The control slider is on in-game statistic performance panel.  
 When speed is set to 0, the game will enter pause mode, game tick and factories will stop.  
   
@@ -29,11 +29,14 @@ Run the game one time to generate `com.starfi5h.plugin.BulletTime.cfg` file.
 Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html).   
 
 - `EnableBackgroundAutosave`  
-Run autosave in background. (Default:`true`)  
+Run autosave in background. Besides config file, it can toggle in stat - performance panel. (Default:`false`)  
 
 - `KeyAutosave`  
 Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
-  
+
+- `KeyPause`  
+Hotkey for toggling pause. (Default:`Pause｜Break`)  
+
 - `StartingSpeed`  
 Game speed when the game begin. range:0-100  (Default:`100`)  
 
@@ -54,7 +57,6 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 - [✅] GalacticScale  
 - [✅] NebulaMultiplayer  
-- [❔] [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/): If `RemoveGC` is enabled, don't toggle 'Finish build immediately' and 'Architect mode' features of CheatEnabler in game.  
 
 ### Extra Functions in Nebula Multiplayer  
 
@@ -70,8 +72,8 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 ## 调整游戏速度
 
-在性能测试面板可以调整游戏速度(0~100%)，只影响工厂，机甲仍保持正常速度。  
-速度为0时进入时停模式，gameTick会在离开时停模式后恢复。  
+在性能测试面板可以调整游戏速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
+速度为0或启用热键时进入时停模式，gameTick会在离开时停模式后恢复。  
 
 ## 背景自动保存
 
@@ -89,26 +91,29 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.BulletTime.cfg`文件  
 
 - `EnableBackgroundAutosave`  
-在背景执行自动保存。 (预设为开启`true`)  
+在背景执行自动保存。除了配置文件之外，它还可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
 
 - `KeyAutosave`  
-自动存档的热键组合 (预设为`F10 + LeftShift`)  
+自动存档的热键组合 (默认为`F10 + LeftShift`)  
+
+- `KeyPause`
+时停模式的热键 (默认为`Pause｜Break`)  
   
 - `StartingSpeed`   
-开始时的游戏速度，范围: 0-100 (预设为`100`)  
+开始时的游戏速度，范围: 0-100 (默认为`100`)  
 
 - `EnableFastLoading`  
-加快载入主选单 (预设为开启`true`)  
+加快载入主选单 (默认为开启`true`)  
 
 - `RemoveGC`  
-移除建筑工具的强制内存回收 (预设为开启`true`)  
+移除建筑工具的强制内存回收 (默认为开启`true`)  
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/)：如果启用了`RemoveGC`, 不要在游戏中切换CheatEnabler的“建造秒完成”和“建筑师模式”功能, 请于游戏外部修改配置文件。  
 
 - `UIBlueprintAsync`  
-使蓝图非同步载入,减少卡顿时间 (预设为关闭`false`)  
+使蓝图非同步载入,减少卡顿时间 (默认为关闭`false`)  
 
 - `MinimumUPS`  
-联机mod-客户端的最小逻辑帧 (预设为`50.0`)  
+联机mod-客户端的最小逻辑帧 (默认为`50.0`)  
 
 
 ## 联机功能  
