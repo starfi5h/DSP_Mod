@@ -41,12 +41,13 @@ namespace BulletTime
             PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);            
 
             PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
-            bool flag = gameData.DetermineLocalPlanet();
+            bool flag = !__instance.isMenuDemo && gameData.DetermineLocalPlanet();
             gameData.DetermineRelative();
+            __instance.SetStarmapReferences(GameMain.data);
             if (flag)
                 GameCamera.instance.FrameLogic();
             VFInput.UpdateGameStates();
-            if (UIRoot.instance.uiGame.starmap.fastTravelling) // Use original path for fast travel
+            if (GameMain.mainPlayer?.controller.actionSail.fastTravelling ?? false) // Use original path for fast travel
             {
                 GameMain.universeSimulator.GameTick(__instance.timef);
                 gameData.DetermineRelative();
@@ -55,15 +56,15 @@ namespace BulletTime
             }
             else
             {
-                UniverseSimulatorGameTick();
+                UniverseSimulatorGameTick(); //靜止宇宙
             }
             PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
+            // Scenario的部分需要時間前進才有用, 跳過
 
-
+            // Extract the part meaningful to player in GameData.GameTick():
             PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
             gameData.mainPlayer.packageUtility.Count();
             PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
-
             if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
             {
                 // update player.cmd.raycast
@@ -72,10 +73,10 @@ namespace BulletTime
                 GameMain.localPlanet.physics.GameTick();
                 PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
             }
-            if (GameMain.data.guideMission != null)
+            if (gameData.guideMission != null)
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
-                gameData.guideMission.GameTick();
+                gameData.guideMission.GameTick(); // what does this do?
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Scenario);
             }
             if (GameMain.mainPlayer != null)
@@ -87,7 +88,7 @@ namespace BulletTime
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
             }
 
-            EndLogic:
+        EndLogic:
             PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
             PerformanceMonitor.EndLogicFrame();
 
@@ -182,6 +183,7 @@ namespace BulletTime
             {
                 universe.backgroundStars.transform.rotation = Quaternion.identity;
             }
+            // this.galaxyData.UpdatePoses(time); //保留原本星球位置,只在接下來計算鏡頭相對位置
             Vector3 position = GameMain.mainPlayer.position;
             VectorLF3 uPosition = GameMain.mainPlayer.uPosition;
             Vector3 position2 = GameCamera.main.transform.position;
@@ -196,7 +198,7 @@ namespace BulletTime
                 {
                     if (universe.planetSimulators[i] != null)
                     {
-                        universe.planetSimulators[i].UpdateUniversalPosition(position, uPosition, position2);
+                        universe.planetSimulators[i].UpdateUniversalPosition(uPosition, position2);
                     }
                 }
             }
@@ -208,7 +210,7 @@ namespace BulletTime
             if (player == null)
                 return;
 
-            if (GameStateManager.Interactable)
+            if (GameStateManager.Interactable) //允許完整互動
             {
                 player.GameTick(time);
                 return;
@@ -223,10 +225,11 @@ namespace BulletTime
                 player.controller.cmd.raycast.castVein.id = 0;
             }
 
-            player.controller.GameTick(time);
+            player.controller.GameTick(time); //機甲動作
             player.gizmo.GameTick();
             player.orders.GameTick(time);
-            player.mecha.forge.GameTick(time, 0.016666668f);
+            player.mecha.forge.GameTick(time, 0.016666668f); //forge是在Mecha.GameTick中唯一沒有和外界交互的
+            player.mecha.UpdateSkillColliders(); //更新玩家的護盾位置
 
             Monitor.Exit(player);
         }
