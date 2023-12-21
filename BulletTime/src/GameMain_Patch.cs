@@ -88,6 +88,18 @@ namespace BulletTime
                 PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
             }
 
+            if (gameData.spaceSector != null)
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
+                gameData.spaceSector.model.PostGameTick(); //refresh visaul position
+                if (!DSPGame.IsMenuDemo)
+                {
+                    gameData.spaceSector.physics.PostGameTick(); //refresh collision box
+                }
+                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
+            }
+            // LocalAudio 暫時不管它
+
         EndLogic:
             PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
             PerformanceMonitor.EndLogicFrame();
