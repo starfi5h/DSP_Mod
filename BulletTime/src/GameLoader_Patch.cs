@@ -33,7 +33,7 @@ namespace BulletTime
         [HarmonyPostfix, HarmonyPatch(typeof(GameLoader), nameof(GameLoader.FixedUpdate))]
         static void FixedUpdate_Postfix(GameLoader __instance)
         {
-            if (__instance.frame >= 5 && DSPGame.Game.isMenuDemo)
+            if (__instance.frame >= 5 && DSPGame.Game.isMenuDemo && !DSPGame.IsCombatCutscene)
             {
                 Log.Debug("MenuDemo - Fast forward");
                 GameMain.data.SetReady();
