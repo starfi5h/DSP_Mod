@@ -35,7 +35,7 @@ Run autosave in background. Besides config file, it can toggle in stat - perform
 Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
 
 - `KeyPause`  
-Hotkey for toggling pause. (Default:`Pause｜Break`)  
+Hotkey for toggling special pause mode. (projectiles in normal time flow) (Default:`Pause｜Break`)  
 
 - `StartingSpeed`  
 Game speed when the game begin. range:0-100  (Default:`100`)  
@@ -97,7 +97,7 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 自动存档的热键组合 (默认为`F10 + LeftShift`)  
 
 - `KeyPause`
-时停模式的热键 (默认为`Pause｜Break`)  
+特殊时停模式(子弹流速正常+画面提示)的热键 (默认为`Pause｜Break`)  
   
 - `StartingSpeed`   
 开始时的游戏速度，范围: 0-100 (默认为`100`)  
@@ -107,7 +107,6 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 - `RemoveGC`  
 移除建筑工具的强制内存回收 (默认为开启`true`)  
-[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/)：如果启用了`RemoveGC`, 不要在游戏中切换CheatEnabler的“建造秒完成”和“建筑师模式”功能, 请于游戏外部修改配置文件。  
 
 - `UIBlueprintAsync`  
 使蓝图非同步载入,减少卡顿时间 (默认为关闭`false`)  

@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.3.1
+\- Fix error when creating a new game with dark fog enabled.  
+\- Pause mode using pause hotkey will now let projectiles fire in normal speed and display a notification.  
+
 #### v1.3.0
 \- Adapt to game version 0.10.28.20829 For game version 0.9.27, please roll back to BulletTime v1.2.14.  
 \- Add a toggle button to enable background auto feature in performance pannel. The default value is set to off now.  
