@@ -90,6 +90,9 @@ namespace BulletTime
 
             if (gameData.spaceSector != null)
             {
+                if (GameStateManager.Interactable)
+                    SkillSystem_Patch.GameTick(gameData.spaceSector.skillSystem);
+
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
                 gameData.spaceSector.model.PostGameTick(); //refresh visaul position
                 if (!DSPGame.IsMenuDemo)

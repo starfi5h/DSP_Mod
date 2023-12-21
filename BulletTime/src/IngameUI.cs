@@ -102,6 +102,7 @@ namespace BulletTime
             }            
             if (text != null)
                 text.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
+            SkillSystem_Patch.Enable = false; //當暫停模式有任何變化,都取消子彈時間
         }
 
         private static void OnSliderChange(float value)
@@ -119,11 +120,12 @@ namespace BulletTime
                 text.text = $"{(int)value}%";
                 if (GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                 {
-                    NebulaCompat.SendPacket(PauseEvent.Resume);
-                    ShowStatus("");
+                    NebulaCompat.SendPacket(PauseEvent.Resume);                    
                 }
+                ShowStatus("");
             }
             GameStateManager.SetSpeedRatio(value/100f);
+            SkillSystem_Patch.Enable = false;
         }
 
         public static void OnKeyPause()
@@ -134,9 +136,14 @@ namespace BulletTime
             if (GameStateManager.Pause == false) //不在時停狀態時,切換至時停
             {
                 GameStateManager.ManualPause = true; //進入手動時停狀態
+                GameStateManager.SetPauseMode(true);
                 if (NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
-                GameStateManager.SetPauseMode(true);
+                else
+                {
+                    SkillSystem_Patch.Enable = true;
+                    ShowStatus("Bullet Time".Translate());
+                }
             }
             else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
             {

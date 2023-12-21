@@ -337,6 +337,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\SkillSystem_Patch.cs" />
     <Compile Include="src\BuildTool_Patch.cs" />
     <Compile Include="src\GameLoader_Patch.cs" />
     <Compile Include="src\NebulaCompat.cs" />
