@@ -14,6 +14,7 @@ namespace SampleAndHoldSim
     public class Compatibility
     {
         static string errorMessage = "";
+        static string warnMessage = "";
 
         public static void Init(Harmony harmony)
         {
@@ -26,7 +27,7 @@ namespace SampleAndHoldSim
             Blackbox_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
 
-            if (!string.IsNullOrEmpty(errorMessage))
+            if (!string.IsNullOrEmpty(errorMessage) || !string.IsNullOrEmpty(warnMessage))
             {
                 harmony.PatchAll(typeof(Compatibility));
             }
@@ -40,13 +41,20 @@ namespace SampleAndHoldSim
         [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
         static void ShowMessage()
         {
-            errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
-            UIMessageBox.Show("SampleAndHoldSim", errorMessage, "确定".Translate(), 3);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
+                UIMessageBox.Show("SampleAndHoldSim 模拟帧", errorMessage, "确定".Translate(), 3);
+            }
+            if (!string.IsNullOrEmpty(warnMessage))
+            {
+                UIMessageBox.Show("SampleAndHoldSim 模拟帧", warnMessage, "确定".Translate(), 3);
+            }
         }
 
         public static class NebulaAPI
         {
-            public const string GUID = "dsp.nebula-multiplayer-api";
+            public const string GUID = "dsp.nebula-multiplayer";
             public static bool IsClient { get; private set; }
             public static bool IsPatched { get; private set; }
 
@@ -121,7 +129,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CommonAPI compatibility failed! Last working version: 1.5.7";
+                    string message = "CommonAPI compatibility failed! Last working version: 1.6.2";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -143,7 +151,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "DSPOptimizations compatibility failed! Last working version: 1.1.14";
+                    string message = "DSPOptimizations compatibility failed! Last working version: 1.1.16";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -176,12 +184,12 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(Warper));
-
-                    Log.Debug("Multfunction_mod compatibility - OK");
+                    warnMessage += "SampleAndHoldSim对Multifunction的部分功能(星球矿机, 内置喷涂..)兼容性不佳,可能会造成统计数据异常";
+                    //Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "Multfunction_mod compatibility failed! Last working version: 2.8.6";
+                    string message = "Multfunction_mod compatibility failed! Last working version: 3.1.3";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -190,7 +198,7 @@ namespace SampleAndHoldSim
 
             public static class Warper
             {
-                [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.EjectorComponentPatch))]
+                [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch.SomePatch), nameof(Multifunctionpatch.SomePatch.EjectorComponentPatch))]
                 public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
@@ -220,93 +228,6 @@ namespace SampleAndHoldSim
                     int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
-                }
-
-                static bool clearFlag;
-
-                [HarmonyPrefix, HarmonyPatch(typeof(Multifunctionpatch), nameof(Multifunctionpatch.Prefix), new Type[] { typeof(ProductionStatistics) })]
-                public static bool AddStatDic_Prefix(ref bool __result)
-                {
-                    // 將星球礦機視為工廠外部, 覆寫原本的邏輯
-                    var factoryStatPool = GameMain.data.statistics.production.factoryStatPool;
-                    clearFlag = false;
-                    __result = true;
-                    if (!GameMain.instance.running || !Multifunction.FinallyInit)
-                    {
-                        Multifunction.addStatDic = new Dictionary<int, Dictionary<int, long>>();
-                        Multifunction.consumeStatDic = new Dictionary<int, Dictionary<int, long>>();
-                        return false;
-                    }
-                    if (GameMain.galaxy != null && (Time.time - Multifunctionpatch.time) > 0.5f)
-                    {
-                        Multifunctionpatch.time = Time.time;
-                        if (Multifunction.addStatDic != null)
-                        {
-                            foreach (var planetEntry in Multifunction.addStatDic)
-                            {
-                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
-                                foreach (var kvp in planetEntry.Value)
-                                {
-                                    int itemId = kvp.Key;
-                                    int itemNum = (int)kvp.Value; // Assume addStatDic[planetId][itemId] doesn't exceed the range of int
-                                    factoryStatPool[factoryIndex].productRegister[itemId] += itemNum;
-                                }
-                            }
-                        }
-                        if (Multifunction.consumeStatDic != null)
-                        {
-                            foreach (var planetEntry in Multifunction.consumeStatDic)
-                            {
-                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
-                                foreach (var kvp in planetEntry.Value)
-                                {
-                                    int itemId = kvp.Key;
-                                    int itemNum = (int)kvp.Value; // Assume consumeStatDic[planetId][itemId] doesn't exceed the range of int
-                                    factoryStatPool[factoryIndex].consumeRegister[itemId] += itemNum;
-                                }
-                            }
-                        }
-                        clearFlag = true;
-                    }
-                    return false; // Overwrite original mod function
-                }
-
-                [HarmonyPostfix, HarmonyPatch(typeof(ProductionStatistics), nameof(ProductionStatistics.GameTick))]
-                public static void AddStatDic_Postfix()
-                {
-                    if (clearFlag)
-                    {
-                        // 將額外的統計減去, 回歸原本數值
-                        var factoryStatPool = GameMain.data.statistics.production.factoryStatPool;
-                        if (Multifunction.addStatDic != null)
-                        {
-                            foreach (var planetEntry in Multifunction.addStatDic)
-                            {
-                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
-                                foreach (var kvp in planetEntry.Value)
-                                {
-                                    int itemId = kvp.Key;
-                                    int itemNum = (int)kvp.Value;
-                                    factoryStatPool[factoryIndex].productRegister[itemId] -= itemNum; // restore stats
-                                }
-                                planetEntry.Value.Clear();
-                            }
-                        }
-                        if (Multifunction.consumeStatDic != null)
-                        {
-                            foreach (var planetEntry in Multifunction.consumeStatDic)
-                            {
-                                int factoryIndex = GameMain.galaxy.PlanetById(planetEntry.Key).factoryIndex;
-                                foreach (var kvp in planetEntry.Value)
-                                {
-                                    int itemId = kvp.Key;
-                                    int itemNum = (int)kvp.Value;
-                                    factoryStatPool[factoryIndex].productRegister[itemId] -= itemNum; // restore stats
-                                }
-                                planetEntry.Value.Clear();
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -618,7 +539,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.1";
+                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.8";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
