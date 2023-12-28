@@ -86,7 +86,7 @@ namespace DeliverySlotsTweaks
         {
             ParameterOverwrite();
             PlayerPackagePatch.OnConfigChange();
-            SetMaxDeliveryGridIndex();
+            SetMaxDeliveryGridIndex(GameMain.mainPlayer?.deliveryPackage);
         }
 
         [HarmonyPostfix, HarmonyPriority(Priority.HigherThanNormal)]
@@ -100,19 +100,22 @@ namespace DeliverySlotsTweaks
                 {
                     __instance.colCount = ColCount.Value;
                     GameMain.mainPlayer.deliveryPackage.NotifySizeChange();
-                    SetMaxDeliveryGridIndex();
                 }
             }
             if (StackSizeMultiplier.Value > 0)
                 __instance.stackSizeMultiplier = StackSizeMultiplier.Value;
         }
 
-        static void SetMaxDeliveryGridIndex()
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(DeliveryPackage), nameof(DeliveryPackage.NotifySizeChange))]
+        static void SetMaxDeliveryGridIndex(DeliveryPackage __instance)
         {
             if (UseLogisticSlots.Value)
             {
-                // 因為有Multifunction.player.deliveryPackage.NotifySizeChange(), 所以將找尋最高索引值的函式分離
-                DeliveryPackage __instance = GameMain.mainPlayer.deliveryPackage;
+                // 因為有Multifunction.player.deliveryPackage.NotifySizeChange()
+                // 所以這個找尋maxDeliveryGridIndex的函式必需限定在主玩家的物流背包
+                if (__instance == null || __instance != GameMain.mainPlayer?.deliveryPackage)
+                    return;
                 DeliveryPackagePatch.maxDeliveryGridIndex = 0;
                 for (int i = __instance.gridLength - 1; i >= 0; i--)
                 {
