@@ -18,12 +18,32 @@ namespace DeliverySlotsTweaks
                 // TODO: Add ammo in the future
                 packageStacksize = Plugin.PlayerPackageStackSize.Value;
                 Plugin.Log.LogDebug("PlayerPackage stack count:" + packageStacksize);
+                if (GameMain.mainPlayer != null)
+                {
+                    var grids = GameMain.mainPlayer.package.grids;
+                    for (int i = 0; i < GameMain.mainPlayer.package.size; i++)
+                    {
+                        if (grids[i].filter > 0)
+                            grids[i].stackSize = packageStacksize;
+                    }
+                }
             }
             else if (Plugin.PlayerPackageStackMultiplier.Value > 0)
             {
                 packageStackMultiplier = Plugin.PlayerPackageStackMultiplier.Value;
                 Plugin.Log.LogDebug("PlayerPackage stack multiplier:" + packageStackMultiplier);
+                if (GameMain.mainPlayer != null)
+                {
+                    var grids = GameMain.mainPlayer.package.grids;
+                    for (int i = 0; i < GameMain.mainPlayer.package.size; i++)
+                    {
+                        int filter = grids[i].filter;
+                        if (filter > 0 && filter < StorageComponent.itemStackCount.Length)
+                            grids[i].stackSize = StorageComponent.itemStackCount[filter] * packageStackMultiplier;
+                    }
+                }
             }
+
         }
 
         [HarmonyPostfix]
