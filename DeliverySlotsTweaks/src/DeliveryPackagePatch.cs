@@ -210,19 +210,23 @@ namespace DeliverySlotsTweaks
 
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(MechaForge), nameof(MechaForge.AddTaskIterate))]
-		public static IEnumerable<CodeInstruction> AddTaskIterate_Transpiler(IEnumerable<CodeInstruction> instructions)
+		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishAmmo))]
+		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishFuel))]
+		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishFuelAll))]
+		public static IEnumerable<CodeInstruction> TakeItem_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try
 			{
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeItem"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeItem)));
+					.Repeat(matcher => matcher
+						.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeItem))));
 
 				return codeMacher.InstructionEnumeration();
 			}
 			catch (Exception e)
 			{
-				Plugin.Log.LogWarning("Transpiler AddTaskIterate error");
+				Plugin.Log.LogWarning("Transpiler StorageComponent.TakeItem error");
 				Plugin.Log.LogWarning(e);
 				return instructions;
 			}
@@ -234,6 +238,7 @@ namespace DeliverySlotsTweaks
 
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))]
+		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.RemoveBasePit))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.OnPlayerPackageChange))]
@@ -241,6 +246,7 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu._OnUpdate))]
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
 		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
+		[HarmonyPatch(typeof(UIRemoveBasePitButton), nameof(UIRemoveBasePitButton._OnUpdate))]
 		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
@@ -269,6 +275,7 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds))]
 		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DoUpgradeObject))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))] // Note: target player.package.TakeTailItems, not tmpPackage.TakeTailItems
+		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.RemoveBasePit))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(Player), nameof(Player.TakeItemFromPlayer))] // Call by EntityFastFillIn
