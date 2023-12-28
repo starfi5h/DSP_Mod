@@ -17,11 +17,12 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.3.1";
+        public const string VERSION = "1.4.0";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
         public static ConfigEntry<bool> UseLogisticSlots;
+        public static ConfigEntry<bool> AutoRefillFuel;
         public static ConfigEntry<int> ColCount;
         public static ConfigEntry<int> StackSizeMultiplier;
         public static ConfigEntry<bool> DeliveryFirst;
@@ -34,6 +35,9 @@ namespace DeliverySlotsTweaks
         {
             UseLogisticSlots = Config.Bind("DeliveryPackage", "UseLogisticSlots", true,
                 "Let replicator and build tools use items in logistic slots.\n使手动制造和建筑工具可以使用物流清单内的物品");
+
+            AutoRefillFuel = Config.Bind("DeliveryPackage", "AutoRefillFuel", false,
+                "Allow fuel chamber to also take from logistics slots.\n自动补充燃料时也会使用物流清单内的物品");
 
             ColCount = Config.Bind("DeliveryPackage", "ColCount", 0,
                 new ConfigDescription("NoChange:0 TechMax:2 Limit:5\n物流清单容量-列(不改:0 原版科技:2 最高上限:5)", new AcceptableValueRange<int>(0, 5)));
@@ -57,7 +61,16 @@ namespace DeliverySlotsTweaks
 
             harmony.PatchAll(typeof(Plugin));
             if (UseLogisticSlots.Value)
+            {
                 harmony.PatchAll(typeof(DeliveryPackagePatch));
+                if (AutoRefillFuel.Value)
+                {
+                    harmony.Patch(AccessTools.Method(typeof(Mecha), nameof(Mecha.AutoReplenishFuel)), null, null,
+                        new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                    harmony.Patch(AccessTools.Method(typeof(Mecha), nameof(Mecha.AutoReplenishFuelAll)), null, null,
+                        new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                }
+            }
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
 #if DEBUG

@@ -211,8 +211,6 @@ namespace DeliverySlotsTweaks
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(MechaForge), nameof(MechaForge.AddTaskIterate))]
 		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishAmmo))]
-		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishFuel))]
-		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishFuelAll))]
 		public static IEnumerable<CodeInstruction> TakeItem_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try
