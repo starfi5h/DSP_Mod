@@ -22,6 +22,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | :----- | :------ | :---------- |
 | DeliveryPackage | | |
 | `UseLogisticSlots`     | true | Let replicator and build tools use items in logistic slots. Take effect affter reloading the game. |
+| `AutoRefillFuel`       | false | Allow fuel chamber to also take from logistics slots. |
 | `ColCount`             | 0    | No Change:0 TechMax:2 Limit:5 |
 | `StackSizeMultiplier`  | 0    | No Change:0 TechMax:10 |
 | `DeliveryFirst`        | true | When logistic bots send items to mecha, send them to delivery slots first. |
@@ -51,6 +52,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | :----- | :------ | :---------- |
 | DeliveryPackage | | |
 | `UseLogisticSlots`     | true | 使手动制造和建筑工具可以使用物流清单内的物品。重启游戏后生效 |
+| `AutoRefillFuel`       | false | 自动补充燃料时也会使用物流清单内的物品 |
 | `ColCount`             | 0    | 物流清单容量-列(不变:0 原版科技:2 最高上限:5) |
 | `StackSizeMultiplier`  | 0    | 物流清单物品堆叠倍率(不变:0 原版科技:10) |
 | `DeliveryFirst`        | true | 配送机会优先将物品送入物流清单的栏位 |
@@ -62,21 +64,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 RebindBuildBar(1.0.0): 可改工具列会显示背包+物流清单的建筑数目  
 CheatEnabler(2.3.7), Multifunction_mod(3.1.7): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
 NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
-
-----
-
-## Changelog
-
-v1.3.1 - Fix stack size overwirte gets reset after setting the item filter.  
-v1.3.0 - Support DSP 0.10.28.20779, upgrade compats.  
-v1.2.3 - Fix Nebula, Multfunction_mod, CheatEnabler(v2.2.7) compat.  
-v1.2.2 - UseLogisticSlots for blueprint paste. Add Multifunction_mod(ArchitectMode), RebindBuildBar compat.  
-v1.2.1 - UseLogisticSlots for Auto Replenish. Add Nebula compat.  
-v1.2.0 - Add `UseLogisticSlots`, `StackMultiplier` config options. Add CheatEnabler(ArchitectMode) compat.  
-v1.1.1 - Apply `StackSize` setting to fuel chamber and warper slot.  
-v1.1.0 - Add `StackSize` config option. Now can apply mod config changes in game settings.  
-v1.0.1 - Fix a bug that some logistics  solts are not usable.  
-v1.0.0 - Initial release. (DSPv0.9.27.15466)  
+可能会和改机甲物流背包的mod冲突  
 
 ----
 
