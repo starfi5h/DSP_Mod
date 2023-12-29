@@ -20,7 +20,7 @@ namespace SampleAndHoldSim
             Log.Debug("UpdatePeriod = " + UpdatePeriod + ", FocusLocalFactory = " + FocusLocalFactory + ", StoreLowerbound = " + StationStoreLowerbound);
         }
 
-        public static int SetFactories(PlanetFactory[] workFactories, PlanetFactory[] idleFactories)
+        public static int SetFactories(PlanetFactory[] workFactories, PlanetFactory[] idleFactories, long[] factoryTimes)
         {
             for (int index = Factories.Count; index < GameMain.data.factoryCount; index++)
             {
@@ -39,18 +39,21 @@ namespace SampleAndHoldSim
                 if ((FocusLocalFactory && (i == localFactoryId)) || (factories[i].planetId / 100 - 1) == FocusStarIndex)
                 {
                     workFactories[workFactoryCount++] = factories[i];
+                    factoryTimes[i] = time;
                     Factories[i].IsActive = true;
                     Factories[i].IsNextIdle = false; // focused local factory always active
                 }
                 else if ((i + time) % UpdatePeriod == 0)
                 {
                     workFactories[workFactoryCount++] = factories[i];
+                    factoryTimes[i] = time / UpdatePeriod; // scale down the time argument to fix % operations
                     Factories[i].IsActive = true;
                     Factories[i].IsNextIdle = UpdatePeriod > 1; // vanilla: UpdatePeriod = 1
                 }
                 else
                 {
                     idleFactories[idleFactoryCount++] = factories[i];
+                    factoryTimes[i] = time; // this should not be used
                     Factories[i].IsActive = false;
                     Factories[i].IsNextIdle = false;
                 }

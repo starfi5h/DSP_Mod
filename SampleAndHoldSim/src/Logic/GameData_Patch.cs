@@ -9,6 +9,7 @@ namespace SampleAndHoldSim
     {
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
+        static long[] factoryTimes;
         static int idleFactoryCount;
         static int workFactoryCount;
 
@@ -17,8 +18,10 @@ namespace SampleAndHoldSim
         {
             if (GameMain.data != null)
             {
-                workFactories = new PlanetFactory[GameMain.data.factories.Length];
-                idleFactories = new PlanetFactory[GameMain.data.factories.Length];
+                int length = GameMain.data.factories.Length;
+                workFactories = new PlanetFactory[length];
+                idleFactories = new PlanetFactory[length];
+                factoryTimes = new long[length];
                 MainManager.Init();
                 UIstation.SetVeiwStation(-1, -1, 0);
             }
@@ -34,7 +37,7 @@ namespace SampleAndHoldSim
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
         static void GameTick_Prefix()
         {
-            workFactoryCount = MainManager.SetFactories(workFactories, idleFactories);
+            workFactoryCount = MainManager.SetFactories(workFactories, idleFactories, factoryTimes);
             idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
         }
 
@@ -52,11 +55,39 @@ namespace SampleAndHoldSim
             // replace GameData.factoryCount with workFactoryCount
             codeMatcher = new CodeMatcher(codeMatcher.InstructionEnumeration())
                 .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "factoryCount"))
-                .Repeat(matcher => matcher
-                        .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), "workFactoryCount"))
-                        .Advance(-2)
-                        .SetAndAdvance(OpCodes.Nop, null)
-                );
+                .Repeat(matcher => {
+                    matcher
+                         .SetAndAdvance(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), "workFactoryCount"))
+                         .Advance(-2)
+                         .SetAndAdvance(OpCodes.Nop, null);
+
+                    if (matcher.InstructionAt(1).opcode == OpCodes.Blt)
+                    {
+                        // replace time with factoryTimes[i] in the loop of for (int i = 0; i < this.factoryCount; i++) {...}
+                        matcher.Advance(-6);
+                        var index = matcher.Instruction;
+                        //Log.Info(matcher.Pos + ": " + index);
+
+                        while (matcher.Opcode != OpCodes.Br) 
+                        {
+                            //if (matcher.Opcode == OpCodes.Callvirt)
+                            //    Log.Debug(matcher.Pos + ": " + matcher.Instruction);
+                            if (matcher.Opcode == OpCodes.Ldarg_1)
+                            {
+                                matcher
+                                    .RemoveInstruction()
+                                    .Insert(
+                                        new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), "factoryTimes")),
+                                        index,
+                                        new CodeInstruction(OpCodes.Ldelem_I8)
+                                    );
+                                matcher.Advance(-2);
+                                //Log.Warn(matcher.Pos);
+                            }
+                            matcher.Advance(-1);
+                        }                       
+                    }
+                });
             return codeMatcher.InstructionEnumeration();
         }
 
