@@ -353,6 +353,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Logic\CombatLogic.cs" />
     <Compile Include="src\Logic\DysonLogic.cs" />
     <Compile Include="src\Plugin\Compatibility.cs" />
     <Compile Include="src\Logic\MainManager.cs" />

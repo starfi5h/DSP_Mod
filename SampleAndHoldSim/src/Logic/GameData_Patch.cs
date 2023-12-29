@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 namespace SampleAndHoldSim
 {
-    public class GameData_Patch
+    public partial class GameData_Patch
     {
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
@@ -106,6 +106,27 @@ namespace SampleAndHoldSim
                     .SetAndAdvance(OpCodes.Ldfld, AccessTools.Field(typeof(GameData), "factories"))
                     .SetAndAdvance(OpCodes.Ldarg_0, null)
                     .SetAndAdvance(OpCodes.Ldfld, AccessTools.Field(typeof(GameData), "factoryCount"));
+
+                // Replace DFGroundSystem logic part in if (this.gameDesc.isCombatMode) {...}
+                codeMatcher.
+                    MatchForward(true,
+                        new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(GameDesc), "get_isCombatMode")),
+                        new CodeMatch(OpCodes.Brfalse),
+                        new CodeMatch(OpCodes.Ldarg_0)
+                    );
+                if (codeMatcher.IsInvalid)
+                {
+                    Log.Error("GameTick_Transpiler: Can't find DFGroundSystemLogic!");
+                    return codeMatcher.InstructionEnumeration();
+                }
+                var brfalse = codeMatcher.InstructionAt(-1);
+                // call DFGroundSystemLogic_Prefix in CombatLogic.cs
+                codeMatcher.Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldarg_1),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameData_Patch), nameof(DFGroundSystemLogic_Prefix))),
+                    brfalse
+                );
 
                 return codeMatcher.InstructionEnumeration();
             }
