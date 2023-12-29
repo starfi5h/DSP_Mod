@@ -11,13 +11,12 @@ namespace SampleAndHoldSim
     [BepInDependency(Compatibility.DSPOptimizations.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.PlanetMiner.GUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(Compatibility.DSP_Battle_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.5.7";
+        public const string VERSION = "0.6.0";
         public static Plugin instance;
         Harmony harmony;
 
@@ -29,7 +28,7 @@ namespace SampleAndHoldSim
 
         public void LoadConfig()
         {
-            UpdatePeriod = Config.Bind("General", "UpdatePeriod", 3, "Compute actual factory simulation every x ticks.\n更新周期: 每x逻辑帧运行一次实际计算");
+            UpdatePeriod = Config.Bind("General", "UpdatePeriod", 5, "Compute actual factory simulation every x ticks.\n更新周期: 每x逻辑帧运行一次实际计算");
             FocusLocalFactory = Config.Bind("General", "FocusLocalFactory", true, "Let local planet factory always active.使本地工厂保持每帧运行\n");
             SliderMaxUpdatePeriod = Config.Bind("UI", "SliderMaxUpdatePeriod", 10, "Max value of upate period slider\n更新周期滑动条的最大值");
             UIStationStoragePeriod = Config.Bind("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");

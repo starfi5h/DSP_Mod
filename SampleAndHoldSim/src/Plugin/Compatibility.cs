@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using DysonSphereProgram.Modding.Blackbox;
+﻿using DysonSphereProgram.Modding.Blackbox;
 using HarmonyLib;
 using Multifunction_mod;
 using NebulaAPI;
@@ -7,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using UnityEngine;
 
 namespace SampleAndHoldSim
 {
@@ -23,7 +21,6 @@ namespace SampleAndHoldSim
             DSPOptimizations.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             PlanetMiner.Init(harmony);
-            DSP_Battle_Patch.Init(harmony);
             Blackbox_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
 
@@ -184,7 +181,7 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(Warper));
-                    warnMessage += "SampleAndHoldSim对Multifunction的部分功能(星球矿机, 内置喷涂..)兼容性不佳,可能会造成统计数据异常";
+                    warnMessage += "Multifunction: some game-breaking features are not compatible\nSampleAndHoldSim对Multifunction的改机制功能(星球矿机等)兼容性不佳,可能会造成统计数据异常";
                     //Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
@@ -366,85 +363,6 @@ namespace SampleAndHoldSim
 #pragma warning restore CS8321
         }
 
-        public static class DSP_Battle_Patch
-        {
-            public const string GUID = "com.ckcz123.DSP_Battle";
-            public static bool IsPatched { get; private set; } = false;
-
-            public static void Init(Harmony harmony)
-            {
-                try
-                {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    harmony.PatchAll(typeof(Warper));
-                    IsPatched = true;
-                    Log.Debug("DSP_Battle compatibility - OK");
-                }
-                catch (Exception e)
-                {
-                    string message = "DSP_Battle compatibility failed! Last working version: 2.2.8";
-                    Log.Warn(message);
-                    Log.Warn(e);
-                    errorMessage += message + "\n";
-                }
-            }
-
-            public static class Warper
-            {
-                [HarmonyPostfix, HarmonyPatch(typeof(DSP_Battle.WaveStages), "Update")]
-                public static void Update()
-                {
-                    // Focus on star system that is under attack during battle stage
-                    if (DSP_Battle.Configs.nextWaveState == 3)
-                    {
-                        MainManager.FocusStarIndex = DSP_Battle.Configs.nextWaveStarIndex;
-                    }
-                    else
-                    {
-                        MainManager.FocusStarIndex = -1;
-                    }
-                }
-
-                public static void IdleTick(PlanetFactory factory)
-                {
-                    if (GameMain.instance.timei % 30 != 1) return; //ShieldGenPowerUpdatePatch1: 每半秒檢查1次
-
-                    PowerSystem powerSystem = factory.powerSystem;
-                    for (int i = 1; i < powerSystem.netCursor; i++)
-                    {
-                        PowerNetwork powerNetwork = powerSystem.netPool[i];
-                        if (powerNetwork != null && powerNetwork.id == i)
-                        {
-                            List<int> exchangers = powerNetwork.exchangers;
-                            int count = exchangers.Count;
-                            for (int k = 0; k < count; k++)
-                            {
-                                ref PowerExchangerComponent exchanger = ref powerSystem.excPool[exchangers[k]];
-                                exchanger.currEnergyPerTick *= MainManager.UpdatePeriod; // 低速狀態下, 補償護盾恢復值
-                                DSP_Battle.ShieldGenerator.ShieldGenPowerUpdatePatch1(ref exchanger);
-                                exchanger.currEnergyPerTick /= MainManager.UpdatePeriod;
-                            }
-                        }
-                    }
-                }
-
-                [HarmonyPrefix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
-                public static void RefreshPowerNetworkUI_Prefix()
-                {
-                    // 在UI中, 顯示正確的護盾恢復值。(假設UI是當地星球)
-                    if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
-                        DSP_Battle.ShieldGenerator.curShieldIncUI /= MainManager.UpdatePeriod;
-                }
-
-                [HarmonyPostfix, HarmonyPatch(typeof(DSP_Battle.ShieldGenerator), "RefreshPowerNetworkUI")]
-                public static void RefreshPowerNetworkUI_Postfix()
-                {
-                    if (MainManager.UpdatePeriod > 1 && (!MainManager.FocusLocalFactory))
-                        DSP_Battle.ShieldGenerator.curShieldIncUI *= MainManager.UpdatePeriod;
-                }
-            }
-        }
-
         public static class Blackbox_Patch
         {
             public const string GUID = "dev.raptor.dsp.Blackbox";
@@ -502,16 +420,7 @@ namespace SampleAndHoldSim
                                     factoryStatPool.consumeRegister[consumption.Key] -= countToAdd; // revert count
                                 }
                             }
-                            /* BlackboxSimulation.continuousStats is always true
-                            else if (simulation.timeIdx == 0)
-                            {
-                                var factoryStatPool = GameMain.data.statistics.production.factoryStatPool[factory.index];
-                                foreach (var production in Recipe.produces)
-                                    factoryStatPool.productRegister[production.Key] -= production.Value;
-                                foreach (var consumption in Recipe.consumes)
-                                    factoryStatPool.consumeRegister[consumption.Key] -= consumption.Value;
-                            }
-                            */
+                            /* BlackboxSimulation.continuousStats is always true */
                         }
                     }
                 }
