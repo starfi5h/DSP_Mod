@@ -1,7 +1,7 @@
 {
     "name": "SampleAndHoldSim",
-    "description": "Approximated simulation to improve UPS (warning: may disable Milkyway upload).  模拟星球工厂的输入输出以减少运算(可能会无法上传银河系)",
-    "version_number": "0.5.7",
+    "description": "Approximated simulation to improve UPS (warning: may disable Milkyway upload or corrupt saves).  模拟帧-减慢远端星球工厂更新频率并放大产出以提升帧率(可能会无法上传银河系) 黑雾版本测试中,可能崩档,请多备份存档",
+    "version_number": "0.6.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/SampleAndHoldSim",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

@@ -1,5 +1,13 @@
 ## Changelog
 
+#### v0.6.0 (DSP-0.10.28.21014)
+\- Adapt to game Dark Fog version. (The battle part still needs testing)  
+\- `UpdatePeriod` default value is not set to 5.  
+\- Remove TCFV and Multfuntion compat support.  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.5.7  
 \- Remove vein logic.  
 \- Update CheatEnabler compat to v2.3.1  
@@ -9,11 +17,8 @@
 \- Add CheatEnabler 2.2.0 compat.  
 \- Fix PlanetMiner 3.0.7 compat.  
 
-#### v0.5.5 (DSP0.9.27.15466)
+#### v0.5.5
 \- Fix stats incorrect for Multfuntion mod planet miners.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.5.4
 \- Fix len consumption rate abnormal on idle factories.  
@@ -31,7 +36,7 @@
 \- Fix error when player land on an unexplored planet.  
 \- Reduce memory allocation to fix stuttering.  
 
-#### v0.5.0 (DSP0.9.27.15466)
+#### v0.5.0 (DSP-0.9.27.15466)
 \- Rework: Change logic from MaxFactoryCount to UpdatePeriod, add related config.    
 \- Remove vein comsumption rate UI.  
 \- Enable station storage to have negative values to prevent generating extra item.  
