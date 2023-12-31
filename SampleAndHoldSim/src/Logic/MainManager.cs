@@ -36,7 +36,7 @@ namespace SampleAndHoldSim
             int localFactoryId = GameMain.localPlanet?.factory?.index ?? -1; // unexplored planet may not have factory on it
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
-                if ((FocusLocalFactory && (i == localFactoryId)) || (factories[i].planetId / 100 - 1) == FocusStarIndex)
+                if ((FocusLocalFactory && (i == localFactoryId)))
                 {
                     workFactories[workFactoryCount] = factories[i];
                     workFactoryTimes[workFactoryCount] = time;
@@ -61,6 +61,7 @@ namespace SampleAndHoldSim
             }
 
             FocusPlanetId = (FocusLocalFactory && UpdatePeriod > 1 && GameMain.localPlanet != null) ? GameMain.localPlanet.id : -1;
+            FocusStarIndex = (FocusLocalFactory && UpdatePeriod > 1 && GameMain.localStar != null) ? GameMain.localStar.index : -1;
             return workFactoryCount;
         }
 
