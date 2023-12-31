@@ -69,7 +69,7 @@ namespace SampleAndHoldSim
 		static void UpdateHives(SpaceSector @this, long realTime)
         {
 			int scale = MainManager.UpdatePeriod;
-			int time = (int)realTime;
+			int time = (int)(realTime & 0x7FFFFFFF); //positive value only
 			int focusStarIndex = MainManager.FocusStarIndex;
 
 			if (@this.dfHives != null)
@@ -107,11 +107,12 @@ namespace SampleAndHoldSim
 				PerformanceMonitor.EndSample(ECpuWorkEntry.Enemy);
 
 				// Update space hive keyTick logic every (60 * UpdatePeriod) tick
-				int startIndex = (time - 1) * hiveLength / (60 * scale);
-				int endIndex = time * hiveLength / (60 * scale);
+				int cycleTick = time % (60 * scale); // prevent overflow in the following index
+				int startIndex = (cycleTick - 1) * hiveLength / (60 * scale);
+				int endIndex = cycleTick * hiveLength / (60 * scale);
 				for (int i = startIndex; i < endIndex; i++)
 				{
-					int id = (i % hiveLength);
+					int id = i % hiveLength;
 					if (id == focusStarIndex) continue;
 					HiveKeyTickLogic(@this.dfHives[id], time / scale);
 				}

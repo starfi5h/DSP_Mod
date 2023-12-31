@@ -121,7 +121,7 @@ namespace SampleAndHoldSim
                 station.storage[i].inc += data.tmpInc[i];
                 if (station.storage[i].count < MainManager.StationStoreLowerbound)
                 {
-                    Log.Warn($"station{station.id} - store{i}: {station.storage[i].count}");
+                    Log.Debug($"station{station.id} - store{i}: {station.storage[i].count}");
                     station.storage[i].count = MainManager.StationStoreLowerbound;
                 }
             }
