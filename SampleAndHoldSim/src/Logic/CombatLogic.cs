@@ -19,7 +19,7 @@ namespace SampleAndHoldSim
 				PerformanceMonitor.BeginSample(ECpuWorkEntry.Enemy);
 				for (int i = 0; i < workFactoryCount; i++)
 				{
-					workFactories[i].enemySystem.GameTickLogic(factoryTimes[i]); // keytick_timer++ in this
+					workFactories[i].enemySystem.GameTickLogic(workFactoryTimes[i]); // keytick_timer++ in this
 					workFactories[i].enemySystem.ExecuteDeferredEnemyChange();
 				}
 				PerformanceMonitor.EndSample(ECpuWorkEntry.Enemy);
@@ -30,7 +30,7 @@ namespace SampleAndHoldSim
 					if (enemySystem != null && enemySystem.keytick_timer >= 60) // Update KeyTickLogic every 60 ticks
 					{
 						enemySystem.DecisionAI();
-						enemySystem.KeyTickLogic(factoryTimes[i]);
+						enemySystem.KeyTickLogic(workFactoryTimes[i]);
 						enemySystem.ExecuteDeferredEnemyChange();
 						enemySystem.ExecuteDeferredUnitFormation();
 						enemySystem.PostKeyTick();

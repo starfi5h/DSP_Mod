@@ -9,7 +9,7 @@ namespace SampleAndHoldSim
     {
         static PlanetFactory[] idleFactories;
         static PlanetFactory[] workFactories;
-        static long[] factoryTimes;
+        static long[] workFactoryTimes;
         static int idleFactoryCount;
         static int workFactoryCount;
 
@@ -21,7 +21,7 @@ namespace SampleAndHoldSim
                 int length = GameMain.data.factories.Length;
                 workFactories = new PlanetFactory[length];
                 idleFactories = new PlanetFactory[length];
-                factoryTimes = new long[length];
+                workFactoryTimes = new long[length]; // the scale tick of the working factories
                 MainManager.Init();
                 UIstation.SetVeiwStation(-1, -1, 0);
             }
@@ -37,7 +37,7 @@ namespace SampleAndHoldSim
         [HarmonyPrefix, HarmonyPatch(typeof(GameData), "GameTick")]
         static void GameTick_Prefix()
         {
-            workFactoryCount = MainManager.SetFactories(workFactories, idleFactories, factoryTimes);
+            workFactoryCount = MainManager.SetFactories(workFactories, idleFactories, workFactoryTimes);
             idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
         }
 
@@ -63,7 +63,7 @@ namespace SampleAndHoldSim
 
                     if (matcher.InstructionAt(1).opcode == OpCodes.Blt)
                     {
-                        // replace time with factoryTimes[i] in the loop of for (int i = 0; i < this.factoryCount; i++) {...}
+                        // replace time with workFactoryTimes[i] in the loop of for (int i = 0; i < this.factoryCount; i++) {...}
                         matcher.Advance(-6);
                         var index = matcher.Instruction;
                         //Log.Info(matcher.Pos + ": " + index);
@@ -77,7 +77,7 @@ namespace SampleAndHoldSim
                                 matcher
                                     .RemoveInstruction()
                                     .Insert(
-                                        new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), "factoryTimes")),
+                                        new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GameData_Patch), "workFactoryTimes")),
                                         index,
                                         new CodeInstruction(OpCodes.Ldelem_I8)
                                     );
