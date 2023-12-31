@@ -53,6 +53,9 @@ If you're using mod manager, you can find the file in Config editor.
 
 ## Changelog
 
+#### v1.3.1
+\- Fix the TypeLoadException error in ejector window.  
+
 #### v1.3.0 (DSP 0.10.28.21150)
 \- Add a button in ejector window to toggle `ForceRetargeting`.
 

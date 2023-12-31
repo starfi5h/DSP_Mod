@@ -26,7 +26,7 @@ namespace RailgunsRetargetMini
                     label.transform.localPosition += new Vector3(-10, 0, 0);
                     UnityEngine.Object.Destroy(label.GetComponent<Localizer>());
                     var text = label.GetComponent<Text>();
-                    text.text = "Force Retarget".Translate();
+                    text.text = "Force Retarget";
                     text.horizontalOverflow = HorizontalWrapMode.Overflow;
 
                     var uibutton = go.GetComponent<UIButton>();
