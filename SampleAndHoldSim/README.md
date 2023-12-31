@@ -6,7 +6,7 @@ Reduce the update frequency of the remote planets and multiply their input/outpu
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/demo5.gif)  
 The mod control panel is on the statistics panel - performance test.  
 Ratio - PlanetFactory is updated every x ticks. The input field can set the value higher than 10.   
-Focus Local - When enabled, the local planet factory will always be active. It can give a better gaming experience.  
+Focus Local - When enabled, the local planet/star will always be active. It can give a better gaming experience.  
 **Warning: Because this mod manipulates stats data and item generation, it may disable Milkyway upload.**  
 **Warning: This mod is not fully tested against Dark Fog enemies, back up your saves before using it.**
 
@@ -15,11 +15,11 @@ Additional UI for displaying flow-in/flow-out rate of cargo in stations. Configu
 
 ## How does it work
 
-Let factories have active tick and idle tick. When active, the factory will run the whole simulation. When idle, the factory will use values from the last active tick to generate input and output, multiplying the "result".  
-The goal is to make factories tick less but still make nearly the same amount of items in ILS in the long term, trade accuracy for UPS.    
 <details>
 <summary>Click to expand</summary>
 
+Let factories have active tick and idle tick. When active, the factory will run the whole simulation. When idle, the factory will use values from the last active tick to generate input and output, multiplying the "result".  
+The goal is to make factories tick less but still make nearly the same amount of items in ILS in the long term, trade simulation accuracy for UPS.   
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/time_chart.png)  
 User can set how many planet factories can work during a game tick, the rest will be put into the idle state. For working factories, the factories will run as normal. For idle factories, simulate the input/output by value changes of the last active tick.  
 In the example chart, the upper one is the original game which runs 3 factories per tick, and their factory cycles are 4/3/2. The lower one set cycle time = 3 ticks so there is only 1 factory run per tick, and it now takes 3 times to complete a full factory cycle.  
@@ -80,7 +80,7 @@ If true, show the rate per minute. otherwise, show the rate per second.
 
 ## 运作原理
 
-目前对于太空中的黑雾采取的方法是和地面的单位一起降速, 可能会对平衡造成影响
+目前对于太空中的黑雾采取的方法是除了本地星系的巢穴,其余的依照倍率降速,可能会对平衡造成影响
 <details>
 <summary>点击展开</summary>
 

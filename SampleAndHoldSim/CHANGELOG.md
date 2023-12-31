@@ -1,5 +1,10 @@
 ## Changelog
 
+#### v0.6.1
+\- Focus local now will focus on local star system, including every hives and planets in the system.  
+\- Player space fleet now always run in normal speed.  
+\- Fix time value error in enemy tick logic take make enemy behave abnormally.  
+
 #### v0.6.0 (DSP-0.10.28.21014)
 \- Adapt to game Dark Fog version. (The battle part still needs testing)  
 \- `UpdatePeriod` default value is not set to 5.  
