@@ -133,6 +133,7 @@ namespace DeliverySlotsTweaks
 		#region MechaDroneLogic
 
 		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(ConstructionModuleComponent), nameof(ConstructionModuleComponent.SearchForNewTargets))]
 		[HarmonyPatch(typeof(ConstructionSystem), nameof(ConstructionSystem.FindNextConstruct))]
 		public static IEnumerable<CodeInstruction> FindNextConstruct_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
@@ -239,12 +240,14 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.RemoveBasePit))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
+		[HarmonyPatch(typeof(PlayerAction_Inspect), nameof(PlayerAction_Inspect.GameTick))]
 		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.OnPlayerPackageChange))]
 		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.SetComponentItem))]
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu._OnUpdate))]
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
 		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
 		[HarmonyPatch(typeof(UIRemoveBasePitButton), nameof(UIRemoveBasePitButton._OnUpdate))]
+		[HarmonyPatch(typeof(UITurretWindow), nameof(UITurretWindow.OnHandFillAmmoButtonClick))]
 		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
@@ -277,6 +280,9 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.StationAutoReplenishIfNeeded))]
 		[HarmonyPatch(typeof(Player), nameof(Player.TakeItemFromPlayer))] // Call by EntityFastFillIn
+		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DoUpgradeObject))]
+		[HarmonyPatch(typeof(PlayerAction_Inspect), nameof(PlayerAction_Inspect.GameTick))]
+		[HarmonyPatch(typeof(UITurretWindow), nameof(UITurretWindow.OnHandFillAmmoButtonClick))]
 		public static IEnumerable<CodeInstruction> CheckBuildConditions_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
