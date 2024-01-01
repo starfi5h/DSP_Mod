@@ -130,6 +130,29 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.Sort))]
+		public static void Sort_Prefix(StorageComponent __instance)
+		{
+			if (__instance != GameMain.mainPlayer?.package) return;
+
+			// Try to move item into delivery slots before sorting
+			var packageGrids = __instance.grids;
+			var deliveryPackage = GameMain.mainPlayer.deliveryPackage;
+			int length = __instance.size < __instance.grids.Length ? __instance.size : __instance.grids.Length;
+			for (int i = length - 1; i > 0; i--)
+			{
+				ref var grid = ref packageGrids[i];
+				int itemId = grid.itemId;
+				if (itemId > 0 && deliveryGridindex.ContainsKey(itemId))
+				{
+					int sentItemCount = deliveryPackage.AddItem(deliveryGridindex[itemId], itemId, grid.count, grid.inc, out int remainInc);
+					grid.count -= sentItemCount;
+					grid.inc = remainInc;
+				}
+			}
+		}
+
 		#region MechaDroneLogic
 
 		[HarmonyTranspiler]
@@ -274,7 +297,6 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(BuildTool_Addon), nameof(BuildTool_Addon.CreatePrebuilds))]
 		[HarmonyPatch(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.CreatePrebuilds))]
 		[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds))]
-		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.DoUpgradeObject))]
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.ReformAction))] // Note: target player.package.TakeTailItems, not tmpPackage.TakeTailItems
 		[HarmonyPatch(typeof(BuildTool_Reform), nameof(BuildTool_Reform.RemoveBasePit))]
 		[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.EntityAutoReplenishIfNeeded))]
