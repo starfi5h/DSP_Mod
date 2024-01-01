@@ -13,6 +13,7 @@ namespace DeliverySlotsTweaks
             CheatEnabler_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             RebindBuildBar_Patch.Init(harmony);
+            UnlimitedFoundations_Patch.Init(harmony);
             Nebula_Patch.Init(harmony);
         }
 
@@ -159,5 +160,35 @@ namespace DeliverySlotsTweaks
             }
         }
 
+        public static class UnlimitedFoundations_Patch
+        {
+            public const string GUID1 = "com.aekoch.mods.dsp.UnlimitedFoundations";
+            public const string GUID2 = "com.tinysquid.infinitefoundations";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID1)
+                        || BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID2))
+                    harmony.Patch(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.GetItemCount)), 
+                        null, 
+                        new HarmonyMethod(typeof(UnlimitedFoundations_Patch).GetMethod(nameof(UnlimitedFoundations_Patch.GetItemCount_Postfix))));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("UnlimitedFoundations compatibility failed!");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            public static void GetItemCount_Postfix(int itemId, ref int __result)
+            {
+                if (itemId == 1131) // FOUNDATION_ITEM_ID
+                {
+                    __result = 9999;
+                }
+            }
+        }
     }
 }
