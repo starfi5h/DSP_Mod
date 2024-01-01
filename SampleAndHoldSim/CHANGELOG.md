@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.2
+\- Bugfixes for index out of range error in UpdateHives and MainManager.TryGet.  
+
 #### v0.6.1
 \- Focus local now will focus on local star system, including every hives and planets in the system.  
 \- Player space fleet now always run in normal speed.  
