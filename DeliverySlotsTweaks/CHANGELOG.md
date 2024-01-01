@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v1.4.1 (DSP-0.10.28.21172)
+\- Move item into delivery slots before sorting.  
+\- Add compat to UnlimitedFoundations, Infinitefoundations  
+\- `UseLogisticSlots` now support upgarde, instant manual build, turrent hand fill.  
+
+
 #### v1.4.0 (DSP-0.10.28.21014)
 \- Add config option `AutoRefillFuel`  
 \- Support `UseLogisticSlots` for ammo refill and removing enemy base.  
