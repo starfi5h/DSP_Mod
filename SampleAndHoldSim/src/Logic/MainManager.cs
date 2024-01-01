@@ -68,7 +68,7 @@ namespace SampleAndHoldSim
         public static bool TryGet(int index, out FactoryManager factoryData)
         {
             factoryData = null;
-            if (0 <= index && index <= Factories.Count) // Black simulate factory using index -1
+            if (0 <= index && index < Factories.Count) // Black simulate factory using index -1
             {
                 factoryData = Factories[index];
                 return true;
