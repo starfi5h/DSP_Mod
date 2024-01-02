@@ -4,7 +4,8 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System.Reflection;
 
-[assembly: AssemblyTitle(DeliverySlotsTweaks.Plugin.NAME)]
+[assembly: AssemblyTitle(DeliverySlotsTweaks.Plugin.GUID)]
+[assembly: AssemblyProduct(DeliverySlotsTweaks.Plugin.NAME)]
 [assembly: AssemblyVersion(DeliverySlotsTweaks.Plugin.VERSION)]
 
 namespace DeliverySlotsTweaks

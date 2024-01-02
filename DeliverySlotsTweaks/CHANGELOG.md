@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.2 (DSP-0.10.28.21172)
+\- Add config `SortToDelieverySlots`. Default is false.  
+
 #### v1.4.1 (DSP-0.10.28.21172)
 \- Move item into delivery slots before sorting.  
 \- Add compat to UnlimitedFoundations, Infinitefoundations  
