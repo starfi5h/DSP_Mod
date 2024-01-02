@@ -17,7 +17,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.4.0";
+        public const string VERSION = "1.4.2";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -28,8 +28,8 @@ namespace DeliverySlotsTweaks
         public static ConfigEntry<bool> DeliveryFirst;
         public static ConfigEntry<int> PlayerPackageStackSize;
         public static ConfigEntry<int> PlayerPackageStackMultiplier;
-
-         Harmony harmony;
+        public static ConfigEntry<bool> SortToDelieverySlots;
+        Harmony harmony;
 
         public void Start()
         {
@@ -47,6 +47,9 @@ namespace DeliverySlotsTweaks
 
             DeliveryFirst = Config.Bind("DeliveryPackage", "DeliveryFirst", true,
                 "When logistic bots send items to mecha, send them to delivery slots first.\n配送机会优先将物品送入物流清单的栏位");
+
+            SortToDelieverySlots = Config.Bind("DeliveryPackage", "SortToDelieverySlots", false,
+                "When sorting inventory, send them to delivery slots first.\n整理背包时会先将物品送入物流清单的栏位");
 
             PlayerPackageStackSize = Config.Bind("PlayerPackage", "StackSize", 0,
                 "Overwrite stack size in inventory. NoChange:0\n覆蓋玩家背包中的堆疊数值(每件物品皆相同)(不改:0)");

@@ -134,6 +134,7 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(StorageComponent), nameof(StorageComponent.Sort))]
 		public static void Sort_Prefix(StorageComponent __instance)
 		{
+			if (!Plugin.SortToDelieverySlots.Value) return;
 			if (__instance != GameMain.mainPlayer?.package) return;
 
 			// Try to move item into delivery slots before sorting
