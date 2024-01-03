@@ -1,5 +1,12 @@
 ## Changelog
 
+#### v0.6.3
+\- Discard the change to hives ticks. Now all space hives will not be affected and run in normal speed.  
+\- Remote systems now have Lancers damage scale down to the ratio.  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.6.2
 \- Bugfixes for index out of range error in UpdateHives and MainManager.TryGet.  
 
@@ -12,9 +19,6 @@
 \- Adapt to game Dark Fog version. (The battle part still needs testing)  
 \- `UpdatePeriod` default value is not set to 5.  
 \- Remove TCFV and Multfuntion compat support.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.5.7  
 \- Remove vein logic.  
