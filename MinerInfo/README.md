@@ -46,9 +46,10 @@ If you're using mod manager, you can find the file in Config editor.
 
 ## Changelog
 
-v1.1.1 - Support for DSPv0.10.28.20779  
-v1.1.0 - Add filter vein type feature. Enable showing both /s and /m in units. (DSPv0.9.27.15466)  
-v1.0.0 - Initial release. (DSPv0.9.27.15033)  
+v1.1.2 - Fix NRE in CurrentOutputPatch. (DSP-0.10.28.21219)  
+v1.1.1 - Support for DSP-0.10.28.20779  
+v1.1.0 - Add filter vein type feature. Enable showing both /s and /m in units. (DSP-0.9.27.15466)  
+v1.0.0 - Initial release. (DSP-0.9.27.15033)  
 
 ----
 

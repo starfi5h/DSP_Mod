@@ -11,7 +11,7 @@ namespace MinerInfo
             {
                 ItemProto itemProto = __instance.entityInfo.itemProto;
                 PrefabDesc prefabDesc = itemProto?.prefabDesc;
-                if (prefabDesc.minerType > 0)
+                if (prefabDesc != null && prefabDesc.minerType > 0 && __instance.factory != null)
                 {
                     int minerId = __instance.factory.entityPool[__instance.entityId].minerId;
                     ref var miner = ref __instance.factory.factorySystem.minerPool[minerId];

@@ -20,7 +20,7 @@ namespace MinerInfo
                 {
                     entry.iconButton.data = entry.refId;
                     entry.iconButton.BindOnClickSafe(OnVeinIconClick);
-                    Plugin.Log.LogDebug((EVeinType)entry.refId);
+                    //Plugin.Log.LogDebug((EVeinType)entry.refId);
                 }
             }
         }

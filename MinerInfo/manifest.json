@@ -1,7 +1,7 @@
 {
     "name": "MinerInfo",
     "description": "Shows maximum miner output per second for all miners on a vein. Filter details by clicking on vein icons. 显示矿脉上矿机最大产量。点选矿脉图示以过滤信息。",
-    "version_number": "1.1.1",
+    "version_number": "1.1.2",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/MinerInfo",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
