@@ -11,6 +11,7 @@ namespace SampleAndHoldSim
         public static Dictionary<int, FactoryManager> Planets { get; } = new Dictionary<int, FactoryManager>();
         public static int FocusStarIndex { get; set; } = -1; // Use by DSP_Battle
         public static int FocusPlanetId { get; private set; } = -1;
+        public static int FocusFactoryIndex { get; private set; } = -1;
 
         public static void Init()
         {
@@ -60,6 +61,7 @@ namespace SampleAndHoldSim
                 }
             }
 
+            FocusFactoryIndex = (FocusLocalFactory && UpdatePeriod > 1) ? localFactoryId : -1;
             FocusPlanetId = (FocusLocalFactory && UpdatePeriod > 1 && GameMain.localPlanet != null) ? GameMain.localPlanet.id : -1;
             FocusStarIndex = (FocusLocalFactory && UpdatePeriod > 1 && GameMain.localStar != null) ? GameMain.localStar.index : -1;
             return workFactoryCount;
