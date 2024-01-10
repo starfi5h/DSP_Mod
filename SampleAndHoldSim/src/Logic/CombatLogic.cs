@@ -109,5 +109,13 @@ namespace SampleAndHoldSim
 				return originValue;
 			return originValue * MainManager.UpdatePeriod;
 		}
+
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(PlanetATField), nameof(PlanetATField.TestRelayCondition))]
+		static bool TestRelayCondition(PlanetData ___planet)
+		{
+			if (MainManager.UpdatePeriod <= 1) return true;
+			return (___planet.id / 100) == MainManager.FocusStarIndex; // Do not land on remote star system
+		}
 	}
 }
