@@ -17,7 +17,7 @@ namespace SampleAndHoldSim
 
         public static void Init(Harmony harmony)
         {
-            NebulaAPI.Init();
+            //NebulaAPI.Init();
             CommonAPI.Init(harmony);
             DSPOptimizations.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);

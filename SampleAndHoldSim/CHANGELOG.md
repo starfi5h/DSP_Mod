@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.6.4
+\- Missiles and plasma cannons now have damage sclae up on remote planets.  
+\- Relay will not land on planets with shield on remote star systems.  
+
 #### v0.6.3
 \- Discard the change to hives ticks. Now all space hives will not be affected and run in normal speed.  
 \- Remote systems now have Lancers damage scale down to the ratio.  
