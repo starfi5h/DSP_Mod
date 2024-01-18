@@ -1,7 +1,7 @@
 {
     "name": "HoverTooltipDelay",
-    "description": "Change the delay frames of building brief info tooltip.",
-    "version_number": "1.0.0",
-    "website_url": "https://github.com/starfi5h/DSP_Mod",
+    "description": "Config the delay frames of building brief info tooltip. Add hotkey Tab to quick transfer items from inventory into the building when hovering on it.  弹出式简报介面延迟调整,增加从背包快捷物品转移的热键(Tab)",
+    "version_number": "1.1.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/HoverTooltipDelay",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
