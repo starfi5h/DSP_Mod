@@ -1,7 +1,7 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 namespace HoverTooltipDelay
 {
@@ -12,24 +12,23 @@ namespace HoverTooltipDelay
         public const string NAME = "HoverTooltipDelay";
         public const string VERSION = "1.0.0";
         public static Plugin instance;
-        Harmony harmony;
-
-        ConfigEntry<int> DelayFrame;
+        public static ManualLogSource log;
+        Harmony harmony;        
 
         public void LoadConfig()
         {
-            DelayFrame = Config.Bind<int>("General", "DelayFrame", 15, "Time delay for tooltip to show up when mouse hovering on a building.");
-            Patch.SetDelay(DelayFrame.Value);
+            var delayFrame = Config.Bind("General", "DelayFrame", 15, "Time delay for tooltip to show up when mouse hovering on a building.");
+            var keyFastFillin = Config.Bind("Hotkey", "FastFillin", KeyCode.Tab, "Hotkey to transfer group of items to the selecting buildings.");
+            Patch.SetConfig(delayFrame.Value, keyFastFillin.Value);
         }
 
         public void Awake()
         {
             instance = this;
-            Log.Init(Logger);
-
             LoadConfig();
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Patch));
+            log = Logger;
         }
 
         public void OnDestroy()
@@ -37,15 +36,4 @@ namespace HoverTooltipDelay
             harmony.UnpatchSelf();
         }
     }
-
-    public static class Log
-    {
-        private static ManualLogSource _logger;
-        public static void Init(ManualLogSource logger) => _logger = logger;
-        public static void Error(object obj) => _logger.LogError(obj);
-        public static void Warn(object obj) => _logger.LogWarning(obj);
-        public static void Info(object obj) => _logger.LogInfo(obj);
-        public static void Debug(object obj) => _logger.LogDebug(obj);
-    }
 }
-
