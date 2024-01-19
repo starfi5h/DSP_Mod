@@ -60,6 +60,13 @@ namespace DeliverySlotsTweaks
 			return itemCount1 + itemCount2;
 		}
 
+        // To ingore buildbar limit
+#pragma warning disable IDE0060
+        public static int GetItemCountDummy(StorageComponent _, int itemId)
+#pragma warning restore IDE0060
+        {
+			return 999;
+		}
 
 		// Replace StorageComponent.TakeItem
 		public static int TakeItem(StorageComponent storage, int itemId, int count, out int inc)
@@ -268,11 +275,10 @@ namespace DeliverySlotsTweaks
 		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.OnPlayerPackageChange))]
 		[HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector.SetComponentItem))]
 		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu._OnUpdate))]
-		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
 		[HarmonyPatch(typeof(UIHandTip), nameof(UIHandTip._OnUpdate))]
 		[HarmonyPatch(typeof(UIRemoveBasePitButton), nameof(UIRemoveBasePitButton._OnUpdate))]
 		[HarmonyPatch(typeof(UITurretWindow), nameof(UITurretWindow.OnHandFillAmmoButtonClick))]
-		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+		public static IEnumerable<CodeInstruction> UIBuildMenu_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try
 			{
@@ -286,6 +292,30 @@ namespace DeliverySlotsTweaks
 			catch (Exception e)
 			{
 				Plugin.Log.LogWarning("Transpiler UIBuildMenu._OnUpdate error");
+				Plugin.Log.LogWarning(e);
+				return instructions;
+			}
+		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(UIBuildMenu), nameof(UIBuildMenu.OnChildButtonClick))]
+		public static IEnumerable<CodeInstruction> OnBuildingButtonClick_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			try
+			{
+				if (!Plugin.EnableHologram.Value)
+					return UIBuildMenu_Transpiler(instructions);
+
+				var codeMacher = new CodeMatcher(instructions)
+					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
+					.Repeat(matcher => matcher
+						.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCountDummy))));
+
+				return codeMacher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Plugin.Log.LogWarning("Transpiler UIBuildMenu.OnChildButtonClick error");
 				Plugin.Log.LogWarning(e);
 				return instructions;
 			}
