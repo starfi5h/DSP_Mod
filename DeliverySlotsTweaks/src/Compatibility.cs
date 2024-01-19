@@ -86,7 +86,7 @@ namespace DeliverySlotsTweaks
 
         public static class Nebula_Patch
         {
-            public const string GUID = "dsp.nebula-multiplayer-api";
+            public const string GUID = "dsp.nebula-multiplayer";
             public static bool IsActive { get; private set; }
             static bool IsPatched;
 
