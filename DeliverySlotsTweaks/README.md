@@ -6,6 +6,7 @@
 2. When logistic bots deliver items to mecha, Let logistic slots fill first.   
 3. Change the parameters of logistic slots (size, stack size).  
 4. Overwrite default item stack size count in mecha inventory and fuel chamber.  
+5. Enable placing white holograms (building ghost) when lack of items.  
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually download the file and put `DeliverySlotsTweaks.dll` in `BepInEx/plugins` folder.
@@ -30,6 +31,10 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | PlayerPackage | | |
 | `StackSize`            | 0    | Unify & overwirte item stack size in mecha inventory. Load game with this value ≤ 0 will skip this patch. |
 | `StackMultiplier`      | 0    | Apply multiplier for stack size in inventory. Load game with this value ≤ 0 will skip this patch. |
+| BuildTool | | |
+| `EnableHologram`       | false | Ingore lack of item warning and build as white holograms |
+| `EnableArchitectMode`  | false | Build without requirement of items (infinite buildings) |
+
 
 ----
 
@@ -39,6 +44,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 2. 当配送物品至机甲时, 优先补充物流清单的栏位。  
 3. 改变物流清单的参数(列,堆叠数量)。  
 4. 覆蓋机甲背包及燃烧室中的物品堆疊上限。  
+5. 缺少物品时仍可以直接放置白色建築虛影  
 
 ## 配置   
 配置文件(.cfg)需要先运行过游戏一次才会出现。  
@@ -61,11 +67,14 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | PlayerPackage | | |
 | `StackSize`            | 0    | 统一覆蓋机甲背包中的物品堆疊上限。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
 | `StackMultiplier`      | 0    | 修改玩家背包中的物品堆疊倍率。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
+| BuildTool | | |
+| `EnableHologram`       | false | 即使物品不足也可以放置建筑虚影 |
+| `EnableArchitectMode`  | false | 建筑师模式:建造无需物品 |
 
 ## MOD兼容性
 RebindBuildBar(1.0.0): 可改工具列会显示背包+物流清单的建筑数目  
 CheatEnabler(2.3.7), Multifunction_mod(3.1.7): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
-NebulaMultiplayerMod: 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
+NebulaMultiplayerMod(0.9.0): 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
 可能会和改机甲物流背包的mod冲突  
 
 ----

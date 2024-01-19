@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.0 (DSP-0.10.28.21308)
+\- Add config `EnableHologram`, `EnableArchitectMode`. Default are false.  
+\- Update NebulaAPI compat version to 2.0.0 (pre-release version)  
+
 #### v1.4.2 (DSP-0.10.28.21172)
 \- Add config `SortToDelieverySlots`. Default is false.  
 
