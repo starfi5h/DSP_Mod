@@ -19,24 +19,29 @@ namespace BuildToolOpt
         public static ManualLogSource Log;
         static Harmony harmony;
 
-        public static bool EnableReplaceStation = true;
-        public static bool EnableUIBlueprintOpt = true;
         public static bool EnableRemoveGC = true;
-        public static bool EnableGhost = true;
+        public static bool EnableReplaceStation = true;
+        public static bool EnableHologram = true;
+        public static bool EnableUIBlueprintOpt = true;
 
         public void Start() // Wait until all mods are awake
         {
             Log = Logger;
             harmony = new(GUID);
-            
-            
+
+            EnableRemoveGC = Config.Bind("BuildTool", "RemoveGC", true, "Remove c# garbage collection of build tools\n移除建筑工具的强制内存回收").Value;
+            EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
+            EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lack of item\n即使物品不足也可以放置建筑虚影").Value;
+            EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
+            Compatibility.Init();
+
             if (EnableReplaceStation)
                 harmony.PatchAll(typeof(ReplaceStationLogic));
 
             if (EnableUIBlueprintOpt)
                 harmony.PatchAll(typeof(UIBlueprint_Patch));
 
-            if (EnableGhost)
+            if (EnableHologram)
             {
                 harmony.PatchAll(typeof(BuildTool_Patch));
                 harmony.Patch(AccessTools.Method(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds)), null, null,
