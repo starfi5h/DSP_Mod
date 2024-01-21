@@ -29,9 +29,9 @@ namespace BuildToolOpt
             Log = Logger;
             harmony = new(GUID);
 
-            EnableRemoveGC = Config.Bind("BuildTool", "RemoveGC", true, "Remove c# garbage collection of build tools\n移除建筑工具的强制内存回收").Value;
+            EnableRemoveGC = Config.Bind("BuildTool", "RemoveGC", true, "Remove c# garbage collection of build tools to reduce lag\n移除建筑工具的强制内存回收以减少铺设时卡顿").Value;
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
-            EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lack of item\n即使物品不足也可以放置建筑虚影").Value;
+            EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
             Compatibility.Init();
 

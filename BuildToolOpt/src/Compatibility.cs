@@ -45,7 +45,7 @@ namespace BuildToolOpt
 
         public static class DeliverySlotsTweaks_Patch
         {
-            public const string GUID = "com.starfi5h.plugin.BulletTime";
+            public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
 
             public static void Init()
             {
