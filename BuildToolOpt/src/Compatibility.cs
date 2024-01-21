@@ -78,7 +78,8 @@ namespace BuildToolOpt
                 if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var _)) return;
 
                 Plugin.EnableReplaceStation = false;
-                Plugin.Log.LogDebug("Nebula: Disable replace station function");
+                Plugin.EnableHologram = false;
+                Plugin.Log.LogDebug("Nebula: Disable replace station and hologram function");
             }
         }
     }

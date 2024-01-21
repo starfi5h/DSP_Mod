@@ -46,6 +46,7 @@ namespace BuildToolOpt
                 harmony.PatchAll(typeof(BuildTool_Patch));
                 harmony.Patch(AccessTools.Method(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CreatePrebuilds)), null, null,
                     new HarmonyMethod(AccessTools.Method(typeof(RemoveGC_Patch), nameof(RemoveGC_Patch.RemoveGC_Transpiler))));
+                harmony.PatchAll(typeof(BuildTool_Inserter_Patch));
             }
             else
             {
