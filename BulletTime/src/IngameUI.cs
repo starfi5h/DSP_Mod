@@ -142,7 +142,7 @@ namespace BulletTime
                 else
                 {
                     SkillSystem_Patch.Enable = true;
-                    ShowStatus("Bullet Time".Translate());
+                    ShowStatus(BulletTimePlugin.StatusTextPause.Value);
                 }
             }
             else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
@@ -163,7 +163,7 @@ namespace BulletTime
             {
                 GameObject go = GameObject.Find("UI Root/Overlay Canvas/In Game/Top Tips/Auto Save/content/tip-panel");
                 GameObject statePanel = GameObject.Instantiate(go, go.transform.parent.parent);
-                statePanel.transform.localPosition = new Vector3(0, 300, 0);
+                statePanel.transform.localPosition = new Vector3(-35, statePanel.transform.localPosition.y + BulletTimePlugin.StatusTextHeightOffset.Value, 0);
                 GameObject.Destroy(statePanel.transform.Find("bg").gameObject);
                 GameObject.Destroy(statePanel.transform.Find("icon").gameObject);
                 GameObject.Destroy(statePanel.transform.Find("glow-1").gameObject);

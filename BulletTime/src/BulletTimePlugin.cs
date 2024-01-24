@@ -24,17 +24,21 @@ namespace BulletTime
         public static ConfigEntry<float> MinimumUPS;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<KeyCode> KeyPause;
+        public static ConfigEntry<int> StatusTextHeightOffset;
+        public static ConfigEntry<string> StatusTextPause;
         static Harmony harmony;
 
         private void LoadConfig()
         {
+            KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
+            KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n特殊时停模式的热键");
             MinimumUPS = Config.Bind("Multiplayer", "MinimumUPS", 50f, new ConfigDescription("Minimum UPS in client of multiplayer game\n联机-客户端的最小逻辑帧"));
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
-            KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
-            KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n特殊时停模式的热键");
+            StatusTextHeightOffset = Config.Bind("UI", "StatusTextHeightOffset", 100, "Height of Status text relative to auto save text\n状态提示相对于自动保存提示的高度");
+            StatusTextPause = Config.Bind("UI", "StatusTextPause", "Bullet Time", "Status text when in pause mode\n暂停时的状态提示文字");
         }
 
         public void Start()
