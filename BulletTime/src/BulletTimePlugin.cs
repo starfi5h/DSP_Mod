@@ -20,7 +20,6 @@ namespace BulletTime
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<bool> RemoveGC;
-        public static ConfigEntry<bool> UIBlueprintAsync;
         public static ConfigEntry<float> StartingSpeed;
         public static ConfigEntry<float> MinimumUPS;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
@@ -33,7 +32,6 @@ namespace BulletTime
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
-            UIBlueprintAsync = Config.Bind("Speed", "UIBlueprintAsync", false, "Optimize blueprint UI to reduce freezing time\n使蓝图非同步载入,减少卡顿时间");
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
             KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n特殊时停模式的热键");
@@ -74,17 +72,6 @@ namespace BulletTime
                     catch
                     {
                         Log.Warn("BuildTool no GC patch didn't success!");
-                    }
-                }
-                if (UIBlueprintAsync.Value)
-                {
-                    try
-                    {
-                        harmony.PatchAll(typeof(UIBlueprint_Patch));
-                    }
-                    catch
-                    {
-                        Log.Warn("UIBlueprint async patch didn't success!");
                     }
                 }
 
