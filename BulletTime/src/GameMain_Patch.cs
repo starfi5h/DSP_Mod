@@ -66,13 +66,20 @@ namespace BulletTime
             gameData.mainPlayer.packageUtility.Count();
             PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
             if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
-            {
-                // update player.cmd.raycast
+            {                
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
                 GameMain.localPlanet.factory.cargoTraffic.ClearStates();
-                GameMain.localPlanet.physics.GameTick();
+                GameMain.localPlanet.physics.GameTick(); // update player.cmd.raycast
                 PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
             }
+            if (gameData.spaceSector != null)
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
+                if (!DSPGame.IsMenuDemo)
+                    gameData.spaceSector.physics.GameTick(); // update raycast in PlayerAction_Inspect
+                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
+            }
+
             if (gameData.guideMission != null)
             {
                 PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
@@ -153,7 +160,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
         private static bool GamePauseLogic_Prefix(ref bool __result)
         {
-            if (GameStateManager.Pause)
+            if (GameStateManager.Pause && !(GameStateManager.HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value))
             {
                 __result = false;
                 return false;
@@ -219,6 +226,23 @@ namespace BulletTime
             Player player = GameMain.data.mainPlayer;
             if (player == null)
                 return;
+
+            if (GameStateManager.HotkeyPause) //熱鍵暫停模式
+            {
+                if (BulletTimePlugin.EnableMechaFunc.Value) //允許完整互動
+                {
+                    player.GameTick(time);
+                    return;
+                }
+                player.controller.actionRts.GameTick(time);
+                player.controller.actionInspect.GameTick(time);
+                player.position = GameStateManager.PlayerPosition; //鎖定機甲位置
+                player.controller.ClearForce();
+
+                player.gizmo.GameTick();
+                player.orders.GameTick(time);
+                return;
+            }
 
             if (GameStateManager.Interactable) //允許完整互動
             {

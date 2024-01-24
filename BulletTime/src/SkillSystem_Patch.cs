@@ -2,7 +2,7 @@
 {
     class SkillSystem_Patch
     {
-        public static bool Enable = false;
+        public static bool Enable { get; set; } = false;
 
         public static void GameTick(SkillSystem skillSystem)
         {

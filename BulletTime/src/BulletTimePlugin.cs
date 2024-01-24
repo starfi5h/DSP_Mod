@@ -26,6 +26,7 @@ namespace BulletTime
         public static ConfigEntry<KeyCode> KeyPause;
         public static ConfigEntry<int> StatusTextHeightOffset;
         public static ConfigEntry<string> StatusTextPause;
+        public static ConfigEntry<bool> EnableMechaFunc;
         static Harmony harmony;
 
         private void LoadConfig()
@@ -33,6 +34,7 @@ namespace BulletTime
             KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n特殊时停模式的热键");
             MinimumUPS = Config.Bind("Multiplayer", "MinimumUPS", 50f, new ConfigDescription("Minimum UPS in client of multiplayer game\n联机-客户端的最小逻辑帧"));
+            EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键暂停模式下启用机甲功能");
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");

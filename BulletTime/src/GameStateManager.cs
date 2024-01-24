@@ -1,14 +1,18 @@
-﻿namespace BulletTime
+﻿using UnityEngine;
+
+namespace BulletTime
 {
     public static class GameStateManager
     {
         public static bool Pause { get; set; }
-        public static bool ManualPause { get; set; } // Manual pause state set by user
+        public static bool ManualPause { get; set; } // Manual pause state set by user (slider, hotkey)
+        public static bool HotkeyPause { get; set; } // Hotkey pause mode
         public static bool AdvanceTick { get; private set; } = true;
         public static long StoredGameTick { get; set; }
         public static bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
         public static bool LockFactory { get; set; } = false; // Lock all interaction on local planet
         public static float SkipRatio { get; set; }
+        public static Vector3 PlayerPosition { get; set; } // Lock player position in hotkey pause
 
         private static float timer;
  
