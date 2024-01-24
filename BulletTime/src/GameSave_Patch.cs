@@ -90,6 +90,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(VFInput), "_buildConfirm", MethodType.Getter)]
         [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate0", MethodType.Getter)]
         [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate1", MethodType.Getter)]
+        [HarmonyPatch(typeof(VFInput), "instantConstruct", MethodType.Getter)]
         private static void BuildConfirm_Postfix(ref VFInput.InputValue __result)
         {
             // Stop building actions

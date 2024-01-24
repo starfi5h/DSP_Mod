@@ -108,7 +108,12 @@ namespace BulletTime
                 }
                 PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
             }
-            // LocalAudio 暫時不管它
+            if (gameData.localPlanet != null && gameData.localPlanet.factoryLoaded)
+            {
+                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalAudio);
+                gameData.localPlanet.audio.GameTick();
+                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalAudio);
+            }
 
         EndLogic:
             PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
@@ -234,10 +239,15 @@ namespace BulletTime
                     player.GameTick(time);
                     return;
                 }
+                player.controller.SetCommandStateHeader();
+                player.controller.UpdateCommandState();
+                player.controller.GetInput();
+                player.controller.HandleBaseInput();
                 player.controller.actionRts.GameTick(time);
-                player.controller.actionInspect.GameTick(time);
-                player.position = GameStateManager.PlayerPosition; //鎖定機甲位置
+                player.controller.actionBuild.GameTick(time);
+                player.controller.actionInspect.GameTick(time); //阻止立即建造
                 player.controller.ClearForce();
+                player.position = GameStateManager.PlayerPosition; //鎖定機甲位置
 
                 player.gizmo.GameTick();
                 player.orders.GameTick(time);
