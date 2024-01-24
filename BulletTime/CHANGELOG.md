@@ -1,5 +1,12 @@
 ## Changelog
 
+#### v1.4.0
+\- Add compat to Nebula pre-release version.  
+\- Add config `Pause`:`EnableMechaFunc`  
+\- Add config `UI`:`StatusTextHeightOffset`, `StatusTextPause`  
+\- Remove config `Speed`:`UIBlueprintAsync`. This feature has been move to BuildToolOpt mod.  
+\- Remove config `Multiplayer`:`MinimumUPS`  
+
 #### v1.3.1
 \- Fix error when creating a new game with dark fog enabled.  
 \- Pause mode using pause hotkey will now let projectiles fire in normal speed and display a notification.  

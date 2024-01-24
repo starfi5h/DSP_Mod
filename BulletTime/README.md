@@ -1,14 +1,23 @@
 # Bullet Time
 
-![Pause Mode](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
-
-1. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
-2. Run autosave in the background to make the game stay responsive.  
-3. Skip planet modeling for cover to speed up main menu loading.   
+1. Provide hotkey to pause the game and view the freeze in-game world.  
+2. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
+3. Run autosave in the background to make the game stay responsive.  
+4. Skip planet modeling for cover to speed up main menu loading.   
 
 ## Feature
 
+### Hotkey true pause mode
+When pressing `KeyPause` key, the game will enter true pause mode. The following actions are allowed:
+- Freely move camera and inspect in-game objects.  
+- Queue up mecha RTS order.  
+- Change settings of buildings.  
+- Place down blueprints.  
+
+Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaFunc` to true.  
+
 ### Game speed adjustment  
+![Game speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
 Slow game speed down to lower calculation workload. Improve FPS in late game.  
 The speed adjustment affects everything but the mecha, the mecha will still in normal speed.  
 The control slider is on in-game statistic performance panel.  
@@ -19,23 +28,22 @@ Run autosave on background thread so the game won't freeze.
 To make sure factory data is consistent, the game will enter pause mode during autosave.  
 The interaction with the factory is prohibited during the time exporting local factory data.  
 
-### Async blueprint loading
-When clicking on a blueprint file, it will be loaded asynchronously to prevent UI from freezing.   
-The loading time is proportional to the size of the blueprint. After the loading is complete, the blueprint can be used by double-clicking.  
-
 ## Configuration
 
 Run the game one time to generate `com.starfi5h.plugin.BulletTime.cfg` file.  
 Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html).   
 
-- `EnableBackgroundAutosave`  
-Run autosave in background. Besides config file, it can toggle in stat - performance panel. (Default:`false`)  
-
 - `KeyAutosave`  
 Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
 
 - `KeyPause`  
-Hotkey for toggling special pause mode. (projectiles in normal time flow) (Default:`Pause｜Break`)  
+Hotkey for toggling pause mode. () (Default:`Pause｜Break`)  
+
+- `EnableMechaFunc`  
+When enable, mecha will be ablet to move in pause mode and projectiles will fly in normal speed. (Default:`fasle`)    
+
+- `EnableBackgroundAutosave`  
+Run autosave in background. Besides config file, it can toggle in stat - performance panel. (Default:`false`)  
 
 - `StartingSpeed`  
 Game speed when the game begin. range:0-100  (Default:`100`)  
@@ -45,12 +53,6 @@ Increase main menu loading speed. (Default:`true`)
 
 - `RemoveGC`  
 Remove force garbage collection of build tools. (Default:`true`)  
-
-- `UIBlueprintAsync`  
-Optimize blueprint UI to reduce freezing time. (Default:`false`)  
-
-- `EnableFastLoading`  
-Minimum UPS in client of multiplayer game. (Default:`50.0`)  
 
 
 ## Compatibility
@@ -68,8 +70,6 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 ----
 
-![UIBlueprintAsync](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo2.gif)  
-
 ## 调整游戏速度
 
 在性能测试面板可以调整游戏速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
@@ -80,25 +80,23 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 在背景自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
 使用这项功能时建议先测试。
 
-## 蓝图异步载入
-
-当单击蓝图档案时, 会采用非同步载入的方式避免介面卡顿。  
-载入的时间和蓝图的大小成正比。在载入完成后双击才能使用蓝图。  
-
 ## 设置   
 .cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
 管理器安装: 左边选项Config editor -> 找到`starfi5h.plugin.BulletTime` -> Edit Config  
 手动安装: 更改`BepInEx\config\com.starfi5h.plugin.BulletTime.cfg`文件  
 
-- `EnableBackgroundAutosave`  
-在背景执行自动保存。除了配置文件之外，它还可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
-
 - `KeyAutosave`  
 自动存档的热键组合 (默认为`F10 + LeftShift`)  
 
 - `KeyPause`
-特殊时停模式(子弹流速正常+画面提示)的热键 (默认为`Pause｜Break`)  
+暂停模式(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
   
+- `EnableMechaFunc`  
+启用后，机甲能够在暂停模式中活动。弹射物将以正常速度飞行。 (默认为关闭`false`)    
+
+- `EnableBackgroundAutosave`  
+在背景执行自动保存。除了配置文件之外，它还可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
+
 - `StartingSpeed`   
 开始时的游戏速度，范围: 0-100 (默认为`100`)  
 
@@ -107,13 +105,6 @@ Minimum UPS in client of multiplayer game. (Default:`50.0`)
 
 - `RemoveGC`  
 移除建筑工具的强制内存回收 (默认为开启`true`)  
-
-- `UIBlueprintAsync`  
-使蓝图非同步载入,减少卡顿时间 (默认为关闭`false`)  
-
-- `MinimumUPS`  
-联机mod-客户端的最小逻辑帧 (默认为`50.0`)  
-
 
 ## 联机功能  
 
