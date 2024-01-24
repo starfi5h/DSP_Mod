@@ -32,4 +32,8 @@
   <ItemGroup>
     <Folder Include="img\" />
   </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&#xD;&#xA;xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)manifest.json&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)README.md&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)CHANGELOG.md&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)img\icon.png&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;del /q &quot;$(ProjectDir)bin\output\*.zip&quot;&#xD;&#xA;7z a &quot;$(ProjectDir)bin\$(ProjectName).zip&quot; &quot;$(ProjectDir)bin\output\*&quot;&#xD;&#xA;)" />
+  </Target>
 </Project>

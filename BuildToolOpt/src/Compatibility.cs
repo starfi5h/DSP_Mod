@@ -9,38 +9,8 @@ namespace BuildToolOpt
     {
         public static void Init()
         {
-            BulletTime_Patch.Init();
             DeliverySlotsTweaks_Patch.Init();
             Nebula_Patch.Init();
-        }
-
-        public static class BulletTime_Patch
-        {
-            public const string GUID = "com.starfi5h.plugin.BulletTime";
-
-            public static void Init()
-            {
-                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-
-                try
-                {
-                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("BulletTime.BulletTimePlugin");
-
-                    var entry = (ConfigEntry<bool>)(AccessTools.Field(classType, "UIBlueprintAsync").GetValue(null));
-                    Plugin.EnableUIBlueprintOpt = entry == null || !entry.Value;
-
-                    entry = (ConfigEntry<bool>)(AccessTools.Field(classType, "RemoveGC").GetValue(null));
-                    Plugin.EnableRemoveGC = entry == null || !entry.Value;
-
-                    Plugin.Log.LogDebug("BulletTime blueprint=" + Plugin.EnableUIBlueprintOpt + " RemoveGC=" + Plugin.EnableRemoveGC);
-                }
-                catch (Exception e)
-                {
-                    Plugin.Log.LogWarning("BulletTime compatibility failed! Last working version: 1.3.1");
-                    Plugin.Log.LogWarning(e);
-                }
-            }
         }
 
         public static class DeliverySlotsTweaks_Patch

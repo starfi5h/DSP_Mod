@@ -16,6 +16,9 @@ namespace BuildToolOpt
 				BuildPreview buildPreview = __instance.buildPreviews[0];
 				if (buildPreview.desc.isStation && buildPreview.condition == EBuildCondition.Collide)
 				{
+					if (buildPreview.desc.isVeinCollector) //不取代大礦機
+						return;
+
 					int entityId = GetOverlapStationEntityId(__instance);
 					if (entityId > 0)
 					{

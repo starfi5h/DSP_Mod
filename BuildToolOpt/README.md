@@ -3,12 +3,21 @@
 ![Hologram](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BuildToolOpt/img/demo1.jpg)  
 Provides optimization and extra QoL features to build tool and blueprint UI.
 
+![ReplaceStation](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BuildToolOpt/img/demo1.gif)  
+替换升级物流塔相当于作了以下的步骤:
+1. 复制物流塔设定
+2. 将塔内的所有物品提出
+3. 拆除旧塔
+4. 放上贴上旧塔设定的新塔
+5. 重新连上传送带
+6. 尝试将物品放回塔内
+
 ## Configuration
 Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.cfg` file.  
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。    
 
 ```
-## Settings file was created by plugin BuildToolOpt v1.0.0
+## Settings file was created by plugin BuildToolOpt v1.0.1
 ## Plugin GUID: starfi5h.plugin.BuildToolOpt
 
 [BuildTool]
@@ -48,4 +57,4 @@ ReplaceStation and EnableHologram will be disabled.
   
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/)  
 When using ReplaceStation, please disable `Finish build immediately` in CheatEnabler first.  
-使用替换物流塔功能时请先关闭CE的`建造秒完成`功能, 否则会造成错误  
+使用替换物流塔功能时请先暂时关闭CE的`建造秒完成`功能, 否则会造成错误  

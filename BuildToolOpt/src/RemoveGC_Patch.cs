@@ -21,6 +21,7 @@ namespace BuildToolOpt
 			var codeMacher = new CodeMatcher(instructions).End();
 			for (int i = 0; i < 5; i++)
 			{
+				codeMacher.Advance(-1);
 				if (codeMacher.Opcode == OpCodes.Call && ((MethodInfo)codeMacher.Operand).Name == "Collect")
 				{
 					codeMacher.SetOpcodeAndAdvance(OpCodes.Nop);
