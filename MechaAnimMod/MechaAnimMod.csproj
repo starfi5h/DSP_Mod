@@ -1,0 +1,106 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>MechaAnimMod</AssemblyName>
+    <Description></Description>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Authors />
+    <PackageId />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="output\**" />
+    <EmbeddedResource Remove="output\**" />
+    <None Remove="output\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitignore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.17" />
+    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.10.28.21172-r.0" />
+    <PackageReference Include="UnityEngine.Modules" Version="2018.4.12" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&#xD;&#xA;xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)manifest.json&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)README.md&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)CHANGELOG.md&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)img\icon.png&quot; &quot;$(ProjectDir)bin\output\&quot;&#xD;&#xA;del /q &quot;$(ProjectDir)bin\output\*.zip&quot;&#xD;&#xA;7z a &quot;$(ProjectDir)bin\$(ProjectName).zip&quot; &quot;$(ProjectDir)bin\output\*&quot;&#xD;&#xA;)" />
+  </Target>
+  
+  <ItemGroup>
+    <Reference Update="mscorlib">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Xml">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Update="System.Xml.Linq">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
