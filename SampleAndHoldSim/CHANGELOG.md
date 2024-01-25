@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.5
+\- Add config `UI`:`WarnIncompat` to stop mod incompatibility warning showing up in the future.  
+
 #### v0.6.4
 \- Missiles and plasma cannons now have damage sclae up on remote planets.  
 \- Relay will not land on planets with shield on remote star systems.  

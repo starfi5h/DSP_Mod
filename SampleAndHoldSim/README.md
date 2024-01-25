@@ -65,7 +65,7 @@ If true, show the rate per minute. otherwise, show the rate per second.
 (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)  
 (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/) - SampleAndHoldSim will be diabled in client mode. Only host can use it.  
 (🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - Fix the error when enabling 'skip bullet' function.  
-(🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.  
+(⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.   
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - Fix mine rate on idle factories, let it not be affected by FPS.   
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Some game-breaking features are not compatible.  
 
@@ -135,6 +135,6 @@ true: 显示单位设为每分钟速率 false: 显示每秒速率
 (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)(优化mod)  
 (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod) - 只有主机可使用, 客户端会自动停用并关闭介面  
 (🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - 修复启用'跳过子弹阶段'时造成的冲突。  
-(🛠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复黑盒产物统计会倍增的问题    
+(⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复黑盒产物统计会倍增的问题。目前数据统计的UPS耗用会异常增加    
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - 修复星球矿机速率不正确的问题, 使其不随FPS变动。    
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 修复跳过子弹时, 太阳帆的数量没有被倍增的问题。其他改机制功能(星球矿机等)不兼容。  
