@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.1
+\- Fix error when enabling background autosave.  
+
 #### v1.4.0
 \- Add compat to Nebula pre-release version.  
 \- Add config `Pause`:`EnableMechaFunc`  

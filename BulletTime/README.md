@@ -88,7 +88,7 @@ Remove force garbage collection of build tools. (Default:`true`)
 - `KeyAutosave`  
 自动存档的热键组合 (默认为`F10 + LeftShift`)  
 
-- `KeyPause`
+- `KeyPause`  
 暂停模式(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
   
 - `EnableMechaFunc`  
