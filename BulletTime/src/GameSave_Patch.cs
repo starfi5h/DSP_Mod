@@ -1,6 +1,8 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Emit;
 using System.Threading;
 using UnityEngine.UI;
 
@@ -14,6 +16,12 @@ namespace BulletTime
 
         public static void Enable(bool enable)
         {
+            if (NebulaCompat.NebulaIsInstalled)
+            {
+                isEnabled = enable;
+                return;
+            }
+
             if (enable && harmony == null)
             {
                 Log.Debug("Patch GameSave_Patch");
@@ -90,7 +98,6 @@ namespace BulletTime
         [HarmonyPatch(typeof(VFInput), "_buildConfirm", MethodType.Getter)]
         [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate0", MethodType.Getter)]
         [HarmonyPatch(typeof(VFInput), "blueprintPasteOperate1", MethodType.Getter)]
-        [HarmonyPatch(typeof(VFInput), "instantConstruct", MethodType.Getter)]
         private static void BuildConfirm_Postfix(ref VFInput.InputValue __result)
         {
             // Stop building actions
@@ -98,6 +105,17 @@ namespace BulletTime
             {
                 __result.onUp = false;
                 __result.onDown = false;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(VFInput), "instantConstruct", MethodType.Getter)]
+        private static void InstantConstruct_Postfix(ref bool __result)
+        {
+            // Stop building actions
+            if (GameStateManager.LockFactory)
+            {
+                __result = false;
             }
         }
 
@@ -113,40 +131,50 @@ namespace BulletTime
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameSave), nameof(GameSave.AutoSave))]
-        private static bool AutoSave_Prefix()
-        {
-            if (GameStateManager.Interactable)
-            {                
-                // Let's capture screenshot on main thread first
-                GameCamera.CaptureSaveScreenShot();
 
-                // Set pause state here so the game will go to pause in the next fixupdate()
-                bool tmp = GameStateManager.Pause;
-                GameStateManager.SetPauseMode(true);
-                GameStateManager.SetInteractable(false);
-                ThreadingHelper.Instance.StartAsyncInvoke(() =>
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
+        public static IEnumerable<CodeInstruction> RemoveGC_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            // Replace GameSave.AutoSave with our async save
+            var codeMacher = new CodeMatcher(instructions).End()
+                .MatchBack(false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(GameSave), nameof(GameSave.AutoSave))))
+                .SetOperandAndAdvance(AccessTools.Method(typeof(GameSave_Patch), nameof(AsyncAutoSave)));
+
+            return codeMacher.InstructionEnumeration();
+        }
+
+        private static bool AsyncAutoSave()
+        {
+            if (!isEnabled) // Use vanilla autosave if it is disable (MP)
+                return GameSave.AutoSave();
+
+            // Let's capture screenshot on main thread first
+            GameCamera.CaptureSaveScreenShot();
+
+            // Set pause state here so the game will go to pause in the next fixupdate()
+            bool tmp = GameStateManager.Pause;
+            GameStateManager.SetPauseMode(true);
+            GameStateManager.SetInteractable(false);
+            ThreadingHelper.Instance.StartAsyncInvoke(() =>
+            {
+                HighStopwatch highStopwatch = new HighStopwatch();
+                highStopwatch.Begin();
+                // Wait a tick to let game full stop?
+                Thread.Sleep((int)(1000/FPSController.currentUPS));
+                Log.Info($"Background Autosave start. UPS: {FPSController.currentUPS:F2}");
+                bool result = GameSave.AutoSave();
+                Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
+                return () =>
                 {
-                    HighStopwatch highStopwatch = new HighStopwatch();
-                    highStopwatch.Begin();
-                    // Wait a tick to let game full stop?
-                    Thread.Sleep((int)(1000/FPSController.currentUPS));
-                    Log.Info($"Background Autosave start. UPS: {FPSController.currentUPS:F2}");
-                    bool result = GameSave.AutoSave();
-                    Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
-                    return () =>
-                    {
-                        System.GC.Collect();
-                        GameStateManager.SetInteractable(true);
-                        GameStateManager.SetPauseMode(tmp);
-                        UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
-                        UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
-                    };
-                });
-                return false;
-            }
-            return true;
+                    System.GC.Collect();
+                    GameStateManager.SetInteractable(true);
+                    GameStateManager.SetPauseMode(tmp);
+                    UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
+                    UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
+                };
+            });
+            return false;
         }
 
         [HarmonyPrefix]

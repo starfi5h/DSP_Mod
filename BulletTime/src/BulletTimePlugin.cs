@@ -52,10 +52,19 @@ namespace BulletTime
 
             try
             {
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
+                    NebulaCompat.Init(harmony);
+
                 harmony.PatchAll(typeof(GameMain_Patch));
                 harmony.PatchAll(typeof(IngameUI));
-                if (EnableBackgroundAutosave.Value)
+                if (NebulaCompat.NebulaIsInstalled)
+                {
+                    harmony.PatchAll(typeof(GameSave_Patch));
                     GameSave_Patch.Enable(true);
+                }
+                else if (EnableBackgroundAutosave.Value)
+                    GameSave_Patch.Enable(true);
+
                 if (EnableFastLoading.Value)
                 {
                     try
@@ -78,9 +87,6 @@ namespace BulletTime
                         Log.Warn("BuildTool no GC patch didn't success!");
                     }
                 }
-
-                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
-                    NebulaCompat.Init(harmony);
             }
             catch (Exception e)
             {
