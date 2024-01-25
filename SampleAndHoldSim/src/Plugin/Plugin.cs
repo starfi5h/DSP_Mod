@@ -16,15 +16,16 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.6.4";
+        public const string VERSION = "0.6.5";
         public static Plugin instance;
         Harmony harmony;
 
-        ConfigEntry<int> UpdatePeriod;
-        ConfigEntry<bool> FocusLocalFactory;
-        ConfigEntry<int> SliderMaxUpdatePeriod;
-        ConfigEntry<int> UIStationStoragePeriod;
-        ConfigEntry<bool> UnitPerMinute;
+        public ConfigEntry<int> UpdatePeriod;
+        public ConfigEntry<bool> FocusLocalFactory;
+        public ConfigEntry<int> SliderMaxUpdatePeriod;
+        public ConfigEntry<int> UIStationStoragePeriod;
+        public ConfigEntry<bool> UnitPerMinute;
+        public ConfigEntry<bool> WarnIncompat;
 
         public void LoadConfig()
         {
@@ -33,7 +34,8 @@ namespace SampleAndHoldSim
             SliderMaxUpdatePeriod = Config.Bind("UI", "SliderMaxUpdatePeriod", 10, "Max value of upate period slider\n更新周期滑动条的最大值");
             UIStationStoragePeriod = Config.Bind("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");
             UnitPerMinute = Config.Bind("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
-            
+            WarnIncompat = Config.Bind("UI", "WarnIncompat", true, "Show warning for incompatible mods\n显示不兼容mod的警告");
+
             MainManager.UpdatePeriod = UpdatePeriod.Value;
             MainManager.FocusLocalFactory = FocusLocalFactory.Value;
             UIcontrol.SliderMax = SliderMaxUpdatePeriod.Value;

@@ -11,9 +11,10 @@ namespace SampleAndHoldSim
 {
     public class Compatibility
     {
+        public static bool IsNoticed { get; set; } = false;
+
         static string errorMessage = "";
         static string warnMessage = "";
-        static bool isNoticed = false;
 
         public static void Init(Harmony harmony)
         {
@@ -39,17 +40,19 @@ namespace SampleAndHoldSim
         [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
         static void ShowMessage()
         {
-            if (isNoticed) return;
-            isNoticed = true;
+            if (IsNoticed || !Plugin.instance.WarnIncompat.Value) return;
+            IsNoticed = true;
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
-                UIMessageBox.Show("SampleAndHoldSim 模拟帧", errorMessage, "确定".Translate(), 3);
+                UIMessageBox.Show("SampleAndHoldSim 模拟帧", errorMessage, "确定".Translate(), "Don't show",
+                    3, null, () => Plugin.instance.WarnIncompat.Value = false);
             }
             if (!string.IsNullOrEmpty(warnMessage))
             {
-                UIMessageBox.Show("SampleAndHoldSim 模拟帧", warnMessage, "确定".Translate(), 3);
+                UIMessageBox.Show("SampleAndHoldSim 模拟帧", warnMessage, "确定".Translate(), "Don't show", 
+                    3, null, () => Plugin.instance.WarnIncompat.Value = false);
             }
         }
 
