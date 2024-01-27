@@ -33,7 +33,7 @@ namespace BuildToolOpt
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
             EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
-            Compatibility.Init();
+            Compatibility.Init(harmony);
 
             if (EnableReplaceStation)
                 harmony.PatchAll(typeof(ReplaceStationLogic));

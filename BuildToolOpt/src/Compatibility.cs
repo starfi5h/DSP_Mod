@@ -7,10 +7,11 @@ namespace BuildToolOpt
 {
     public class Compatibility
     {
-        public static void Init()
+        public static void Init(Harmony harmony)
         {
             DeliverySlotsTweaks_Patch.Init();
             Nebula_Patch.Init();
+            CheatEnabler_Patch.Init(harmony);
         }
 
         public static class DeliverySlotsTweaks_Patch
@@ -50,6 +51,35 @@ namespace BuildToolOpt
                 Plugin.EnableReplaceStation = false;
                 Plugin.EnableHologram = false;
                 Plugin.Log.LogDebug("Nebula: Disable replace station and hologram function");
+            }
+        }
+
+        public static class CheatEnabler_Patch
+        {
+            public const string GUID = "org.soardev.cheatenabler";
+            
+            public static void Init(Harmony harmony)
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+
+                try
+                {
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    var classType = assembly.GetType("CheatEnabler.FactoryPatch");
+                    harmony.Patch(AccessTools.Method(classType, "ArrivePlanet"),
+                        new HarmonyMethod(AccessTools.Method(typeof(CheatEnabler_Patch), nameof(ArrivePlanet_Prefix))));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.9");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/FactoryPatch.cs#L78-L105
+            internal static bool ArrivePlanet_Prefix()
+            {
+                return !ReplaceStationLogic.IsReplacing;
             }
         }
     }

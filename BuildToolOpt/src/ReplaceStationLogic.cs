@@ -5,6 +5,7 @@ namespace BuildToolOpt
 {
     class ReplaceStationLogic
     {
+		public static bool IsReplacing { get; private set; }
 		static int stationId;
 
 		[HarmonyPostfix, HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.CheckBuildConditions))]
@@ -16,7 +17,7 @@ namespace BuildToolOpt
 				BuildPreview buildPreview = __instance.buildPreviews[0];
 				if (buildPreview.desc.isStation && buildPreview.condition == EBuildCondition.Collide)
 				{
-					if (buildPreview.desc.isVeinCollector) //不取代大礦機
+					if (buildPreview.desc.isVeinCollector || buildPreview.desc.isCollectStation) //不取代大礦機和軌道採集器
 						return;
 
 					int entityId = GetOverlapStationEntityId(__instance);
@@ -71,6 +72,8 @@ namespace BuildToolOpt
 
 		public static void ReplaceStation(BuildTool_Click tool, int stationId)
 		{
+			IsReplacing = true; // flag for other mods compat
+
 			// Save status of old station
 			StationComponent oldStation = tool.factory.transport.stationPool[stationId];
 			BuildingParameters parameters = default;
@@ -94,6 +97,8 @@ namespace BuildToolOpt
 			tool.factory.BuildFinally(tool.player, -objId);
 			StationComponent newStation = tool.factory.transport.stationPool[stationId];
 			LoadState(newStation, state);
+
+			IsReplacing = false;
 		}
 
 		private static void ReconnectBelts(PlanetFactory factory, int objId, SlotData[] slots)
