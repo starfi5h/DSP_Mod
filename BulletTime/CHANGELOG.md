@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.2
+\- Fix that replicator queue doesn't work in pause mode.  
+
 #### v1.4.1
 \- Fix error when enabling background autosave.  
 

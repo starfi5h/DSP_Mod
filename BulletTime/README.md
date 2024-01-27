@@ -10,7 +10,7 @@
 ### Hotkey true pause mode
 When pressing `KeyPause` key, the game will enter true pause mode. The following actions are allowed:
 - Freely move camera and inspect in-game objects.  
-- Queue up mecha RTS order.  
+- Queue up mecha RTS order and mecha replicator.  
 - Change settings of buildings.  
 - Place down blueprints.  
 
