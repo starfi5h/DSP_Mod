@@ -1,3 +1,7 @@
+### v1.0.2
+\- Disable replace station function for Orbital Collector.  
+\- Add CheatEnabler v2.3.9 compat.  
+
 ### v1.0.1
 \- Disable replace station function for Advanced Mining Machine.  
 

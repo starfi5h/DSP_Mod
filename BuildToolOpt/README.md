@@ -6,7 +6,7 @@ Provides optimization and extra QoL features to build tool and blueprint UI.
 ![ReplaceStation](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BuildToolOpt/img/demo1.gif)  
 替换升级物流塔相当于作了以下的步骤:
 1. 复制物流塔设定
-2. 将塔内的所有物品提出
+2. 将塔内的所有物品取出
 3. 拆除旧塔
 4. 放上贴上旧塔设定的新塔
 5. 重新连上传送带
@@ -55,6 +55,6 @@ UIBlueprintOpt = true
 ReplaceStation and EnableHologram will be disabled.  
 当与联机mod共用时, 替换物流塔和建筑虚影功能将暂停使用  
   
-[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/)  
-When using ReplaceStation, please disable `Finish build immediately` in CheatEnabler first.  
-使用替换物流塔功能时请先暂时关闭CE的`建造秒完成`功能, 否则会造成错误  
+[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.3.9)  
+When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  
+使用替换物流塔功能时mod会暂时关闭CE的`建造秒完成`功能直到替换完成  
