@@ -45,7 +45,6 @@ namespace BulletTime
                     if (NebulaCompat.IsClient)
                         FPSController.SetFixUPS(0);
                 }
-                GameMain.isFullscreenPaused = true;
             }
             else
             {
@@ -56,7 +55,7 @@ namespace BulletTime
                     GameMain.gameTick = StoredGameTick;
                     StoredGameTick = 0;
                 }
-                GameMain.isFullscreenPaused = false;
+                GameMain.isFullscreenPaused = false; //一併解除聯機的鎖定 (戴森球,研究頁面)
             }
             IngameUI.OnPauseModeChange(value);
         }

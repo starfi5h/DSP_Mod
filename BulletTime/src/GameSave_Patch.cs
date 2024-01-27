@@ -154,6 +154,9 @@ namespace BulletTime
 
             // Set pause state here so the game will go to pause in the next fixupdate()
             bool tmp = GameStateManager.Pause;
+            bool isFullscreenPaused = GameMain.isFullscreenPaused;
+            if (NebulaCompat.IsMultiplayerActive)
+                GameMain.isFullscreenPaused = true; // Prevent other players from joining
             GameStateManager.SetPauseMode(true);
             GameStateManager.SetInteractable(false);
             ThreadingHelper.Instance.StartAsyncInvoke(() =>
@@ -170,6 +173,7 @@ namespace BulletTime
                     System.GC.Collect();
                     GameStateManager.SetInteractable(true);
                     GameStateManager.SetPauseMode(tmp);
+                    GameMain.isFullscreenPaused = isFullscreenPaused;
                     UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
                     UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
                 };

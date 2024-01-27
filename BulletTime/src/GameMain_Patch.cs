@@ -163,14 +163,21 @@ namespace BulletTime
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerAnimator), nameof(PlayerAnimator.GamePauseLogic))]
-        private static bool GamePauseLogic_Prefix(ref bool __result)
+        private static bool GamePauseLogic_Prefix(PlayerAnimator __instance, ref bool __result)
         {
-            if (GameStateManager.Pause && !(GameStateManager.HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value))
+            if (!GameStateManager.Pause) 
+                return true;
+
+            if (GameStateManager.HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value)
             {
-                __result = false;
+                // freeze mecha animation 
+                __instance.PauseAllAnimations();
+                __instance.motorBone.localPosition = Vector3.zero;
+                __result = true;
                 return false;
             }
-            return true;
+            __result = false;
+            return false;
         }
 
         [HarmonyPrefix]

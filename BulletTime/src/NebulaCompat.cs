@@ -171,6 +171,7 @@ namespace BulletTime
         public static bool OnPlayerJoining(string username)
         {
             NebulaCompat.IsPlayerJoining = true;
+            GameMain.isFullscreenPaused = true; // Prevent other players from joining
             IngameUI.ShowStatus(string.Format("{0} joining the game".Translate(), username));
             GameStateManager.SetPauseMode(true);
             GameStateManager.SetLockFactory(true); // TODO: Lock for only on the joining player's planet
@@ -219,7 +220,7 @@ namespace BulletTime
             return !NebulaCompat.IsMultiplayerActive || !NebulaCompat.IsPlayerJoining;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(UIDESphereInfo), nameof(UIDESphereInfo._OnInit)), HarmonyAfter("dsp.nebula - multiplayer")]
+        [HarmonyPostfix, HarmonyPatch(typeof(UIDESphereInfo), nameof(UIDESphereInfo._OnInit)), HarmonyAfter("dsp.nebula-multiplayer")]
         private static void UIDESphereInfo__OnInit()
         {
             UIDETopFunction topFunction = UIRoot.instance.uiGame.dysonEditor.controlPanel.topFunction;
@@ -337,6 +338,7 @@ namespace BulletTime
                 case PauseEvent.Save: //Client
                     if (IsClient)
                     {
+                        GameMain.isFullscreenPaused = true;
                         GameStateManager.SetPauseMode(true);
                         GameStateManager.SetLockFactory(true);
                         IngameUI.ShowStatus("Host is saving game...".Translate());
