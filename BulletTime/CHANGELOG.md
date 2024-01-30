@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.3
+\- Prevent autosave when pausing.  
+
 #### v1.4.2
 \- Fix that replicator queue doesn't work in pause mode.  
 

@@ -15,7 +15,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.4.2";
+        public const string VERSION = "1.4.3";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
@@ -108,6 +108,7 @@ namespace BulletTime
             {
                 // Initial auto save when there is no autosave in process
                 UIAutoSave.lastSaveTick = 0L;
+                Log.Debug("Trigger auto save by hotkey");
             }
         }
 

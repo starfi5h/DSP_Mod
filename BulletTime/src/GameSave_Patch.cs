@@ -119,6 +119,17 @@ namespace BulletTime
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
+        private static bool AutoSaveGuard(UIAutoSave __instance)
+        {
+            if (__instance.showTime == 0 && GameStateManager.Pause)
+            {
+                return false;
+            }
+            return true;
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
         private static void OverwriteSaveText(UIAutoSave __instance)
@@ -131,12 +142,11 @@ namespace BulletTime
             }
         }
 
-
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
         public static IEnumerable<CodeInstruction> RemoveGC_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            // Replace GameSave.AutoSave with our async save
+            // Replace GameSave.AutoSave() with AsyncAutoSave()
             var codeMacher = new CodeMatcher(instructions).End()
                 .MatchBack(false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(GameSave), nameof(GameSave.AutoSave))))
                 .SetOperandAndAdvance(AccessTools.Method(typeof(GameSave_Patch), nameof(AsyncAutoSave)));

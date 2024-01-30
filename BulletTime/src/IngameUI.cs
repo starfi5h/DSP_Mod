@@ -155,9 +155,12 @@ namespace BulletTime
 
             if (GameStateManager.Pause == false) //不在時停狀態時,切換至熱鍵時停
             {
-                GameStateManager.ManualPause = true; //進入手動時停狀態
-                GameStateManager.SetPauseMode(true);
-                SetHotkeyPauseMode(true); //啟動熱鍵時停
+                if (UIRoot.instance.uiGame.autoSave.showTime == 0) // 不在自動存檔的動畫
+                {
+                    GameStateManager.ManualPause = true; //進入手動時停狀態
+                    GameStateManager.SetPauseMode(true);
+                    SetHotkeyPauseMode(true); //啟動熱鍵時停
+                }
             }
             else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
             {
