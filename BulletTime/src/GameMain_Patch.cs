@@ -189,6 +189,14 @@ namespace BulletTime
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(EnemyFormationRenderer), nameof(EnemyFormationRenderer.Update))]
+        private static bool StopAnimations()
+        {
+            // Skip animation update so it looks like pause
+            return !GameStateManager.Pause;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(UIStarmap), nameof(UIStarmap.StartFastTravelToPlanet))]
         private static bool StartFastTravelToPlanet_Prefix()
         {
