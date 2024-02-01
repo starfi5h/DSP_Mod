@@ -28,6 +28,7 @@ namespace SphereEditorTools
         static Vector3 rayOrigin;
         static Ray castRay = default;
         static bool paint_gridMode;
+        static int paint_cast_type; // type of paint cast
 
         static int tick;
 
@@ -167,6 +168,14 @@ namespace SphereEditorTools
         {
             try
             {
+                if (brushId == (int)BrushMode.Paint)
+                {
+                    if (dysnoEditor.brush_paint.castNodeGizmo != null) paint_cast_type = 1;
+                    else if (dysnoEditor.brush_paint.castFrameGizmo != null) paint_cast_type = 2;
+                    else if (dysnoEditor.brush_paint.castShellGizmo != null) paint_cast_type = 3;
+                    else paint_cast_type = 0;
+                }
+
                 int activeBrushCount = rdialCount * (mirrorMode > 0 ? 2 : 1);
                 if (activeBrushCount > 1) //symmetric mode on
                 {
@@ -499,6 +508,235 @@ namespace SphereEditorTools
                 __instance.AddShellSelection(shell);
             return false;
         }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIDysonBrush_Paint), "_OnUpdate")]
+        public static bool UIDysonBrush_Paint_OnUpdate(UIDysonBrush_Paint __instance)
+        {
+            if (!overwrite) return true;
+
+            __instance.size = ((__instance.size > __instance.maxPainterBrushSize) ? __instance.maxPainterBrushSize : __instance.size);
+            UIDysonDrawingGrid[] drawingGrids = __instance.editor.drawingGrids;
+            Camera screenCamera = __instance.editor.screenCamera;
+            UIDysonPaintingGrid uidysonPaintingGrid = __instance.editor.paintingGrids[__instance.layer.paintingGridMode];
+
+            if (!RectTransformUtility.RectangleContainsScreenPoint(__instance.editor.controlPanel.inspector.selfRect, Input.mousePosition, __instance.editor.uiCamera) && !RectTransformUtility.RectangleContainsScreenPoint(__instance.editor.controlPanel.hierarchy.selfRect, Input.mousePosition, __instance.editor.uiCamera))
+            {
+                if (__instance.eraseMode)
+                {
+                    UICursor.SetCursor(ECursor.DysonEraser);
+                }
+                else if (__instance.pickColorMode)
+                {
+                    UICursor.SetCursor(ECursor.DysonEyedropper);
+                }
+                else
+                {
+                    UICursor.SetCursor(ECursor.DysonPainter);
+                }
+            }
+
+            if (!UIBlockZone.blocked && !UIDysonEditor.onGUIOperate)
+            {
+                int num2 = 0;
+                int num3 = 0;
+                int num4 = 0;
+                int num5 = 0;
+                //DysonSphereLayer dysonSphereLayer = __instance.layer;
+                if (__instance.layer != null)
+                {
+                    int id = __instance.layer.id;
+                    Ray ray = screenCamera.ScreenPointToRay(Input.mousePosition);
+                    Ray ray2 = ray;
+                    ray2.origin /= (float)((double)__instance.layer.orbitRadius * 0.00025);
+
+                    if (paint_cast_type == 1) // Orignal brush select node
+                    {
+                        for (int i = 1; i < __instance.layer.nodeCursor; i++)
+                        {
+                            if (__instance.layer.nodePool[i] != null && __instance.layer.nodePool[i].id == i)
+                            {
+                                if (Vector3.SqrMagnitude(__instance.layer.nodePool[i].pos.normalized - dataPoint) < 1E-3f)
+                                {
+                                    num3 = i;
+                                    num2 = id;
+                                }
+                            }
+                        }
+                    }
+                    __instance._tmp_frame_list.Clear();
+                    __instance._tmp_shell_list.Clear();
+                    Vector3 vector2;
+                    if (Overwrite_RayCast(drawingGrids[0], ray, __instance.layer.currentRotation, __instance.layer.orbitRadius, out vector2, true))
+                    {
+                        double num6 = 0.16099441051483154;
+                        for (int j = 1; j < __instance.layer.nodeCursor; j++)
+                        {
+                            DysonNode dysonNode = __instance.layer.nodePool[j];
+                            if (dysonNode != null && dysonNode.id == j && (double)(__instance.layer.nodePool[j].pos.normalized - vector2).sqrMagnitude < num6)
+                            {
+                                List<DysonFrame> frames = dysonNode.frames;
+                                for (int k = 0; k < frames.Count; k++)
+                                {
+                                    if (!__instance._tmp_frame_list.Contains(frames[k]))
+                                    {
+                                        __instance._tmp_frame_list.Add(frames[k]);
+                                    }
+                                }
+                                List<DysonShell> shells = dysonNode.shells;
+                                for (int l = 0; l < shells.Count; l++)
+                                {
+                                    if (!__instance._tmp_shell_list.Contains(shells[l]))
+                                    {
+                                        __instance._tmp_shell_list.Add(shells[l]);
+                                    }
+                                }
+                            }
+                        }
+                        float num7 = 0.00028900002f;
+                        DysonFrame dysonFrame = null;
+                        DysonShell dysonShell = null;
+                        foreach (DysonFrame dysonFrame2 in __instance._tmp_frame_list)
+                        {
+                            List<Vector3> segments = dysonFrame2.GetSegments();
+                            for (int m = 0; m < segments.Count - 1; m++)
+                            {
+                                Vector3 normalized = segments[m].normalized;
+                                Vector3 normalized2 = segments[m + 1].normalized;
+                                float num8 = UIDysonBrush_Paint.PointToSegmentSqr(normalized, normalized2, vector2);
+                                if (num8 < num7)
+                                {
+                                    num7 = num8;
+                                    dysonFrame = dysonFrame2;
+                                }
+                            }
+                        }
+                        VectorLF3 vectorLF = vector2 * __instance.layer.orbitRadius;
+                        if (dysonFrame != null)
+                        {
+                            num4 = dysonFrame.id;
+                            num2 = id;
+                            //dysonSphereLayer = __instance.layer;
+                        }
+                        else
+                        {
+                            foreach (DysonShell dysonShell2 in __instance._tmp_shell_list)
+                            {
+                                if (dysonShell2.IsPointInShell(vectorLF))
+                                {
+                                    dysonShell = dysonShell2;
+                                    break;
+                                }
+                            }
+                            if (dysonShell != null)
+                            {
+                                num5 = dysonShell.id;
+                                num2 = id;
+                                //dysonSphereLayer = __instance.layer;
+                            }
+                        }
+                    }
+                    __instance._tmp_frame_list.Clear();
+                }
+                if (num2 > 0 && __instance.layer != null)
+                {
+                    if (num3 > 0 && (__instance.targetFilter & 1) > 0)
+                    {
+                        DysonNode dysonNode2 = (__instance.castNodeGizmo = __instance.layer.nodePool[num3]);
+                        __instance.castFrameGizmo = null;
+                        __instance.castShellGizmo = null;
+                        if (__instance.pickColorMode)
+                        {
+                            return false;
+                        }
+                        else if (Input.GetMouseButton(0))
+                        {
+                            dysonNode2.color = (__instance.eraseMode ? new Color32(0, 0, 0, 0) : __instance.paint);
+                            __instance.editor.selection.viewDysonSphere.UpdateColor(dysonNode2);
+                        }
+                    }
+                    else if (num4 > 0 && (__instance.targetFilter & 2) > 0)
+                    {
+                        __instance.castNodeGizmo = null;
+                        DysonFrame dysonFrame3 = (__instance.castFrameGizmo = __instance.layer.framePool[num4]);
+                        __instance.castShellGizmo = null;
+                        if (__instance.pickColorMode)
+                        {
+                            return false;
+                        }
+                        else if (Input.GetMouseButton(0))
+                        {
+                            dysonFrame3.color = (__instance.eraseMode ? new Color32(0, 0, 0, 0) : __instance.paint);
+                            __instance.editor.selection.viewDysonSphere.UpdateColor(dysonFrame3);
+                        }
+                    }
+                    else if (num5 > 0 && (__instance.targetFilter & 4) > 0)
+                    {
+                        __instance.castNodeGizmo = null;
+                        __instance.castFrameGizmo = null;
+                        DysonShell dysonShell3 = (__instance.castShellGizmo = __instance.layer.shellPool[num5]);
+                        if (__instance.pickColorMode)
+                        {
+                            return false;
+                        }
+                        else if (Input.GetMouseButton(0))
+                        {
+                            dysonShell3.color = (__instance.eraseMode ? new Color32(0, 0, 0, 0) : __instance.paint);
+                        }
+                    }
+                    else
+                    {
+                        __instance.castNodeGizmo = null;
+                        __instance.castFrameGizmo = null;
+                        __instance.castShellGizmo = null;
+                    }
+                }
+                else
+                {
+                    __instance.castNodeGizmo = null;
+                    __instance.castFrameGizmo = null;
+                    __instance.castShellGizmo = null;
+                }
+                if (__instance.isGridMode)
+                {
+                    if (__instance.pickColorMode)
+                    {
+                        return false;
+                    }
+                    else if (uidysonPaintingGrid.RayCastAndHightlight(screenCamera.ScreenPointToRay(Input.mousePosition), __instance.size) && Input.GetMouseButton(0))
+                    {
+                        uidysonPaintingGrid.PaintCells(__instance.eraseMode ? new Color32(0, 0, 0, 0) : __instance.paint);
+                    }
+                }
+                if (__instance.pickColorMode && Input.GetMouseButtonUp(0))
+                {
+                    __instance.pickColorMode = false;
+                }
+                if (Input.GetMouseButtonDown(1))
+                {
+                    if (!__instance.isGridMode)
+                    {
+                        __instance.editor.brushMode = UIDysonEditor.EBrushMode.Select;
+                        __instance._Close();
+                        return false;
+                    }
+                    __instance.paintingbox.SwitchPaintingGrid();
+                }
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    __instance.eraseMode = !__instance.eraseMode;
+                    return false;
+                }
+            }
+            else
+            {
+                __instance.castNodeGizmo = null;
+                __instance.castFrameGizmo = null;
+                __instance.castShellGizmo = null;
+                uidysonPaintingGrid.ClearCursorCells();
+            }
+            return false;
+        }
+
         #endregion
     }
 }
