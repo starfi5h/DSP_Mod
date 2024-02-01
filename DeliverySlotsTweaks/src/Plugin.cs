@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.0";
+        public const string VERSION = "1.5.1";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -30,7 +30,6 @@ namespace DeliverySlotsTweaks
         public static ConfigEntry<int> PlayerPackageStackSize;
         public static ConfigEntry<int> PlayerPackageStackMultiplier;
         public static ConfigEntry<bool> SortToDelieverySlots;
-        public static ConfigEntry<bool> EnableHologram;
         public static ConfigEntry<bool> EnableArchitectMode;
 
         Harmony harmony;
@@ -61,9 +60,6 @@ namespace DeliverySlotsTweaks
             PlayerPackageStackMultiplier = Config.Bind("PlayerPackage", "StackMultiplier", 0,
                 "Apply multiplier for stack size in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率(不改:0)");
 
-            EnableHologram = Config.Bind("BuildTool", "EnableHologram", false,
-                "Ingore lack of item warning and build as white holograms\n即使物品不足也可以放置建筑虚影");
-
             EnableArchitectMode = Config.Bind("BuildTool", "EnableArchitectMode", false,
                 "Build without requirement of items (infinite buildings)\n建筑师模式:建造无需物品");
 
@@ -87,9 +83,7 @@ namespace DeliverySlotsTweaks
             
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
-            
-            if (EnableHologram.Value)
-                harmony.PatchAll(typeof(BuildToolGhost_Patch));
+
 #if DEBUG
             ApplyConfigs();
 #endif
