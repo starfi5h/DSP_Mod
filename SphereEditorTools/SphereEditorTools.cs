@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace SphereEditorTools
 {
-    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.2.2")]
+    [BepInPlugin("com.starfi5h.plugin.SphereEditorTools", "SphereEditorTools", "2.2.3")]
     public class SphereEditorTools : BaseUnityPlugin
     {
         Harmony harmony;
@@ -17,7 +17,6 @@ namespace SphereEditorTools
         public static ConfigEntry<bool> EnableDisplayOptions;
         public static ConfigEntry<bool> EnableSymmetryTool;
         public static ConfigEntry<bool> EnableOrbitTool;
-        public static ConfigEntry<bool> EnableNonemptyList;
         public static ConfigEntry<bool> EnableVisualEffect;
         public static ConfigEntry<bool> EnableGUI;
         public static ConfigEntry<string> WindowPosition;
@@ -42,7 +41,6 @@ namespace SphereEditorTools
             EnableDisplayOptions    = Config.Bind<bool>("- General -", "EnableDisplayOptions", true, "Enable display control of star and black mask.\n启用显示控制(恒星/黑色遮罩)");
             EnableSymmetryTool      = Config.Bind<bool>("- General -", "EnableSymmetryTool", true, "Enable mirror and rotation symmetry of building tools.\n启用对称建造工具(镜像/旋转)");
             EnableOrbitTool         = Config.Bind<bool>("- General -", "EnableOrbitTool", true, "Enable dyson sphere layer orbit modifiy tool.\n启用壳层轨道工具");
-            EnableNonemptyList      = Config.Bind<bool>("- General -", "EnableNonemptyList", true, "Dropdown list only shows dysonspheres that are not empty.\n下拉列表中仅显示非空的戴森球");
 
             EnableGUI               = Config.Bind<bool>("GUI", "EnableGUI", true, "Show a simple window to use the tools. \n启用图形操作界面窗口");
             WindowPosition          = Config.Bind<string>("GUI", "WindowPosition", "300, 250", "Position of the window. Format: x,y\n窗口的位置 格式: x,y");
