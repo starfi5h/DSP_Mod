@@ -52,6 +52,29 @@ namespace DeliverySlotsTweaks
             }
         }
 
+        public static class Auxilaryfunction_Patch
+        {
+            public const string GUID = "cn.blacksnipe.dsp.Auxilaryfunction";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("Auxilaryfunction.Auxilaryfunction");
+                    harmony.Patch(AccessTools.Method(classType, "AutoMovetounbuilt"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
+
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 2.5.1");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+        }
+
         public static class Multfunction_mod_Patch
         {
             public const string GUID = "cn.blacksnipe.dsp.Multfuntion_mod";
