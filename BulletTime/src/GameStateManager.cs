@@ -65,6 +65,10 @@ namespace BulletTime
         {
             bool pauseThisFrame = Pause;
             AdvanceTick = GameMain.data.guideComplete && Interactable;
+            if (HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value)
+            {
+                AdvanceTick = false;
+            }
             if (!Pause)
             {
                 timer += SkipRatio;

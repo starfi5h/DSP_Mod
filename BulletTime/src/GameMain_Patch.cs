@@ -188,8 +188,8 @@ namespace BulletTime
             return false;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(EnemyFormationRenderer), nameof(EnemyFormationRenderer.Update))]
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(EnemyFormationRenderer), nameof(EnemyFormationRenderer.Render))]
         private static bool StopAnimations()
         {
             // Skip animation update so it looks like pause
