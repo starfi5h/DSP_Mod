@@ -142,6 +142,7 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 #### v2.2.3
 \- Remove EnableNonemptyList as it is in game now. (DSP v0.10.29.28154)  
+\- Attempt to fix paint brush for dyson nodes.  
 
 #### v2.2.2
 \- Fix for DSP 0.10.28.20779  
