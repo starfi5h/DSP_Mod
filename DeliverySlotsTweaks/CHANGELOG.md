@@ -1,8 +1,16 @@
 ## Changelog
 
+#### v1.5.1 (DSP-0.10.29.28154)
+\- Fix for drone logic code refactor.  
+\- Remove config `EnableHologram`  
+\- Add Auxilaryfunction v2.5.1 compat for auto fly to unfinished bulding.  
+
 #### v1.5.0 (DSP-0.10.28.21308)
 \- Add config `EnableHologram`, `EnableArchitectMode`. Default are false.  
 \- Update NebulaAPI compat version to 2.0.0 (pre-release version)  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v1.4.2 (DSP-0.10.28.21172)
 \- Add config `SortToDelieverySlots`. Default is false.  
@@ -18,9 +26,6 @@
 \- Support `UseLogisticSlots` for ammo refill and removing enemy base.  
 \- Fix a bug that pinned inventory slots don't apply to new stack size.  
 \- Fix a bug that some delivery slots aren't detected after storage size upgrade.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 v1.3.1 - Fix stack size overwirte gets reset after setting the item filter.  
 v1.3.0 - Support DSP-0.10.28.20779, upgrade compats.  
