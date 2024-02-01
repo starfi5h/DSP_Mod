@@ -161,52 +161,6 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
-		#region MechaDroneLogic
-
-		[HarmonyTranspiler]
-		[HarmonyPatch(typeof(ConstructionModuleComponent), nameof(ConstructionModuleComponent.SearchForNewTargets))]
-		[HarmonyPatch(typeof(ConstructionSystem), nameof(ConstructionSystem.FindNextConstruct))]
-		public static IEnumerable<CodeInstruction> FindNextConstruct_Transpiler(IEnumerable<CodeInstruction> instructions)
-		{
-			try
-			{
-				// Patch only if (ownedByMecha) flag2 = ptr.itemRequired <= this.player.package.GetItemCount((int)ptr.protoId);
-				var codeMacher = new CodeMatcher(instructions)
-					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "GetItemCount"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(GetItemCount)));
-
-				return codeMacher.InstructionEnumeration();
-			}
-			catch (Exception e)
-			{
-				Plugin.Log.LogWarning("Transpiler FindNextConstruct error");
-				Plugin.Log.LogWarning(e);
-				return instructions;
-			}
-		}
-
-		[HarmonyTranspiler]
-		[HarmonyPatch(typeof(ConstructionSystem), nameof(ConstructionSystem.TakeEnoughItemsFromPlayer))]
-		public static IEnumerable<CodeInstruction> TakeEnoughItemsFromPlayer_Transpiler(IEnumerable<CodeInstruction> instructions)
-		{
-			try
-			{
-				var codeMacher = new CodeMatcher(instructions)
-					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems"))
-					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)));
-
-				return codeMacher.InstructionEnumeration();
-			}
-			catch (Exception e)
-			{
-				Plugin.Log.LogWarning("Transpiler TakeEnoughItemsFromPlayer error");
-				Plugin.Log.LogWarning(e);
-				return instructions;
-			}
-		}
-
-		#endregion
-
 		#region MechaForge
 
 		[HarmonyTranspiler]
