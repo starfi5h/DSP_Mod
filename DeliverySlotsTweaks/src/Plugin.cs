@@ -43,7 +43,7 @@ namespace DeliverySlotsTweaks
                 "Allow fuel chamber to also take from logistics slots.\n自动补充燃料时也会使用物流清单内的物品");
 
             ColCount = Config.Bind("DeliveryPackage", "ColCount", 0,
-                new ConfigDescription("NoChange:0 TechMax:2 Limit:5\n物流清单容量-列(不改:0 原版科技:2 最高上限:5)", new AcceptableValueRange<int>(0, 5)));
+                new ConfigDescription("NoChange:0 TechMax:3 Limit:5\n物流清单容量-列(不改:0 原版科技:3 最高上限:5)", new AcceptableValueRange<int>(0, 5)));
 
             StackSizeMultiplier = Config.Bind("DeliveryPackage", "StackSizeMultiplier", 0,
                 "NoChange:0 TechMax:10\n物流清单物品堆叠倍率(不改:0 原版科技:10)");
@@ -55,7 +55,7 @@ namespace DeliverySlotsTweaks
                 "When sorting inventory, send them to delivery slots first.\n整理背包时会先将物品送入物流清单的栏位");
 
             PlayerPackageStackSize = Config.Bind("PlayerPackage", "StackSize", 0,
-                "Overwrite stack size in inventory. NoChange:0\n覆蓋玩家背包中的堆疊数值(每件物品皆相同)(不改:0)");
+                "Overwrite stack size in inventory. NoChange:0\n统一修改玩家背包中的物品堆疊上限(每件物品皆相同)(不改:0)");
 
             PlayerPackageStackMultiplier = Config.Bind("PlayerPackage", "StackMultiplier", 0,
                 "Apply multiplier for stack size in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率(不改:0)");
