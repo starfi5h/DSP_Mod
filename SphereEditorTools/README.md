@@ -41,7 +41,6 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableDisplayOptions`   | true  | Enable display control of star and black mask. |
 | `EnableSymmetryTool`     | true  | Enable mirror and rotation symmetry of building tools. |
 | `EnableToolboxHotkey`    | true  | Enable dyson sphere layer orbit modifiy tool. |
-| `EnableNonemptyList`     | true  | Dropdown list only shows dysonspheres that are not empty. |
 
 ### GUI
 || Default | Description |
@@ -111,7 +110,6 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 | `EnableDisplayOptions`   | true  | 启用显示控制(恒星/黑色遮罩) |
 | `EnableSymmetryTool`     | true  | 启用对称建造工具(镜像/旋转) |
 | `EnableOrbitTool`        | true  | 启用壳层轨道工具 |
-| `EnableNonemptyList`     | true  | 下拉列表中仅显示非空的戴森球 |
   
 ### GUI
 || Default | Description |
@@ -142,7 +140,10 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 ## Changelog
 
-#### v0.3.4
+#### v2.2.3
+\- Remove EnableNonemptyList as it is in game now. (DSP v0.10.29.28154)  
+
+#### v2.2.2
 \- Fix for DSP 0.10.28.20779  
 
 <details>
