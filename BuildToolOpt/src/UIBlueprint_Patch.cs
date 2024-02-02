@@ -1,5 +1,4 @@
-﻿using BepInEx;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.IO;
 using UnityEngine;
 
@@ -32,7 +31,8 @@ namespace BuildToolOpt
             return false;
         }        
 
-        [HarmonyPrefix, HarmonyPatch(typeof(UIBlueprintFileItem), nameof(UIBlueprintFileItem.OnThisClick))]
+        [HarmonyPrefix, HarmonyPriority(Priority.Low)]
+        [HarmonyPatch(typeof(UIBlueprintFileItem), nameof(UIBlueprintFileItem.OnThisClick))]
         public static bool UIBlueprintFileItem_OnThisClick(UIBlueprintFileItem __instance)
         {
             if (__instance.time - __instance.lastClickTime < (0.5f * Time.timeScale)) // Adjust time to fit speed change mods
@@ -52,8 +52,9 @@ namespace BuildToolOpt
         public static bool UIBlueprintInspector_OnOpen(UIBlueprintInspector __instance)
         {
             __instance.player.package.onStorageChange += __instance.OnPlayerPackageChange;
-            __instance.Refresh(false, true, false); // code preview will use info of the file instead of generate from blueprint data
+            __instance.Refresh(false, true, false, false); // code preview will use info of the file instead of generate from blueprint data
 
+            // Update the string preview by reading the first 256 charactors in the file
             __instance.shareLengthText.text = "";
             __instance.shareCodeText.text = "";
             string fullPath = GameConfig.blueprintFolder + __instance.newPath + ".txt";
