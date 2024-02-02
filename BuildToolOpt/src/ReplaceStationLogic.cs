@@ -24,7 +24,7 @@ namespace BuildToolOpt
 					if (entityId > 0)
 					{
 						// Snap to the overlap station
-						EntityData entityData = __instance.factory.entityPool[entityId];
+						ref var entityData = ref __instance.factory.entityPool[entityId];
 						stationId = entityData.stationId;
 						buildPreview.lpos = entityData.pos;
 						buildPreview.lrot = entityData.rot;
@@ -60,7 +60,7 @@ namespace BuildToolOpt
 			int i = 0;
 			while (BuildTool._tmp_cols[i] != null)
 			{
-				if (physics.GetColliderData(BuildTool._tmp_cols[i], out ColliderData colliderData) && colliderData.isForBuild)
+				if (physics.GetColliderData(BuildTool._tmp_cols[i], out ColliderData colliderData))
 				{
 					if (colliderData.objType == EObjectType.Entity && tool.factory.entityPool[colliderData.objId].stationId > 0)
 						return colliderData.objId;
