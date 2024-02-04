@@ -161,6 +161,93 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
+		#region MechaDroneLogic
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(ConstructionModuleComponent), nameof(ConstructionModuleComponent.PlaceItems))]
+		public static IEnumerable<CodeInstruction> PlaceItems_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			try
+			{
+				var codeMacher = new CodeMatcher(instructions);
+
+				/*
+				if (this.entityId == 0)
+				{
+					StorageComponent package = player.package;
+					for (int i = 0; i < package.size; i++) {
+						...
+						num += count;
+					}
+					AddConstructableCountsInStorage(this, player, ref num); // Insert method here
+				}
+				else if (this.entityId > 0)
+				{
+					...
+				*/
+
+				codeMacher.MatchForward(false,
+						new CodeMatch(OpCodes.Br),
+						new CodeMatch(OpCodes.Ldarg_0),
+						new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(ConstructionModuleComponent), nameof(ConstructionModuleComponent.entityId))),
+						new CodeMatch(OpCodes.Ldc_I4_0),
+						new CodeMatch(OpCodes.Ble)
+					)
+					.Insert(
+						new CodeInstruction(OpCodes.Ldarg_0),
+						new CodeInstruction(OpCodes.Ldarg_2),
+						new CodeInstruction(OpCodes.Ldloca_S, (byte)0), // num += count; in the loop
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(AddConstructableCountsInStorage)))
+					);
+
+				// Replace player.package.TakeTailItems
+
+				codeMacher
+					.MatchForward(true,
+						new CodeMatch(OpCodes.Ldarg_2),
+						new CodeMatch(OpCodes.Callvirt, AccessTools.DeclaredPropertyGetter(typeof(Player), nameof(Player.package))),
+						new CodeMatch(OpCodes.Ldloca_S),
+						new CodeMatch(OpCodes.Ldloca_S),
+						new CodeMatch(OpCodes.Ldloca_S),
+						new CodeMatch(OpCodes.Ldc_I4_0),
+						new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "TakeTailItems")
+					)
+					.Repeat(
+						matcher => matcher.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(TakeTailItems)))
+					);
+
+				return codeMacher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Plugin.Log.LogWarning("Transpiler PlaceItems error");
+				Plugin.Log.LogWarning(e);
+				return instructions;
+			}
+		}
+
+		static void AddConstructableCountsInStorage(ConstructionModuleComponent constructionModule, Player player, ref int num)
+        {
+			if (player?.deliveryPackage == null) return;
+
+			// Add item in deliveryPackage to constructableCountsInStorage too
+			var array = constructionModule.constructableCountsInStorage;
+			var grids = player.deliveryPackage.grids;
+			for (int i = 0; i <= maxDeliveryGridIndex; i++)
+			{
+				int itemId = grids[i].itemId;
+				if (itemId > 0 && ItemProto.constructableIdHash.Contains(itemId))
+				{
+					int count = grids[i].count;					
+					int index = ItemProto.constructableIndiceById[itemId];
+					array[index].haveCount += count;
+					num += count;
+				}
+			}
+		}
+
+		#endregion
+
 		#region MechaForge
 
 		[HarmonyTranspiler]
