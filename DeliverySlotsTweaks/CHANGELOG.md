@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.2 (DSP-0.10.29.21904)
+\- Fix that rebuilding doesn't take item in delivery slots.  
+
 #### v1.5.1 (DSP-0.10.29.28154)
 \- Fix for drone logic code refactor.  
 \- Remove config `EnableHologram`  
