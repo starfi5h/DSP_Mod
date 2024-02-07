@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.4
+\- Properly stop animation when hotkey pause.  
+
 #### v1.4.3
 \- Prevent autosave when pausing.  
 
