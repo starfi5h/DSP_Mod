@@ -87,7 +87,10 @@ namespace SampleAndHoldSim
         static void UpdateVeinCollection_Postfix(StationComponent __instance, int __state, PlanetFactory factory)
         {
             if (MainManager.TryGet(factory.index, out FactoryManager manager))
-                manager.SetMinearl(__instance.id, __instance.storage[0].count - __state);
+            {
+                if (manager.IsActive)
+                    manager.SetMineral(__instance, __instance.storage[0].count - __state);
+            }
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.GameTick))]

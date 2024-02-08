@@ -7,14 +7,14 @@ namespace SampleAndHoldSim
     {
         readonly Dictionary<int, StationData> stationDict = new Dictionary<int, StationData>();
 
-        public void SetMinearl(int stationId, int mineralCount)
+        public void SetMineral(StationComponent station, int mineralCount)
         {
-            if (IsActive)
+            if (!stationDict.TryGetValue(station.id, out var stationData))
             {
-                if (!stationDict.ContainsKey(stationId))
-                    stationDict.Add(stationId, new StationData(factory.transport.stationPool[stationId]));
-                StationData.SetMinearl(stationDict[stationId], mineralCount);
+                stationDict.Add(station.id, new StationData(station));
+                stationData = stationDict[station.id];
             }
+            StationData.SetMineral(stationData, mineralCount);
         }
 
         public void StationAfterTransport()
@@ -73,7 +73,7 @@ namespace SampleAndHoldSim
             tmpInc = new int[length];
         }
 
-        public static void SetMinearl(StationData data, int mineralCount)
+        public static void SetMineral(StationData data, int mineralCount)
         {            
             data.tmpMineralCount = mineralCount;
         }

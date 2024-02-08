@@ -37,6 +37,11 @@ namespace SampleAndHoldSim
             int localFactoryId = GameMain.localPlanet?.factory?.index ?? -1; // unexplored planet may not have factory on it
             for (int i = 0; i < GameMain.data.factoryCount; i++)
             {
+                if (Factories[i].factory != factories[i]) // sanity check
+                {
+                    Factories[i].factory = factories[i];
+                }
+
                 if ((FocusLocalFactory && (i == localFactoryId)))
                 {
                     workFactories[workFactoryCount] = factories[i];
@@ -84,7 +89,7 @@ namespace SampleAndHoldSim
         public bool IsActive; // is working, excuting functions in GameData.GameTick()
         public bool IsNextIdle; // will turn into idle next tick
         public int Index;
-        public readonly PlanetFactory factory;
+        public PlanetFactory factory;
 
         public FactoryManager(int index, PlanetFactory factory)
         {
