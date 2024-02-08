@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.6
+\- Fix IndexOutOfRangeException in FactoryManager.SetMineral   
+
 #### v0.6.5
 \- Add config `UI`:`WarnIncompat` to stop mod incompatibility warning showing up in the future.  
 
