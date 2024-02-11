@@ -132,15 +132,15 @@ namespace BulletTime
             SetHotkeyPauseMode(false); //當滑條有任何變化時取消熱鍵時停
         }
 
-        private static void SetHotkeyPauseMode(bool active)
+        public static void SetHotkeyPauseMode(bool active)
         {
             GameStateManager.HotkeyPause = active;
             if (active)
             {
-                if (NebulaCompat.IsMultiplayerActive)
+                if (NebulaCompat.IsMultiplayerActive && !NebulaCompat.IsClient)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
                 GameStateManager.PlayerPosition = GameMain.mainPlayer?.position ?? Vector3.zero;
-                SkillSystem_Patch.Enable = BulletTimePlugin.EnableMechaFunc.Value;
+                SkillSystem_Patch.Enable = GameStateManager.EnableMechaFunc;
                 ShowStatus(BulletTimePlugin.StatusTextPause.Value);
             }
             else
@@ -151,8 +151,15 @@ namespace BulletTime
 
         public static void OnKeyPause()
         {
-            if (NebulaCompat.IsClient) //暫時不允許客戶端啟用時停
+            if (NebulaCompat.IsClient) //客戶端向主機提出暫停/恢復請求
+            {
+                if (!GameStateManager.Interactable) return; //鎖定狀態時無法送出請求
+
+                if (!GameStateManager.Pause) NebulaCompat.SendPacket(PauseEvent.Pause);
+                else NebulaCompat.SendPacket(PauseEvent.Resume);
+
                 return;
+            }
 
             if (GameStateManager.Pause == false) //不在時停狀態時,切換至熱鍵時停
             {

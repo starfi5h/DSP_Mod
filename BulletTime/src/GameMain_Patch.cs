@@ -168,7 +168,7 @@ namespace BulletTime
             if (!GameStateManager.Pause) 
                 return true;
 
-            if (GameStateManager.HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value)
+            if (GameStateManager.HotkeyPause && !GameStateManager.EnableMechaFunc)
             {
                 // freeze mecha animation 
                 __instance.PauseAllAnimations();
@@ -241,7 +241,7 @@ namespace BulletTime
 
             if (GameStateManager.HotkeyPause) //熱鍵暫停模式
             {
-                if (BulletTimePlugin.EnableMechaFunc.Value) //允許完整互動
+                if (GameStateManager.EnableMechaFunc) //允許完整互動
                 {
                     player.GameTick(time);
                     return;

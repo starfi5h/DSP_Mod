@@ -79,6 +79,7 @@ namespace BulletTime
             IsPlayerJoining = false;
             LoadingPlayers.Clear();
             DysonSpherePaused = false;
+            GameStateManager.EnableMechaFunc = false;
         }
 
         public static void OnMultiplayerGameEnded()
@@ -88,6 +89,7 @@ namespace BulletTime
             IsPlayerJoining = false;
             LoadingPlayers.Clear();
             DysonSpherePaused = false;
+            GameStateManager.EnableMechaFunc = BulletTimePlugin.EnableMechaFunc.Value;
         }
 
         private static void OnFactoryLoadRequest(int planetId)
@@ -111,6 +113,7 @@ namespace BulletTime
                 {
                     GameStateManager.SetPauseMode(true);
                     GameStateManager.SetSyncingLock(false);
+                    IngameUI.ShowStatus(BulletTimePlugin.StatusTextPause.Value);
                     SendPacket(PauseEvent.Pause);
                 }
                 else
@@ -320,18 +323,36 @@ namespace BulletTime
             Log.Dev(packet.Event);
             switch (packet.Event)
             {
-                case PauseEvent.Resume: //Client
-                    GameStateManager.SetPauseMode(false);
-                    GameStateManager.SetSyncingLock(false); //解除工廠鎖定
-                    IngameUI.ShowStatus("");
+                case PauseEvent.Resume: //Host, Client
+                    if (IsHost)
+                    {
+                        if (!GameStateManager.Interactable || !GameStateManager.Pause) return;
+
+                        IngameUI.OnKeyPause(); //解除熱鍵時停
+                    }
+                    else
+                    {
+                        GameStateManager.ManualPause = false;
+                        GameStateManager.SetPauseMode(false);
+                        GameStateManager.SetSyncingLock(false); //解除工廠鎖定
+                        IngameUI.SetHotkeyPauseMode(false);
+                        IngameUI.ShowStatus("");
+                    }
                     break;
 
-                case PauseEvent.Pause: //Client
-                    if (IsClient)
+                case PauseEvent.Pause: //Host, Client
+                    if (IsHost)
                     {
+                        if (!GameStateManager.Interactable || GameStateManager.Pause) return;
+
+                        IngameUI.OnKeyPause(); //觸發熱鍵時停
+                    }
+                    else
+                    {
+                        GameStateManager.ManualPause = true;
                         GameStateManager.SetPauseMode(true);
                         GameStateManager.SetSyncingLock(false); //解除工廠鎖定
-                        IngameUI.ShowStatus("");
+                        IngameUI.SetHotkeyPauseMode(true);
                     }
                     break;
 

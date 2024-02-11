@@ -7,6 +7,7 @@ namespace BulletTime
         public static bool Pause { get; private set; }
         public static bool ManualPause { get; set; } // Manual pause state set by user (slider, hotkey)
         public static bool HotkeyPause { get; set; } // Hotkey pause mode
+        public static bool EnableMechaFunc { get; set; } // Is mecha available to move in hotkey pause mode?
         public static bool AdvanceTick { get; private set; } = true;
         public static long StoredGameTick { get; private set; }
         public static bool Interactable { get; private set; } = true; //gametick stop, disable interaction with world
@@ -66,7 +67,7 @@ namespace BulletTime
         {
             bool pauseThisFrame = Pause;
             AdvanceTick = GameMain.data.guideComplete && Interactable;
-            if (HotkeyPause && !BulletTimePlugin.EnableMechaFunc.Value)
+            if (HotkeyPause && !EnableMechaFunc)
             {
                 AdvanceTick = false;
             }
