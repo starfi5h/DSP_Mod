@@ -6,6 +6,7 @@ namespace BulletTime
 {
     class IngameUI
     {
+        public static string CurrentStatus = "";
         private static Slider slider;
         private static Text text;
         private static Text stateMessage;
@@ -189,6 +190,7 @@ namespace BulletTime
             }
             stateMessage.transform.GetParent().gameObject.SetActive(message != "");
             stateMessage.text = message;
+            CurrentStatus = message;
         }
     }
 }

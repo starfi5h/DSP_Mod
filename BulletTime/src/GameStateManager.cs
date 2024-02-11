@@ -4,14 +4,14 @@ namespace BulletTime
 {
     public static class GameStateManager
     {
-        public static bool Pause { get; set; }
+        public static bool Pause { get; private set; }
         public static bool ManualPause { get; set; } // Manual pause state set by user (slider, hotkey)
         public static bool HotkeyPause { get; set; } // Hotkey pause mode
         public static bool AdvanceTick { get; private set; } = true;
-        public static long StoredGameTick { get; set; }
-        public static bool Interactable { get; set; } = true; //gametick stop, disable interaction with world
-        public static bool LockFactory { get; set; } = false; // Lock all interaction on local planet
-        public static float SkipRatio { get; set; }
+        public static long StoredGameTick { get; private set; }
+        public static bool Interactable { get; private set; } = true; //gametick stop, disable interaction with world
+        public static bool LockFactory { get; private set; } = false; // Lock all interaction on local planet
+        public static float SkipRatio { get; private set; }
         public static Vector3 PlayerPosition { get; set; } // Lock player position in hotkey pause
 
         private static float timer;
@@ -56,6 +56,7 @@ namespace BulletTime
                     StoredGameTick = 0;
                 }
                 GameMain.isFullscreenPaused = false; //一併解除聯機的鎖定 (戴森球,研究頁面)
+                SetLockFactory(false); //一併解除工廠的鎖定
             }
             IngameUI.OnPauseModeChange(value);
         }
@@ -106,6 +107,13 @@ namespace BulletTime
                     UIMessageBox.CloseTopMessage();
                 }
             }
+        }
+
+        public static void SetSyncingLock(bool isLock)
+        {
+            SetInteractable(!isLock);
+            SetLockFactory(isLock);
+            Log.Debug("SetSyncingLock: " + isLock);
         }
     }
 }

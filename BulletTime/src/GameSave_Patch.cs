@@ -53,7 +53,16 @@ namespace BulletTime
                 if (balcklist && !whitelist)
                 {
                     if (__instance.dysonEditor.active)
-                        ShowMessage("Read-Only".Translate(), "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window".Translate());
+                    {
+                        if (string.IsNullOrEmpty(IngameUI.CurrentStatus))
+                        {
+                            ShowMessage("Read-Only".Translate(), "Can't interact with game world during auto-save\nPlease wait or press ESC to close the window".Translate());
+                        }
+                        else
+                        {
+                            ShowMessage("Read-Only".Translate(), "Can't interact with game world when player is loading the game".Translate());
+                        }
+                    }
                     else
                         ShowMessage();
                     isBlocked = true;

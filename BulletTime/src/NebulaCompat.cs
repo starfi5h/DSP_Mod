@@ -110,13 +110,13 @@ namespace BulletTime
                 if (GameStateManager.ManualPause)
                 {
                     GameStateManager.SetPauseMode(true);
-                    GameStateManager.SetLockFactory(false);
+                    GameStateManager.SetSyncingLock(false);
                     SendPacket(PauseEvent.Pause);
                 }
                 else
                 {
                     GameStateManager.SetPauseMode(false);
-                    GameStateManager.SetLockFactory(true);
+                    GameStateManager.SetSyncingLock(false);
                     IngameUI.ShowStatus("");
                     SendPacket(PauseEvent.Resume);
                 }
@@ -174,7 +174,7 @@ namespace BulletTime
             GameMain.isFullscreenPaused = true; // Prevent other players from joining
             IngameUI.ShowStatus(string.Format("{0} joining the game".Translate(), username));
             GameStateManager.SetPauseMode(true);
-            GameStateManager.SetLockFactory(true); // TODO: Lock for only on the joining player's planet
+            GameStateManager.SetSyncingLock(true); // TODO: Lock for only on the joining player's planet
             return false;
         }
 
@@ -322,7 +322,7 @@ namespace BulletTime
             {
                 case PauseEvent.Resume: //Client
                     GameStateManager.SetPauseMode(false);
-                    GameStateManager.SetLockFactory(false);
+                    GameStateManager.SetSyncingLock(false); //解除工廠鎖定
                     IngameUI.ShowStatus("");
                     break;
 
@@ -330,7 +330,7 @@ namespace BulletTime
                     if (IsClient)
                     {
                         GameStateManager.SetPauseMode(true);
-                        GameStateManager.SetLockFactory(false); //解除工廠鎖定
+                        GameStateManager.SetSyncingLock(false); //解除工廠鎖定
                         IngameUI.ShowStatus("");
                     }
                     break;
@@ -340,14 +340,14 @@ namespace BulletTime
                     {
                         GameMain.isFullscreenPaused = true;
                         GameStateManager.SetPauseMode(true);
-                        GameStateManager.SetLockFactory(true);
+                        GameStateManager.SetSyncingLock(true);
                         IngameUI.ShowStatus("Host is saving game...".Translate());
                     }
                     break;
 
                 case PauseEvent.FactoryRequest: //Host, Client
                     GameStateManager.SetPauseMode(true);
-                    GameStateManager.SetLockFactory(GameMain.localPlanet?.id == packet.PlanetId);
+                    GameStateManager.SetSyncingLock(GameMain.localPlanet?.id == packet.PlanetId);
                     IngameUI.ShowStatus(string.Format("{0} arriving {1}".Translate(), packet.Username, GameMain.galaxy.PlanetById(packet.PlanetId)?.displayName));
                     if (IsHost)
                     {
