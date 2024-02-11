@@ -66,6 +66,7 @@ Remove force garbage collection of build tools. (Default:`true`)
 - When host is saving or manually entering pause mode, the client will enter pause mode too.  
 - If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
 - Players can stop/resume dyson sphere rotation in the editor at top-left button.  
+- Both host and client can stop the game using hotkey pause.  
 
 
 ----

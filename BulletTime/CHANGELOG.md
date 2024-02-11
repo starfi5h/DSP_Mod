@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.4.5
+\- Fix that host can't place building after client joining.  
+\- Enable client to pause the game.  
+
 #### v1.4.4
 \- Properly stop animation when hotkey pause.  
 
