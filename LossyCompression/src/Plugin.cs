@@ -71,9 +71,9 @@ namespace LossyCompression
 #if DEBUG
             harmony.PatchAll(typeof(DebugPatch));
             UIcontrol.Init();
-            // Refresh DSPModSave dictionary for script engine
-            var dict = (Dictionary<string, IModCanSave>)AccessTools.Field(typeof(crecheng.DSPModSave.Patches), "allModData").GetValue(null);
-            dict[GUID] = Instance;
+            // TODO: Refresh DSPModSave dictionary for script engine
+            //var dict = (Dictionary<string, ModSaveSettings>)AccessTools.Field(typeof(DSPModSavePlugin), "allModData").GetValue(null);
+            //dict[GUID] = Instance;
 #endif
         }
 

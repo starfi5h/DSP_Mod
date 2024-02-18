@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using NebulaAPI;
+using NebulaAPI.Networking;
+using NebulaAPI.Packets;
 using System;
 using System.IO;
 using System.Reflection;
