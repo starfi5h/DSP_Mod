@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.3.5 (DSP 0.10.29.21950)  
+\- Update for NebulaAPIv2.0.0.  
+
 #### v0.3.4
 \- Support DSP 0.10.28.20779  
 
