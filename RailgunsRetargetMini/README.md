@@ -53,6 +53,9 @@ If you're using mod manager, you can find the file in Config editor.
 
 ## Changelog
 
+#### v1.3.2 (DSP 0.10.29.21950)
+\- Update for NebulaAPI 2.0.0  
+
 #### v1.3.1
 \- Fix the TypeLoadException error in ejector window.  
 

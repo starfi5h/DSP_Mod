@@ -1,4 +1,6 @@
 ﻿using NebulaAPI;
+using NebulaAPI.Networking;
+using NebulaAPI.Packets;
 using System;
 using System.Reflection;
 
@@ -6,7 +8,7 @@ namespace RailgunsRetargetMini
 {
     public static class NebulaCompat
     {
-        public const string GUID = "dsp.nebula-multiplayer-api";
+        public const string GUID = "dsp.nebula-multiplayer";
         public static bool IsMultiplayer { get; private set; }
         public static bool IsClient { get; private set; }
 

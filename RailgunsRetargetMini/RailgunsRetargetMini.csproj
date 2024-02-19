@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>RailgunsRetargetMini</AssemblyName>
     <Description></Description>
-    <Version>1.2.0</Version>
+    <Version>1.3.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <Company />
@@ -20,8 +20,8 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.17" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.9.27.15033-r.0" />
-    <PackageReference Include="DysonSphereProgram.Modding.NebulaMultiplayerModApi" Version="1.3.1" />
+    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.10.29.21950-r.0" />
+    <PackageReference Include="DysonSphereProgram.Modding.NebulaMultiplayerModApi" Version="2.0.0" />
 	<PackageReference Include="UnityEngine.Modules" Version="2018.4.12" IncludeAssets="compile" />
   </ItemGroup>
   
