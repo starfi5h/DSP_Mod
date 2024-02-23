@@ -135,6 +135,9 @@ namespace BulletTime
 
         public static void SendPacket(PauseEvent pauseEvent, int planetId = 0)
         {
+#if DEBUG
+            Log.Debug($"SendPacket " + pauseEvent);
+#endif
             string username = NebulaModAPI.MultiplayerSession.LocalPlayer.Data.Username;
             NebulaModAPI.MultiplayerSession.Network.SendPacket(new PauseNotificationPacket(pauseEvent, username, planetId));
             if (pauseEvent == PauseEvent.Resume) //UI-slider manual resume
@@ -142,6 +145,12 @@ namespace BulletTime
                 LoadingPlayers.Clear();
                 IsPlayerJoining = false;
             }
+        }
+
+        public static void SetPacketProcessing(bool enable)
+        {
+            Log.Info("SetPacketProcessing: " + enable);
+            NebulaModAPI.MultiplayerSession.Network.PacketProcessor.EnablePacketProcessing = enable;
         }
     }
 

@@ -143,7 +143,7 @@ namespace BulletTime
         [HarmonyPatch(typeof(UIAutoSave), nameof(UIAutoSave._OnLateUpdate))]
         private static void OverwriteSaveText(UIAutoSave __instance)
         {            
-            if (!GameStateManager.Interactable)
+            if (GameStateManager.IsSaving)
             {
                 // The game file is still saving in another thread
                 __instance.saveText.text = "Saving...".Translate();
@@ -175,9 +175,14 @@ namespace BulletTime
             bool tmp = GameStateManager.Pause;
             bool isFullscreenPaused = GameMain.isFullscreenPaused;
             if (NebulaCompat.IsMultiplayerActive)
+            {
                 GameMain.isFullscreenPaused = true; // Prevent other players from joining
+                NebulaCompat.SetPacketProcessing(false); // Stop processing packet from other players
+            }
             GameStateManager.SetPauseMode(true);
             GameStateManager.SetInteractable(false);
+            GameStateManager.IsSaving = true;
+
             ThreadingHelper.Instance.StartAsyncInvoke(() =>
             {
                 HighStopwatch highStopwatch = new HighStopwatch();
@@ -190,9 +195,15 @@ namespace BulletTime
                 return () =>
                 {
                     System.GC.Collect();
+
+                    GameStateManager.IsSaving = false;
                     GameStateManager.SetInteractable(true);
                     GameStateManager.SetPauseMode(tmp);
                     GameMain.isFullscreenPaused = isFullscreenPaused;
+                    if (NebulaCompat.IsMultiplayerActive)
+                    {
+                        NebulaCompat.SetPacketProcessing(true); // Resume processing packet from other players
+                    }
                     UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
                     UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
                 };

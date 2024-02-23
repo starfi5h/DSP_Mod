@@ -8,6 +8,8 @@ namespace BulletTime
         public static bool ManualPause { get; set; } // Manual pause state set by user (slider, hotkey)
         public static bool HotkeyPause { get; set; } // Hotkey pause mode
         public static bool EnableMechaFunc { get; set; } // Is mecha available to move in hotkey pause mode?
+        public static bool IsSaving { get; set; } // Is during saving?
+
         public static bool AdvanceTick { get; private set; } = true;
         public static long StoredGameTick { get; private set; }
         public static bool Interactable { get; private set; } = true; //gametick stop, disable interaction with world
