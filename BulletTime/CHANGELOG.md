@@ -1,5 +1,10 @@
 ## Changelog
 
+#### v1.4.6
+\- Update to NebulaAPI 2.0.0 (Nebula Multiplayer Mod 0.9.0)  
+\- (Nebula) Fix the screen wrongly displaying "Saving" when a player joins.  
+\- (Nebula) Fix UI window gets closed when resume event trigger.  
+
 #### v1.4.5
 \- Fix that host can't place building after client joining.  
 \- Enable client to pause the game.  
