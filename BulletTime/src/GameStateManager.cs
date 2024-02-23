@@ -90,7 +90,8 @@ namespace BulletTime
         {
             //Log.Debug($"Interactable = {value}");
             Interactable = value;
-            if (Interactable)
+            // Close blocking message
+            if (Interactable && GameSave_Patch.isBlocked)
             { 
                 GameSave_Patch.isBlocked = false;
                 UIMessageBox.CloseTopMessage();
@@ -104,7 +105,7 @@ namespace BulletTime
             if (!LockFactory)
             {                
                 // Close blocking message if it is not dysonEditor
-                if (!UIRoot.instance.uiGame.dysonEditor.active)
+                if (!UIRoot.instance.uiGame.dysonEditor.active && GameSave_Patch.isBlocked)
                 {
                     GameSave_Patch.isBlocked = false;
                     UIMessageBox.CloseTopMessage();
