@@ -7,13 +7,15 @@ namespace MinerInfo
 {
     class VeinFilterPatch
     {
-        static EVeinType filterType = EVeinType.None;
+        public static EVeinType filterType = EVeinType.None;
+        public static int veinDisplayFilter = 0;
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIPlanetDetail), "OnPlanetDataSet")]
         public static void OnPlanetDataSet(UIPlanetDetail __instance)
         {
             // OnPlanetDataSet is called when 1. OnOpen 2. Switch planet 3. Switch display fliter 4. OnClose
             filterType = EVeinType.None; // Reset vein type filter
+            veinDisplayFilter = __instance.uiGame.veinAmountDisplayFilter;
             if (__instance.planet?.factory != null)
             {
                 foreach (var entry in __instance.entries)

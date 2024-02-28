@@ -57,6 +57,21 @@ namespace MinerInfo
                 __instance._Close();
                 return false;
             }
+            // In filter mode
+            if (VeinFilterPatch.filterType != EVeinType.None && __instance.veinGroupIndex < maxArr.Length)
+            {
+                if (VeinFilterPatch.veinDisplayFilter == 1 && maxArr[__instance.veinGroupIndex] == 0f) // planned
+                {
+                    __instance._Close();
+                    return false;
+                }
+                if (VeinFilterPatch.veinDisplayFilter == 2 && maxArr[__instance.veinGroupIndex] != 0f) // not plan
+                {
+                    __instance._Close();
+                    return false;
+                }
+            }
+
             if (__instance.counter % 4 == 0 && (__instance.showingAmount != veinGroup.amount || __instance.counter % 60 == 0))
             {
                 __instance.showingAmount = veinGroup.amount;
