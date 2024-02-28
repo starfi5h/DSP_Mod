@@ -7,6 +7,7 @@ namespace MinerInfo
     public class MaxOutputPatch
     {
         static float[] maxArr = new float[0];
+        static readonly StringBuilder stringBuilder = new();
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIVeinDetail), "_OnUpdate")]
         static void UIVeinDetail_OnUpdate(UIVeinDetail __instance)
@@ -50,7 +51,7 @@ namespace MinerInfo
                 __instance._Close();
                 return false;
             }
-            VeinGroup veinGroup = __instance.inspectFactory.veinGroups[__instance.veinGroupIndex];
+            ref var veinGroup = ref __instance.inspectFactory.veinGroups[__instance.veinGroupIndex];
             if (veinGroup.count == 0 || veinGroup.type == EVeinType.None)
             {
                 __instance._Close();
@@ -59,48 +60,43 @@ namespace MinerInfo
             if (__instance.counter % 4 == 0 && (__instance.showingAmount != veinGroup.amount || __instance.counter % 60 == 0))
             {
                 __instance.showingAmount = veinGroup.amount;
+                stringBuilder.Clear();
                 if (veinGroup.type != EVeinType.Oil)
                 {
-                    __instance.infoText.text = string.Concat(new string[]
-                    {
-                    veinGroup.count.ToString(),
-                    "空格个".Translate(),
-                    __instance.veinProto.name,
-                    "储量".Translate(),
-                    __instance.AmountString(veinGroup.amount),
-                    MinerInfoString(__instance.veinGroupIndex)
-                    });
+                    stringBuilder.Append(veinGroup.count);
+                    stringBuilder.Append("空格个".Translate());
+                    stringBuilder.Append(__instance.veinProto.name);
+                    stringBuilder.Append("储量".Translate());
+                    stringBuilder.Append(__instance.AmountString(veinGroup.amount));
+                    MinerInfoString(__instance.veinGroupIndex);
+                    __instance.infoText.text = stringBuilder.ToString();
                 }
                 else
                 {
-                    __instance.infoText.text = string.Concat(new string[]
-                    {
-                    veinGroup.count.ToString(),
-                    "空格个".Translate(),
-                    __instance.veinProto.name,
-                    "产量".Translate(),
-                    (veinGroup.amount * VeinData.oilSpeedMultiplier).ToString("0.0000"),
-                    "/s"
-                    });
+                    stringBuilder.Append(veinGroup.count);
+                    stringBuilder.Append("空格个".Translate());
+                    stringBuilder.Append(__instance.veinProto.name);
+                    stringBuilder.Append("产量".Translate());
+                    stringBuilder.Append((veinGroup.amount * VeinData.oilSpeedMultiplier).ToString("0.0000"));
+                    stringBuilder.Append("/s");
+                    __instance.infoText.text = stringBuilder.ToString();
                 }
             }
             __instance.counter++;
             return false;
         }
 
-        static string MinerInfoString(int veinGroupIndex)
+        static void MinerInfoString(int veinGroupIndex)
         {
             if (veinGroupIndex >= maxArr.Length || maxArr[veinGroupIndex] == 0f)
-                return "";
+                return;
 
-            var sb = new StringBuilder();
-            sb.AppendLine();
-            sb.Append(Plugin.VeinMaxMinerOutputText);
+            stringBuilder.AppendLine();
+            stringBuilder.Append(Plugin.VeinMaxMinerOutputText);
             if (Plugin.ShowItemsPerSecond)
-                sb.Append(string.Format(" {0:F1}/s ", maxArr[veinGroupIndex]));
+                stringBuilder.Append(string.Format(" {0:F1}/s ", maxArr[veinGroupIndex]));
             if (Plugin.ShowItemsPerMinute)
-                sb.Append(string.Format(" {0:F0}/m", maxArr[veinGroupIndex] * 60f));
-            return sb.ToString();
+                stringBuilder.Append(string.Format(" {0:F0}/m", maxArr[veinGroupIndex] * 60f));
         }
     }
 }
