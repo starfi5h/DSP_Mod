@@ -9,7 +9,7 @@ namespace MinerInfo
     {
         public const string GUID = "starfi5h.plugin.MinerInfo";
         public const string NAME = "MinerInfo";
-        public const string VERSION = "1.1.2";
+        public const string VERSION = "1.1.3";
 
         //Configs
         public static bool ShowItemsPerSecond;
