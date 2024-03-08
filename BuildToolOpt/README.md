@@ -17,7 +17,7 @@ Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.c
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。    
 
 ```
-## Settings file was created by plugin BuildToolOpt v1.0.1
+## Settings file was created by plugin BuildToolOpt v1.0.4
 ## Plugin GUID: starfi5h.plugin.BuildToolOpt
 
 [BuildTool]
@@ -47,6 +47,12 @@ EnableHologram = true
 # Setting type: Boolean
 # Default value: true
 UIBlueprintOpt = true
+
+## Directly parse blueprint data from clipboard when Ctrl + V
+## 热键粘贴蓝图时,直接读取剪切板
+# Setting type: Boolean
+# Default value: true
+ClipboardPaste = true
 ```
 
 ## Compatibility  

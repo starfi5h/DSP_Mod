@@ -1,3 +1,7 @@
+### v1.0.4
+\- Add config option `UI - ClipboardPaste`  
+\- Update cursorText to show if the replacing station is too close to other stations  
+
 ### v1.0.3
 \- Adpat to DSP 0.10.29.21904  
 
