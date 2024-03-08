@@ -23,6 +23,7 @@ namespace BuildToolOpt
         public static bool EnableReplaceStation = true;
         public static bool EnableHologram = true;
         public static bool EnableUIBlueprintOpt = true;
+        public static bool EnableClipboardPaste = true;
 
         public void Start() // Wait until all mods are awake
         {
@@ -33,6 +34,7 @@ namespace BuildToolOpt
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
             EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
+            EnableClipboardPaste = Config.Bind("UI", "ClipboardPaste", true, "Directly parse blueprint data from clipboard when Ctrl + V\n热键粘贴蓝图时,直接读取剪切板").Value;
             Compatibility.Init(harmony);
 
             if (EnableReplaceStation)
@@ -52,6 +54,11 @@ namespace BuildToolOpt
             {
                 if (EnableRemoveGC)
                     harmony.PatchAll(typeof(RemoveGC_Patch));
+            }
+
+            if (EnableClipboardPaste)
+            {
+                harmony.PatchAll(typeof(PlayerController_Patch));
             }
         }
 
