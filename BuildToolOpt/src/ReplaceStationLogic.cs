@@ -29,11 +29,11 @@ namespace BuildToolOpt
 						buildPreview.lpos = entityData.pos;
 						buildPreview.lrot = entityData.rot;
 						buildPreview.condition = EBuildCondition.Ok;
-						__instance.actionBuild.model.cursorText = buildPreview.conditionText;
-						__instance.actionBuild.model.cursorState = 0;
 						if (!VFInput.onGUI)
 							UICursor.SetCursor(ECursor.Default);
 						__result = true;
+						__instance.actionBuild.model.cursorState = 0;
+						__instance.actionBuild.model.cursorText = BuildPreview.GetConditionText(GetCondition(__instance, buildPreview));
 						return;
 					}
 				}
@@ -68,6 +68,64 @@ namespace BuildToolOpt
 				i++;
 			}
 			return 0;
+		}
+
+		private static EBuildCondition GetCondition(BuildTool_Click tool, BuildPreview buildPreview)
+        {
+			var stationPool = tool.factory.transport.stationPool;
+			var stationCursor = tool.factory.transport.stationCursor;
+			var prebuildPool = tool.factory.prebuildPool;
+			var prebuildCursor = tool.factory.prebuildCursor;
+			var entityPool = tool.factory.entityPool;
+			float PLSlimit = 225f;
+			float ILSlimit = 841f;
+			for (int id = 1; id < stationCursor; id++)
+			{
+				if (id == stationId) continue; // Skip the orignal station
+
+				if (stationPool[id] != null && stationPool[id].id == id)
+				{
+					float maxSqrDist = ((stationPool[id].isStellar || buildPreview.desc.isStellarStation) ? ILSlimit : PLSlimit);
+					if ((entityPool[stationPool[id].entityId].pos - buildPreview.lpos).sqrMagnitude < maxSqrDist)
+					{
+						if (stationPool[id].isVeinCollector)
+						{
+							return EBuildCondition.MK2MinerTooClose;
+						}
+						else
+						{
+							return EBuildCondition.TowerTooClose;
+						}
+					}
+				}
+			}
+			for (int id = 1; id < prebuildCursor; id++)
+			{
+				if (prebuildPool[id].id == id)
+				{
+					var itemProto = LDB.items.Select(prebuildPool[id].protoId);
+					if (itemProto != null && itemProto.prefabDesc.isStation)
+					{
+						float maxSqrDist = ((itemProto.prefabDesc.isStellarStation || buildPreview.desc.isStellarStation) ? ILSlimit : PLSlimit);
+						if (buildPreview.desc.isVeinCollector && itemProto.prefabDesc.isVeinCollector)
+						{
+							maxSqrDist = 0f;
+						}
+						if ((prebuildPool[id].pos - buildPreview.lpos).sqrMagnitude < maxSqrDist)
+						{
+							if (itemProto.prefabDesc.isVeinCollector)
+							{
+								return EBuildCondition.MK2MinerTooClose;
+							}
+							else
+							{
+								return EBuildCondition.TowerTooClose;
+							}
+						}
+					}
+				}
+			}
+			return EBuildCondition.Ok;
 		}
 
 		public static void ReplaceStation(BuildTool_Click tool, int stationId)
