@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.4.7 (DSP0.10.29.21950)  
+\- Fix crash when viewing remote hives in starmap during background autosave.  
+
 #### v1.4.6
 \- Update to NebulaAPI 2.0.0 (Nebula Multiplayer Mod 0.9.0)  
 \- (Nebula) Fix the screen wrongly displaying "Saving" when a player joins.  
@@ -28,6 +31,9 @@
 \- Remove config `Speed`:`UIBlueprintAsync`. This feature has been move to BuildToolOpt mod.  
 \- Remove config `Multiplayer`:`MinimumUPS`  
 
+<details>
+<summary>Previous Changelog</summary>
+
 #### v1.3.1
 \- Fix error when creating a new game with dark fog enabled.  
 \- Pause mode using pause hotkey will now let projectiles fire in normal speed and display a notification.  
@@ -37,9 +43,6 @@
 \- Add a toggle button to enable background auto feature in performance pannel. The default value is set to off now.  
 \- Add config `Hotkey`-`KeyPause`, which will toggle pause mode by hitting the hotkey.  
 \- Config option `KeyAutosave` has been move to `Hotkey` catagory.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v1.2.14
 \- Fix error by fast travel when pasueThisFrame. Fast travel to another planet is now disable during pause mode.  

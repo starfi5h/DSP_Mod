@@ -1,5 +1,6 @@
 # Bullet Time
 
+Decouple the mecha (player actions) from the world simulation.  
 1. Provide hotkey to pause the game and view the freeze in-game world.  
 2. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
 3. Run autosave in the background to make the game stay responsive.  
