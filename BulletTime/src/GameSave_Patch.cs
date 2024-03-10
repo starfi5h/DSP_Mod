@@ -245,6 +245,25 @@ namespace BulletTime
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(SpaceSector), nameof(SpaceSector.EndSave))]
+        private static bool SpaceSectorEndSave_Prefix(SpaceSector __instance)
+        {
+            if (!GameStateManager.Interactable && ThreadingHelper.Instance.InvokeRequired)
+            {
+                autoEvent.Reset();
+                ThreadingHelper.Instance.StartSyncInvoke(() =>
+                {
+                    // 反實例化InstantiateEnemies會用到ComputeBuffer:SetData, 因此要在主線程執行避免崩潰
+                    __instance.EndSave();
+                    autoEvent.Set();
+                });
+                autoEvent.WaitOne(-1);
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(Player), nameof(Player.Export))]
         private static void Player_Prefix()
         {
