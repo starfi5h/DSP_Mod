@@ -31,6 +31,7 @@ namespace DeliverySlotsTweaks
         public static ConfigEntry<int> PlayerPackageStackMultiplier;
         public static ConfigEntry<bool> SortToDelieverySlots;
         public static ConfigEntry<bool> EnableArchitectMode;
+        public static ConfigEntry<bool> EnableFastReplicator;
 
         Harmony harmony;
 
@@ -63,6 +64,9 @@ namespace DeliverySlotsTweaks
             EnableArchitectMode = Config.Bind("BuildTool", "EnableArchitectMode", false,
                 "Build without requirement of items (infinite buildings)\n建筑师模式:建造无需物品");
 
+            EnableFastReplicator = Config.Bind("BuildTool", "EnableFastReplicator", true,
+                "Right click on hotbar to queue the building in replicator\n右键单击快捷栏中的建筑可直接在合成器排程制造");
+
             Instance = this;
             Log = Logger;
             harmony = new(GUID);
@@ -84,8 +88,12 @@ namespace DeliverySlotsTweaks
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
 
+            if (EnableFastReplicator.Value)
+                harmony.PatchAll(typeof(UIBuildMenuPatch));
+
 #if DEBUG
             ApplyConfigs();
+            UIBuildMenuPatch.AddEvents(UIRoot.instance.uiGame.buildMenu);
 #endif
         }
 
