@@ -32,7 +32,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | `StackMultiplier`      | 0    | Apply multiplier for stack size in inventory. Load game with this value ≤ 0 will skip this patch. |
 | BuildTool | | |
 | `EnableArchitectMode`  | false | Build without requirement of items (infinite buildings) |
-
+| `EnableFastReplicator` | true | Right click on hotbar to queue the building in replicator |
 
 ----
 
@@ -66,11 +66,12 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | `StackMultiplier`      | 0    | 修改玩家背包中的物品堆疊倍率。当此值≤0时载入游戏将不会套用修改,直到游戏重启 |
 | BuildTool | | |
 | `EnableArchitectMode`  | false | 建筑师模式:建造无需物品 |
+| `EnableFastReplicator` | true | 右键单击快捷栏中的建筑可直接在合成器排程制造 |
 
 ## MOD兼容性
-RebindBuildBar(1.0.0): 可改工具列会显示背包+物流清单的建筑数目  
-Auxilaryfunction(2.5.1): 飞往未完成建筑也会使用物流栏位的物品  
-CheatEnabler(2.3.7), Multifunction_mod(3.1.7): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
+RebindBuildBar(1.0.4): 可改工具列会显示背包+物流清单的建筑数目  
+Auxilaryfunction(2.5.8): 飞往未完成建筑也会使用物流栏位的物品  
+CheatEnabler(2.3.11), Multifunction_mod(3.4.2): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
 NebulaMultiplayerMod(0.9.0): 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
 可能会和改机甲物流背包的mod冲突  
 

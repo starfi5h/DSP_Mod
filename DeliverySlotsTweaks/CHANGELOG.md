@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.3 (DSP-0.10.29.21950)  
+\- Add config `EnableFastReplicator`.  
+
 #### v1.5.2 (DSP-0.10.29.21904)
 \- Fix that rebuilding doesn't take item in delivery slots.  
 
@@ -22,7 +25,6 @@
 \- Move item into delivery slots before sorting.  
 \- Add compat to UnlimitedFoundations, Infinitefoundations  
 \- `UseLogisticSlots` now support upgarde, instant manual build, turrent hand fill.  
-
 
 #### v1.4.0 (DSP-0.10.28.21014)
 \- Add config option `AutoRefillFuel`  
