@@ -128,13 +128,29 @@ namespace DeliverySlotsTweaks
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(Mecha), nameof(Mecha.GameTick))]
-		public static void Prepare(Mecha __instance)
+		public static void Prepare(Mecha __instance, long time)
 		{
 			if (__instance?.player != null && __instance.player == GameMain.mainPlayer)
 			{
 				Count(__instance.player.package);
 				Count(__instance.player.deliveryPackage);
+
+				if (time % 30 == 0 && Plugin.AutoRefillWarper.Value)
+                {
+					TryReillWarper(__instance);
+				}
 			}
+		}
+
+		static void TryReillWarper(Mecha mecha)
+        {
+			if (mecha.HasWarper()) return;
+
+			var itemId = 1210;
+			var itemCount = 1;
+			if (GetItemCount(null, itemId) <= 0) return;
+			TakeTailItems(mecha.player.package, ref itemId, ref itemCount, out var itemInc, false);
+			mecha.warpStorage.AddItem(itemId, itemCount, itemInc, out _);
 		}
 
 		[HarmonyPrefix]

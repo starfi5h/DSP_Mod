@@ -24,6 +24,7 @@ namespace DeliverySlotsTweaks
         public static ManualLogSource Log;
         public static ConfigEntry<bool> UseLogisticSlots;
         public static ConfigEntry<bool> AutoRefillFuel;
+        public static ConfigEntry<bool> AutoRefillWarper;
         public static ConfigEntry<int> ColCount;
         public static ConfigEntry<int> StackSizeMultiplier;
         public static ConfigEntry<bool> DeliveryFirst;
@@ -42,6 +43,9 @@ namespace DeliverySlotsTweaks
 
             AutoRefillFuel = Config.Bind("DeliveryPackage", "AutoRefillFuel", false,
                 "Allow fuel chamber to also take from logistics slots.\n自动补充燃料时也会使用物流清单内的物品");
+
+            AutoRefillWarper = Config.Bind("DeliveryPackage", "AutoRefillWarper", false,
+                "Auto refill space warper from inventory and logistics slots.\n从背包和物流清单自动补充翘曲器");
 
             ColCount = Config.Bind("DeliveryPackage", "ColCount", 0,
                 new ConfigDescription("NoChange:0 TechMax:3 Limit:5\n物流清单容量-列(不改:0 原版科技:3 最高上限:5)", new AcceptableValueRange<int>(0, 5)));
