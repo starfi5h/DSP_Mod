@@ -23,6 +23,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | DeliveryPackage | | |
 | `UseLogisticSlots`     | true | Let replicator and build tools use items in logistic slots. Take effect affter reloading the game. |
 | `AutoRefillFuel`       | false | Allow fuel chamber to also take from logistics slots. |
+| `AutoRefillWarper`     | false | Auto refill space warper from inventory and logistics slots. |
 | `ColCount`             | 0    | No Change:0 TechMax:3 Limit:5 |
 | `StackSizeMultiplier`  | 0    | No Change:0 TechMax:10 |
 | `DeliveryFirst`        | true | When logistic bots send items to mecha, send them to delivery slots first. |
@@ -57,6 +58,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 | DeliveryPackage | | |
 | `UseLogisticSlots`     | true | 使手动制造和建筑工具可以使用物流清单内的物品。重启游戏后生效 |
 | `AutoRefillFuel`       | false | 自动补充燃料时也会使用物流清单内的物品 |
+| `AutoRefillWarper`     | false | 从背包和物流清单自动补充翘曲器 |
 | `ColCount`             | 0    | 物流清单容量-列(不变:0 原版科技:3 最高上限:5) |
 | `StackSizeMultiplier`  | 0    | 物流清单物品堆叠倍率(不变:0 原版科技:10) |
 | `DeliveryFirst`        | true | 配送机会优先将物品送入物流清单的栏位 |

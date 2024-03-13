@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.4
+\- Add config `AutoRefillWarper`.  
+
 #### v1.5.3 (DSP-0.10.29.21950)  
 \- Add config `EnableFastReplicator`.  
 
