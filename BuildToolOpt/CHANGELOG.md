@@ -1,3 +1,6 @@
+### v1.0.5
+\- Use GetHashCode together with length to reduce false negative of clipboard content change detection  
+
 ### v1.0.4
 \- Add config option `UI - ClipboardPaste`  
 \- Update cursorText to show if the replacing station is too close to other stations  

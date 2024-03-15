@@ -6,6 +6,7 @@ namespace BuildToolOpt
     class PlayerController_Patch
     {
         static int clipboardLength;
+        static int hashCode;
 
         [HarmonyPrefix, HarmonyPatch(typeof(PlayerController), nameof(PlayerController.UpdateCommandState))]
         public static void UpdateCommandState_Prefix(PlayerController __instance)
@@ -22,25 +23,28 @@ namespace BuildToolOpt
                     && !BlueprintData.IsNullOrEmpty(__instance.actionBuild.blueprintCopyTool.blueprint))
                 {
                     return;
-                }                
+                }
 
                 // 如果剪貼簿的長度變化, 檢查是否可以解析為藍圖
-                if (clipboardLength != GUIUtility.systemCopyBuffer.Length)
+                string systemCopyBuffer = GUIUtility.systemCopyBuffer;
+                if (clipboardLength != systemCopyBuffer?.Length || hashCode != systemCopyBuffer?.GetHashCode())
                 {
-                    string systemCopyBuffer = GUIUtility.systemCopyBuffer;                    
                     if (string.IsNullOrEmpty(systemCopyBuffer))
                     {
                         clipboardLength = 0;
+                        hashCode = 0;
                         return;
                     }
                     clipboardLength = systemCopyBuffer.Length;
+                    hashCode = systemCopyBuffer.GetHashCode();
+
                     var blueprintData = new BlueprintData();
                     blueprintData.FromBase64String(systemCopyBuffer);
                     if (blueprintData.isValid)
                     {
                         // 更新blueprintClipboard, 以便後續呼叫this.OpenBlueprintPasteMode(null, "")
                         __instance.actionBuild.blueprintClipboard = blueprintData;
-                        UIRealtimeTip.Popup($"Parse {clipboardLength:N0} from clipboard!", false, 0);
+                        UIRealtimeTip.Popup($"Parse {clipboardLength:N0} from clipboard!", false, 0);                        
                     }
                 }
 
