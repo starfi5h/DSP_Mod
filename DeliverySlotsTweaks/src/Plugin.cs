@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using System;
 using System.Reflection;
 
 [assembly: AssemblyTitle(DeliverySlotsTweaks.Plugin.GUID)]
@@ -18,7 +19,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.4";
+        public const string VERSION = "1.5.5";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -88,7 +89,11 @@ namespace DeliverySlotsTweaks
                         new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
                 }
             }
-            
+
+            StackSizeMultiplier.Value = Math.Min(StackSizeMultiplier.Value, 1000000); // 1M
+            PlayerPackageStackSize.Value = Math.Min(PlayerPackageStackSize.Value, 1000000000); // 1000M
+            PlayerPackageStackMultiplier.Value = Math.Min(PlayerPackageStackMultiplier.Value, 1000000); // 1M
+
             if (PlayerPackageStackSize.Value > 0 || PlayerPackageStackMultiplier.Value > 0)
                 harmony.PatchAll(typeof(PlayerPackagePatch));
 

@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.5
+\- Add upper limit to StackSizeMultiplier(1M) and PlayerPackageStackSize(1,000M).  
+
 #### v1.5.4
 \- Add config `AutoRefillWarper`.  
 

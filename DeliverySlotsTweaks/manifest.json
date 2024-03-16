@@ -1,7 +1,8 @@
 {
     "name": "DeliverySlotsTweaks",
     "description": "Let replicator and build tools use items in logistic slots. Tweak slots count and stacksize. Right-click on hotbar to craft building. 手搓和建造可以直接使用物流背包的物品,可改物流背包容量及背包堆叠倍率",
-    "version_number": "1.5.4",
+    "version_number": "1.5.5",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/DeliverySlotsTweaks",
-    "dependencies": ["xiaoye97-BepInEx-5.4.17"]
+    "dependencies": ["xiaoye97-BepInEx-5.4.17"],
+    "gameVersion": "0.10.29.29150"
 }
