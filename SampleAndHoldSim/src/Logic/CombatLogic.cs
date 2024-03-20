@@ -112,10 +112,10 @@ namespace SampleAndHoldSim
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(PlanetATField), nameof(PlanetATField.TestRelayCondition))]
-		static bool TestRelayCondition(PlanetData ___planet)
+		static bool TestRelayCondition()
 		{
-			if (MainManager.UpdatePeriod <= 1) return true;
-			return (___planet.id / 100) == MainManager.FocusStarIndex; // Do not land on remote star system
+			return Plugin.instance.EnableRelayLanding.Value;
+			//return (___planet.id / 100) == MainManager.FocusStarIndex; // Old method: Do not land on remote star system
 		}
 	}
 }

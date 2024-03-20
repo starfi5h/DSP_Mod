@@ -26,6 +26,7 @@ namespace SampleAndHoldSim
         public ConfigEntry<int> UIStationStoragePeriod;
         public ConfigEntry<bool> UnitPerMinute;
         public ConfigEntry<bool> WarnIncompat;
+        public ConfigEntry<bool> EnableRelayLanding;
 
         public void LoadConfig()
         {
@@ -35,6 +36,7 @@ namespace SampleAndHoldSim
             UIStationStoragePeriod = Config.Bind("UI", "UIStationStoragePeriod", 600, "Display item count change rate in station storages in x ticks. 0 = no display\n显示过去x帧内物流塔货物的流入或流出速率, 0 = 不显示");
             UnitPerMinute = Config.Bind("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
             WarnIncompat = Config.Bind("UI", "WarnIncompat", true, "Show warning for incompatible mods\n显示不兼容mod的警告");
+            EnableRelayLanding = Config.Bind("Combat", "EnableRelayLanding", true, "Allow Dark Fog relay to land on planet.\n允许黑雾中继器登陆星球");
 
             MainManager.UpdatePeriod = UpdatePeriod.Value;
             MainManager.FocusLocalFactory = FocusLocalFactory.Value;
