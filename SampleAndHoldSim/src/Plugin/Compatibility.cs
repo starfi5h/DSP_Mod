@@ -21,6 +21,7 @@ namespace SampleAndHoldSim
             //NebulaAPI.Init();
             CommonAPI.Init(harmony);
             DSPOptimizations.Init(harmony);
+            Auxilaryfunction_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             PlanetMiner.Init(harmony);
             Blackbox_Patch.Init(harmony);
@@ -133,7 +134,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CommonAPI compatibility failed! Last working version: 1.6.2";
+                    string message = "CommonAPI compatibility failed! Last working version: 1.6.5";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -178,6 +179,50 @@ namespace SampleAndHoldSim
             }
         }
 
+        public static class Auxilaryfunction_Patch
+        {
+            public const string GUID = "cn.blacksnipe.dsp.Auxilaryfunction";
+            static bool enable = false;
+            static int storedUpdatePeriod = 1;
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type targetType = assembly.GetType("Auxilaryfunction.Patch.GameTickPatch");
+                    harmony.Patch(targetType.GetMethod("set_Enable"), new HarmonyMethod(typeof(Auxilaryfunction_Patch).GetMethod(nameof(OnStopFactory))));
+
+                    Log.Debug("Auxilaryfunction compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    string message = "Auxilaryfunction compatibility failed! Last working version: 2.5.9";
+                    Log.Warn(message);
+                    Log.Warn(e);
+                    errorMessage += message + "\n";
+                }
+            }
+
+            public static void OnStopFactory(bool value)
+            {
+                if (enable == value) return;
+                enable = value;
+                if (enable)
+                {
+                    storedUpdatePeriod = MainManager.UpdatePeriod;
+                    MainManager.UpdatePeriod = 1;
+                }
+                else
+                {
+                    MainManager.UpdatePeriod = storedUpdatePeriod;
+                    storedUpdatePeriod = 1;
+                }
+                Log.Debug($"Auxilaryfunction stop factory:{enable}  ratio => {MainManager.UpdatePeriod}");
+            }
+        }
+
         public static class Multfunction_mod_Patch
         {
             public const string GUID = "cn.blacksnipe.dsp.Multfuntion_mod";
@@ -193,7 +238,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "Multfunction_mod compatibility failed! Last working version: 3.1.3";
+                    string message = "Multfunction_mod compatibility failed! Last working version: 3.4.2";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -259,7 +304,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "PlanetMiner compatibility failed! Last working version: 3.0.7";
+                    string message = "PlanetMiner compatibility failed! Last working version: 3.0.8";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -455,7 +500,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.8";
+                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.11";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
