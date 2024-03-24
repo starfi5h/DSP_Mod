@@ -37,9 +37,26 @@ namespace AutoMute
             Instance = this;
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
+
+            // Suppress the sound when finishing craft
+            var method = AccessTools.Method(typeof(UIMechaMoveTip), "OnForgeTaskDelivery");
+            if (method != null) harmony.Patch(method, new HarmonyMethod(AccessTools.Method(typeof(Plugin), nameof(Suppress))));
+#if !DEBUG
+        }
+#else
+            //Print();
         }
 
-#if DEBUG
+        void Print()
+        {
+            string str = "\n| Name | ClipPath | Note |\n| --- | --- | --- |\n";
+            foreach (var audioProto in LDB.audios.dataArray)
+            {
+                str += $"{audioProto.name} | {audioProto.ClipPath} |  |\n";
+            }
+            Logger.LogDebug(str);
+        }
+
         internal void OnDestroy()
         {
             harmony.UnpatchSelf();
@@ -60,6 +77,11 @@ namespace AutoMute
                 OriginalVolume = AudioListener.volume;
                 AudioListener.volume = 0;
             }
+        }
+
+        static bool Suppress()
+        {
+            return false;
         }
 
         [HarmonyPostfix]
