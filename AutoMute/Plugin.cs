@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace AutoMute
         public const string VERSION = "1.1.1";
 
         internal static Plugin Instance;
+        internal static ManualLogSource Log; 
         internal Harmony harmony;
         internal ConfigEntry<bool> MuteInBackground;
         internal ConfigEntry<string> MuteBuildingIds;
@@ -21,7 +23,7 @@ namespace AutoMute
         
         // Audio volume backups
         static float? OriginalVolume = null;
-        readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
+        public readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
         readonly static Dictionary<int, float> ModelVolumes = new Dictionary<int, float>();
 
         public void BindConfig()
@@ -35,8 +37,10 @@ namespace AutoMute
         {
             BindConfig();
             Instance = this;
+            Log = Logger;
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
+            harmony.PatchAll(typeof(IngameUI));
 
             // Suppress the sound when finishing craft
             var method = AccessTools.Method(typeof(UIMechaMoveTip), "OnForgeTaskDelivery");
@@ -44,6 +48,7 @@ namespace AutoMute
 #if !DEBUG
         }
 #else
+            OnApplyClick();
             //Print();
         }
 
@@ -59,7 +64,14 @@ namespace AutoMute
 
         internal void OnDestroy()
         {
+            foreach (var pair in AudioVolumes) // Restore original volumes
+            {
+                var audioProto = LDB.audios[pair.Key];
+                if (audioProto != null) audioProto.Volume = pair.Value;
+            }
+
             harmony.UnpatchSelf();
+            IngameUI.OnDestory();
         }
 #endif
 
@@ -89,13 +101,13 @@ namespace AutoMute
         internal static void OnApplyClick()
         {
             Instance.Config.Reload(); // Refresh config file when click
-            ChangeVolumes(); // Apply changes to LDB.audios
+            ApplySettings(); // Apply changes to LDB.audios
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(VFPreload), "InvokeOnLoadWorkEnded")]
         [HarmonyAfter("me.xiaoye97.plugin.Dyson.LDBTool")]
-        internal static void ChangeVolumes()
+        internal static void ApplySettings()
         {
             ChangeAudioVolumes();
             ChangeBuildingVolumes();

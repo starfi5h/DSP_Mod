@@ -335,6 +335,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IngameUI.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
