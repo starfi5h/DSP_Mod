@@ -21,6 +21,19 @@ namespace AutoMute
         static AudioProto audioProto = null;
         static VFAudio vFAudio = null;
 
+        [HarmonyPrefix, HarmonyPatch(typeof(VFListener), nameof(VFListener.SetPassFilter))]
+        public static bool SetPassFilter_Block()
+        {
+            // This is set in BGMController.UpdateLogic to make audio low when pause
+            if (vFAudio != null && vFAudio.isPlaying)
+            {
+                VFListener.lowPassFilter.enabled = false;
+                VFListener.highPassFilter.enabled = false;
+                return false;
+            }
+            return true;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(UIOptionWindow), nameof(UIOptionWindow._OnOpen))]
         public static void Init()
         {
