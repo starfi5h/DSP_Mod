@@ -3,6 +3,7 @@
 1. Automatically mute when the game loses focus, i.e. alt-tab to the background.   
 2. Mute user-specified building working sounds.  
 3. Mute user-specified UI or world audio.  
+4. Mute the sound when player crafting is done.  
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually download the file and put `AutoMute.dll` in `BepInEx/plugins` folder.
@@ -16,7 +17,11 @@ After changing `.cfg` file, go to in-game settings and click 'Apply' to apply th
 - `Mute Building Ids` - The [item IDs](https://dsp-wiki.com/Modding:Items_IDs) of building to mute, separated by white spaces.   
 For example, to mute Ray receiver and Artificial star, key in `2208 2210`. Reload the planet to take effect.  
 - `MuteList` - The list of audio name to mute, separated by white spaces. Check [mod page wiki](https://dsp.thunderstore.io/package/starfi5h/AutoMute/wiki/) for available names.  
-For example, to mute UI button click sounds, key in `ui-click-0 ui-click-1 ui-click-2`  
+For example, to mute `flight mode` system broadcast, key in `vc-broadcast-4 vc-broadcast-5`  
+
+![Settings](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AutoMute/img/setting.png)  
+In Settings - Audio tab, there is a mod UI to play and toggle each audio.  
+The upper input field can filter the drop-down list of the audio.  
 
 ----
 
@@ -32,6 +37,9 @@ For example, to mute UI button click sounds, key in `ui-click-0 ui-click-1 ui-cl
 ----
 
 ## Changelog
+
+#### v1.2.0
+\- Add mod UI in game Settings - Audio.  
 
 #### v1.1.1
 \- Fix error when installing for the first time.  

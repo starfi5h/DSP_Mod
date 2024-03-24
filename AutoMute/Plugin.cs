@@ -12,7 +12,7 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "1.1.1";
+        public const string VERSION = "1.2.0";
 
         internal static Plugin Instance;
         internal static ManualLogSource Log; 
@@ -30,7 +30,7 @@ namespace AutoMute
         {            
             MuteInBackground = Config.Bind("- General -", "Mute In Background", true, "Enable to mute the game when in the background, i.e. alt-tabbed.\n游戏在后台时自动静音，切换到前台时恢复");
             MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by white spaces.\n消除指定建筑的音讯。输入:建筑物品id, 以空白分隔。");
-            MuteList = Config.Bind("- General -", "MuteList", "", "The list of audio name to mute, separated by white spaces. Check mod page wiki for available names.\n消除指定的音讯。输入:音讯名称, 以空白分隔(名称可以在mod页面wiki查询)");
+            MuteList = Config.Bind("- General -", "MuteList", "vc-broadcast-4 vc-broadcast-5 vc-broadcast-6 vc-broadcast-7 vc-broadcast-8 vc-broadcast-22", "The list of audio name to mute, separated by white spaces. Check mod page wiki for available names.\n消除指定的音讯。输入:音讯名称, 以空白分隔(名称可以在mod页面wiki查询)");
         }
 
         internal void Awake()
