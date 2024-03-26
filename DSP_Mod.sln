@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuildToolOpt", "BuildToolOp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechaAnimMod", "MechaAnimMod\MechaAnimMod.csproj", "{991762F5-FA2F-4E42-8607-E665D62450E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioReplacer", "AudioReplacer\AudioReplacer.csproj", "{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{991762F5-FA2F-4E42-8607-E665D62450E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{991762F5-FA2F-4E42-8607-E665D62450E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{991762F5-FA2F-4E42-8607-E665D62450E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

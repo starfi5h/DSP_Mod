@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>AudioReplacer</AssemblyName>
+    <Description></Description>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Authors />
+    <PackageId />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="output\**" />
+    <EmbeddedResource Remove="output\**" />
+    <None Remove="output\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.17" />
+    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.10.29.22015-r.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2018.4.12" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&#xD;&#xA;xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)manifest.json&quot; &quot;$(ProjectDir)output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)README.md&quot; &quot;$(ProjectDir)output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)CHANGELOG.md&quot; &quot;$(ProjectDir)output\&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)img\icon.png&quot; &quot;$(ProjectDir)output\&quot;&#xD;&#xA;del /q &quot;$(ProjectDir)output\*.zip&quot;&#xD;&#xA;7z a &quot;$(ProjectDir)output\$(ProjectName).zip&quot; &quot;$(ProjectDir)output\*&quot;&#xD;&#xA;)" />
+  </Target>
+</Project>

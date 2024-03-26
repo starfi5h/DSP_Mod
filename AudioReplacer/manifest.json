@@ -1,0 +1,7 @@
+{
+    "name": "AudioReplacer",
+    "description": "",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/AudioReplacer",
+    "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
+}
