@@ -20,7 +20,7 @@ namespace AudioReplacer
     {
         public const string GUID = "starfi5h.plugin.AudioReplacer";
         public const string NAME = "AudioReplacer";
-        public const string VERSION = "0.1.0";
+        public const string VERSION = "0.1.1";
         public static AudioReplacerPlugin Instance;
 
         public Harmony harmony;

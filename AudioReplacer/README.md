@@ -18,11 +18,15 @@ Run the game one time to generate `starfi5h.plugin.AudioReplacer.cfg` file.
 
 - `AudioFolderPath` - The folder to load custom audio files when game startup.
 
+## AudioReplacerAPI
+
+Provide `RegisterDirectory`, `LoadAudioFromDirectory`, `LoadAudioFromDirectory`, `UnloadAudioFromDirectory` to dynamic loading/unloading audio files without making them into asset bundle.  
+
 ----
 
 ## 音频名称
 当从文件夹加载时，它将获取文件名并尝试在`LDB.audios`中查找同名的音频并替换。  
-您可以安装[AutoMute](https://thunderstore.io/c/dyson-sphere-program/p/starfi5h/AutoMute/)来获取游戏中当前可用的音频名称。  
+可以安装[AutoMute](https://thunderstore.io/c/dyson-sphere-program/p/starfi5h/AutoMute/)来获取游戏中当前可用的音频名称。  
 
 ## 设置   
 .cfg文件需要先运行过游戏一次才会出现，修改后要点击游戏内'应用设置'的按钮才会生效。  
