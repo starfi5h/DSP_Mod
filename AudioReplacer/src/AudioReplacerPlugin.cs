@@ -90,6 +90,7 @@ namespace AudioReplacer
             //Instance.Logger.LogDebug("UnloadAudioFromDirectory " + dir);
             var cleanAll = string.IsNullOrEmpty(dir);
             var audioCount = 0;
+            var removedList = new List<string>();
             foreach (var pair in Instance.ModifyAudio) // Restore original volumes
             {
                 var audioProto = LDB.audios[pair.Key];
@@ -98,10 +99,15 @@ namespace AudioReplacer
                 audioProto.audioClip = pair.Value.originAudioClip;
                 audioProto.Volume = pair.Value.originVolume;
                 audioCount++;
+                removedList.Add(pair.Key);
             }
             if (cleanAll)
             {
                 Instance.ModifyAudio.Clear();
+            }
+            else
+            {
+                foreach (var audioName in removedList) Instance.ModifyAudio.Remove(audioName);
             }
 
             Instance.LogInfo($"Unload {audioCount} files. ");

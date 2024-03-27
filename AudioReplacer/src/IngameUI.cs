@@ -14,6 +14,7 @@ namespace AudioReplacer
 
         static InputField folderPathInput;
         static UIButton loadFolderBtn;
+        static UIButton unloadFolderBtn;
         static UIButton unloadAllBtn;
         static Text loadInfoText;
 
@@ -66,7 +67,7 @@ namespace AudioReplacer
                     go = GameObject.Instantiate(buttonTemple, group.transform);
                     go.name = "Load Folder Button";
                     go.transform.localPosition = new Vector3(0, 0, 0);
-                    go.GetComponent<RectTransform>().sizeDelta = new Vector2(150, 30);
+                    go.GetComponent<RectTransform>().sizeDelta = new Vector2(130, 30);
                     loadFolderBtn = go.GetComponent<UIButton>();
                     loadFolderBtn.onClick += LoadFolder;
                     var text = go.GetComponentInChildren<Text>();
@@ -74,8 +75,16 @@ namespace AudioReplacer
                     GameObject.Destroy(go.GetComponentInChildren<Localizer>());
 
                     go = GameObject.Instantiate(loadFolderBtn.gameObject, group.transform);
+                    go.name = "Unload Folder Button";
+                    go.transform.localPosition = new Vector3(130 + 5, 0, 0);
+                    unloadFolderBtn = go.GetComponent<UIButton>();
+                    unloadFolderBtn.onClick += UnloadFolder;
+                    text = go.GetComponentInChildren<Text>();
+                    text.text = "Unload Folder".Translate();
+
+                    go = GameObject.Instantiate(loadFolderBtn.gameObject, group.transform);
                     go.name = "Unload All Button";
-                    go.transform.localPosition = new Vector3(150, 0, 0);
+                    go.transform.localPosition = new Vector3(260 + 10, 0, 0);
                     unloadAllBtn = go.GetComponent<UIButton>();
                     unloadAllBtn.onClick += UnloadAll;
                     text = go.GetComponentInChildren<Text>();
@@ -89,6 +98,7 @@ namespace AudioReplacer
                     go.SetActive(true);
                     folderPathInput = go.GetComponent<InputField>();
                     folderPathInput.text = AudioReplacerPlugin.Instance.AudioFolderPath.Value;
+                    folderPathInput.characterLimit = 256;
 
                     go = GameObject.Instantiate(checkBoxTemple, group.transform);
                     go.name = "Load Info";
@@ -146,7 +156,7 @@ namespace AudioReplacer
                     go.name = "Audio ClipPath";
                     go.transform.localPosition = new Vector3(210, OffsetAudioY - 30, 0);
                     audioClipPath = go.GetComponent<Text>();
-                    audioClipPath.text = "(Custom Audio Path)";
+                    audioClipPath.text = "(Custom Audio Path)".Translate();
 
                     // Create button to play audio
                     go = GameObject.Instantiate(buttonTemple, group.transform);
@@ -157,7 +167,7 @@ namespace AudioReplacer
                     playAudioButton = go.GetComponent<Button>();
                     playAudioButton.onClick.AddListener(PlayAudio);
                     playAudioText = go.GetComponentInChildren<Text>();
-                    playAudioText.text = "Play Audio";
+                    playAudioText.text = "Play Audio".Translate();
                     GameObject.Destroy(go.GetComponent<UIButton>());
                     GameObject.Destroy(go.GetComponentInChildren<Localizer>());
                 }
@@ -192,6 +202,22 @@ namespace AudioReplacer
             AudioReplacerPlugin.LoadAudioFromDirectory(folderPathInput.text);
             loadInfoText.text = plugin.lastInfoMsg + " " + plugin.lastWarningMsg;
             RefreshAudioComboBox();
+            OnComboBoxIndexChange();
+        }
+
+        static void UnloadFolder(int _)
+        {
+            plugin.lastInfoMsg = "";
+            plugin.lastWarningMsg = "";
+            if (string.IsNullOrEmpty(folderPathInput.text))
+            {
+                loadInfoText.text = "Path is empty.";
+                return;
+            }
+            AudioReplacerPlugin.UnloadAudioFromDirectory(folderPathInput.text);
+            loadInfoText.text = plugin.lastInfoMsg + " " + plugin.lastWarningMsg;
+            RefreshAudioComboBox();
+            OnComboBoxIndexChange();
         }
 
         static void UnloadAll(int _)
@@ -201,6 +227,7 @@ namespace AudioReplacer
             AudioReplacerPlugin.UnloadAudioFromDirectory();
             loadInfoText.text = plugin.lastInfoMsg + " " + plugin.lastWarningMsg;
             RefreshAudioComboBox();
+            OnComboBoxIndexChange();
         }
 
         static void PlayAudio()
@@ -225,7 +252,7 @@ namespace AudioReplacer
                     {
                         audioClipPath.text = entry.filePath;
                     }
-                    playAudioText.text = currentAudioProto.Volume == 0.0f ? "Muted" : "Play Audio";
+                    playAudioText.text = currentAudioProto.Volume == 0.0f ? "Muted".Translate() : "Play Audio".Translate();
                 }                
             }
             if (currentVFAudio != null)
