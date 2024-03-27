@@ -28,6 +28,7 @@ namespace AudioReplacer
         public string lastWarningMsg = "";
         public string lastInfoMsg = "";
         public ConfigEntry<string> AudioFolderPath;
+        public readonly HashSet<string> RegisteredFolders = new(); // dir
 
         private bool isLoaded;
 
@@ -76,7 +77,11 @@ namespace AudioReplacer
         [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), "InvokeOnLoadWorkEnded")]
         public static void Init()
         {
-            if (!Instance.isLoaded) LoadAudioFromDirectory(Instance.AudioFolderPath.Value);
+            if (Instance.isLoaded) return;
+                
+            foreach (var dir in Instance.RegisteredFolders)
+                LoadAudioFromDirectory(dir);
+            LoadAudioFromDirectory(Instance.AudioFolderPath.Value);
             Instance.isLoaded = true;
         }
 
