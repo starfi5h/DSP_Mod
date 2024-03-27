@@ -38,6 +38,9 @@ The upper input field can filter the drop-down list of the audio.
 
 ## Changelog
 
+#### v1.2.1
+\- Add button to filter only mute audio.  
+
 #### v1.2.0
 \- Add mod UI in game Settings - Audio.  
 
