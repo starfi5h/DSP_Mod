@@ -25,6 +25,7 @@ namespace AutoMute
         static float? OriginalVolume = null;
         public readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
         readonly static Dictionary<int, float> ModelVolumes = new Dictionary<int, float>();
+        internal static bool IsDirty = true;
 
         public void BindConfig()
         {            
@@ -102,6 +103,13 @@ namespace AutoMute
         {
             Instance.Config.Reload(); // Refresh config file when click
             ApplySettings(); // Apply changes to LDB.audios
+
+            // Reload planet audio. Apply after restarting the game or reloading the planet.
+            if (IsDirty)
+            {
+                AudioData.LoadStatic();
+                IsDirty = false;
+            }
         }
 
         [HarmonyPostfix]

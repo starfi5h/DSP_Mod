@@ -12,11 +12,16 @@ namespace AutoMute
         static GameObject group;
         static UIToggle backGroundMuteToggle;
         static InputField filterInput;
+        static Text muteInfoText;
+        static UIToggle filterMuteOnlyToggle;
+
         static UIComboBox audioComboBox;
         static Text audioClipPath;
         static UIToggle audioEnableToggle;
         static Button playAudioButton;
+        static Text playAutoButtonText; 
 
+        static bool filterMuteOnly = false;
         static string searchStr = "";
         static AudioProto audioProto = null;
         static VFAudio vFAudio = null;
@@ -48,13 +53,13 @@ namespace AutoMute
                     GameObject inputTemple = GameObject.Find("UI Root/Overlay Canvas/In Game/Globe Panel/name-input");
                     GameObject buttonTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/revert-button");
 
-                    // Create group
+                    // 創建一個群組包含所有mod的物件
                     group = new GameObject("AutoMute_Group");
                     group.transform.SetParent(settingTab.transform);
                     group.transform.localPosition = new Vector3(-100, 280);
                     group.transform.localScale = Vector3.one;
 
-                    // Create background mute toggle
+                    // 創建在背景靜音的勾選按鈕
                     var go = GameObject.Instantiate(checkBoxTemple, group.transform);
                     go.name = "MuteInBackground Toggle";
                     go.transform.localPosition = new Vector3(0, 0, 0);
@@ -64,12 +69,11 @@ namespace AutoMute
                     text_local.text = "Mute in background".Translate();
 
                     backGroundMuteToggle = go.GetComponentInChildren<UIToggle>();
-                    backGroundMuteToggle.transform.localPosition = new Vector3(120, 5, 0);
+                    backGroundMuteToggle.transform.localPosition = new Vector3(130, 5, 0);
                     backGroundMuteToggle.isOn = Plugin.Instance.MuteInBackground.Value;
                     backGroundMuteToggle.toggle.onValueChanged.AddListener(OnBackGroundMuteToggleChange);
 
-
-                    // Create InputField filterInput to search audio with string 
+                    // 創建一個輸入框, 篩選音頻檔名
                     go = GameObject.Instantiate(inputTemple, group.transform);
                     go.name = "AudioName Filter";
                     go.transform.localPosition = new Vector3(-2, -30, 0);
@@ -82,7 +86,20 @@ namespace AutoMute
                     // tmp.transform.parent.GetChild(0).GetComponent<Button>().onClick.AddListener(new UnityAction(OnComboBoxClicked));
                     go.SetActive(true);
 
-                    // Create UIComboBox audioComboBox for drop-down select audio
+                    // 狀態回報文字, 以及勾選按鈕過濾靜音列表
+                    go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                    go.name = "Filter Mute Only Toggle";
+                    go.transform.localPosition = new Vector3(210 + 30, -30, 0);
+                    GameObject.Destroy(go.GetComponent<Localizer>());
+                    muteInfoText = go.GetComponent<Text>();
+                    muteInfoText.text = "";
+
+                    filterMuteOnlyToggle = go.GetComponentInChildren<UIToggle>();
+                    filterMuteOnlyToggle.transform.localPosition = new Vector3(-40, 5, 0);
+                    filterMuteOnlyToggle.isOn = filterMuteOnly;
+                    filterMuteOnlyToggle.toggle.onValueChanged.AddListener(OnFilterMuteOnlyToggleChange);
+
+                    // 創建一個下拉表單, 選音頻檔案
                     go = GameObject.Instantiate(comboBoxTemple, group.transform, false);
                     go.name = "Audio ComboBox";
                     go.transform.localPosition = new Vector3(0, -60, 0);
@@ -111,8 +128,7 @@ namespace AutoMute
                     audioComboBox.m_Input.text = "<i>(Select Audio)</i>";
                     audioComboBox.onItemIndexChange.AddListener(OnComboBoxIndexChange);
 
-
-                    // Create UIToggle audioEnableToggle and Text audioClipPath
+                    // 創建音頻文件的路徑文字, 及靜音勾選按鈕
                     go = GameObject.Instantiate(checkBoxTemple, group.transform);
                     go.name = "Audio Enable Toggle";
                     go.transform.localPosition = new Vector3(210 + 30, -60, 0);
@@ -125,7 +141,7 @@ namespace AutoMute
                     audioEnableToggle.isOn = true;
                     audioEnableToggle.toggle.onValueChanged.AddListener(OnAudioEnableToggleChange);
 
-                    // Create button to play audio
+                    // 創建播放音頻的按鈕
                     go = GameObject.Instantiate(buttonTemple, group.transform);
                     go.name = "Play Audio Button";
                     go.transform.localPosition = new Vector3(210, -130, 0);
@@ -133,8 +149,8 @@ namespace AutoMute
                     rect.sizeDelta = new Vector2(90, 30);
                     playAudioButton = go.GetComponent<Button>();
                     playAudioButton.onClick.AddListener(PlayAudio);
-                    var text = go.GetComponentInChildren<Text>();
-                    text.text = "Play Audio";
+                    playAutoButtonText = go.GetComponentInChildren<Text>();
+                    playAutoButtonText.text = "Play Audio".Translate();
                     GameObject.Destroy(go.GetComponent<UIButton>());
                     GameObject.Destroy(go.GetComponentInChildren<Localizer>());
                 }
@@ -179,6 +195,15 @@ namespace AutoMute
             }
         }
 
+        static void OnFilterMuteOnlyToggleChange(bool value)
+        {
+            filterMuteOnlyToggle.isOn = value;
+            filterMuteOnly = value;
+
+            RefreshAudioComboBox();
+            OnComboBoxIndexChange();
+        }
+
         static void OnAudioEnableToggleChange(bool value)
         {
             audioEnableToggle.isOn = value;
@@ -189,8 +214,8 @@ namespace AutoMute
                 {
                     audioProto.Volume = volume;
                     Plugin.AudioVolumes.Remove(audioProto.name);
-                    audioComboBox.m_Input.text = audioProto.name;
-                    playAudioButton.gameObject.SetActive(true);
+                    //playAudioButton.gameObject.SetActive(true);
+                    playAutoButtonText.text = "Play Audio".Translate();
                 }                
             }
             else
@@ -199,10 +224,11 @@ namespace AutoMute
                 {
                     Plugin.AudioVolumes.Add(audioProto.name, audioProto.Volume);
                     audioProto.Volume = 0;
-                    audioComboBox.m_Input.text = "<color=#ff9900ff>" + audioProto.name + "</color>";
-                    playAudioButton.gameObject.SetActive(false);
+                    //playAudioButton.gameObject.SetActive(false);
+                    playAutoButtonText.text = "Muted".Translate();
                 }
             }
+            audioComboBox.m_Input.text = GetRichText(audioProto.name);
             Plugin.Log.LogDebug($"[{audioProto.name}]: {audioProto.Volume}");
             
             // Stored the changed ids
@@ -213,6 +239,7 @@ namespace AutoMute
                 sb.Append(' ');
             }
             Plugin.Instance.MuteList.Value = sb.ToString();
+            Plugin.IsDirty = true;
 
             RefreshAudioComboBox();
         }
@@ -226,7 +253,17 @@ namespace AutoMute
                 audioClipPath.text = audioProto.ClipPath;
                 var isMute = Plugin.AudioVolumes.ContainsKey(audioProto.name);
                 audioEnableToggle.isOn = !isMute;
-                playAudioButton.gameObject.SetActive(!isMute);
+                //playAudioButton.gameObject.SetActive(!isMute);
+                playAutoButtonText.text = isMute ? "Muted".Translate() : "Play Audio".Translate();
+            }
+            else
+            {
+                audioProto = null;
+                audioComboBox.m_Input.text = "";
+                audioClipPath.text = "";
+                audioEnableToggle.isOn = false;
+                //playAudioButton.gameObject.SetActive(false);
+                playAutoButtonText.text = "No Audio".Translate();
             }
             if (vFAudio != null)
             {
@@ -244,12 +281,6 @@ namespace AutoMute
             {
                 audioComboBox.itemIndex = 0;
             }
-            else
-            {
-                audioComboBox.m_Input.text = "";
-                audioClipPath.text = "";
-                playAudioButton.gameObject.SetActive(false);
-            }
             OnComboBoxIndexChange();
         }
 
@@ -258,9 +289,19 @@ namespace AutoMute
             audioComboBox.Items.Clear();
             audioComboBox.ItemsData.Clear();
 
+            var muteCount = 0;
             for (var index = 0; index < LDB.audios.dataArray.Length; index++)
             {
                 var name = LDB.audios.dataArray[index].name;
+
+                if (Plugin.AudioVolumes.ContainsKey(name))
+                {
+                    muteCount++;
+                }
+                else if (filterMuteOnly)
+                {
+                    continue;
+                }
 
                 if (!string.IsNullOrEmpty(searchStr))
                 {
@@ -269,17 +310,22 @@ namespace AutoMute
                 }
 
                 audioComboBox.ItemsData.Add(index);
-                if (Plugin.AudioVolumes.ContainsKey(name)) // mute
-                {
-                    audioComboBox.Items.Add("<color=#ff9900ff>" + name + "</color>");
-                }
-                else
-                {
-                    audioComboBox.Items.Add(name);
-                }
+                audioComboBox.Items.Add(GetRichText(name));
             }
-            
+
+            muteInfoText.text = $"{audioComboBox.Items.Count}/{LDB.audios.dataArray.Length}";
+            if (filterMuteOnly) muteInfoText.text += " (mute only)";
+            else muteInfoText.text += $" ({muteCount} muted)";
             //Plugin.Log.LogDebug(audioComboBox.Items.Count);
+        }
+
+        static string GetRichText(string audioName)
+        {
+            if (Plugin.AudioVolumes.ContainsKey(audioName)) // mute
+            {
+                return "<color=#ff9900ff>" + audioName + "</color>";
+            }
+            return audioName;
         }
     }
 }
