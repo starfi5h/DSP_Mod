@@ -69,6 +69,7 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(UIcontrol));
             harmony.PatchAll(typeof(Dyson_Patch));
             harmony.PatchAll(typeof(Combat_Patch));
+            harmony.PatchAll(typeof(Fix_Patch));
 
             if (UIstation.Period > 0)
                 harmony.PatchAll(typeof(UIstation));
