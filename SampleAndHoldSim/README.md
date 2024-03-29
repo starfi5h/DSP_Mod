@@ -15,8 +15,14 @@ Additional UI for displaying flow-in/flow-out rate of cargo in stations. Configu
 
 ## How does it work
 
+The difference between vanilla behavior:  
+- Stations may have negative value to maintain the cargo balance between slowed and unslowed environment.  
+- Kill stats may tick slower in slowed plaents, but the production of drop will remain the same.  
+- Lancer attacks will be scaled down in remote systems.  
+- Turrets that attack space unit will be scaled up in remote systems.  
+
 <details>
-<summary>Click to expand</summary>
+<summary>Detial (Click to expand)</summary>
 
 Let factories have active tick and idle tick. When active, the factory will run the whole simulation. When idle, the factory will use values from the last active tick to generate input and output, multiplying the "result".  
 The goal is to make factories tick less but still make nearly the same amount of items in ILS in the long term, trade simulation accuracy for UPS.   
@@ -84,12 +90,16 @@ If true, allow Dark Fog relays to land on planet (vanilla).
 
 ## 运作原理
 
+和原版不同之处:  
+- 为了保持内外部物品时恒定, 物流塔内的货物可能为负数  
+- 击杀统计会减慢(但是掉落物品产量不会改变)  
+  
 目前对战斗系统进行了以下的修改, 可能会影响平衡:  
 - 远程星系的枪骑攻击力依照倍率缩减, 避免远程星系的星球被攻破  
 - 远程星球的导弹和电浆炮伤害依照倍率增加, 但可能有溢伤的问题  
 
 <details>
-<summary>点击展开</summary>
+<summary>详情(点击展开)</summary>
 
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/SampleAndHoldSim/img/time_chart.png)  
 此图中有三个星球工厂，星球A的工厂的物品数量变化是+2/+1/+0/-1，经过一个完整生产周期后最终会有2个物品。其余工厂同理。  

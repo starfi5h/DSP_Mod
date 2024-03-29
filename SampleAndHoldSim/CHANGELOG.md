@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.8
+\- Fix IndexOutOfRangeException in `PowerExchangerComponent.CalculateActualEnergyPerTick`.  
+
 #### v0.6.7
 \- Add config `Combat` - `EnableRelayLanding` to enable/disable Dark Fog relay from landing.  
 \- Add Auxilaryfunction compat for its stop factory feature.  
