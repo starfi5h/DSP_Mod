@@ -1,0 +1,7 @@
+{
+    "name": "PlanetwideSpray",
+    "description": "Spray Coaster wihtout cargo infeed belt can spray production facilities of the entire planet. 没有货物输入传送带的喷涂机可以喷涂全球的生产设备",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/PlanetwideSpray",
+    "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
+}
