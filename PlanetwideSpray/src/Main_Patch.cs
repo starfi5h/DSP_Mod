@@ -8,7 +8,8 @@ namespace PlanetwideSpray
 {
     public class Main_Patch
     {
-        public static Status[] statusArr = null;
+        public static bool LimitSpray = true;
+        private static Status[] statusArr = null;
 
         public class Status
         {
@@ -33,7 +34,7 @@ namespace PlanetwideSpray
         static void AddItemInc(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc)
         {
             ref var entity = ref __instance.entityPool[entityId];
-            if (entity.assemblerId == 0 && entity.labId == 0) return;
+            if (entity.assemblerId == 0 && entity.labId == 0 && LimitSpray) return;
 
             var status = statusArr[__instance.index];
             var incToAdd = (itemCount * status.incLevel) - itemInc;
@@ -63,7 +64,7 @@ namespace PlanetwideSpray
             if (status.incDebt > 0)
             {
                 flag = true;
-                var incToAdd = (__instance.incSprayTimes) < status.incDebt ? (__instance.incSprayTimes) : status.incDebt;
+                var incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt; // max: 7200/min
                 status.incDebt -= incToAdd;
                 __instance.extraIncCount -= incToAdd;
                 //__instance.sprayTime = incToAdd; // Use in UI
