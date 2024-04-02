@@ -3,9 +3,44 @@
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/PlanetwideSpray/img/demo1.jpg)  
 
 If a spray coaster is set without the belt underneath, it will turn into planetwide sprayer.  
-The production facilities (smelters, assemblers, lab) on entire planet will get their raw materials proliferated.  
+The production facilities (smelters, assemblers, lab) on entire planet will get their **raw materials** proliferated.  
+By default, the products of those machine will not proliferate, unless config `Spray All Cargo` is set to true.  
 With this mod, the direct insertion builds can get proliferation too.  
 
 如果喷涂机的下方没有货物传送带，它将变成全球喷涂机。  
-整个星球上的生产设施（熔炉, 制造台, 研究站）的原材料将会喷涂增产剂。  
+整个星球上的生产设施（熔炉, 制造台, 研究站）的**原料**将会喷涂增产剂。  
+默认生产设施的产物不会喷涂, 除非将配置的`Spray All Cargo`开启。  
 此mod可以让不使用传送带的产线也能享受到增产剂的效果。  
+
+
+## Configuration
+Run the game one time to generate `BepInEx\config\starfi5h.plugin.PlanetwideSpray.cfg` file.  
+配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。  
+ 
+```
+## Settings file was created by plugin PlanetwideSpray v1.0.1
+## Plugin GUID: starfi5h.plugin.PlanetwideSpray
+
+[Cheat]
+
+## Spray everything insert by sorters if this value > 0
+## (作弊选项)当此值>0, 使分捡器抓取的货物皆为此增产等级
+# Setting type: Int32
+# Default value: 0
+# Acceptable value range: From 0 to 10
+Force Proliferator Level = 0
+
+[General]
+
+## Spray every item transfer by sorters (including products)
+## 喷涂任何分捡器抓取的货物(包含产物)
+# Setting type: Boolean
+# Default value: false
+Spray All Cargo = false
+
+```
+
+## Changelog
+
+- v1.0.1 - Add config Spray All Cargo.   
+- v1.0.0 - Initial release. (DSP-0.10.29.22015)  
