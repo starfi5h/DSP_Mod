@@ -1,25 +1,31 @@
 # ReorderTechQueue  
 
 
-![click-and-drag](https://raw.githubusercontent.com/starfi5h/DSP_Mod/master/ReorderTechQueue/img/demo1.gif)  
-Rearrange research queue by pressing left click and dragging the icon to the target position.  
-If there are techs depend on selecting tech, it can't move to position behind them.  
-If selecting tech move to position in front of its prerequisites, the tech will get removed.  
+![click-and-drag](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/ReorderTechQueue/img/demo1.gif)  
+Rearrange research queue by pressing left-click and dragging the icon to the target position.  
+If there are techs depending on selecting tech, it can't move to position behind them.  
+If selecting tech moves to position in front of its prerequisites, the tech will get removed.  
+
+![navi-button](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/ReorderTechQueue/img/demo2.png)  
+Add a button to navigate to implicit required tech.  
 
 ## Installation
-Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manual download the file and put `ReorderTechQueue.dll` in `BepInEx/plugins` folder.
+Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually download the file and put `ReorderTechQueue.dll` in `BepInEx/plugins` folder.
 
 ## Configuration
 
 Run the game one time to generate `com.starfi5h.plugin.ReorderTechQueue.cfg` file.  
 
 - `TechQueueLength`  
-Length of reserach queue. (Default:`8`)  
+Length of research queue. (Default:`8`)  
 
 ----
 
 ## Changelog
 
+#### v1.2.0
+\- Add navigate button to ImplicitPreTechRequired.  
+\- Allow tech to be queued even if the metadata requirement is not met. (0.10.29.22015)  
 
 #### v1.1.1
 \- Fix a bug that moving an infinite tech will enqueue duplicate tech.  
