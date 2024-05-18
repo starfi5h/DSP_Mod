@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.6 (DSP-0.10.29.22015)
+\- Add BlueprintTweaks v1.6.4 compat for allowing foundation blueprint to use delivery slots.  
+
 #### v1.5.5
 \- Add upper limit to StackSizeMultiplier(1M) and PlayerPackageStackSize(1,000M).  
 

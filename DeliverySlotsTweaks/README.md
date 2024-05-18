@@ -3,7 +3,7 @@
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/DeliverySlotsTweaks/img/demo1.jpg)
 
 1. Let replicator and build tools use items in logistic slots.
-2. When logistic bots deliver items to mecha, Let logistic slots fill first.   
+2. When logistic bots deliver items to mecha, let logistic slots fill first.   
 3. Change the parameters of logistic slots (size, stack size).  
 4. Overwrite default item stack size count in mecha inventory and fuel chamber.  
 
@@ -72,6 +72,7 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 
 ## MOD兼容性
 RebindBuildBar(1.0.4): 可改工具列会显示背包+物流清单的建筑数目  
+BlueprintTweaks(1.6.4): 使用带地基的蓝图时允许使用物流栏内的物品  
 Auxilaryfunction(2.5.8): 飞往未完成建筑也会使用物流栏位的物品  
 CheatEnabler(2.3.11), Multifunction_mod(3.4.2): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
 NebulaMultiplayerMod(0.9.0): 其他玩家发起的建筑事件不会消耗本地背包中的建筑  

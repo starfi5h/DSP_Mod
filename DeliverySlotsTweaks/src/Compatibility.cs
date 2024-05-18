@@ -11,6 +11,7 @@ namespace DeliverySlotsTweaks
         public static void Init(Harmony harmony)
         {
             CheatEnabler_Patch.Init(harmony);
+            BlueprintTweaks_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             RebindBuildBar_Patch.Init(harmony);
             UnlimitedFoundations_Patch.Init(harmony);
@@ -51,6 +52,33 @@ namespace DeliverySlotsTweaks
                     DeliveryPackagePatch.architectMode = false;
             }
         }
+
+        public static class BlueprintTweaks_Patch
+        {
+            public const string GUID = "org.kremnev8.plugin.BlueprintTweaks";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("BlueprintTweaks.BlueprintPasteExtension");
+                    harmony.Patch(AccessTools.Method(classType, "OnUpdate"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
+                    harmony.Patch(AccessTools.Method(classType, "CheckItems"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
+                    harmony.Patch(AccessTools.Method(classType, "CheckItems"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 1.6.4");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+        }
+
 
         public static class Auxilaryfunction_Patch
         {
