@@ -16,7 +16,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.0.1";
+        public const string VERSION = "1.1.0";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -37,6 +37,7 @@ namespace PlanetwideSpray
                 ForceProliferatorLevel.Value = Math.Min(ForceProliferatorLevel.Value, 10);
                 harmony.PatchAll(typeof(Cheat_Patch));
                 Cheat_Patch.IncAbility = ForceProliferatorLevel.Value;
+                Logger.LogDebug("Cheat mode: Force Proliferator Level = " + Cheat_Patch.IncAbility);
             }
             else
             {
@@ -66,6 +67,20 @@ namespace PlanetwideSpray
         static void AddItemInc(byte itemCount, ref byte itemInc)
         {
             itemInc = (byte)(itemCount * IncAbility);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
+        static void FractionatorSetInc(ref FractionatorComponent __instance)
+        {
+            __instance.fluidInputInc = __instance.fluidInputCount * IncAbility;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TurretComponent), nameof(TurretComponent.BeltUpdate))]
+        static void TurretSetInc(ref TurretComponent __instance)
+        {
+            __instance.itemInc = (short)(__instance.itemCount * IncAbility);
         }
     }
 }

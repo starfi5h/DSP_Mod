@@ -36,12 +36,39 @@ namespace PlanetwideSpray
             ref var entity = ref __instance.entityPool[entityId];
             if (entity.assemblerId == 0 && entity.labId == 0 && LimitSpray) return;
 
-            var status = statusArr[__instance.index];
-            var incToAdd = (itemCount * status.incLevel) - itemInc;
+            var status = statusArr[__instance.index]; //定位工廠
+            var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
             if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
             {
-                Interlocked.Add(ref status.incDebt, itemCount);
+                Interlocked.Add(ref status.incDebt, itemCount); //記錄噴塗的物品數 (詳見num9 * this.incAbility)
                 itemInc += (byte)incToAdd;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
+        static void FractionatorSetInc(PlanetFactory factory, ref FractionatorComponent __instance)
+        {
+            var status = statusArr[factory.index];
+            var incToAdd = (__instance.fluidInputCount * status.incLevel) - __instance.fluidInputInc;
+            if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+            {
+                Interlocked.Add(ref status.incDebt, incToAdd / status.incLevel);
+                __instance.fluidInputInc += incToAdd;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TurretComponent), nameof(TurretComponent.InternalUpdate))]
+        static void TurretSetInc(PlanetFactory factory, ref TurretComponent __instance)
+        {
+            // TurretComponent.BeltUpdate沒有factory可以定位, 因此用外層的InternalUpdate
+            var status = statusArr[factory.index];
+            var incToAdd = (__instance.itemCount * status.incLevel) - __instance.itemInc;
+            if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+            {
+                Interlocked.Add(ref status.incDebt, incToAdd / status.incLevel);
+                __instance.itemInc += (short)incToAdd;
             }
         }
 
@@ -61,7 +88,7 @@ namespace PlanetwideSpray
 
             var flag = false;
             var status = statusArr[_traffic.factory.index];
-            if (status.incDebt > 0)
+            if (status.incDebt > 0) //存在滯留扣除額, 嘗試報銷
             {
                 flag = true;
                 var incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt; // max: 7200/min
