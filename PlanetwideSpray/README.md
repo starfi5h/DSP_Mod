@@ -3,14 +3,26 @@
 ![demo](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/PlanetwideSpray/img/demo1.jpg)  
 
 If a spray coaster is set without the belt underneath, it will turn into planetwide sprayer.  
-The production facilities (smelters, assemblers, lab) on entire planet will get their **raw materials** proliferated.  
+The production facilities (*1) on entire planet will get their **raw materials** proliferated.  
 By default, the products of those machine will not proliferate, unless config `Spray All Cargo` is set to true.  
 With this mod, the direct insertion builds can get proliferation too.  
 
+(*1) Support facilities list:  
+1. Smelting, Assembler, Refinery, Chemical facilities that use sorters to input
+2. Research Lab that use sorters to input
+3. Fractionator: materials go through will be spray
+4. Turret: bullets go into turrets will be spray
+
 如果喷涂机的下方没有货物传送带，它将变成全球喷涂机。  
-整个星球上的生产设施（熔炉, 制造台, 研究站）的**原料**将会喷涂增产剂。  
+整个星球上的生产设施(*1)的**原料**将会喷涂增产剂。  
 默认生产设施的产物不会喷涂, 除非将配置的`Spray All Cargo`开启。  
 此mod可以让不使用传送带的产线也能享受到增产剂的效果。  
+
+(*1) 支援的生产设备:  
+1. 用爪子输入原料的熔炉, 制造台, 精炼厂, 化工厂
+2. 用爪子输入原料的研究站
+3. 分馏塔: 经过分馏塔的原料将被喷涂
+3. 炮塔: 输入炮塔的子弹将会被喷涂
 
 
 ## Configuration
@@ -42,5 +54,6 @@ Spray All Cargo = false
 
 ## Changelog
 
+- v1.1.0 - Support fractionator and turret.  
 - v1.0.1 - Add config Spray All Cargo.   
 - v1.0.0 - Initial release. (DSP-0.10.29.22015)  
