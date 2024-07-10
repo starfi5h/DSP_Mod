@@ -24,6 +24,21 @@ With this mod, the direct insertion builds can get proliferation too.
 3. 分馏塔: 经过分馏塔的原料将被喷涂
 3. 炮塔: 输入炮塔的子弹将会被喷涂
 
+## Cheat Mode 作弊模式
+
+In cheat mode, the following cargo will receive free proliferator points according to `Force Proliferator Level`:  
+1. facilities that use sorters to input
+2. feed by belt: turret, fractionator, power exchanger, liquid tank
+3. input by belt: logistic station  
+  
+Planetwide sprayer patches will not apply in cheat mode.  
+
+在作弊模式中, 以下的货物(原料)将依照增产等级免费得到增产点数:
+1. 用爪子输入  
+2. 传送带供给: 炮塔, 分馏塔, 能量枢纽, 储液罐  
+3. 传送带输入: 物流站(以及创世之书的巨型工厂)  
+  
+作弊模式不会消耗增产剂, 因此全球喷涂机将不会作用  
 
 ## Configuration
 Run the game one time to generate `BepInEx\config\starfi5h.plugin.PlanetwideSpray.cfg` file.  
@@ -54,6 +69,7 @@ Spray All Cargo = false
 
 ## Changelog
 
+- v1.1.1 - Spray more transportations in cheat mode. (DSP-0.10.30.22292)  
 - v1.1.0 - Support fractionator and turret.  
 - v1.0.1 - Add config Spray All Cargo.   
 - v1.0.0 - Initial release. (DSP-0.10.29.22015)  

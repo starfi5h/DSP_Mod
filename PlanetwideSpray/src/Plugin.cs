@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System;
 using System.Reflection;
-using UnityEngine;
 
 [assembly: AssemblyTitle(PlanetwideSpray.Plugin.NAME)]
 [assembly: AssemblyVersion(PlanetwideSpray.Plugin.VERSION)]
@@ -16,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.0";
+        public const string VERSION = "1.1.1";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -67,6 +66,14 @@ namespace PlanetwideSpray
         static void AddItemInc(byte itemCount, ref byte itemInc)
         {
             itemInc = (byte)(itemCount * IncAbility);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.TryPickItemAtRear))]
+        [HarmonyPatch(typeof(CargoPath), nameof(CargoPath.TryPickItemAtRear))]
+        static void TryPickItemAtRear(ref byte stack, ref byte inc)
+        {
+            inc = (byte)(stack * IncAbility);
         }
 
         [HarmonyPostfix]
