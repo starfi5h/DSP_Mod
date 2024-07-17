@@ -1,7 +1,7 @@
 {
     "name": "BulletTime",
     "description": "Time stop with pause key. Let user adjust world speed in performance test panel. Autosave in background. Pause键暂停。性能测试面板中可调世界速度。在背景执行自动保存。",
-    "version_number": "1.4.7",
+    "version_number": "1.4.8",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/BulletTime",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

@@ -8,8 +8,9 @@ Decouple the mecha (player actions) from the world simulation.
 
 ## Feature
 
-### Hotkey true pause mode
-When pressing `KeyPause` key, the game will enter true pause mode. The following actions are allowed:
+### Tactical pause mode
+![Tactical pause](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo3.gif)  
+When pressing `KeyPause` key, the game will enter tactical pause mode (true pause). The following actions are allowed:
 - Freely move camera and inspect in-game objects.  
 - Queue up mecha RTS order and mecha replicator.  
 - Change settings of buildings.  
@@ -19,15 +20,15 @@ Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaF
 
 ### Game speed adjustment  
 ![Game speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
-Slow game speed down to lower calculation workload. Improve FPS in late game.  
-The speed adjustment affects everything but the mecha, the mecha will still in normal speed.  
-The control slider is on in-game statistic performance panel.  
-When speed is set to 0, the game will enter pause mode, game tick and factories will stop.  
+Reduce game speed to lower the calculation workload and improve FPS in the late game.  
+This adjustment affects everything except the mecha, which will continue at normal speed.  
+The control slider is available in the in-game performance statistics panel.  
+When speed is set to 0, the game will enter pause mode, and game ticks and factories will stop.
   
 ### Background autosave  
-Run autosave on background thread so the game won't freeze.  
-To make sure factory data is consistent, the game will enter pause mode during autosave.  
-The interaction with the factory is prohibited during the time exporting local factory data.  
+Run autosave on a background thread to prevent game freezes.  
+The game will enter pause mode during autosave to ensure factory data consistency.  
+Interaction with the factory is prohibited during local factory data export.
 
 ## Configuration
 
@@ -38,16 +39,16 @@ Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/
 Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
 
 - `KeyPause`  
-Hotkey for toggling pause mode. () (Default:`Pause｜Break`)  
+Hotkey for toggling pause mode. (Default:`Pause｜Break`)  
 
 - `EnableMechaFunc`  
-When enable, mecha will be ablet to move in pause mode and projectiles will fly in normal speed. (Default:`fasle`)    
+When enabled, mecha will be able to move in pause mode and projectiles will fly at normal speed. (Default:`fasle`)    
 
 - `EnableBackgroundAutosave`  
-Run autosave in background. Besides config file, it can toggle in stat - performance panel. (Default:`false`)  
+Run autosave in the background. This can also be toggled in the performance test panel. (Default:`false`)  
 
 - `StartingSpeed`  
-Game speed when the game begin. range:0-100  (Default:`100`)  
+Game speed when the game begins. range:0-100  (Default:`100`)  
 
 - `EnableFastLoading`  
 Increase main menu loading speed. (Default:`true`)  
@@ -71,6 +72,16 @@ Remove force garbage collection of build tools. (Default:`true`)
 
 
 ----
+
+## 战术暂停
+
+按下`KeyPause`键时，游戏将进入战术暂停模式。允许以下操作：
+- 自由移动摄像头并检查游戏内物体。
+- 队列机甲 RTS 动作指令和手搓。
+- 更改建筑物设置。
+- 放置蓝图。
+
+在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。
 
 ## 调整游戏速度
 
@@ -97,7 +108,7 @@ Remove force garbage collection of build tools. (Default:`true`)
 启用后，机甲能够在暂停模式中活动。弹射物将以正常速度飞行。 (默认为关闭`false`)    
 
 - `EnableBackgroundAutosave`  
-在背景执行自动保存。除了配置文件之外，它还可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
+在背景执行自动保存。可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
 
 - `StartingSpeed`   
 开始时的游戏速度，范围: 0-100 (默认为`100`)  
