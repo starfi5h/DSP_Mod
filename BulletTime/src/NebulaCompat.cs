@@ -23,7 +23,6 @@ namespace BulletTime
         public static List<(string username, int planetId)> LoadingPlayers { get; } = new List<(string, int)>();
         public static bool DysonSpherePaused { get; set; }
 
-
         public static void Init(Harmony harmony)
         {
             try
@@ -42,14 +41,6 @@ namespace BulletTime
                     LoadingPlayers.RemoveAll(x => x.username == player.Username);
                     DetermineCurrentState();
                 };
-
-                System.Type world = AccessTools.TypeByName("NebulaWorld.SimulatedWorld");
-                System.Type type = AccessTools.TypeByName("NebulaWorld.GameStates.GameStatesManager");
-                harmony.Patch(world.GetMethod("OnPlayerJoining"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnPlayerJoining")));
-                harmony.Patch(world.GetMethod("OnAllPlayersSyncCompleted"), new HarmonyMethod(typeof(NebulaPatch).GetMethod("OnAllPlayersSyncCompleted")));
-                harmony.Patch(type.GetProperty("RealGameTick").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealGameTick")));
-                harmony.Patch(type.GetProperty("RealUPS").GetGetMethod(), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("RealUPS")));
-                harmony.Patch(type.GetMethod("NotifyTickDifference"), null, new HarmonyMethod(typeof(NebulaPatch).GetMethod("NotifyTickDifference")));
                 harmony.PatchAll(typeof(NebulaPatch));
 
                 Log.Debug("Nebula Compatibility OK");
@@ -80,6 +71,7 @@ namespace BulletTime
             LoadingPlayers.Clear();
             DysonSpherePaused = false;
             GameStateManager.EnableMechaFunc = false;
+            NebulaPatch.SetProgessMode(false);
         }
 
         public static void OnMultiplayerGameEnded()
@@ -154,24 +146,30 @@ namespace BulletTime
         }
     }
 
-    
+
     public class NebulaPatch
     {
-        public static void RealGameTick(ref long __result)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(NebulaWorld.GameStates.GameStatesManager), "RealGameTick", MethodType.Getter)]
+        static void RealGameTick(ref long __result)
         {
             if (GameStateManager.StoredGameTick != 0)
                 __result = GameStateManager.StoredGameTick;
         }
 
-        public static void RealUPS(ref float __result)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(NebulaWorld.GameStates.GameStatesManager), "RealUPS", MethodType.Getter)]
+        static void RealUPS(ref float __result)
         {
             if (!GameStateManager.Pause)
                 __result *= (1f - GameStateManager.SkipRatio) / 100f;
-            Log.Dev($"{1f - GameStateManager.SkipRatio:F3} UPS:{__result}");
+            //Log.Dev($"{1f - GameStateManager.SkipRatio:F3} UPS:{__result}");
         }
 
-        public static void NotifyTickDifference(float delta)
-        {            
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(NebulaWorld.GameStates.GameStatesManager), "NotifyTickDifference")]
+        static void NotifyTickDifference(float delta)
+        {
             if (!GameStateManager.Pause)
             {
                 float ratio = Mathf.Clamp(1 + delta / (float)FPSController.currentUPS, 0.01f, 1f);
@@ -180,17 +178,22 @@ namespace BulletTime
             }
         }
 
-        public static bool OnPlayerJoining(string username)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(NebulaWorld.SimulatedWorld), "OnPlayerJoining")]
+        static bool OnPlayerJoining(string username)
         {
             NebulaCompat.IsPlayerJoining = true;
             GameMain.isFullscreenPaused = true; // Prevent other players from joining
             IngameUI.ShowStatus(string.Format("{0} joining the game".Translate(), username));
             GameStateManager.SetPauseMode(true);
             GameStateManager.SetSyncingLock(true); // TODO: Lock for only on the joining player's planet
+            SetProgessMode(true); // Prepare to update joining player status
             return false;
         }
 
-        public static void OnAllPlayersSyncCompleted()
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(NebulaWorld.SimulatedWorld), "OnAllPlayersSyncCompleted")]
+        static void OnAllPlayersSyncCompleted()
         {
             NebulaCompat.IsPlayerJoining = false;
             if (!NebulaCompat.IsClient)
@@ -198,6 +201,7 @@ namespace BulletTime
                 NebulaCompat.DetermineCurrentState();
                 NebulaCompat.SendPacket(NebulaCompat.DysonSpherePaused ? PauseEvent.DysonSpherePaused : PauseEvent.DysonSphereResume);
             }
+            SetProgessMode(false); // Resume ping status
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameSave), nameof(GameSave.SaveCurrentGame))]
@@ -295,6 +299,51 @@ namespace BulletTime
             }
         }
 
+        #region Progress
+
+        static int lastLength;
+        static bool enablePingIndicatorUpdate = true;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(NebulaWorld.GameStates.GameStatesManager), "UpdateBufferLength")]
+        static void UpdateBufferLength_Postfix(int length)
+        {
+            if (lastLength == length || NebulaWorld.GameStates.GameStatesManager.FragmentSize <= 0) return; // Update only when length change
+
+            // Broadcast the downloading progress to other players
+            NebulaModAPI.MultiplayerSession.Network.SendPacket(new ProgressUpdatePacket(NebulaWorld.GameStates.GameStatesManager.FragmentSize, (float)length / NebulaWorld.GameStates.GameStatesManager.FragmentSize));
+            lastLength = length;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(NebulaWorld.SimulatedWorld), "UpdatePingIndicator")]
+        static bool UpdatePingIndicator_Prefix()
+        {
+            return enablePingIndicatorUpdate;
+        }
+
+        public static void SetProgessMode(bool enable)
+        {
+            if (enable)
+            {
+                enablePingIndicatorUpdate = false;
+            }
+            else
+            {
+                enablePingIndicatorUpdate = true;
+                if (NebulaModAPI.MultiplayerSession.IsServer) NebulaWorld.Multiplayer.Session.World.HidePingIndicator();
+            }
+        }
+
+        public static void SetProgressTest(int fragmentSize, float percentage)
+        {
+            var enable = enablePingIndicatorUpdate;
+            enablePingIndicatorUpdate = true;
+            NebulaWorld.Multiplayer.Session.World.UpdatePingIndicator($"Progress {fragmentSize / 1000:n0} KB ({percentage:P1})");
+            enablePingIndicatorUpdate = enable;
+        }
+
+        #endregion
     }
 
     internal class PauseNotificationPacket
@@ -329,6 +378,7 @@ namespace BulletTime
     {
         public override void ProcessPacket(PauseNotificationPacket packet, INebulaConnection conn)
         {
+            NebulaPatch.SetProgessMode(false);
             Log.Dev(packet.Event);
             switch (packet.Event)
             {
@@ -384,6 +434,7 @@ namespace BulletTime
                         NebulaCompat.LoadingPlayers.Add((packet.Username, packet.PlanetId));
                         NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
                     }
+                    NebulaPatch.SetProgessMode(packet.Username != NebulaModAPI.MultiplayerSession.LocalPlayer.Data.Username); // Prepare to update arriving player progress status for other players
                     break;
 
                 case PauseEvent.FactoryLoaded: //Host
@@ -407,6 +458,33 @@ namespace BulletTime
                         NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
                     break;
             }
+        }
+    }
+
+    internal class ProgressUpdatePacket
+    {
+        public int FragmentSize { get; set; }
+        public float Percentage { get; set; }
+
+        public ProgressUpdatePacket() { }
+        public ProgressUpdatePacket(int framentSize, float percentage)
+        {
+            FragmentSize = framentSize;
+            Percentage = percentage;
+        }
+    }
+
+    [RegisterPacketProcessor]
+    internal class ProgressUpdateProcessor : BasePacketProcessor<ProgressUpdatePacket>
+    {
+        public override void ProcessPacket(ProgressUpdatePacket packet, INebulaConnection conn)
+        {
+            if (IsHost)
+            {
+                NebulaModAPI.MultiplayerSession.Network.SendPacketExclude(packet, conn);
+                NebulaWorld.Multiplayer.Session.World.DisplayPingIndicator();
+            }
+            NebulaPatch.SetProgressTest(packet.FragmentSize, packet.Percentage);
         }
     }
 }
