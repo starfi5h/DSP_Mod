@@ -7,6 +7,7 @@ namespace MinerInfo
     public class MaxOutputPatch
     {
         static float[] maxArr = new float[0];
+        static int[] minedNodeCounts = new int[0];
         static readonly StringBuilder stringBuilder = new();
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIVeinDetail), "_OnUpdate")]
@@ -39,6 +40,21 @@ namespace MinerInfo
                     // Assume miner veins belong to the same group
                     int groupIndex = factory.veinPool[miner.veins[0]].groupIndex;
                     maxArr[groupIndex] += maxOutput;
+                }
+            }
+
+            if (Plugin.ShowMinedNodesCount)
+            {
+                if (minedNodeCounts.Length != factory.veinGroups.Length)
+                    minedNodeCounts = new int[factory.veinGroups.Length];
+                else
+                    Array.Clear(minedNodeCounts, 0, minedNodeCounts.Length);
+
+                for (int i = 1; i < factory.veinCursor; i++)
+                {
+                    ref var veinData = ref factory.veinPool[i];
+                    if (veinData.minerCount > 0)
+                        minedNodeCounts[veinData.groupIndex]++;
                 }
             }
         }
@@ -81,6 +97,8 @@ namespace MinerInfo
                     stringBuilder.Append(veinGroup.count);
                     stringBuilder.Append("空格个".Translate());
                     stringBuilder.Append(__instance.veinProto.name);
+                    if (Plugin.ShowMinedNodesCount && __instance.veinGroupIndex < minedNodeCounts.Length)
+                        stringBuilder.Append(string.Format(" ({0}/{1})", minedNodeCounts[__instance.veinGroupIndex], veinGroup.count));
                     stringBuilder.Append("储量".Translate());
                     stringBuilder.Append(__instance.AmountString(veinGroup.amount));
                     MinerInfoString(__instance.veinGroupIndex);
