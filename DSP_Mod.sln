@@ -42,7 +42,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechaAnimMod", "MechaAnimMo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioReplacer", "AudioReplacer\AudioReplacer.csproj", "{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetwideSpray", "PlanetwideSpray\PlanetwideSpray.csproj", "{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetwideSpray", "PlanetwideSpray\PlanetwideSpray.csproj", "{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DarkFogTweaks", "DarkFogTweaks\DarkFogTweaks.csproj", "{68546DAF-2E19-426F-ACC9-4621A1F5F899}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,6 +124,10 @@ Global
 		{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,6 +8,7 @@
 Test/
 TestMod/
 TestingMod/
+output/
 
 # User-specific files
 *.rsuser
