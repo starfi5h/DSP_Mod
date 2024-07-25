@@ -23,7 +23,7 @@ The changes will take effects after reboost, or go to game settings and click 'A
 
 
 ```
-## Settings file was created by plugin DarkFogTweaks v0.0.1
+## Settings file was created by plugin DarkFogTweaks
 ## Plugin GUID: starfi5h.plugin.DarkFogTweaks
 
 [Behavior]
@@ -87,6 +87,12 @@ HiveExtraEnergyGen = 0
 
 [EnemyUnitFactor]
 
+## If not null, the modifications will only apply to the whiltelist ids, separated by comma.
+## ProtoIds: 300 Raider, 301 Ranger, 302 Guardian, 285 Lancer, 284 Humpback, 283 Eclipse Fortress
+# Setting type: String
+# Default value: 
+WhiteListProtoIds = 
+
 # Setting type: Single
 # Default value: 1
 HpMax = 1
@@ -138,6 +144,11 @@ AttackCoolDownSpeed = 1
 AttackCoolDownSpeedInc = 1
 
 ```
+
+## Changelog
+
+v0.0.2 - Add config `WhiteListProtoIds`.  
+v0.0.1 - Initial release. (DSPv0.10.30.22292)  
 
 ----
 

@@ -1,5 +1,4 @@
 ﻿using BepInEx.Configuration;
-using HarmonyLib;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,6 +6,7 @@ namespace DarkFogTweaks
 {
     public class EnemyUnitScale
     {
+        static readonly List<int> whiteListIds = new();
         static readonly List<EnemyUnitDesc> oEnemyUnitDescs = new();
         static readonly List<int> oModelIds = new();
 
@@ -15,9 +15,23 @@ namespace DarkFogTweaks
             //Plugin.Log.LogInfo("ApplyAll");
             oEnemyUnitDescs.Clear();
             oModelIds.Clear();
+            whiteListIds.Clear();
+
+            var strings = whiteListProtoIds.Value.Split(new char[] { ' ', ',' });
+            foreach (var substring in strings)
+            {
+                if (int.TryParse(substring, out int protoId))
+                {
+                    whiteListIds.Add(protoId);
+                    //Plugin.Log.LogDebug("whiteList add: " + protoId);
+                }
+            }
+            if (!string.IsNullOrEmpty(whiteListProtoIds.Value)) Plugin.Log.LogDebug("white list count: " + whiteListIds.Count);
+
             foreach (var modelProto in LDB.models.dataArray)
             {
                 if (modelProto.ObjectType != EObjectType.Enemy || !modelProto.prefabDesc.isEnemyUnit) continue;
+                if (whiteListIds.Count > 0 && !whiteListIds.Contains(modelProto.ID)) continue;
 
                 var enemyUnitDesc = new EnemyUnitDesc();
                 BackUp(modelProto.prefabDesc, enemyUnitDesc);
@@ -27,7 +41,7 @@ namespace DarkFogTweaks
                 Apply(modelProto);
                 //Print(modelProto);
             }
-            Plugin.Log.LogInfo("EnemyUnit count: " + oModelIds.Count);
+            Plugin.Log.LogDebug("EnemyUnit count: " + oModelIds.Count);
         }
 
         public static void RestoreAll()
@@ -93,6 +107,7 @@ namespace DarkFogTweaks
             prefabDesc.unitColdSpeedInc = enemyUnitDesc.coldSpeedInc;
         }
 
+        static ConfigEntry<string> whiteListProtoIds;
         static ConfigEntry<float> hpMax;
         static ConfigEntry<float> hpInc;
         static ConfigEntry<float> hpRecover;
@@ -107,6 +122,7 @@ namespace DarkFogTweaks
 
         public static void LoadConfigs(ConfigFile configFile)
         {
+            whiteListProtoIds = configFile.Bind("EnemyUnitFactor", "WhiteListProtoIds", "", "If not null, the modifications will only apply to the whiltelist ids, separated by comma.\nProtoIds: 300 Raider, 301 Ranger, 302 Guardian, 285 Lancer, 284 Humpback, 283 Eclipse Fortress");
             hpMax = configFile.Bind("EnemyUnitFactor", "HpMax", 1.0f);
             hpInc = configFile.Bind("EnemyUnitFactor", "HpInc", 1.0f, "Hp upgrade per level");
             hpRecover = configFile.Bind("EnemyUnitFactor", "HpRecover", 1.0f, "Hp recovery overtime");

@@ -13,7 +13,7 @@ namespace DarkFogTweaks
     {
         public const string GUID = "starfi5h.plugin.DarkFogTweaks";
         public const string NAME = "DarkFogTweaks";
-        public const string VERSION = "0.0.1";
+        public const string VERSION = "0.0.2";
 
         public static ManualLogSource Log;
         public static Plugin Instance;
