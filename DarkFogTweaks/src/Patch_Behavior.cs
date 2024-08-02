@@ -9,14 +9,18 @@ namespace DarkFogTweaks
 		static ConfigEntry<bool> Relay_FillPitFirst;
 		static ConfigEntry<bool> Relay_ToPlayerPlanetFirst;
 		static ConfigEntry<int> Hive_AssaultUnitCount;
+		static ConfigEntry<float> Hive_AssaultUnitFactor;
 		static ConfigEntry<int> Base_AssaultUnitCount;
+		static ConfigEntry<float> Base_AssaultUnitFactor;
 		static ConfigEntry<float> Space_ThreatFactor;
 		static ConfigEntry<float> All_ExpFactor;
 
 		public static void LoadConfigs(ConfigFile configFile)
 		{
-			Base_AssaultUnitCount = configFile.Bind("Behavior", "Base_AssaultUnitCount", 0, "Send as many unit as this value when base assault (max: 180)"); //InitFormations: 108 + 72
-			Hive_AssaultUnitCount = configFile.Bind("Behavior", "Hive_AssaultUnitCount", 0, "Send as many unit as this value when hive assault (max: 1440)");//InitFormations: 1440
+			Base_AssaultUnitCount = configFile.Bind("Behavior", "Base_AssaultUnitCount", 0, "Send as many unit as this overwritten value when base assault (max: 180)"); //InitFormations: 108 + 72
+			Base_AssaultUnitFactor = configFile.Bind("Behavior", "Base_AssaultUnitFactor", 1.0f, "Scale the original assaulting unit count");
+			Hive_AssaultUnitCount = configFile.Bind("Behavior", "Hive_AssaultUnitCount", 0, "Send as many unit as this overwritten value when hive assault (max: 1440)");//InitFormations: 1440
+			Hive_AssaultUnitFactor = configFile.Bind("Behavior", "Hive_AssaultUnitFactor", 1.0f, "Scale the original assaulting unit count");
 			Relay_FillPitFirst = configFile.Bind("Behavior", "Relay_FillPitFirst", false, "Relay will try to land on base first");
 			Relay_ToPlayerPlanetFirst = configFile.Bind("Behavior", "Relay_ToPlayerPlanetFirst", false, "Relay will try to land on player's local planet first");
 			Space_ThreatFactor = configFile.Bind("Behavior", "Space_ThreatFactor", 1.0f, "Multiplier of threat increase when attacking space enemies");
@@ -27,15 +31,18 @@ namespace DarkFogTweaks
 		[HarmonyPatch(typeof(DFGBaseComponent), nameof(DFGBaseComponent.LaunchAssault))]
 		static void LaunchAssault_Prefix(ref int unitCount0, ref int unitCount1)
 		{
-			if (unitCount0 < Base_AssaultUnitCount.Value) unitCount0 = Base_AssaultUnitCount.Value;
-			if (unitCount1 < Base_AssaultUnitCount.Value) unitCount1 = Base_AssaultUnitCount.Value;
+			unitCount0 = (int)(unitCount0 * Base_AssaultUnitFactor.Value + 0.5f);
+			unitCount1 = (int)(unitCount1 * Base_AssaultUnitFactor.Value + 0.5f);
+			if (Base_AssaultUnitCount.Value != 0) unitCount0 = Base_AssaultUnitCount.Value;
+			if (Base_AssaultUnitCount.Value != 0) unitCount1 = Base_AssaultUnitCount.Value;
 		}
 
 		[HarmonyPrefix, HarmonyPriority(Priority.First)]
 		[HarmonyPatch(typeof(EnemyDFHiveSystem), nameof(EnemyDFHiveSystem.LaunchLancerAssault))]
 		static void LaunchLancerAssault_Prefix(ref int unitCount0)
         {
-			if (unitCount0 < Hive_AssaultUnitCount.Value) unitCount0 = Hive_AssaultUnitCount.Value;
+			unitCount0 = (int)(unitCount0 * Hive_AssaultUnitFactor.Value + 0.5f);
+			if (Hive_AssaultUnitCount.Value != 0) unitCount0 = Hive_AssaultUnitCount.Value;
 		}
 
 		[HarmonyPostfix]

@@ -28,15 +28,25 @@ The changes will take effects after reboost, or go to game settings and click 'A
 
 [Behavior]
 
-## Send as many unit as this value when base assault (max: 180)
+## Send as many unit as this overwritten value when base assault (max: 180)
 # Setting type: Int32
 # Default value: 0
 Base_AssaultUnitCount = 0
 
-## Send as many unit as this value when hive assault (max: 1440)
+## Scale the original assaulting unit count
+# Setting type: Single
+# Default value: 1
+Base_AssaultUnitFactor = 1
+
+## Send as many unit as this overwritten value when hive assault (max: 1440)
 # Setting type: Int32
 # Default value: 0
 Hive_AssaultUnitCount = 0
+
+## Scale the original assaulting unit count
+# Setting type: Single
+# Default value: 1
+Hive_AssaultUnitFactor = 1
 
 ## Relay will try to land on base first
 # Setting type: Boolean
@@ -147,6 +157,7 @@ AttackCoolDownSpeedInc = 1
 
 ## Changelog
 
+v0.0.3 - Add config `Base_AssaultUnitFactor`, `Hive_AssaultUnitFactor`.  
 v0.0.2 - Add config `WhiteListProtoIds`.  
 v0.0.1 - Initial release. (DSPv0.10.30.22292)  
 

@@ -1,7 +1,7 @@
 {
     "name": "DarkFogTweaks",
     "description": "Provide many multipliers to change enemy unit settings (hp, attack, speed, etc.) and behaviors 黑雾数值与行为调整",
-    "version_number": "0.0.2",
+    "version_number": "0.0.3",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/DarkFogTweaks",
     "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
 }
