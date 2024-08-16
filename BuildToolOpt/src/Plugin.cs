@@ -14,14 +14,14 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.0.5";
+        public const string VERSION = "1.0.6";
 
         public static ManualLogSource Log;
         static Harmony harmony;
 
         public static bool EnableRemoveGC = true;
         public static bool EnableReplaceStation = true;
-        public static bool EnableHologram = true;
+        public static bool EnableHologram = false;
         public static bool EnableUIBlueprintOpt = true;
         public static bool EnableClipboardPaste = true;
 
@@ -32,7 +32,7 @@ namespace BuildToolOpt
 
             EnableRemoveGC = Config.Bind("BuildTool", "RemoveGC", true, "Remove c# garbage collection of build tools to reduce lag\n移除建筑工具的强制内存回收以减少铺设时卡顿").Value;
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
-            EnableHologram = Config.Bind("BuildTool", "EnableHologram", true, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
+            EnableHologram = Config.Bind("BuildTool", "EnableHologram", false, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
             EnableClipboardPaste = Config.Bind("UI", "ClipboardPaste", true, "Directly parse blueprint data from clipboard when Ctrl + V\n热键粘贴蓝图时,直接读取剪切板").Value;
             Compatibility.Init(harmony);

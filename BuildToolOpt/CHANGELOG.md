@@ -1,3 +1,7 @@
+### v1.0.6
+\- Adapt to DSP v10.30.23292  
+\- Set config `EnableHologram` default value to false.  
+
 ### v1.0.5
 \- Use GetHashCode together with length to reduce false negative of clipboard content change detection  
 
@@ -6,7 +10,7 @@
 \- Update cursorText to show if the replacing station is too close to other stations  
 
 ### v1.0.3
-\- Adpat to DSP 0.10.29.21904  
+\- Adapt to DSP 0.10.29.21904  
 
 ### v1.0.2
 \- Disable replace station function for Orbital Collector.  

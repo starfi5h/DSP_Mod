@@ -37,8 +37,8 @@ ReplaceStation = true
 ## Place white holograms when lacking of item
 ## 即使物品不足也可以放置建筑虚影
 # Setting type: Boolean
-# Default value: true
-EnableHologram = true
+# Default value: false
+EnableHologram = false
 
 [UI]
 

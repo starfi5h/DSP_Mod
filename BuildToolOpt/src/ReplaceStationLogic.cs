@@ -213,14 +213,17 @@ namespace BuildToolOpt
 		{
 			station.energy = state.energy;
 
+			var itemCountInStation = station.warperCount;
 			station.warperCount = Math.Min(state.warperCount, station.warperMaxCount);
-			RefundItem(1210, state.warperCount - station.warperMaxCount, 0, station.entityId);
+			RefundItem(1210, state.warperCount - station.warperMaxCount + itemCountInStation, 0, station.entityId);
 
+			itemCountInStation = station.idleDroneCount;
 			station.idleDroneCount = Math.Min(state.droneCount, station.workDroneDatas.Length);
-			RefundItem(5001, state.droneCount - station.workDroneDatas.Length, 0, station.entityId);
+			RefundItem(5001, state.droneCount - station.workDroneDatas.Length + itemCountInStation, 0, station.entityId);
 
+			itemCountInStation = station.idleShipCount;
 			station.idleShipCount = Math.Min(state.shipCount, station.workShipDatas.Length);
-			RefundItem(5002, state.shipCount - station.workShipDatas.Length, 0, station.entityId);
+			RefundItem(5002, state.shipCount - station.workShipDatas.Length + itemCountInStation, 0, station.entityId);
 
 			int length = Math.Min(station.storage.Length, state.storage.Length);
 			for (int i = 0; i < length; i++)
