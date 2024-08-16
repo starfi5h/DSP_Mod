@@ -198,7 +198,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "Auxilaryfunction compatibility failed! Last working version: 2.5.9";
+                    string message = "Auxilaryfunction compatibility failed! Last working version: 2.7.7";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -233,12 +233,12 @@ namespace SampleAndHoldSim
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     harmony.PatchAll(typeof(Warper));
-                    warnMessage += "Multifunction: some game-breaking features are not compatible\nSampleAndHoldSim对Multifunction的改机制功能(星球矿机等)兼容性不佳,可能会造成统计数据异常";
+                    warnMessage += "Multifunction: some game-breaking features are not compatible\nSampleAndHoldSim对Multifunction的改机制功能(跳过太阳帆子弹阶段,星球矿机等)兼容性不佳,可能会造成统计数据异常";
                     //Log.Debug("Multfunction_mod compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "Multfunction_mod compatibility failed! Last working version: 3.4.2";
+                    string message = "Multfunction_mod compatibility failed! Last working version: 3.4.4";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -247,6 +247,7 @@ namespace SampleAndHoldSim
 
             public static class Warper
             {
+                /*
                 [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch.SomePatch), nameof(Multifunctionpatch.SomePatch.EjectorComponentPatch))]
                 public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
@@ -278,6 +279,7 @@ namespace SampleAndHoldSim
                     for (int i = 0; i < times; i++)
                         list.Add(tempSail);
                 }
+                */
             }
         }
 
@@ -500,7 +502,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.11";
+                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.17";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";

@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.6.9
+\- Update for DSP-0.10.30.23292  
+\- Remove Multfuntion_mod compat as the compat patch is outdated.  
+
 #### v0.6.8
 \- Fix IndexOutOfRangeException in `PowerExchangerComponent.CalculateActualEnergyPerTick`.  
 
@@ -13,6 +17,10 @@
 #### v0.6.5
 \- Add config `UI`:`WarnIncompat` to stop mod incompatibility warning showing up in the future.  
 
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.6.4
 \- Missiles and plasma cannons now have damage sclae up on remote planets.  
 \- Relay will not land on planets with shield on remote star systems.  
@@ -20,9 +28,6 @@
 #### v0.6.3
 \- Discard the change to hives ticks. Now all space hives will not be affected and run in normal speed.  
 \- Remote systems now have Lancers damage scale down to the ratio.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.6.2
 \- Bugfixes for index out of range error in UpdateHives and MainManager.TryGet.  
