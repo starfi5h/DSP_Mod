@@ -1,9 +1,12 @@
 ## Changelog
 
-#### v1.4.8 (DSP0.10.30.22292)
+#### v1.5.0 (DSP-0.10.30.22350)
+\- Add pause/resume/speedup speed control buttons.  
+
+#### v1.4.8 (DSP-0.10.30.22292)
 \- (Nebula) Update download progression for other players.  
 
-#### v1.4.7 (DSP0.10.29.21950)  
+#### v1.4.7 (DSP-0.10.29.21950)  
 \- Fix crash when viewing remote hives in starmap during background autosave.  
 
 #### v1.4.6

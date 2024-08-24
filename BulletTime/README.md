@@ -1,12 +1,21 @@
 # Bullet Time
 
 Decouple the mecha (player actions) from the world simulation.  
-1. Provide hotkey to pause the game and view the freeze in-game world.  
-2. Let user slow down game speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
-3. Run autosave in the background to make the game stay responsive.  
-4. Skip planet modeling for cover to speed up main menu loading.   
+1. Provide speed control buttons at bottom right corner to set game speed from 0x to 4x.  
+2. Provide hotkey to pause the game and view the freeze in-game world.  
+3. Let user slow down world speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
+4. Run autosave in the background to make the game stay responsive.  
+5. Skip planet modeling for cover to speed up main menu loading.   
 
 ## Feature
+
+### Speed control buttons
+![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
+- Pause: Toggle tactical pause mode.
+- Resume: Reset game speed back to 1x.
+- Speed Up: Increase game speed (max 4x).  
+The speed adjustment is done by setting the target UPS goal. Hardware still limits the real game speed.  
+You can shift + f12 to view the real FPS/UPS at the top-left. The default 1x speed UPS is 60 tick/s.  
 
 ### Tactical pause mode
 ![Tactical pause](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo3.gif)  
@@ -18,8 +27,8 @@ When pressing `KeyPause` key, the game will enter tactical pause mode (true paus
 
 Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaFunc` to true.  
 
-### Game speed adjustment  
-![Game speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
+### World speed adjustment  
+![World speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
 Reduce game speed to lower the calculation workload and improve FPS in the late game.  
 This adjustment affects everything except the mecha, which will continue at normal speed.  
 The control slider is available in the in-game performance statistics panel.  
@@ -73,7 +82,20 @@ Remove force garbage collection of build tools. (Default:`true`)
 
 ----
 
-## 战术暂停
+# BulletTime 子弹时间-游戏速度控制mod
+
+## 功能
+
+### 游戏速度倍率调整
+![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
+- 暂停：切换战术暂停模式。
+- 恢复：将游戏速度重置为 1 倍。
+- 加速：提高游戏速度（最高 4 倍）。  
+速度调整是通过设置目标 UPS 来完成的。实际上的游戏速度由硬体性能决定。  
+您可以按 Shift + f12 在左上角查看实际 FPS/UPS。默认1倍速 UPS 为 60 tick/s。  
+
+
+### 战术暂停
 
 按下`KeyPause`键时，游戏将进入战术暂停模式。允许以下操作：
 - 自由移动摄像头并检查游戏内物体。
@@ -83,14 +105,14 @@ Remove force garbage collection of build tools. (Default:`true`)
 
 在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。
 
-## 调整游戏速度
+### 调整世界速度
 
-在性能测试面板可以调整游戏速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
+在性能测试面板可以调整世界速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
 速度为0或启用热键时进入时停模式，gameTick会在离开时停模式后恢复。  
 
-## 背景自动保存
+### 後台自动保存
 
-在背景自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
+在後台自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
 使用这项功能时建议先测试。
 
 ## 设置   
@@ -129,4 +151,5 @@ Remove force garbage collection of build tools. (Default:`true`)
 
 #### Acknowledgements
 All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  
-<a href="https://www.flaticon.com/free-icons/pause-button" title="pause-button icons">Pause-button icons created by Uniconlabs - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/pause-button" title="pause-button icons">Pause-button icons created by Uniconlabs - Flaticon</a>  
+Speed button UI desgin from [DspGameSpeed](https://thunderstore.io/c/dyson-sphere-program/p/dsp-mods/DspGameSpeed/)  

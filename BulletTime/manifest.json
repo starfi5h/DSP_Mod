@@ -1,7 +1,7 @@
 {
     "name": "BulletTime",
-    "description": "Time stop with pause key. Let user adjust world speed in performance test panel. Autosave in background. Pause键暂停。性能测试面板中可调世界速度。在背景执行自动保存。",
-    "version_number": "1.4.8",
+    "description": "Set the speed of the game 0x ~ 4x by pause/resume/speed up button or hotkey. Autosave in background. 游戏速度控制(0x~4x)。Pause热键战术暂停。可在後台自動保存",
+    "version_number": "1.5.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/BulletTime",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

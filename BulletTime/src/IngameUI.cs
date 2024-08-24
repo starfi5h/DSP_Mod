@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UITools;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -10,9 +11,13 @@ namespace BulletTime
         private static Slider slider;
         private static Text text;
         private static Text stateMessage;
-        private static GameObject timeText;
-        private static GameObject infoText;
         private static UIToggle backgroundSaveToggle;
+
+        // 右下角的時間速度控制
+        private static GameObject timeTextGo;
+        private static GameObject infoTextGo;
+        private static Text speedRatioText;
+        private static readonly GameObject[] speedBtnGo = new GameObject[3];
 
         public static void Dispose()
         {
@@ -28,14 +33,22 @@ namespace BulletTime
                 GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
                 stateMessage = null;
             }
-            timeText = null;
-            GameObject.Destroy(infoText);
-            infoText = null;
             if (backgroundSaveToggle != null)
             {
                 GameObject.Destroy(backgroundSaveToggle.transform.parent.gameObject);
                 backgroundSaveToggle = null;
             }
+
+            timeTextGo = null;
+            for (int i = 0; i < speedBtnGo.Length; i++)
+            {
+                GameObject.Destroy(speedBtnGo[i]);
+                speedBtnGo[i] = null;
+            }
+            GameObject.Destroy(infoTextGo);
+            infoTextGo = null;
+            GameObject.Destroy(speedRatioText?.gameObject);
+            speedRatioText = null;
         }
 
         public static void Init()
@@ -82,28 +95,142 @@ namespace BulletTime
             {
                 Log.Warn("IngameUI fail! error:\n" + e);
             }
+
+            try
+            {
+                if (timeTextGo == null)
+                {
+                    timeTextGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
+                    timeTextGo.SetActive(true);
+
+                    // Create pause, resume and speedup button
+                    RectTransform prefab = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/button-1-bg").GetComponent<RectTransform>();
+                    Vector3 newPos = prefab.localPosition;
+                    newPos.x += 35f;
+                    newPos.y -= 20f;
+                    for (int i = 0; i  < 3; i++)
+                    {
+                        var go = GameObject.Instantiate<RectTransform>(prefab, timeTextGo.transform.parent);
+                        go.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+                        go.localPosition = newPos;
+                        newPos.x += 22f;
+
+                        var btn = go.GetComponent<UIButton>();
+                        btn.OnPointerDown(null);
+                        btn.OnPointerEnter(null);
+                        btn.data = i;
+                        btn.onClick += OnSpeedButtonClick;
+
+                        Sprite iconSprite = null;
+                        switch (i)
+                        {
+                            case 0: // Sprite Path: "ui/textures/sprites/icons/pause-icon"
+                                iconSprite = UIRoot.instance.uiGame.researchQueue.pauseButton.gameObject.transform.Find("icon").GetComponent<Image>().sprite;
+                                btn.tips.tipTitle = go.name = "Pause".Translate();
+                                btn.tips.tipText = "Toggle tactical pause mode".Translate();
+                                break;
+
+                            case 1: // Sprite Path: "ui/textures/sprites/icons/resume-icon"
+                                iconSprite = UIRoot.instance.uiGame.researchQueue.resumeButton.gameObject.transform.Find("icon").GetComponent<Image>().sprite;
+                                btn.tips.tipTitle = go.name = "Resume".Translate();
+                                btn.tips.tipText = "Reset game speed back to 1x".Translate();
+                                break;
+
+
+                            case 2: // Sprite Path: "ui/textures/sprites/test/next-icon-2"
+                                iconSprite = Resources.Load<Sprite>("ui/textures/sprites/test/next-icon-2");
+                                btn.tips.tipTitle = go.name = "SpeedUp".Translate();
+                                btn.tips.tipText = "Increase game speed (max 4x)".Translate();
+                                break;
+                        }
+                        go.Find("button-1/icon").GetComponent<Image>().sprite = iconSprite;
+                        speedBtnGo[i] = go.gameObject;
+                    }
+
+                    // Create info text
+                    infoTextGo = GameObject.Instantiate(timeTextGo, timeTextGo.transform.parent);
+                    infoTextGo.name = "pause info-text";
+                    infoTextGo.GetComponent<Text>().text = "Pause".Translate();
+                    infoTextGo.GetComponent<Text>().enabled = true;
+                    infoTextGo.SetActive(false);
+
+                    // Create speed ratio text
+                    var ratioGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/real-time-text");
+                    ratioGo = GameObject.Instantiate(ratioGo, ratioGo.transform.parent);
+                    ratioGo.name = "speed ratio-text";                    
+                    ratioGo.transform.localPosition += new Vector3(0, 15f);
+                    ratioGo.SetActive(true);
+                    speedRatioText = ratioGo.GetComponent<Text>();                    
+                }
+                // Only host can have speedUp button enable
+                speedBtnGo[2].SetActive(!NebulaCompat.IsClient);
+                SetSpeedRatioText();
+            }
+            catch (System.Exception e)
+            {
+                Log.Warn("Game Menu button UI fail! error:\n" + e);
+            }
+        }
+
+        private static void OnSpeedButtonClick(int mode)
+        {
+            switch (mode)
+            {
+                case 0: // Pause
+                    OnKeyPause();
+                    break;
+
+                case 1: // Resume
+                    FPSController.SetFixUPS(0);
+                    if (GameStateManager.Pause) OnKeyPause();
+                    break;
+
+                case 2: // SpeedUp
+                    if (GameStateManager.Pause)
+                    {
+                        // If it is in pause state, resume
+                        OnKeyPause();
+                    }
+                    else if (FPSController.instance.fixUPS == 0.0)
+                    {
+                        FPSController.SetFixUPS(120.0);
+                    }
+                    else if (FPSController.instance.fixUPS < 240.0)
+                    {
+                        FPSController.SetFixUPS(FPSController.instance.fixUPS + 60.0);
+                    }
+                    break;
+            }
+            SetSpeedRatioText();
+        }
+
+        private static void SetSpeedRatioText()
+        {
+            if (speedRatioText == null) return;
+            if (NebulaCompat.IsClient) // 客戶端的UPS是跟隨主機隨時在變動的, 因此不顯示
+            { 
+                speedRatioText.text = "";
+                return;
+            }
+
+            float ratio = (float)FPSController.instance.fixUPS / 60.0f;
+            if (ratio == 0.0f)
+                speedRatioText.text = "1 x"; //正常流速
+            else if ((ratio - (int)ratio) < 0.05) 
+                speedRatioText.text = (int)ratio + " x"; //整數倍率
+            else
+                speedRatioText.text = $"{ratio:0.0} x"; //顯示到小數點1位
         }
 
         public static void OnPauseModeChange(bool pause)
-        {            
-            if (timeText == null)
+        {
+            if (infoTextGo != null)
             {
-                timeText = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/time-text");
-            }            
-            if (infoText == null && timeText != null)
-            {
-                infoText = GameObject.Instantiate(timeText, timeText.transform.parent);
-                infoText.name = "pause info-text";
-                infoText.GetComponent<Text>().text = "Pause".Translate();
-                infoText.GetComponent<Text>().enabled = true;
-            }
-            if (timeText != null && infoText != null)
-            {
-                timeText.SetActive(!pause);
-                infoText.SetActive(pause);
-            }            
-            if (text != null)
+                timeTextGo.SetActive(!pause);
+                infoTextGo.SetActive(pause);
                 text.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
+                SetSpeedRatioText();
+            }
 
             SetHotkeyPauseMode(false); //當暫停模式有任何變化時取消熱鍵時停
         }
