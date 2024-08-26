@@ -9,7 +9,7 @@ namespace BulletTime
     {
         public static string CurrentStatus = "";
         private static Slider slider;
-        private static Text text;
+        private static Text sliderText;
         private static Text stateMessage;
         private static UIToggle backgroundSaveToggle;
 
@@ -27,7 +27,7 @@ namespace BulletTime
                 GameObject.Destroy(slider.gameObject);
             }
             slider = null;
-            text = null;
+            sliderText = null;
             if (stateMessage != null)
             {
                 GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
@@ -58,21 +58,21 @@ namespace BulletTime
                 if (slider == null)
                 {
                     // Set slider
-                    GameObject go = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/audio/Slider");
-                    Transform cpuPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel").transform;
-                    go = GameObject.Instantiate(go, cpuPanel);
-                    go.name = "RealTickRatioSlider";
-                    go.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
-                    slider = go.GetComponent<Slider>();
-                    text = go.GetComponentInChildren<Text>();
+                    GameObject sliderGo = UIRoot.instance.optionWindow.audioVolumeComp.transform.gameObject;
+                    Transform cpuPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuActiveButton.gameObject.transform.parent;
+                    sliderGo = GameObject.Instantiate(sliderGo, cpuPanel);
+                    sliderGo.name = "RealTickRatioSlider";
+                    sliderGo.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
+                    slider = sliderGo.GetComponent<Slider>();
+                    sliderText = sliderGo.GetComponentInChildren<Text>();
                     slider.value = BulletTimePlugin.StartingSpeed.Value;
                     slider.onValueChanged.AddListener(value => OnSliderChange(value));
                     OnSliderChange(slider.value);
 
                     // Set toggle
-                    GameObject checkBox = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
-                    Transform dataPanel = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/data-panel").transform;
-                    GameObject backgroundSaveGo = GameObject.Instantiate(checkBox, dataPanel);
+                    GameObject checkBoxWithText = UIRoot.instance.optionWindow.fullscreenComp.transform.parent.gameObject;
+                    Transform dataPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.dataActiveButton.gameObject.transform.parent;
+                    GameObject backgroundSaveGo = GameObject.Instantiate(checkBoxWithText, dataPanel);
                     backgroundSaveGo.name = "Background autosave toggle";
                     backgroundSaveGo.transform.localPosition = new Vector3(250, 390, 0);
                     GameObject.Destroy(backgroundSaveGo.GetComponent<Localizer>());
@@ -228,7 +228,10 @@ namespace BulletTime
             {
                 timeTextGo.SetActive(!pause);
                 infoTextGo.SetActive(pause);
-                text.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
+                if (sliderText != null)
+                {
+                    sliderText.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
+                }
                 SetSpeedRatioText();
             }
 
@@ -240,14 +243,14 @@ namespace BulletTime
             if (value == 0)
             {                
                 GameStateManager.ManualPause = true; //滑條拉至0
-                text.text = "pause".Translate();
+                sliderText.text = "pause".Translate();
                 if (!GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                     NebulaCompat.SendPacket(PauseEvent.Pause);
             }
             else
             {
                 GameStateManager.ManualPause = false;
-                text.text = $"{(int)value}%";
+                sliderText.text = $"{(int)value}%";
                 if (GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                 {
                     NebulaCompat.SendPacket(PauseEvent.Resume);                    

@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.1 (DSP-0.10.30.23430)
+\- Fix background button UI.  
+\- Fix rockets don't dock into dyson nodes when dyson sphere rotation is paused.  
+
 #### v1.5.0 (DSP-0.10.30.22350)
 \- Add pause/resume/speedup speed control buttons.  
 

@@ -77,12 +77,14 @@ Remove force garbage collection of build tools. (Default:`true`)
 - When host is saving or manually entering pause mode, the client will enter pause mode too.  
 - If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
 - Players can stop/resume dyson sphere rotation in the editor at top-left button.  
-- Both host and client can stop the game using hotkey pause.  
+- Both host and client can stop the game using hotkey pause. Speed up is only available to host.   
 
 
 ----
 
 # BulletTime 子弹时间-游戏速度控制mod
+
+将机甲与世界的更新逻辑解离，使两者可以以不同的时间流速运行
 
 ## 功能
 
@@ -146,6 +148,7 @@ Remove force garbage collection of build tools. (Default:`true`)
 - 当玩家加入、请求工厂数据、存檔時，进入时停模式。在载入完成后恢复。  
 - 如果游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
 - 玩家可以在编辑器左上角的按钮中停止/恢复戴森球旋转。  
+- 加速只有主机可以使用。暂停/恢复的功能主机和客机都可以使用。  
 
 ----
 

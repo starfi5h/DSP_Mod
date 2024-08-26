@@ -276,19 +276,17 @@ namespace BulletTime
         {
             try
             {
-                // When DysonSpherePaused is on, skip rotation part and jump to DysonSwarm swarm = this.dysonSphere.swarm;
+                // When DysonSpherePaused is on, replace this.orbitAngularSpeed with 0f
                 var codeMatcher = new CodeMatcher(instructions, iL)
-                    .MatchForward(false,
+                    .MatchForward(true,
                         new CodeMatch(OpCodes.Ldarg_0),
-                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(DysonSphereLayer), "dysonSphere")),
-                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(DysonSphere), "swarm"))
+                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(DysonSphereLayer), "orbitAngularSpeed"))
                     )
-                    .CreateLabel(out Label label)
-                    .Start()
-                    .Insert(
-                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NebulaCompat), "DysonSpherePaused")),
-                        new CodeInstruction(OpCodes.Brtrue_S, label)
-                    );
+                    .Repeat(matcher =>
+                    {
+                        matcher.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(NebulaPatch), nameof(GetOrbitAngularSpeed)));
+                    });
+
                 return codeMatcher.InstructionEnumeration();
             }
             catch (Exception e)
@@ -297,6 +295,11 @@ namespace BulletTime
                 Log.Error(e);
                 return instructions;
             }
+        }
+
+        static float GetOrbitAngularSpeed(DysonSphereLayer @this)
+        {
+            return NebulaCompat.DysonSpherePaused ? 0 : @this.orbitAngularSpeed;
         }
 
         #region Progress
