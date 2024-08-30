@@ -10,7 +10,6 @@ namespace AutoMute
     class IngameUI
     {
         static GameObject group;
-        static UIToggle backGroundMuteToggle;
         static InputField filterInput;
         static Text muteInfoText;
         static UIToggle filterMuteOnlyToggle;
@@ -40,7 +39,7 @@ namespace AutoMute
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIOptionWindow), nameof(UIOptionWindow._OnOpen))]
-        public static void Init()
+        public static void Init(UIOptionWindow __instance)
         {
             if (group == null)
             {
@@ -48,33 +47,20 @@ namespace AutoMute
                 try
                 {
                     GameObject settingTab = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2");
-                    GameObject checkBoxTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
-                    GameObject comboBoxTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/resolution/ComboBox");
-                    GameObject inputTemple = GameObject.Find("UI Root/Overlay Canvas/In Game/Globe Panel/name-input");
-                    GameObject buttonTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/revert-button");
+                    GameObject checkBoxWithTextTemple = __instance.fullscreenComp.transform.parent.gameObject;
+                    GameObject comboBoxTemple = __instance.resolutionComp.transform.gameObject;
+                    GameObject inputTemple = UIRoot.instance.uiGame.planetGlobe.nameInput.gameObject; //UI Root/Overlay Canvas/In Game/Globe Panel/name-input
+                    GameObject buttonTemple = __instance.revertButtons[0].gameObject; //../Option Window/details/content-1/revert-button
 
                     // 創建一個群組包含所有mod的物件
                     group = new GameObject("AutoMute_Group");
                     group.transform.SetParent(settingTab.transform);
-                    group.transform.localPosition = new Vector3(-100, 280);
+                    group.transform.localPosition = new Vector3(-100, 320);
                     group.transform.localScale = Vector3.one;
 
-                    // 創建在背景靜音的勾選按鈕
-                    var go = GameObject.Instantiate(checkBoxTemple, group.transform);
-                    go.name = "MuteInBackground Toggle";
-                    go.transform.localPosition = new Vector3(0, 0, 0);
-                    GameObject.Destroy(go.GetComponent<Localizer>());
-                    Text text_local = go.GetComponent<Text>();
-                    //text_local.font = text_factory.font;
-                    text_local.text = "Mute in background".Translate();
-
-                    backGroundMuteToggle = go.GetComponentInChildren<UIToggle>();
-                    backGroundMuteToggle.transform.localPosition = new Vector3(130, 5, 0);
-                    backGroundMuteToggle.isOn = Plugin.Instance.MuteInBackground.Value;
-                    backGroundMuteToggle.toggle.onValueChanged.AddListener(OnBackGroundMuteToggleChange);
 
                     // 創建一個輸入框, 篩選音頻檔名
-                    go = GameObject.Instantiate(inputTemple, group.transform);
+                    var go = GameObject.Instantiate(inputTemple, group.transform);
                     go.name = "AudioName Filter";
                     go.transform.localPosition = new Vector3(-2, -30, 0);
                     filterInput = go.GetComponent<InputField>();
@@ -87,7 +73,7 @@ namespace AutoMute
                     go.SetActive(true);
 
                     // 狀態回報文字, 以及勾選按鈕過濾靜音列表
-                    go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
                     go.name = "Filter Mute Only Toggle";
                     go.transform.localPosition = new Vector3(210 + 30, -30, 0);
                     GameObject.Destroy(go.GetComponent<Localizer>());
@@ -129,7 +115,7 @@ namespace AutoMute
                     audioComboBox.onItemIndexChange.AddListener(OnComboBoxIndexChange);
 
                     // 創建音頻文件的路徑文字, 及靜音勾選按鈕
-                    go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
                     go.name = "Audio Enable Toggle";
                     go.transform.localPosition = new Vector3(210 + 30, -60, 0);
                     GameObject.Destroy(go.GetComponent<Localizer>());
@@ -154,9 +140,10 @@ namespace AutoMute
                     GameObject.Destroy(go.GetComponent<UIButton>());
                     GameObject.Destroy(go.GetComponentInChildren<Localizer>());
                 }
-                catch
+                catch (Exception e)
                 {
                     Plugin.Log.LogWarning("UI component initial fail!");
+                    Plugin.Log.LogWarning(e);
                 }
             }
         }
@@ -173,15 +160,8 @@ namespace AutoMute
         {
             vFAudio?.Stop();
             vFAudio = null;
-            backGroundMuteToggle = null;
             GameObject.Destroy(group);
             group = null;
-        }
-
-        static void OnBackGroundMuteToggleChange(bool value)
-        {
-            Plugin.Instance.MuteInBackground.Value = value;
-            backGroundMuteToggle.isOn = value;
         }
 
         static void PlayAudio()
