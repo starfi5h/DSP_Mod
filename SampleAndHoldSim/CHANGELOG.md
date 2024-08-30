@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.10
+\- Fix UI change for DSP-0.10.30.23430  
+
 #### v0.6.9
 \- Update for DSP-0.10.30.23292  
 \- Remove Multfuntion_mod compat as the compat patch is outdated.  

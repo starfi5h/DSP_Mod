@@ -29,8 +29,8 @@ namespace SampleAndHoldSim
                     Slider slider0 = UIRoot.instance.uiGame.dysonEditor.controlPanel.inspector.layerInfo.slider0;
                     InputField input0 = UIRoot.instance.uiGame.dysonEditor.controlPanel.inspector.layerInfo.input0;
                     Text text0 = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuValueText1;
-                    GameObject checkBox = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
-                    GameObject panelObj = GameObject.Find("UI Root/Overlay Canvas/In Game/Windows/Statistics Window/performance-bg/cpu-panel");
+                    GameObject checkBoxWithTextTemple = UIRoot.instance.optionWindow.fullscreenComp.transform.parent.gameObject;
+                    GameObject panelObj = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuActiveButton.gameObject.transform.parent.gameObject;
 
                     group = new GameObject("SAHS_Group");
                     group.transform.SetParent(panelObj.transform);
@@ -67,7 +67,7 @@ namespace SampleAndHoldSim
                     tip2.Title = "Update Period".Translate();
                     tip2.Text = "Compute actual factory simulation every x ticks.".Translate();
 
-                    tmp = GameObject.Instantiate(checkBox, group.transform);
+                    tmp = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
                     tmp.name = "checkbox_local";
                     tmp.transform.localPosition = new Vector3(60, -25, 0);
                     GameObject.Destroy(tmp.GetComponent<Localizer>());
