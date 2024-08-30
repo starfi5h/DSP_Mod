@@ -1,7 +1,7 @@
 {
     "name": "AudioReplacer",
     "description": "Load custom sound files to replace in-game sfx and voice lines. Support mp3, wav and ogg format. 自定义音效替换",
-    "version_number": "0.1.1",
+    "version_number": "0.1.2",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/AudioReplacer",
     "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
 }

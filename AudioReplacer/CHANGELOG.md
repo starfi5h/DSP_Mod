@@ -1,3 +1,6 @@
+### v0.1.2
+\- Fix UI change for DSP-0.10.30.23430  
+
 ### v0.1.1
 \- Add `AudioReplacerAPI.RegisterDirectory(string dir)`.  
 \- Add Unload Folder Button.  

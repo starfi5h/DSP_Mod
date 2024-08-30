@@ -43,7 +43,7 @@ namespace AudioReplacer
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(UIOptionWindow), nameof(UIOptionWindow._OnOpen))]
-        public static void Init()
+        public static void Init(UIOptionWindow __instance)
         {
             if (group == null)
             {
@@ -51,10 +51,10 @@ namespace AudioReplacer
                 try
                 {
                     GameObject settingTab = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2");
-                    GameObject checkBoxTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/fullscreen");
-                    GameObject comboBoxTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-1/resolution/ComboBox");
-                    GameObject inputTemple = GameObject.Find("UI Root/Overlay Canvas/In Game/Globe Panel/name-input");
-                    GameObject buttonTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2/revert-button");
+                    GameObject checkBoxWithTextTemple = __instance.fullscreenComp.transform.parent.gameObject;
+                    GameObject comboBoxTemple = __instance.resolutionComp.transform.gameObject;
+                    GameObject inputTemple = UIRoot.instance.uiGame.planetGlobe.nameInput.gameObject; //UI Root/Overlay Canvas/In Game/Globe Panel/name-input
+                    GameObject buttonTemple = __instance.revertButtons[0].gameObject; //../Option Window/details/content-1/revert-button
 
                     // Create group
                     group = new GameObject("AudioReplacer_Group");
@@ -100,7 +100,7 @@ namespace AudioReplacer
                     folderPathInput.text = AudioReplacerPlugin.Instance.AudioFolderPath.Value;
                     folderPathInput.characterLimit = 256;
 
-                    go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
                     go.name = "Load Info";
                     go.transform.localPosition = new Vector3(0, -35, 0);
                     GameObject.Destroy(go.GetComponent<Localizer>());
