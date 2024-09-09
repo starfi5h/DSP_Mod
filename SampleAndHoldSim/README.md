@@ -17,7 +17,6 @@ Additional UI for displaying flow-in/flow-out rate of cargo in stations. Configu
 
 The difference between vanilla behavior:  
 - Stations may have negative value to maintain the cargo balance between slowed and unslowed environment.  
-- Kill stats may tick slower in slowed plaents, but the production of drop will remain the same.  
 - Lancer attacks will be scaled down in remote systems.  
 - Turrets that attack space unit will be scaled up in remote systems.  
 
@@ -92,7 +91,6 @@ If true, allow Dark Fog relays to land on planet (vanilla).
 
 和原版不同之处:  
 - 为了保持内外部物品时恒定, 物流塔内的货物可能为负数  
-- 击杀统计会减慢(但是掉落物品产量不会改变)  
   
 目前对战斗系统进行了以下的修改, 可能会影响平衡:  
 - 远程星系的枪骑攻击力依照倍率缩减, 避免远程星系的星球被攻破  

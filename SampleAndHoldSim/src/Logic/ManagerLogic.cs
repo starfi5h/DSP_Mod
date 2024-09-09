@@ -14,8 +14,8 @@ namespace SampleAndHoldSim
         static long totalHash = 0;
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(MultithreadSystem), "Init")]
-        [HarmonyPatch(typeof(MultithreadSystem), "ResetUsedThreadCnt")]
+        [HarmonyPatch(typeof(MultithreadSystem), nameof(MultithreadSystem.Init))]
+        [HarmonyPatch(typeof(MultithreadSystem), nameof(MultithreadSystem.ResetUsedThreadCnt))]
         internal static void Record_UsedThreadCnt(MultithreadSystem __instance)
         {
             threadCount = __instance.usedThreadCnt > 0 ? __instance.usedThreadCnt : 1;
@@ -155,7 +155,7 @@ namespace SampleAndHoldSim
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(PowerSystem), "GameTick")]
+        [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
         static void PowerSystem_Gametick(PowerSystem __instance, ref long time)
         {
             if (MainManager.TryGet(__instance.factory.index, out var manager))
@@ -165,6 +165,61 @@ namespace SampleAndHoldSim
                 if (manager.IsNextIdle)
                     time /= MainManager.UpdatePeriod;
             }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(KillStatistics), nameof(KillStatistics.PrepareTick))]
+        static bool KillStatistics_PrepareTick()
+        {
+            // PrepareTick every x tick, x = MainManager.UpdatePeriod. Preserver kill stat in 1~period tick
+            // Due to skill(weapon projectiles) is update every tick, the kill may happen in every tick.
+            // So in this place use global UpdatePeriod instead of factory active/inactive tick
+            int period = MainManager.UpdatePeriod;
+            if (period <= 1) return true;
+            return GameMain.gameTick % period == 1; // mod 1: Reset after GameTick is record
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(KillStatistics), nameof(KillStatistics.GameTick))]
+        static bool KillStatistics_GameTick(KillStatistics __instance, long time)
+        {
+            // GameTick update every x tick, each time update x frames of stats
+            int period = MainManager.UpdatePeriod;
+            if (period <= 1) return true;
+            if (GameMain.gameTick % period != 0) return false; // mod 0: Record tick
+
+            long startTime = time - period;
+            if (startTime < 0) startTime = 0;
+            for (int i = 0; i < __instance.starKillStatPool.Length; i++)
+            {
+                if (__instance.starKillStatPool[i] != null)
+                {
+                    for (long t = startTime; t <= time; t++)
+                        __instance.starKillStatPool[i].GameTick(t);
+                }
+            }
+            for (int j = 0; j < __instance.factoryKillStatPool.Length; j++)
+            {
+                if (__instance.factoryKillStatPool[j] != null)
+                {
+                    for (long t = startTime; t <= time; t++)
+                        __instance.factoryKillStatPool[j].GameTick(t);
+                }
+            }
+            if (__instance.mechaKillStat != null)
+            {
+                for (long t = startTime; t <= time; t++)
+                    __instance.mechaKillStat.GameTick(t);
+            }
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(KillStatistics), nameof(KillStatistics.AfterTick))]
+        static bool KillStatistics_AfterTick()
+        {
+            // Skip entirely AstroKillStat.AfterTick is just calling ClearRegister, which is already done in PrepareTick
+            return false;
         }
 
         static void PrepareTick(int index)

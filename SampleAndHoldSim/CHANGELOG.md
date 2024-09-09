@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.11
+\- Scale kill stats for remote slowed planets.  
+
 #### v0.6.10
 \- Fix UI change for DSP-0.10.30.23430  
 
