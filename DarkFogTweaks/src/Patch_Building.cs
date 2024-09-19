@@ -44,7 +44,7 @@ namespace DarkFogTweaks
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(DFGBaseComponent), nameof(DFGBaseComponent.LogicTick))]
-		static void DFGBaseComponent_LogicTick_Prefix(DFGBaseComponent __instance, ref EnemyBuilderComponent builder)
+		static void DFGBaseComponent_LogicTick_Prefix(ref EnemyBuilderComponent builder)
 		{
 			if (builder.state > 0)
             {
@@ -73,41 +73,42 @@ namespace DarkFogTweaks
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(EnemyBriefInfo), nameof(EnemyBriefInfo.SetBriefInfo))]
-		static void DFSCoreComponent_LogicTick_Prefix(EnemyBriefInfo __instance, SpaceSector _sector)
+		static void EnemyBriefInfo_SetBriefInfo_Prefix(EnemyBriefInfo __instance, SpaceSector _sector)
 		{
-			if (_sector == null || __instance.enemyId <= 0) return;
+			try
+			{
+				if (_sector == null || __instance.enemyClusterId > 0 || __instance.enemyId <= 0) return;
 
-			if (__instance.astroId > 1000000)
-			{
-				ref EnemyData ptr = ref _sector.enemyPool[__instance.enemyId];
-				if (ptr.id != __instance.enemyId)
+				if (__instance.astroId > 1000000)
 				{
-					return;
+					if (__instance.enemyId >= _sector.enemyPool.Length) return;
+					ref EnemyData ptr = ref _sector.enemyPool[__instance.enemyId];
+					if (ptr.id != __instance.enemyId) return;
+
+					if (ptr.dfSCoreId > 0)
+					{
+						__instance.matterChange += HiveMatterGen.Value;
+						__instance.energyChange += HiveEnergyGen.Value;
+					}
 				}
-				if (ptr.dfSCoreId > 0)
+				else if (__instance.astroId > 100 && __instance.astroId <= 204899 && __instance.astroId % 100 > 0)
 				{
-					__instance.matterChange += HiveMatterGen.Value;
-					__instance.energyChange += HiveEnergyGen.Value;
-				}
-			}
-			else if (__instance.astroId > 100 && __instance.astroId <= 204899 && __instance.astroId % 100 > 0)
-			{
-				var planetFactory = _sector.skillSystem.astroFactories[__instance.astroId];
-				if (planetFactory == null)
-				{
-					return;
-				}
-				ref EnemyData ptr = ref planetFactory.enemyPool[__instance.enemyId];
-				if (ptr.id != __instance.enemyId)
-				{
-					return;
-				}
-				if (ptr.dfGBaseId > 0)
-				{
-					__instance.matterChange += BaseMatterGen.Value;
-					__instance.energyChange += BaseEnergyGen.Value;
+					if (__instance.astroId >= _sector.skillSystem.astroFactories.Length) return;
+					var planetFactory = _sector.skillSystem.astroFactories[__instance.astroId];
+					if (planetFactory == null || __instance.enemyId >= planetFactory.enemyPool.Length) return;
+					ref EnemyData ptr = ref planetFactory.enemyPool[__instance.enemyId];
+					if (ptr.id != __instance.enemyId) return;
+
+					if (ptr.dfGBaseId > 0)
+					{
+						__instance.matterChange += BaseMatterGen.Value;
+						__instance.energyChange += BaseEnergyGen.Value;
+					}
 				}
 			}
+			catch
+            {
+            }
 		}
 	}
 }
