@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.7 (DSP-0.10.30.23430)
+\- Update CheatEnabler compat to v2.3.26  
+
 #### v1.5.6 (DSP-0.10.29.22015)
 \- Add BlueprintTweaks v1.6.4 compat for allowing foundation blueprint to use delivery slots.  
 

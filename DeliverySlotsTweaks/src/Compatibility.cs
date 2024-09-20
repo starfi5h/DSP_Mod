@@ -29,17 +29,17 @@ namespace DeliverySlotsTweaks
                 try
                 {
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("CheatEnabler.FactoryPatch+ArchitectMode");
+                    Type classType = assembly.GetType("CheatEnabler.Patches.FactoryPatch+ArchitectMode");
                     harmony.Patch(AccessTools.Method(classType, "Enable"),
                         null, new HarmonyMethod(AccessTools.Method(typeof(CheatEnabler_Patch), nameof(ArchitectModeValueChanged_Postfix))));
 
-                    classType = assembly.GetType("CheatEnabler.FactoryPatch");
+                    classType = assembly.GetType("CheatEnabler.Patches.FactoryPatch");
                     DeliveryPackagePatch.architectMode = ((ConfigEntry<bool>)(AccessTools.Field(classType, "ArchitectModeEnabled").GetValue(null))).Value;
                     Plugin.Log.LogDebug("CheatEnabler ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.7");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.26");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -97,7 +97,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 2.5.1");
+                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 2.8.2");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -124,7 +124,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 3.1.7");
+                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 3.4.5");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -205,7 +205,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("RebindBuildBar compatibility failed! Last working version: 1.0.0");
+                    Plugin.Log.LogWarning("RebindBuildBar compatibility failed! Last working version: 1.0.4");
                     Plugin.Log.LogWarning(e);
                 }
             }

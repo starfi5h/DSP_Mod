@@ -19,7 +19,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.6";
+        public const string VERSION = "1.5.7";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -135,13 +135,14 @@ namespace DeliverySlotsTweaks
         [HarmonyPatch(typeof(GameHistoryData), nameof(GameHistoryData.UnlockTechFunction))]
         static void ParameterOverwrite()
         {
-            DeliveryPackage __instance = GameMain.mainPlayer.deliveryPackage;
+            DeliveryPackage __instance = GameMain.mainPlayer?.deliveryPackage;
+            if (__instance == null) return;
             if (ColCount.Value > 0 && ColCount.Value <= 5)
             {
                 if (__instance.colCount != ColCount.Value)
                 {
                     __instance.colCount = ColCount.Value;
-                    GameMain.mainPlayer.deliveryPackage.NotifySizeChange();
+                    __instance.NotifySizeChange();
                 }
             }
             if (StackSizeMultiplier.Value > 0)
