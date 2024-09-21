@@ -12,14 +12,13 @@ using System.Reflection;
 namespace DeliverySlotsTweaks
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.Nebula_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.7";
+        public const string VERSION = "1.5.8";
 
         public static Plugin Instance;
         public static ManualLogSource Log;

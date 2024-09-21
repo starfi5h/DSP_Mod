@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.8
+\- Remove CheatEnabler compat  
+
 #### v1.5.7 (DSP-0.10.30.23430)
 \- Update CheatEnabler compat to v2.3.26  
 
