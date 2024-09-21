@@ -293,7 +293,8 @@ namespace BulletTime
             {
                 //Log.Debug("Export local PlanetFactory start");
                 GameStateManager.SetLockFactory(true);
-                Thread.Sleep((int)(1000 / FPSController.currentUPS));
+                int sleepTime = (int)Maths.Clamp(1000 / FPSController.currentUPS, 17.0, 1000.0); // sleep at least 17ms to lock the local factory
+                Thread.Sleep(sleepTime);
             }
         }
 

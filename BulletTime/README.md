@@ -13,7 +13,7 @@ Decouple the mecha (player actions) from the world simulation.
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
 - Pause: Toggle tactical pause mode.
 - Resume: Reset game speed back to 1x.
-- Speed Up: Increase game speed (max 4x).  
+- Speed Up: Increase game speed (max 10x).  
 The speed adjustment is done by setting the target UPS goal. Hardware still limits the real game speed.  
 You can shift + f12 to view the real FPS/UPS at the top-left. The default 1x speed UPS is 60 tick/s.  
 
@@ -65,6 +65,8 @@ Increase main menu loading speed. (Default:`true`)
 - `RemoveGC`  
 Remove force garbage collection of build tools. (Default:`true`)  
 
+- `MaxSpeedupScale`
+Maximum game speed multiplier for speedup button. (Default:`10`)  
 
 ## Compatibility
 
@@ -92,7 +94,7 @@ Remove force garbage collection of build tools. (Default:`true`)
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
 - 暂停：切换战术暂停模式。
 - 恢复：将游戏速度重置为 1 倍。
-- 加速：提高游戏速度（最高 4 倍）。  
+- 加速：提高游戏速度（最高 10 倍）。  
 速度调整是通过设置目标 UPS 来完成的。实际上的游戏速度由硬体性能决定。  
 您可以按 Shift + f12 在左上角查看实际 FPS/UPS。默认1倍速 UPS 为 60 tick/s。  
 
@@ -142,6 +144,9 @@ Remove force garbage collection of build tools. (Default:`true`)
 
 - `RemoveGC`  
 移除建筑工具的强制内存回收 (默认为开启`true`)  
+
+- `MaxSpeedupScale`
+加速按钮的最大游戏速度倍率 (默认为`10`)  
 
 ## 联机功能  
 

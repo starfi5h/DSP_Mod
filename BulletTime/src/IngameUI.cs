@@ -140,7 +140,8 @@ namespace BulletTime
                             case 2: // Sprite Path: "ui/textures/sprites/test/next-icon-2"
                                 iconSprite = Resources.Load<Sprite>("ui/textures/sprites/test/next-icon-2");
                                 btn.tips.tipTitle = go.name = "SpeedUp".Translate();
-                                btn.tips.tipText = "Increase game speed (max 4x)".Translate();
+                                btn.tips.tipText = string.Format("Left click to increase game speed\nRight click to set to max ({0}x)".Translate(), BulletTimePlugin.MaxSpeedupScale.Value);
+                                btn.onRightClick += OnSpeedupButtonRightClcik;
                                 break;
                         }
                         go.Find("button-1/icon").GetComponent<Image>().sprite = iconSprite;
@@ -195,12 +196,23 @@ namespace BulletTime
                     {
                         FPSController.SetFixUPS(120.0);
                     }
-                    else if (FPSController.instance.fixUPS < 240.0)
+                    else if (FPSController.instance.fixUPS < 60.0 * BulletTimePlugin.MaxSpeedupScale.Value)
                     {
                         FPSController.SetFixUPS(FPSController.instance.fixUPS + 60.0);
                     }
                     break;
             }
+            SetSpeedRatioText();
+        }
+
+        private static void OnSpeedupButtonRightClcik(int _)
+        {
+            if (GameStateManager.Pause)
+            {
+                // If it is in pause state, resume
+                OnKeyPause();
+            }
+            FPSController.SetFixUPS(60.0 * BulletTimePlugin.MaxSpeedupScale.Value);
             SetSpeedRatioText();
         }
 

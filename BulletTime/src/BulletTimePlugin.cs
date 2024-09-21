@@ -15,7 +15,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.1";
+        public const string VERSION = "1.5.2";
 
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
@@ -26,6 +26,7 @@ namespace BulletTime
         public static ConfigEntry<int> StatusTextHeightOffset;
         public static ConfigEntry<string> StatusTextPause;
         public static ConfigEntry<bool> EnableMechaFunc;
+        public static ConfigEntry<int> MaxSpeedupScale;
         static Harmony harmony;
 
         private void LoadConfig()
@@ -39,7 +40,9 @@ namespace BulletTime
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
             StatusTextHeightOffset = Config.Bind("UI", "StatusTextHeightOffset", 100, "Height of Status text relative to auto save text\n状态提示相对于自动保存提示的高度");
             StatusTextPause = Config.Bind("UI", "StatusTextPause", "Bullet Time", "Status text when in pause mode\n暂停时的状态提示文字");
-            
+            MaxSpeedupScale = Config.Bind("UI", "MaxSpeedupScale", 10, "Maximum game speed multiplier for speedup button\n加速按钮的最大游戏速度倍率");
+            if (MaxSpeedupScale.Value <= 0) MaxSpeedupScale.Value = 1;
+
             GameStateManager.EnableMechaFunc = EnableMechaFunc.Value;
         }
 

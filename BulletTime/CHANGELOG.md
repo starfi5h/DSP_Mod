@@ -1,11 +1,17 @@
 ## Changelog
 
+#### v1.5.2
+\- Add config `UI`:`MaxSpeedupScale`  
+
 #### v1.5.1 (DSP-0.10.30.23430)
 \- Fix background button UI.  
 \- Fix rockets don't dock into dyson nodes when dyson sphere rotation is paused.  
 
 #### v1.5.0 (DSP-0.10.30.22350)
 \- Add pause/resume/speedup speed control buttons.  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v1.4.8 (DSP-0.10.30.22292)
 \- (Nebula) Update download progression for other players.  
@@ -40,9 +46,6 @@
 \- Add config `UI`:`StatusTextHeightOffset`, `StatusTextPause`  
 \- Remove config `Speed`:`UIBlueprintAsync`. This feature has been move to BuildToolOpt mod.  
 \- Remove config `Multiplayer`:`MinimumUPS`  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v1.3.1
 \- Fix error when creating a new game with dark fog enabled.  
