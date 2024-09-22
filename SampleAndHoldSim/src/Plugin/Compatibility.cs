@@ -1,7 +1,5 @@
 ﻿using DysonSphereProgram.Modding.Blackbox;
 using HarmonyLib;
-using Multifunction_mod;
-using NebulaAPI;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -18,7 +16,6 @@ namespace SampleAndHoldSim
 
         public static void Init(Harmony harmony)
         {
-            //NebulaAPI.Init();
             CommonAPI.Init(harmony);
             DSPOptimizations.Init(harmony);
             Auxilaryfunction_Patch.Init(harmony);
@@ -31,6 +28,9 @@ namespace SampleAndHoldSim
             {
                 harmony.PatchAll(typeof(Compatibility));
             }
+#if DEBUG
+            ShowMessage();
+#endif
         }
 
         public static void OnDestory()
@@ -54,61 +54,6 @@ namespace SampleAndHoldSim
             {
                 UIMessageBox.Show("SampleAndHoldSim 模拟帧", warnMessage, "确定".Translate(), "Don't show", 
                     3, null, () => Plugin.instance.WarnIncompat.Value = false);
-            }
-        }
-
-        public static class NebulaAPI
-        {
-            public const string GUID = "dsp.nebula-multiplayer";
-            public static bool IsClient { get; private set; }
-            public static bool IsPatched { get; private set; }
-
-            public static void Init()
-            {
-                try
-                {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) 
-                        return;
-
-                    Patch();
-                    Log.Debug("Nebula compatibility - OK");
-                }
-                catch (Exception e)
-                {
-
-                    Log.Warn("Nebula compatibility failed!");
-                    Log.Warn(e);
-                }
-            }
-
-            private static void Patch()
-            {
-                // Separate for using NebulaModAPI
-                if (!NebulaModAPI.NebulaIsInstalled || IsPatched)
-                    return;
-                NebulaModAPI.OnMultiplayerGameStarted += OnMultiplayerGameStarted;
-                NebulaModAPI.OnMultiplayerGameEnded += OnMultiplayerGameEnded;
-                IsPatched = true;
-            }
-
-            public static void OnMultiplayerGameStarted()
-            {
-                IsClient = NebulaModAPI.IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
-                if (IsClient)
-                {
-                    Log.Warn("Nebula client: Unload plugin!");
-                    Plugin.instance.OnDestroy();
-                }
-            }
-
-            public static void OnMultiplayerGameEnded()
-            {
-                if (IsClient)
-                {
-                    Log.Warn("Nebula client: Reload plugin!");
-                    Plugin.instance.Awake();
-                }
-                IsClient = false;
             }
         }
 
@@ -495,17 +440,35 @@ namespace SampleAndHoldSim
 
                 try
                 {
-                    harmony.PatchAll(typeof(Warper));
-                    Warper.Init();
-
+                    //harmony.PatchAll(typeof(Warper)); //Note: Patching on generic class PatchImpl will make CE unable to function.
+                    harmony.PatchAll(typeof(CheatEnabler_Patch));
+#if DEBUG
+                    OnGameBegin();
+#endif
                     Log.Debug("CheatEnabler compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler compatibility failed! Last working version: 2.3.17";
+                    string message = "CheatEnabler skipbullet compatibility failed! Last working version: 2.3.26";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
+                }
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
+            static void OnGameBegin()
+            {
+                try
+                {
+                    Warper.Init();
+                }
+                catch (Exception e)
+                {
+                    string message = "CheatEnabler skipbullet compatibility failed! Last working version: 2.3.26";
+                    Log.Warn(message);
+                    Log.Warn(e);
                 }
             }
 
@@ -521,7 +484,9 @@ namespace SampleAndHoldSim
 
                 public static void Init()
                 {
-                    CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable(CheatEnabler.DysonSpherePatch.SkipBulletEnabled.Value);
+                    bool enable = CheatEnabler.Patches.DysonSpherePatch.SkipBulletEnabled.Value;
+                    SkipBulletValueChanged_Prefix(enable);
+                    SkipBulletValueChanged_Postfix(enable);
                 }
 
                 public static void OnDestory()
@@ -538,14 +503,13 @@ namespace SampleAndHoldSim
                     }
                 }
 
-                [HarmonyPrefix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), 
-                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
-                internal static void SkipBulletValueChanged_Prefix(bool on)
+                internal static void SkipBulletValueChanged_Prefix(bool enable)
                 {
-                    if (on)
+                    if (enable)
                     {
                         if (patch_sample != null)
                         {
+                            Log.Info("patch_sample UnpatchSelf");
                             patch_sample.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
                             patch_sample = null;
                         }
@@ -554,48 +518,65 @@ namespace SampleAndHoldSim
                     {
                         if (patch_cheatEnabler != null)
                         {
+                            Log.Info("patch_cheatEnabler UnpatchSelf");
                             patch_cheatEnabler.UnpatchSelf(); // Remove the IL modification first
                             patch_cheatEnabler = null;
                         }
                     }
                 }
 
-                [HarmonyPostfix, HarmonyPatch(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch),
-                    nameof(CheatEnabler.DysonSpherePatch.SkipBulletPatch.Enable))]
-                internal static void SkipBulletValueChanged_Postfix(bool on)
+                internal static void SkipBulletValueChanged_Postfix(bool enable)
                 {
-                    if (on)
+                    if (enable)
                     {
                         if (patch_cheatEnabler == null)
                         {
-                            patch_cheatEnabler = new Harmony(Plugin.GUID + "-CE");
-                            patch_cheatEnabler.Patch(
-                                AccessTools.Method(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate)),
-                                null,
-                                null,
-                                new HarmonyMethod(AccessTools.Method(typeof(Warper), nameof(EjectorComponent_ReplaceAddDysonSail))));
+                            // Somehow this gets constantly trigger when CE unpatchself
+                            Log.Info("patch_cheatEnabler create");
+                            patch_cheatEnabler = Harmony.CreateAndPatchAll(typeof(SkipBullet_Compat_Patch), Plugin.GUID + ".patch_cheatEnabler");
                         }
                     }
                     else
                     {
                         if (patch_sample == null)
                         {
-                            patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch)); // Apply Ejector_Patch after CE patch is unload
+                            Log.Info("patch_sample create");
+                            patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch), Plugin.GUID+ ".patch_sample"); // Apply Ejector_Patch after CE patch is unload
                         }
                     }
                 }
+            }
 
+            private static class SkipBullet_Compat_Patch
+            {
+                [HarmonyTranspiler]
+                [HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
                 private static IEnumerable<CodeInstruction> EjectorComponent_ReplaceAddDysonSail(IEnumerable<CodeInstruction> instructions)
                 {
-                    var matcher = new CodeMatcher(instructions);
-                    matcher.MatchForward(false,
-                        new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(CheatEnabler.DysonSpherePatch.SkipBulletPatch), "AddDysonSail"))
-                    ).RemoveInstruction().Insert(
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
-                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddDysonSailWithPlanetId)))
-                    );
-                    return matcher.InstructionEnumeration();
+                    try
+                    {
+                        var matcher = new CodeMatcher(instructions);
+                        matcher.MatchForward(false,
+                            new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch), "AddDysonSail"))
+                        );
+                        if (matcher.IsInvalid)
+                        {
+                            Log.Warn("Unable to replace SkipBulletPatch.AddDysonSail for CheatEnabler");
+                            return instructions;
+                        }
+                        matcher.RemoveInstruction().Insert(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
+                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(SkipBullet_Compat_Patch), nameof(AddDysonSailWithPlanetId)))
+                        );
+                        return matcher.InstructionEnumeration();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn("Error in EjectorComponent_ReplaceAddDysonSail");
+                        Log.Warn(e);
+                        return instructions;
+                    }
                 }
 
                 private static void AddDysonSailWithPlanetId(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec, int planetId)
@@ -603,7 +584,7 @@ namespace SampleAndHoldSim
                     // If the sail doesn't come from the focus local planet, repeat
                     int repeatCount = (planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
                     for (int i = 0; i < repeatCount; i++)
-                        CheatEnabler.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
+                        CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
                 }
             }
         }

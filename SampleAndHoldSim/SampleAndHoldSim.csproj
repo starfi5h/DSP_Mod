@@ -347,6 +347,10 @@
       <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.XRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UXAssist-nstrip, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>reference\UXAssist-nstrip.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -374,6 +378,7 @@
     <Content Include="reference\Blackbox-nstrip.dll" />
     <Content Include="reference\CheatEnabler-nstrip.dll" />
     <Content Include="reference\Multifunction_mod-nstrip.dll" />
+    <Content Include="reference\UXAssist-nstrip.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BepInEx.Core.5.4.17\build\BepInEx.Core.targets" Condition="Exists('..\packages\BepInEx.Core.5.4.17\build\BepInEx.Core.targets')" />

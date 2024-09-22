@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.12
+\- Update CheatEnabler compat to v2.3.36  
+
 #### v0.6.11
 \- Scale kill stats for remote slowed planets.  
 
