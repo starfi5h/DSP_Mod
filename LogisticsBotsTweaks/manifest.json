@@ -1,7 +1,7 @@
 {
     "name": "LogisticsBotsTweaks",
-    "description": "Tweak bot speed, max bot count and max charging power of logistics distributors. 物流配送器参数调节",
-    "version_number": "1.0.0",
+    "description": "Tweak bot speed, capacity, range, max bot count and max charging power of logistics distributors. 物流配送器参数调节",
+    "version_number": "1.1.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/LogisticsBotsTweaks",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

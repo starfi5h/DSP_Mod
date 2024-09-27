@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
@@ -13,7 +14,7 @@ namespace LogisticsBotsTweaks
     {
         public const string GUID = "starfi5h.plugin.LogisticsBotsTweaks";
         public const string NAME = "LogisticsBotsTweaks";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.1.0";
 
         public static ManualLogSource Log;
         Harmony harmony;
@@ -22,6 +23,12 @@ namespace LogisticsBotsTweaks
         {
 			Patch_LogisticsBot.logisticsBotSpeedScale = Config.Bind("Bot", "SpeedScale", 1f,
 				"Scale of logistics bots flight speed. 物流配送机的飞行速度倍率").Value;
+
+			Patch_LogisticsBot.logisticsBotCapacity = Config.Bind("Bot", "Capacity", 0,
+				"If > 0, Overwirte carrying capacity of logistics bots. 覆写配送运输机运载量").Value;
+
+			Patch_LogisticsBot.dispenserDeliveryMaxAngle = Config.Bind("Bot", "DeliveryMaxAngle", 0f,
+				new ConfigDescription("If > 0, Overwirte distribution range of logistics bots. 覆写配送范围(度)", new AcceptableValueRange<float>(0f, 180f))).Value;
 
 			Patch_Distributor.dispenserMaxCourierCount = Config.Bind("Distributor", "MaxBotCount", 10,
 				"Max logistics bots count. 物流配送器的最大运输机数量").Value;
@@ -32,7 +39,7 @@ namespace LogisticsBotsTweaks
             Log = Logger;
             harmony = new(GUID);
 
-			if (Patch_LogisticsBot.logisticsBotSpeedScale != 1f)
+			if (Patch_LogisticsBot.logisticsBotSpeedScale != 1f || Patch_LogisticsBot.logisticsBotCapacity > 0 || Patch_LogisticsBot.dispenserDeliveryMaxAngle > 0)
 				harmony.PatchAll(typeof(Patch_LogisticsBot));
 			if (Patch_Distributor.dispenserMaxCourierCount != 10 || Patch_Distributor.maxChargePowerScale != 1f)
 				harmony.PatchAll(typeof(Patch_Distributor));
@@ -47,13 +54,21 @@ namespace LogisticsBotsTweaks
 	class Patch_LogisticsBot
 	{
 		public static float logisticsBotSpeedScale = 1.0f;
+		public static int logisticsBotCapacity = 0;
+		public static float dispenserDeliveryMaxAngle = 0f;
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(GameHistoryData), nameof(GameHistoryData.Import))]
 		[HarmonyPatch(typeof(GameHistoryData), nameof(GameHistoryData.SetForNewGame))]
+		[HarmonyPatch(typeof(GameHistoryData), nameof(GameHistoryData.UnlockTechFunction))]
 		public static void LogisticCourierSpeedModified(GameHistoryData __instance)
 		{
-			__instance.logisticCourierSpeed = Configs.freeMode.logisticCourierSpeed * logisticsBotSpeedScale;
+			if (logisticsBotSpeedScale != 1f)
+				__instance.logisticCourierSpeed = Configs.freeMode.logisticCourierSpeed * logisticsBotSpeedScale;
+			if (logisticsBotCapacity > 0)
+				__instance.logisticCourierCarries = logisticsBotCapacity;
+			if (dispenserDeliveryMaxAngle > 0f)
+				__instance.dispenserDeliveryMaxAngle = dispenserDeliveryMaxAngle;
 		}
 	}
 
