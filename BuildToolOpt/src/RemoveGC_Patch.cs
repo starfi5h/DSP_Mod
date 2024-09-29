@@ -1,13 +1,11 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using UnityEngine;
 
 namespace BuildToolOpt
 {
-    public class RemoveGC_Patch
+    public static class RemoveGC_Patch
 	{
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.CreatePrebuilds))]
@@ -29,6 +27,16 @@ namespace BuildToolOpt
 				}
 			}
 			return codeMacher.InstructionEnumeration();
+		}
+
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(DSPGame), nameof(DSPGame.EndGame))]
+		public static void GCCollect()
+        {
+			//var timer = new HighStopwatch();
+			//timer.Begin();
+			System.GC.Collect();
+			//Plugin.Log.LogDebug("GCCollect() " + timer.duration);
 		}
 	}
 }

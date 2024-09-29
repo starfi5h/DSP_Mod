@@ -38,18 +38,18 @@ namespace BuildToolOpt
                 try
                 {
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    var classType = assembly.GetType("CheatEnabler.FactoryPatch");
+                    var classType = assembly.GetType("CheatEnabler.Patches.FactoryPatch");
                     harmony.Patch(AccessTools.Method(classType, "ArrivePlanet"),
                         new HarmonyMethod(AccessTools.Method(typeof(CheatEnabler_Patch), nameof(ArrivePlanet_Prefix))));
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.9");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.26");
                     Plugin.Log.LogWarning(e);
                 }
             }
 
-            // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/FactoryPatch.cs#L78-L105
+            // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/Patches/FactoryPatch.cs#L146-L173
             internal static bool ArrivePlanet_Prefix()
             {
                 return !ReplaceStationLogic.IsReplacing;

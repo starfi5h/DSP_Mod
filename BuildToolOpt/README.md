@@ -17,7 +17,7 @@ Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.c
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。    
 
 ```
-## Settings file was created by plugin BuildToolOpt v1.0.5
+## Settings file was created by plugin BuildToolOpt v1.0.7
 ## Plugin GUID: starfi5h.plugin.BuildToolOpt
 
 [BuildTool]
@@ -27,6 +27,12 @@ Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.c
 # Setting type: Boolean
 # Default value: true
 RemoveGC = true
+
+## Trigger garbage collection when game pause (esc menu). Enable this option if memory usage grow rapidly.
+## 在游戏暂停时(Esc)回收内存
+# Setting type: Boolean
+# Default value: false
+GC when pause = false
 
 ## Directly replace old station with new one in hand
 ## 可直接替换物流塔
@@ -61,6 +67,6 @@ ClipboardPaste = true
 ReplaceStation and EnableHologram will be disabled.  
 当与联机mod共用时, 替换物流塔和建筑虚影功能将暂停使用  
   
-[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.3.9)  
+[CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.3.26)  
 When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  
 使用替换物流塔功能时mod会暂时关闭CE的`建造秒完成`功能直到替换完成  

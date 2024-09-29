@@ -1,3 +1,7 @@
+### v1.0.7
+\- Add config option `GC when pause`.  
+\- Update Cheat Enabler compat to v2.3.26  
+
 ### v1.0.6
 \- Adapt to DSP v10.30.23292  
 \- Set config `EnableHologram` default value to false.  
