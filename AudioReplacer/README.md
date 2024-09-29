@@ -17,6 +17,7 @@ Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually 
 Run the game one time to generate `starfi5h.plugin.AudioReplacer.cfg` file.  
 
 - `AudioFolderPath` - The folder to load custom audio files when game startup.
+- `Enable UI` - Add custom UI in game audio settings.  
 
 ## AudioReplacerAPI
 
@@ -24,7 +25,7 @@ Provide `RegisterDirectory`, `LoadAudioFromDirectory`, `LoadAudioFromDirectory`,
 
 ----
 
-## 音频名称
+## 音频替换
 当从文件夹加载时，它将获取文件名并尝试在`LDB.audios`中查找同名的音频并替换。  
 可以安装[AutoMute](https://thunderstore.io/c/dyson-sphere-program/p/starfi5h/AutoMute/)来获取游戏中当前可用的音频名称。  
 
@@ -34,6 +35,7 @@ Provide `RegisterDirectory`, `LoadAudioFromDirectory`, `LoadAudioFromDirectory`,
 手动安装: 更改`BepInEx\config\starfi5h.plugin.AudioReplacer.cfg`文件  
 
 - `AudioFolderPath` - 自定义音频文件的文件夹 (游戏启动时加载)  
+- `Enable UI` - 在游戏设置-声音中加入mod互动介面    
 
 ----
 

@@ -20,7 +20,7 @@ namespace AudioReplacer
     {
         public const string GUID = "starfi5h.plugin.AudioReplacer";
         public const string NAME = "AudioReplacer";
-        public const string VERSION = "0.1.2";
+        public const string VERSION = "0.1.3";
         public static AudioReplacerPlugin Instance;
 
         public Harmony harmony;
@@ -36,25 +36,31 @@ namespace AudioReplacer
         {
             public AudioClip originAudioClip;
             public float originVolume;
+            public int originClipCount;
             public string filePath;
         }
 
         public void Awake()
         {
             Instance = this;
-            AudioFolderPath = AudioFolderPath = Config.Bind("- General -", "AudioFolderPath", "",
+            AudioFolderPath = Config.Bind("- General -", "AudioFolderPath", "",
                 "The folder to load custom audio files when game startup.\n自定义音频文件的文件夹 (游戏启动时加载)");
+            var enableUI = Config.Bind("- General -", "Enable UI", true,
+                "Add custom UI in game audio settings\n在游戏设置-声音中加入mod互动介面").Value;
 
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(AudioReplacerPlugin));
-            try
+            if (enableUI)
             {
-                harmony.PatchAll(typeof(IngameUI));
-            }
-            catch (Exception e)
-            {
-                Logger.LogWarning("IngameUI patch fail!");
-                Logger.LogWarning(e);
+                try
+                {
+                    harmony.PatchAll(typeof(IngameUI));
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning("IngameUI patch fail!");
+                    Logger.LogWarning(e);
+                }
             }
 
 #if !DEBUG
@@ -78,11 +84,12 @@ namespace AudioReplacer
         public static void Init()
         {
             if (Instance.isLoaded) return;
-                
+
+            Instance.isLoaded = true;
             foreach (var dir in Instance.RegisteredFolders)
                 LoadAudioFromDirectory(dir);
-            LoadAudioFromDirectory(Instance.AudioFolderPath.Value);
-            Instance.isLoaded = true;
+            if (!string.IsNullOrEmpty(Instance.AudioFolderPath.Value))
+                LoadAudioFromDirectory(Instance.AudioFolderPath.Value);
         }
 
         public static int UnloadAudioFromDirectory(string dir = "")
@@ -98,6 +105,7 @@ namespace AudioReplacer
                 if (!cleanAll && !pair.Value.filePath.StartsWith(dir)) continue;
                 audioProto.audioClip = pair.Value.originAudioClip;
                 audioProto.Volume = pair.Value.originVolume;
+                audioProto.ClipCount = pair.Value.originClipCount;
                 audioCount++;
                 removedList.Add(pair.Key);
             }
@@ -245,17 +253,23 @@ namespace AudioReplacer
                 Logger.LogDebug($"Unload [{audioName}]: {value.filePath}");
                 audioProto.audioClip = value.originAudioClip;
                 audioProto.Volume = value.originVolume;
+                audioProto.ClipCount = value.originClipCount;
                 ModifyAudio.Remove(audioName);
             }
 
             Logger.LogDebug($"Load [{audioName}]: {Path.GetFileName(fullFilePath)}");
+
+            // Note: In VFAudio.Play(), proto.ClipCount == 1 will play proto.audioClip, else it will play proto.audioClipGroup[this.playClipId] or RandomClip() 
+            // For proto that has multiple clips (e.g. footsteps), it will convert to the single clip
             var record = new AudioEntry
             {
                 originAudioClip = audioProto.audioClip,
                 originVolume = audioProto.Volume,
+                originClipCount = audioProto.ClipCount,
                 filePath = fullFilePath
             };
             audioProto.audioClip = audioClip;
+            audioProto.ClipCount = 1;
             ModifyAudio.Add(audioName, record);
 
             // Reload planet audio. Apply after restarting the game or reloading the planet.
