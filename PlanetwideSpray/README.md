@@ -45,7 +45,7 @@ Run the game one time to generate `BepInEx\config\starfi5h.plugin.PlanetwideSpra
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。  
  
 ```
-## Settings file was created by plugin PlanetwideSpray v1.0.1
+## Settings file was created by plugin PlanetwideSpray
 ## Plugin GUID: starfi5h.plugin.PlanetwideSpray
 
 [Cheat]
@@ -69,6 +69,7 @@ Spray All Cargo = false
 
 ## Changelog
 
+- v1.1.2 - Fix NRE in SpraycoaterGameTick_Prefix.  
 - v1.1.1 - Spray more transportations in cheat mode. (DSP-0.10.30.22292)  
 - v1.1.0 - Support fractionator and turret.  
 - v1.0.1 - Add config Spray All Cargo.   

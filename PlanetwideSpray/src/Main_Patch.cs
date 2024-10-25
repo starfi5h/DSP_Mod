@@ -10,11 +10,12 @@ namespace PlanetwideSpray
     {
         public static bool LimitSpray = true;
         private static Status[] statusArr = null;
+        const int MAX_INC_COUNT = 11;
 
         public class Status
         {
             public int incLevel; // 當前星球最高作用中增產劑等級
-            public readonly int[] incCount = new int[11]; // 各等級增產劑點數
+            public readonly int[] incCount = new int[MAX_INC_COUNT]; // 各等級增產劑點數
             public int incDebt; // 滯留扣除額
         }
 
@@ -76,8 +77,14 @@ namespace PlanetwideSpray
         [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.SpraycoaterGameTick))]
         static void SpraycoaterGameTick_Prefix(CargoTraffic __instance)
         {
+            if (statusArr == null) SetArray();
             var status = statusArr[__instance.factory.index];
-            Array.Clear(status.incCount, 0, 11);
+            if (status == null)
+            {
+                status = new Status();
+                statusArr[__instance.factory.index] = status;
+            }
+            Array.Clear(status.incCount, 0, MAX_INC_COUNT);
         }
 
         [HarmonyPostfix]
