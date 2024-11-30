@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.8";
+        public const string VERSION = "1.5.9";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -60,10 +60,10 @@ namespace DeliverySlotsTweaks
                 "When sorting inventory, send them to delivery slots first.\n整理背包时会先将物品送入物流清单的栏位");
 
             PlayerPackageStackSize = Config.Bind("PlayerPackage", "StackSize", 0,
-                "Overwrite stack size in inventory. NoChange:0\n统一修改玩家背包中的物品堆疊上限(每件物品皆相同)(不改:0)");
+                "Overwrite stack size in inventory. NoChange:0\n统一修改玩家背包中的物品数量堆疊上限(每件物品皆相同) (不改:0)");
 
             PlayerPackageStackMultiplier = Config.Bind("PlayerPackage", "StackMultiplier", 0,
-                "Apply multiplier for stack size in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率(不改:0)");
+                "Apply multiplier for stack size in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率乘积(上限=原物品堆叠*倍率) (不改:0)");
 
             EnableArchitectMode = Config.Bind("BuildTool", "EnableArchitectMode", false,
                 "Build without requirement of items (infinite buildings)\n建筑师模式:建造无需物品");

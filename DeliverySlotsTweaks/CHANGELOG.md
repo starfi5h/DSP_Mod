@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v1.5.9 (DSP-0.10.31.24646)
+\- Adapt to game version 0.10.31.24646  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v1.5.8
 \- Remove CheatEnabler compat  
 
@@ -29,9 +35,6 @@
 #### v1.5.0 (DSP-0.10.28.21308)
 \- Add config `EnableHologram`, `EnableArchitectMode`. Default are false.  
 \- Update NebulaAPI compat version to 2.0.0 (pre-release version)  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v1.4.2 (DSP-0.10.28.21172)
 \- Add config `SortToDelieverySlots`. Default is false.  

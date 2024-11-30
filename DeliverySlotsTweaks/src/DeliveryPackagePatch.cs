@@ -287,14 +287,14 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
-		public static bool TryAddTaskIterate(MechaForge mechaForge, RecipeProto recipe, int count)
+		public static bool TryAddTaskIterate(MechaForge mechaForge, RecipeProto recipe, int count, out bool useBottleneckItem, bool predictBottleneckItems)
         {
 			// mechaForge._test_pack : expected products in replicator queue
 			Count(mechaForge.player.deliveryPackage);
 			foreach (var pair in deliveryItemCount)
 				mechaForge._test_pack.Alter(pair.Key, pair.Value); // Add item in delivery slot
 
-			return mechaForge.TryAddTaskIterate(recipe, count);
+			return mechaForge.TryAddTaskIterate(recipe, count, out useBottleneckItem, predictBottleneckItems);
 		}
 
 		[HarmonyTranspiler]
