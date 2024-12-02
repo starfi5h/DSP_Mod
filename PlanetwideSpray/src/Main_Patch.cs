@@ -1,6 +1,7 @@
 ﻿
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -10,7 +11,9 @@ namespace PlanetwideSpray
     {
         public static bool LimitSpray = true;
         private static Status[] statusArr = null;
+        private static Dictionary<CargoContainer, int> containerToIndex = new();
         const int MAX_INC_COUNT = 11;
+
 
         public class Status
         {
@@ -27,6 +30,39 @@ namespace PlanetwideSpray
             for (int i = 0; i < statusArr.Length; i++)
             {
                 statusArr[i] = new Status();
+            }
+            containerToIndex.Clear();
+        }
+
+        public class Station_Patch
+        {
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.TryPickItemAtRear))]
+            static void TryPickItemAtRear(CargoTraffic __instance, int __result, ref byte stack, ref byte inc)
+            {
+                if (__result == 0 || __result == 1210) return; //空抓或是翹曲器
+                var status = statusArr[__instance.factory.index]; //定位工廠
+                var incToAdd = (stack * status.incLevel) - inc; //達到層級所需要的增產劑點數
+                if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+                {
+                    Interlocked.Add(ref status.incDebt, stack); //記錄噴塗的物品數
+                    inc += (byte)incToAdd;
+                }
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(CargoPath), nameof(CargoPath.TryPickItemAtRear))]
+            static void TryPickItemAtRear(CargoPath __instance, int __result, ref byte stack, ref byte inc)
+            {
+                if (__result == 0 || __result == 1210) return;
+                if (containerToIndex.TryGetValue(__instance.cargoContainer, out int factoryIndex)) return; //從cargoContainer嘗試反找所屬factory
+                var status = statusArr[factoryIndex];
+                var incToAdd = (stack * status.incLevel) - inc;
+                if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+                {
+                    Interlocked.Add(ref status.incDebt, stack);
+                    inc += (byte)incToAdd;
+                }
             }
         }
 
@@ -83,6 +119,7 @@ namespace PlanetwideSpray
             {
                 status = new Status();
                 statusArr[__instance.factory.index] = status;
+                containerToIndex[__instance.factory.cargoContainer] = __instance.factory.index;
             }
             Array.Clear(status.incCount, 0, MAX_INC_COUNT);
         }

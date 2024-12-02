@@ -65,12 +65,19 @@ Force Proliferator Level = 0
 # Default value: false
 Spray All Cargo = false
 
+## Spray every item flow into station or mega assemblers(GenesisBook mod)
+## 喷涂流入物流塔/塔厂(创世之书mod)的货物
+# Setting type: Boolean
+# Default value: false
+Spray Station Input = true
+
 ```
 
 ## Changelog
 
+- v1.1.3 - Add config `Spray Station Input`. (DSP-0.10.31.24646)  
 - v1.1.2 - Fix NRE in SpraycoaterGameTick_Prefix.  
 - v1.1.1 - Spray more transportations in cheat mode. (DSP-0.10.30.22292)  
 - v1.1.0 - Support fractionator and turret.  
-- v1.0.1 - Add config Spray All Cargo.   
+- v1.0.1 - Add config `Spray All Cargo`.   
 - v1.0.0 - Initial release. (DSP-0.10.29.22015)  

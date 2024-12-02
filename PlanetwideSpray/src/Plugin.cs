@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.2";
+        public const string VERSION = "1.1.3";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -31,17 +31,25 @@ namespace PlanetwideSpray
             var EnableSprayAll = Config.Bind("General", "Spray All Cargo", false,
                 "Spray every item transfer by sorters (including products)\n喷涂任何分捡器抓取的货物(包含产物)");
 
+            var EnableSprayStation = Config.Bind("General", "Spray Station Input", false,
+                "Spray every item flow into station or mega assemblers(GenesisBook mod)\n喷涂流入物流塔/塔厂(创世之书mod)的货物");
+
             if (ForceProliferatorLevel.Value > 0)
             {
                 ForceProliferatorLevel.Value = Math.Min(ForceProliferatorLevel.Value, 10);
                 harmony.PatchAll(typeof(Cheat_Patch));
                 Cheat_Patch.IncAbility = ForceProliferatorLevel.Value;
-                Logger.LogDebug("Cheat mode: Force Proliferator Level = " + Cheat_Patch.IncAbility);
+                Logger.LogInfo("Cheat mode: Force Proliferator Level = " + Cheat_Patch.IncAbility);
             }
             else
             {
+                Logger.LogInfo($"Normal mode: spray all [{EnableSprayAll.Value}], station input [{EnableSprayStation.Value}]");
                 harmony.PatchAll(typeof(Main_Patch));
                 Main_Patch.LimitSpray = !EnableSprayAll.Value;
+                if (EnableSprayStation.Value)
+                {
+                    harmony.PatchAll(typeof(Main_Patch.Station_Patch));
+                }
 #if DEBUG
                 Main_Patch.SetArray();
 #endif
@@ -74,6 +82,13 @@ namespace PlanetwideSpray
         static void TryPickItemAtRear(ref byte stack, ref byte inc)
         {
             inc = (byte)(stack * IncAbility);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StationComponent), nameof(StationComponent.InputItem))]
+        static void InputItemSetInc(int stack, ref int inc)
+        {
+            inc = stack * IncAbility;
         }
 
         [HarmonyPostfix]
