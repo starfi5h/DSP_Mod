@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.13
+\- Adapt item transition across levels in stacked Labs changes for DSP-0.10.31.24646  
+
 #### v0.6.12
 \- Update CheatEnabler compat to v2.3.36  
 

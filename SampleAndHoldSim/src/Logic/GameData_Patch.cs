@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -135,6 +136,47 @@ namespace SampleAndHoldSim
                 Log.Error("Transpiler GameData.GameTick failed.");
                 return instructions;
             }
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabOutputToNext), new Type[] { typeof(long), typeof(bool) })]
+        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabOutputToNext), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
+        static IEnumerable<CodeInstruction> GameTickLabOutput_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            try
+            {
+                // frequency of item transition across levels in stacked Labs now reduce to 1/5 tick after game 0.10.31
+                // Replace: (int)(GameMain.gameTick % 5L)
+                // To: (int)(GetGameTick(this) % 5L)
+
+                var codeMatcher = new CodeMatcher(instructions)
+                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "get_gameTick"));
+
+                if (codeMatcher.IsInvalid) // game version before 0.10.31.24646
+                {
+                    Log.Warn("GameTickLabOutput_Transpiler: Can't find get_gameTick!");
+                    return instructions;
+                }
+
+                codeMatcher.Set(OpCodes.Nop, null)
+                    .Advance(1).Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GameData_Patch), nameof(GetGameTick))));
+
+                return codeMatcher.InstructionEnumeration();
+            }
+            catch
+            {
+                Log.Error("Transpiler FactorySystem.GameTickLabOutputToNext failed.");
+                return instructions;
+            }
+        }
+
+        static long GetGameTick(FactorySystem factorySystem)
+        {
+            // Return the modified gameTick
+            int scale = factorySystem.factory.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
+            return GameMain.gameTick / scale;
         }
     }
 }
