@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.14
+\- Update PlanetMiner compat to v3.1.1  
+
 #### v0.6.13
 \- Adapt item transition across levels in stacked Labs changes for DSP-0.10.31.24646  
 
@@ -11,6 +14,9 @@
 
 #### v0.6.10
 \- Fix UI change for DSP-0.10.30.23430  
+
+<details>
+<summary>Previous Changelog</summary>
 
 #### v0.6.9
 \- Update for DSP-0.10.30.23292  
@@ -28,10 +34,6 @@
 
 #### v0.6.5
 \- Add config `UI`:`WarnIncompat` to stop mod incompatibility warning showing up in the future.  
-
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.6.4
 \- Missiles and plasma cannons now have damage sclae up on remote planets.  

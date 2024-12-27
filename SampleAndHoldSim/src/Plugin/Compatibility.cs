@@ -243,18 +243,48 @@ namespace SampleAndHoldSim
                     harmony.CreateReversePatcher(methodInfo,
                     new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Original)))).Patch();
 
-                    harmony.Patch(methodInfo, 
-                        null, null,
+                    harmony.Patch(methodInfo, null, null,
                         new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.Miner_Transpiler))));
+
+                    methodInfo = AccessTools.Method(assembly.GetType("PlanetMiner.PlanetMiner"), "GenerateEnergy");
+                    harmony.Patch(methodInfo, null, null,
+                        new HarmonyMethod(AccessTools.Method(typeof(PlanetMiner), nameof(PlanetMiner.GenerateEnergy_Transpiler))));
 
                     Log.Debug("PlanetMiner compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "PlanetMiner compatibility failed! Last working version: 3.0.8";
+                    string message = "PlanetMiner compatibility failed! Last working version: 3.1.1";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
+                }
+            }
+
+            static IEnumerable<CodeInstruction> GenerateEnergy_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                try
+                {
+                    CodeMatcher matcher = new CodeMatcher(instructions);
+
+                    // Multiply energy gain based on UpdatePeriod
+                    matcher.End().MatchBack(false,
+                        new CodeMatch(OpCodes.Add),
+                        new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(StationComponent), "energy"))
+                    )
+                    .Insert(
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                        new CodeInstruction(OpCodes.Conv_I8),
+                        new CodeInstruction(OpCodes.Mul)
+                    );
+
+                    return matcher.InstructionEnumeration();
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("PlanetMiner GenerateEnergy_Transpiler failed.");
+                    Log.Warn(ex);
+                    return instructions;
                 }
             }
 
@@ -280,6 +310,7 @@ namespace SampleAndHoldSim
                             new CodeInstruction(OpCodes.Ret)
                         );
 
+                    // Fix frame count to use gameTick(UPS) in game instead of Unity update(FPS)
                     matcher.MatchForward(false, 
                             new CodeMatch(i => i.opcode == OpCodes.Ldsfld && ((FieldInfo)i.operand).Name == "frame")
                         )
@@ -291,16 +322,6 @@ namespace SampleAndHoldSim
                             new CodeInstruction(OpCodes.Div)
                         );
                     
-                    matcher.MatchForward(false,
-                            new CodeMatch(OpCodes.Add),
-                            new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(StationComponent), "energy"))
-                        )
-                        .Insert(
-                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
-                            new CodeInstruction(OpCodes.Conv_I8),
-                            new CodeInstruction(OpCodes.Mul)
-                        );
-
                     // storage2[num7].count = storage2[num7].count + (int)num5 * MainManager.UpdatePeriod;
                     matcher.MatchForward(true,
                             new CodeMatch(OpCodes.Ldelema),
@@ -330,12 +351,12 @@ namespace SampleAndHoldSim
                             new CodeInstruction(OpCodes.Mul)
                         );
 
-                    //return instructions;
                     return matcher.InstructionEnumeration();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Log.Warn("Transpiler Miner failed.");
+                    Log.Warn("PlanetMiner Miner_Transpiler failed.");
+                    Log.Warn(ex);
                     return instructions;
                 }
             }
