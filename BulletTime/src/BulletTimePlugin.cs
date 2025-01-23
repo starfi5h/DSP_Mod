@@ -15,9 +15,10 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.2";
-
+        public const string VERSION = "1.5.3";
+        
         public static ConfigEntry<bool> EnableBackgroundAutosave;
+        public static ConfigEntry<bool> EnableHotkeyAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<bool> RemoveGC;
         public static ConfigEntry<float> StartingSpeed;
@@ -32,9 +33,10 @@ namespace BulletTime
         private void LoadConfig()
         {
             KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
-            KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n特殊时停模式的热键");
-            EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键暂停模式下启用机甲功能");
+            KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n战术暂停(世界停止+画面提示)的热键");
+            EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键战术暂停模式下启用机甲功能");
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
+            EnableHotkeyAutosave = Config.Bind("Save", "EnableHotkeyAutosave", false, "Enable hotkey to trigger autosave\n允许用热键触发自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
@@ -109,7 +111,7 @@ namespace BulletTime
             {
                 IngameUI.OnKeyPause();
             }
-            if (KeyAutosave.Value.IsDown() && UIRoot.instance.uiGame.autoSave.showTime == 0)
+            if (EnableHotkeyAutosave.Value && KeyAutosave.Value.IsDown() && UIRoot.instance.uiGame.autoSave.showTime == 0)
             {
                 // Initial auto save when there is no autosave in process
                 UIAutoSave.lastSaveTick = 0L;

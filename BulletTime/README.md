@@ -1,7 +1,7 @@
 # Bullet Time
 
 Decouple the mecha (player actions) from the world simulation.  
-1. Provide speed control buttons at bottom right corner to set game speed from 0x to 4x.  
+1. Provide speed control buttons at bottom right corner to set game speed from 0x to 10x.  
 2. Provide hotkey to pause the game and view the freeze in-game world.  
 3. Let user slow down world speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
 4. Run autosave in the background to make the game stay responsive.  
@@ -55,6 +55,9 @@ When enabled, mecha will be able to move in pause mode and projectiles will fly 
 
 - `EnableBackgroundAutosave`  
 Run autosave in the background. This can also be toggled in the performance test panel. (Default:`false`)  
+
+- `EnableHotkeyAutosave`
+Enable hotkey to trigger autosave. (Default:`false`)  
 
 - `StartingSpeed`  
 Game speed when the game begins. range:0-100  (Default:`100`)  
@@ -128,13 +131,16 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 自动存档的热键组合 (默认为`F10 + LeftShift`)  
 
 - `KeyPause`  
-暂停模式(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
+战术暂停(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
   
 - `EnableMechaFunc`  
 启用后，机甲能够在暂停模式中活动。弹射物将以正常速度飞行。 (默认为关闭`false`)    
 
 - `EnableBackgroundAutosave`  
 在背景执行自动保存。可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
+
+- `EnableHotkeyAutosave`
+允许用热键触发自动存档 (默认为`false`)  
 
 - `StartingSpeed`   
 开始时的游戏速度，范围: 0-100 (默认为`100`)  

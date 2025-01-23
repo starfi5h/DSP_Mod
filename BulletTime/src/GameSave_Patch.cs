@@ -169,7 +169,7 @@ namespace BulletTime
                 return GameSave.AutoSave();
 
             // Let's capture screenshot on main thread first
-            GameCamera.CaptureSaveScreenShot();
+            GameCamera.CaptureSaveScreenshot();
 
             // Set pause state here so the game will go to pause in the next fixupdate()
             bool tmp = GameStateManager.Pause;
@@ -212,7 +212,7 @@ namespace BulletTime
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.CaptureSaveScreenShot))]
+        [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.CaptureSaveScreenshot))]
         private static bool CaptureSaveScreenShot_Prefix()
         {
             if (!GameStateManager.Interactable)

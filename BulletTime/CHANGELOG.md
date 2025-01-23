@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.3 (DSP-0.10.32.25496)
+\- Adapt to game version 0.10.32.25496  
+\- Add config `Save`:`EnableHotkeyAutosave`, default value is false  
+
 #### v1.5.2
 \- Add config `UI`:`MaxSpeedupScale`  
 
