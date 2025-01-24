@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.10 (DSP-0.10.32.25496)
+\- Fix error when laying foundations in blueprint mode.  
+
 #### v1.5.9 (DSP-0.10.31.24646)
 \- Adapt to game version 0.10.31.24646  
 

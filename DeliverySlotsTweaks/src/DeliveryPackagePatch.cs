@@ -396,13 +396,45 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
+		//[HarmonyTranspiler] // For backward compatiblity, use function call in Plugin to call instead
+		//[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CalculateReformData))]
+		public static IEnumerable<CodeInstruction> CalculateReformData_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			try
+			{
+				// Change: Array.Copy(base.player.package.grids, this.tmpPackage.grids, this.tmpPackage.size);
+				// To:     Array.Copy(base.player.package.grids, this.tmpPackage.grids, base.player.package.size);
+				// Because tmpPackage size is changed to the size larger than player package by this mod
+
+				var codeMacher = new CodeMatcher(instructions)
+					.MatchForward(false,
+						new CodeMatch(OpCodes.Ldarg_0),
+						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "tmpPackage"),
+						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "size"),
+						new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Copy"))
+					.Advance(1)
+					.RemoveInstruction()
+					.Insert(
+						new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(BuildTool), nameof(BuildTool.player))),
+						new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Player), nameof(Player.package)))
+					);
+
+				return codeMacher.InstructionEnumeration();
+			}
+			catch (Exception e)
+			{
+				Plugin.Log.LogWarning("Transpiler BuildTool_BlueprintPaste.CalculateReformData error");
+				Plugin.Log.LogWarning(e);
+				return instructions;
+			}
+		}
 
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(PlayerAction_Build), nameof(PlayerAction_Build.GameTick))]
 		public static IEnumerable<CodeInstruction> PlayerAction_Build_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try
-			{				
+			{
 				var codeMacher = new CodeMatcher(instructions)
 					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand).Name == "_GameTick"))
 					.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(DeliveryPackagePatch), nameof(BuildTool_GameTick)));

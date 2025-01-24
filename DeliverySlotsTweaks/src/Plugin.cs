@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.9";
+        public const string VERSION = "1.5.10";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -86,6 +86,13 @@ namespace DeliverySlotsTweaks
                         new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
                     harmony.Patch(AccessTools.Method(typeof(Mecha), nameof(Mecha.AutoReplenishFuelAll)), null, null,
                         new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                }
+                // BuildTool_BlueprintPaste.CalculateReformData is added in game version 0.10.32.25496
+                var targetMethod = AccessTools.Method(typeof(BuildTool_BlueprintPaste), "CalculateReformData");
+                if (targetMethod != null)
+                {
+                    harmony.Patch(targetMethod, null, null,
+                        new HarmonyMethod(AccessTools.Method(typeof(DeliveryPackagePatch), nameof(DeliveryPackagePatch.CalculateReformData_Transpiler))));
                 }
             }
 
