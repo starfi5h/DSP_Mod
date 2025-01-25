@@ -206,9 +206,22 @@ namespace BulletTime
                     }
                     UIRoot.instance.uiGame.autoSave.saveText.text = result ? "保存成功".Translate() : "保存失败".Translate();
                     UIRoot.instance.uiGame.autoSave.contentTweener.Play1To0();
+                    GlobalObject.SaveOpCounter(); // PlayerPrefs.SetInt can only run in main thread 
                 };
             });
             return false;
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(GameSave), nameof(GameSave.AutoSave))]
+        public static IEnumerable<CodeInstruction> AutoSave_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            // Remove GlobalObject.SaveOpCounter() because it can't run on worker thread
+            var codeMacher = new CodeMatcher(instructions).End()
+                .MatchBack(false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(GlobalObject), nameof(GlobalObject.SaveOpCounter))))
+                .SetAndAdvance(OpCodes.Nop, null);
+
+            return codeMacher.InstructionEnumeration();
         }
 
         [HarmonyPrefix]

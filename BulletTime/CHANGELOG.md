@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.4
+\- Fix background autosave error about PlayerPrefs.SetInt
+
 #### v1.5.3 (DSP-0.10.32.25496)
 \- Adapt to game version 0.10.32.25496  
 \- Add config `Save`:`EnableHotkeyAutosave`, default value is false  
