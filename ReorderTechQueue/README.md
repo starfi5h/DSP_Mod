@@ -9,6 +9,9 @@ If selecting tech moves to position in front of its prerequisites, the tech will
 ![navi-button](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/ReorderTechQueue/img/demo2.png)  
 Add a button to navigate to implicit required tech.  
 
+![preview-cost](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/ReorderTechQueue/img/demo3.png)  
+Add icons below tech cards to show the required matrices.
+
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manually download the file and put `ReorderTechQueue.dll` in `BepInEx/plugins` folder.
 
@@ -19,9 +22,15 @@ Run the game one time to generate `com.starfi5h.plugin.ReorderTechQueue.cfg` fil
 - `TechQueueLength`  
 Length of research queue. (Default:`8`)  
 
+- `EnableCostPreview`  
+Add icons below tech cards to show the required matrices. (Default:`true`)  
+
 ----
 
 ## Changelog
+
+#### v1.2.1
+\- Add config `EnableCostPreview`  
 
 #### v1.2.0
 \- Add navigate button to ImplicitPreTechRequired.  

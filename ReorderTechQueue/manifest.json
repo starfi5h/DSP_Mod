@@ -1,7 +1,7 @@
 {
     "name": "ReorderTechQueue",
-    "description": "Rearrange research queue by dragging the icon. Configure research queue length. 拖动图标可调整科技队列的顺序，自订研究佇列的长度。",
-    "version_number": "1.2.0",
+    "description": "Rearrange research queue by dragging the icon. Configure research queue length. Add cost preview to tech cards. 拖动图标可调整科技队列的顺序，自订研究佇列的长度。在科技树新增矩阵小图",
+    "version_number": "1.2.1",
     "website_url": "https://github.com/starfi5h/DSP_Mod",
 		"dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

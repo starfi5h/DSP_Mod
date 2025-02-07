@@ -8,20 +8,27 @@ using UnityEngine.UI;
 
 namespace ReorderTechQueue
 {
-    [BepInPlugin("com.starfi5h.plugin.ReorderTechQueue", "ReorderTechQueue", "1.2.0")]
+    [BepInPlugin(GUID, NAME, VERSON)]
     public class ReorderTechQueuePlugin : BaseUnityPlugin
     {
+        public const string GUID = "com.starfi5h.plugin.ReorderTechQueue";
+        public const string NAME = "ReorderTechQueue";
+        public const string VERSON = "1.2.1";
+
         Harmony harmony;
         public static ConfigEntry<int> TechQueueLength;
+        public static ConfigEntry<bool> EnableCostPreview;
 
         public void Awake()
         {
             harmony = new Harmony("com.starfi5h.plugin.ReorderTechQueue");
             harmony.PatchAll(typeof(ReorderTechQueue));
-            TechQueueLength = Config.Bind<int>("General", "TechQueueLength", 8, "Length of reserach queue.\n研究佇列的长度");
+            TechQueueLength = Config.Bind("General", "TechQueueLength", 8, "Length of reserach queue.\n研究佇列的长度");
+            EnableCostPreview = Config.Bind("General", "EnableCostPreview", true, "Add icons below tech cards to show the required matrices.\n在科技树的研究节点下方新增消耗矩阵种类的预览小图");
             harmony.PatchAll(typeof(UITechNodePatch));
 #if DEBUG
             ReorderTechQueue.Init();
+            UITechNodePatch.Init();
 #endif
         }
 
@@ -99,10 +106,17 @@ namespace ReorderTechQueue
         static UITechNode currentSelectNode;
         static UIButton locateBtn;
 
+        [HarmonyPostfix, HarmonyPatch(typeof(UITechTree), nameof(UITechTree._OnInit))]
+        internal static void Init()
+        {
+            if (ReorderTechQueuePlugin.EnableCostPreview.Value) AddCostPreviews();
+        }
+
 #if DEBUG
         internal static void Free()
         {
             GameObject.Destroy(locateBtn?.gameObject);
+            RemoveCostPreviews();
         }
 #endif
 
@@ -168,6 +182,39 @@ namespace ReorderTechQueue
 
             var preTechId = GameMain.history.ImplicitPreTechRequired(currentSelectNode.techProto?.ID ?? 0);
             if (preTechId != 0) UIRoot.instance.uiGame.techTree.SelectTech(preTechId);
+        }
+
+        static void AddCostPreviews()
+        {
+            foreach (var node in UIRoot.instance.uiGame.techTree.nodes.Values)
+            {
+                var iconGo = node.gameObject.transform.Find("icon")?.gameObject;
+                if (iconGo == null) continue;
+
+                var length = Math.Min(node.techProto.itemArray.Length, 6);
+                var xoffset = 0;
+                for (int i = length - 1; i >= 0; i--)
+                {
+                    if (node.techProto.itemArray[i] == null) continue;
+
+                    var go = UnityEngine.Object.Instantiate(iconGo, node.gameObject.transform);
+                    go.name = "CostPreviewIcon-" + i;
+                    go.transform.localPosition = new Vector3(190 - (xoffset++) * 15, -122, 0);
+                    go.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    go.transform.GetComponent<Image>().sprite = node.techProto.itemArray[i].iconSprite;
+                }
+            }
+        }
+
+        static void RemoveCostPreviews()
+        {
+            foreach (var node in UIRoot.instance.uiGame.techTree.nodes.Values)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    UnityEngine.Object.Destroy(node.gameObject.transform.Find("CostPreviewIcon-" + i)?.gameObject);
+                }
+            }
         }
     }
 
