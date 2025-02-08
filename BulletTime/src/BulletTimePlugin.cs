@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using BulletTime.Nebula;
 using HarmonyLib;
 using System;
 using System.Diagnostics;

@@ -341,10 +341,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Nebula\ProgressUpdatePacket.cs" />
+    <Compile Include="src\Nebula\PauseNotificationPacket.cs" />
+    <Compile Include="src\Nebula\NebulaPatch.cs" />
     <Compile Include="src\SkillSystem_Patch.cs" />
     <Compile Include="src\BuildTool_Patch.cs" />
     <Compile Include="src\GameLoader_Patch.cs" />
-    <Compile Include="src\NebulaCompat.cs" />
+    <Compile Include="src\Nebula\NebulaCompat.cs" />
     <Compile Include="src\IngameUI.cs" />
     <Compile Include="src\GameSave_Patch.cs" />
     <Compile Include="src\GameMain_Patch.cs" />
