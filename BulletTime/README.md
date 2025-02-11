@@ -12,7 +12,7 @@ Decouple the mecha (player actions) from the world simulation.
 ### Speed control buttons
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
 - Pause: Toggle tactical pause mode.
-- Resume: Reset game speed back to 1x.
+- Resume: Unpause the game, or reset game speed back to 1x.
 - Speed Up: Increase game speed (max 10x).  
 The speed adjustment is done by setting the target UPS goal. Hardware still limits the real game speed.  
 You can shift + f12 to view the real FPS/UPS at the top-left. The default 1x speed UPS is 60 tick/s.  
@@ -82,7 +82,7 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 - When host is saving or manually entering pause mode, the client will enter pause mode too.  
 - If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
 - Players can stop/resume dyson sphere rotation in the editor at top-left button.  
-- Both host and client can stop the game using hotkey pause. Speed up is only available to host.   
+- Both host and client can stop the game using hotkey pause. Speedup button is only sync when SyncUPS multiplayer option is enabled.  
 
 
 ----
@@ -96,7 +96,7 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 ### 游戏速度倍率调整
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
 - 暂停：切换战术暂停模式。
-- 恢复：将游戏速度重置为 1 倍。
+- 恢复：取消暂停, 或将游戏速度重置为 1 倍。
 - 加速：提高游戏速度（最高 10 倍）。  
 速度调整是通过设置目标 UPS 来完成的。实际上的游戏速度由硬体性能决定。  
 您可以按 Shift + f12 在左上角查看实际 FPS/UPS。默认1倍速 UPS 为 60 tick/s。  
@@ -159,7 +159,7 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 - 当玩家加入、请求工厂数据、存檔時，进入时停模式。在载入完成后恢复。  
 - 如果游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
 - 玩家可以在编辑器左上角的按钮中停止/恢复戴森球旋转。  
-- 加速只有主机可以使用。暂停/恢复的功能主机和客机都可以使用。  
+- 暂停/恢复/加速的功能主机和客机都可以使用。加速功能只有在SyncUPS联机选项开启时才会同步。    
 
 ----
 

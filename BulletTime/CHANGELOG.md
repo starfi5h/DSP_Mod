@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.5
+\- (Nebula) Client is now able to change game speed.  
+\- (Nebula) Add system notification for pause and speed change events.  
+
 #### v1.5.4
 \- Fix background autosave error about PlayerPrefs.SetInt
 
