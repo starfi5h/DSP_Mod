@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using NebulaAPI;
+using NebulaModel;
+using NebulaModel.DataStructures.Chat;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -13,6 +15,8 @@ namespace BulletTime.Nebula
         public static bool NebulaIsInstalled { get; private set; }
         public static bool IsMultiplayerActive { get; private set; }
         public static bool IsClient { get; private set; }
+        public static bool SyncUps { get; private set; }
+        public static bool IsIncomingPacket { get; set; }
 
         // Pause states
         public static bool IsPlayerJoining { get; set; }
@@ -63,6 +67,7 @@ namespace BulletTime.Nebula
         {
             IsMultiplayerActive = NebulaModAPI.IsMultiplayerActive;
             IsClient = IsMultiplayerActive && NebulaModAPI.MultiplayerSession.LocalPlayer.IsClient;
+            SyncUps = Config.Options.SyncUps;
             IsPlayerJoining = false;
             LoadingPlayers.Clear();
             DysonSpherePaused = false;
@@ -135,10 +140,36 @@ namespace BulletTime.Nebula
             }
         }
 
+        public static void SendPlayerActionPacket(EPlayerSpeedAction action)
+        {
+            if (IsIncomingPacket) return;
+            string username = NebulaModAPI.MultiplayerSession.LocalPlayer.Data.Username;
+            var packet = new PlayerSpeedActionPacket(action, username);
+            if (!IsClient)
+            {
+                if (action == EPlayerSpeedAction.SpeedSet)
+                {
+                    double fixUPS = FPSController.instance.fixUPS;
+                    packet.Value = (float)(fixUPS == 0.0 ? 1.0 : fixUPS / 60.0);
+                }
+                PlayerActionPacketProcessor.ShowPacket(packet);
+            }
+            NebulaModAPI.MultiplayerSession.Network.SendPacket(packet);
+        }
+
         public static void SetPacketProcessing(bool enable)
         {
             Log.Info("SetPacketProcessing: " + enable);
             NebulaModAPI.MultiplayerSession.Network.PacketProcessor.EnablePacketProcessing = enable;
+        }
+
+        public static void ShowMessageInChat(string message)
+        {
+            if (Config.Options.EnableTimestamp)
+            {
+                message = $"[{DateTime.Now:HH:mm}] " + message;
+            }
+            NebulaWorld.MonoBehaviours.Local.Chat.ChatManager.Instance?.SendChatMessage(message, ChatMessageType.SystemInfoMessage);
         }
     }
 }

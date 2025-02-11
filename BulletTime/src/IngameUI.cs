@@ -162,8 +162,8 @@ namespace BulletTime
                     ratioGo.SetActive(true);
                     speedRatioText = ratioGo.GetComponent<Text>();                    
                 }
-                // Only host can have speedUp button enable
-                speedBtnGo[2].SetActive(!NebulaCompat.IsClient);
+                // Test: Let client has speedUp button enable
+                // speedBtnGo[2].SetActive(!NebulaCompat.IsClient);
                 SetSpeedRatioText();
             }
             catch (System.Exception e)
@@ -180,9 +180,17 @@ namespace BulletTime
                     OnKeyPause();
                     break;
 
-                case 1: // Resume
-                    FPSController.SetFixUPS(0);
+                case 1: // Resume                    
                     if (GameStateManager.Pause) OnKeyPause();
+                    else // 如果不在暫停狀態, 則回復至普通速度
+                    {
+                        FPSController.SetFixUPS(0);
+                        if (NebulaCompat.IsMultiplayerActive && NebulaCompat.SyncUps)
+                        {
+                            if (NebulaCompat.IsClient) NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedReset);
+                            else NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedSet);
+                        }
+                    }
                     break;
 
                 case 2: // SpeedUp
@@ -194,10 +202,20 @@ namespace BulletTime
                     else if (FPSController.instance.fixUPS == 0.0)
                     {
                         FPSController.SetFixUPS(120.0);
+                        if (NebulaCompat.IsMultiplayerActive && NebulaCompat.SyncUps)
+                        {
+                            if (NebulaCompat.IsClient) NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedUp);
+                            else NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedSet);
+                        }
                     }
                     else if (FPSController.instance.fixUPS < 60.0 * BulletTimePlugin.MaxSpeedupScale.Value)
                     {
                         FPSController.SetFixUPS(FPSController.instance.fixUPS + 60.0);
+                        if (NebulaCompat.IsMultiplayerActive && NebulaCompat.SyncUps)
+                        {
+                            if (NebulaCompat.IsClient) NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedUp);
+                            else NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedSet);
+                        }
                     }
                     break;
             }
@@ -213,9 +231,15 @@ namespace BulletTime
             }
             FPSController.SetFixUPS(60.0 * BulletTimePlugin.MaxSpeedupScale.Value);
             SetSpeedRatioText();
+
+            if (NebulaCompat.IsMultiplayerActive && NebulaCompat.SyncUps)
+            {
+                if (NebulaCompat.IsClient) NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedMax);
+                else NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedSet);
+            }
         }
 
-        private static void SetSpeedRatioText()
+        public static void SetSpeedRatioText()
         {
             if (speedRatioText == null) return;
             if (NebulaCompat.IsClient) // 客戶端的UPS是跟隨主機隨時在變動的, 因此不顯示
@@ -296,9 +320,16 @@ namespace BulletTime
             {
                 if (!GameStateManager.Interactable) return; //鎖定狀態時無法送出請求
 
-                if (!GameStateManager.Pause) NebulaCompat.SendPacket(PauseEvent.Pause);
-                else NebulaCompat.SendPacket(PauseEvent.Resume);
-
+                if (!GameStateManager.Pause)
+                {
+                    NebulaCompat.SendPacket(PauseEvent.Pause);
+                    NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Pause);
+                }
+                else
+                {
+                    NebulaCompat.SendPacket(PauseEvent.Resume);
+                    NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Resume);
+                }
                 return;
             }
 
@@ -309,11 +340,15 @@ namespace BulletTime
                     GameStateManager.ManualPause = true; //進入手動時停狀態
                     GameStateManager.SetPauseMode(true);
                     SetHotkeyPauseMode(true); //啟動熱鍵時停
+                    if (NebulaCompat.IsMultiplayerActive) // 主機廣播暫停訊息
+                        NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Pause);
                 }
             }
             else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
             {
-                OnSliderChange(slider.value);
+                OnSliderChange(slider.value);                
+                if (NebulaCompat.IsMultiplayerActive) // 主機廣播恢復訊息
+                    NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Resume);
             }
         }
 

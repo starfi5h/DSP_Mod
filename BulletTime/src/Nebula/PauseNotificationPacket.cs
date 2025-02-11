@@ -36,6 +36,7 @@ namespace BulletTime.Nebula
     {
         public override void ProcessPacket(PauseNotificationPacket packet, INebulaConnection conn)
         {
+            NebulaCompat.IsIncomingPacket = true;
             NebulaPatch.SetProgessMode(false);
             Log.Dev(packet.Event);
             switch (packet.Event)
@@ -123,6 +124,7 @@ namespace BulletTime.Nebula
                     }
                     break;
             }
+            NebulaCompat.IsIncomingPacket = false;
         }
     }
 }
