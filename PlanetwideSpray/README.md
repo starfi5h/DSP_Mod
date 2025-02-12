@@ -22,7 +22,7 @@ With this mod, the direct insertion builds can get proliferation too.
 1. 用爪子输入原料的熔炉, 制造台, 精炼厂, 化工厂
 2. 用爪子输入原料的研究站
 3. 分馏塔: 经过分馏塔的原料将被喷涂
-3. 炮塔: 输入炮塔的子弹将会被喷涂
+3. 炮塔: 输入炮塔的弹药将会被喷涂
 
 ## Cheat Mode 作弊模式
 
@@ -69,12 +69,25 @@ Spray All Cargo = false
 ## 喷涂流入物流塔/塔厂(创世之书mod)的货物
 # Setting type: Boolean
 # Default value: false
-Spray Station Input = true
+Spray Station Input = false
+
+## Spray every item flow into fractionator
+## 喷涂经过分馏塔的原料
+# Setting type: Boolean
+# Default value: true
+Spray Fractionator = true
+
+## Spray every item flow into turret
+## 喷涂输入防御塔的弹药
+# Setting type: Boolean
+# Default value: true
+Spray Turret = true
 
 ```
 
 ## Changelog
 
+- v1.1.4 - Add config `Spray Fractionator`, `Spray Turret`. (DSP-0.10.32.25595)  
 - v1.1.3 - Add config `Spray Station Input`. (DSP-0.10.31.24646)  
 - v1.1.2 - Fix NRE in SpraycoaterGameTick_Prefix.  
 - v1.1.1 - Spray more transportations in cheat mode. (DSP-0.10.30.22292)  

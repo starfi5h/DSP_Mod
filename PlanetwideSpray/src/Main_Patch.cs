@@ -11,7 +11,7 @@ namespace PlanetwideSpray
     {
         public static bool LimitSpray = true;
         private static Status[] statusArr = null;
-        private static Dictionary<CargoContainer, int> containerToIndex = new();
+        private static readonly Dictionary<CargoContainer, int> containerToIndex = new();
         const int MAX_INC_COUNT = 11;
 
 
@@ -82,9 +82,9 @@ namespace PlanetwideSpray
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
-        static void FractionatorSetInc(PlanetFactory factory, ref FractionatorComponent __instance)
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
+        public static void FractionatorSetInc(PlanetFactory factory, ref FractionatorComponent __instance)
         {
             var status = statusArr[factory.index];
             var incToAdd = (__instance.fluidInputCount * status.incLevel) - __instance.fluidInputInc;
@@ -95,9 +95,9 @@ namespace PlanetwideSpray
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(TurretComponent), nameof(TurretComponent.InternalUpdate))]
-        static void TurretSetInc(PlanetFactory factory, ref TurretComponent __instance)
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(TurretComponent), nameof(TurretComponent.InternalUpdate))]
+        public static void TurretSetInc(PlanetFactory factory, ref TurretComponent __instance)
         {
             // TurretComponent.BeltUpdate沒有factory可以定位, 因此用外層的InternalUpdate
             var status = statusArr[factory.index];

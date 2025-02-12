@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.3";
+        public const string VERSION = "1.1.4";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -34,6 +34,12 @@ namespace PlanetwideSpray
             var EnableSprayStation = Config.Bind("General", "Spray Station Input", false,
                 "Spray every item flow into station or mega assemblers(GenesisBook mod)\n喷涂流入物流塔/塔厂(创世之书mod)的货物");
 
+            var EnableSprayFractionator = Config.Bind("General", "Spray Fractionator", true,
+                "Spray every item flow into fractionator\n喷涂经过分馏塔的原料");
+
+            var EnableSprayTurret = Config.Bind("General", "Spray Turret", true,
+                "Spray every item flow into turret\n喷涂输入防御塔的弹药");
+
             if (ForceProliferatorLevel.Value > 0)
             {
                 ForceProliferatorLevel.Value = Math.Min(ForceProliferatorLevel.Value, 10);
@@ -43,12 +49,22 @@ namespace PlanetwideSpray
             }
             else
             {
-                Logger.LogInfo($"Normal mode: spray all [{EnableSprayAll.Value}], station input [{EnableSprayStation.Value}]");
+                Logger.LogInfo($"Normal mode: spray all [{EnableSprayAll.Value}], station input [{EnableSprayStation.Value}], fractionator [{EnableSprayFractionator.Value}], turret [{EnableSprayTurret.Value}]");
                 harmony.PatchAll(typeof(Main_Patch));
                 Main_Patch.LimitSpray = !EnableSprayAll.Value;
                 if (EnableSprayStation.Value)
                 {
                     harmony.PatchAll(typeof(Main_Patch.Station_Patch));
+                }
+                if (EnableSprayFractionator.Value)
+                {
+                    harmony.Patch(AccessTools.Method(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate)),
+                        null, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.FractionatorSetInc))));
+                }
+                if (EnableSprayTurret.Value)
+                {
+                    harmony.Patch(AccessTools.Method(typeof(TurretComponent), nameof(TurretComponent.InternalUpdate)),
+                        null, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.TurretSetInc))));
                 }
 #if DEBUG
                 Main_Patch.SetArray();
