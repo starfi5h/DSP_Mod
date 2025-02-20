@@ -32,7 +32,8 @@ Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaF
 Reduce game speed to lower the calculation workload and improve FPS in the late game.  
 This adjustment affects everything except the mecha, which will continue at normal speed.  
 The control slider is available in the in-game performance statistics panel.  
-When speed is set to 0, the game will enter pause mode, and game ticks and factories will stop.
+When speed is set to 0, the game will enter pause mode, and game ticks and factories will stop.  
+Unlike tactical pause mode, mecha can move freely in this pause mode (similar to Sandevistan in 2077)  
   
 ### Background autosave  
 Run autosave on a background thread to prevent game freezes.  
@@ -56,19 +57,19 @@ When enabled, mecha will be able to move in pause mode and projectiles will fly 
 - `EnableBackgroundAutosave`  
 Run autosave in the background. This can also be toggled in the performance test panel. (Default:`false`)  
 
-- `EnableHotkeyAutosave`
+- `EnableHotkeyAutosave`  
 Enable hotkey to trigger autosave. (Default:`false`)  
 
 - `StartingSpeed`  
 Game speed when the game begins. range:0-100  (Default:`100`)  
 
 - `EnableFastLoading`  
-Increase main menu loading speed. (Default:`true`)  
+Increase main menu loading speed by skipping planet loading. (Default:`true`)  
 
 - `RemoveGC`  
 Remove force garbage collection of build tools. (Default:`true`)  
 
-- `MaxSpeedupScale`
+- `MaxSpeedupScale`  
 Maximum game speed multiplier for speedup button. (Default:`10`)  
 
 ## Compatibility
@@ -112,10 +113,11 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 
 在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。
 
-### 调整世界速度
+### 调整世界速度(时缓)
 
 在性能测试面板可以调整世界速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
 速度为0或启用热键时进入时停模式，gameTick会在离开时停模式后恢复。  
+不同于战术暂停模式，机甲是可以在这个时停模式下移动的(Za Warudo!)  
 
 ### 後台自动保存
 
@@ -139,19 +141,19 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 - `EnableBackgroundAutosave`  
 在背景执行自动保存。可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
 
-- `EnableHotkeyAutosave`
+- `EnableHotkeyAutosave`  
 允许用热键触发自动存档 (默认为`false`)  
 
 - `StartingSpeed`   
 开始时的游戏速度，范围: 0-100 (默认为`100`)  
 
 - `EnableFastLoading`  
-加快载入主选单 (默认为开启`true`)  
+跳过封面的星球模型加载，加快载入主选单 (默认为开启`true`)  
 
 - `RemoveGC`  
 移除建筑工具的强制内存回收 (默认为开启`true`)  
 
-- `MaxSpeedupScale`
+- `MaxSpeedupScale`  
 加速按钮的最大游戏速度倍率 (默认为`10`)  
 
 ## 联机功能  

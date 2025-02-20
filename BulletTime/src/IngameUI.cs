@@ -354,6 +354,7 @@ namespace BulletTime
 
         private static void OnAutosaveToggleChange(bool val)
         {
+            BulletTimePlugin.EnableBackgroundAutosave.Value = val;
             GameSave_Patch.Enable(val);
             backgroundSaveToggle.isOn = val;
         }

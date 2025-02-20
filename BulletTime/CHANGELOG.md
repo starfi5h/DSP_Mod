@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.6
+\- Autosave UI toggle now store `EnableBackgroundAutosave` change in the config file.  
+
 #### v1.5.5
 \- (Nebula) Client is now able to change game speed.  
 \- (Nebula) Add system notification for pause and speed change events.  
