@@ -237,6 +237,18 @@ namespace BulletTime
             return true;
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameScenarioLogic), nameof(GameScenarioLogic.NotifyBeforeGameSave))]
+        private static bool NotifyBeforeGameSave_Prefix()
+        {
+            if (!GameStateManager.Interactable)
+            {
+                // We can't call Unity API on worker thread, skip
+                return false;
+            }
+            return true;
+        }
+
         static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
 
         [HarmonyPrefix]

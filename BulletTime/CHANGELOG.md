@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.7
+\- Fix crash when background autosaving.  
+
 #### v1.5.6
 \- Autosave UI toggle now store `EnableBackgroundAutosave` change in the config file.  
 
