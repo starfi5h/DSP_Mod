@@ -138,6 +138,15 @@ namespace SampleAndHoldSim
             }
         }
 
+        [HarmonyPrefix, HarmonyPriority(Priority.High)]
+        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTick), new Type[] { typeof(long), typeof(bool) })]
+        [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTick), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
+        static void FactorySystemGameTick_Prefix(FactorySystem __instance, ref long time)
+        {
+            // Fix ejector auto reorbit
+            time = GetGameTick(__instance);
+        }
+
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabOutputToNext), new Type[] { typeof(long), typeof(bool) })]
         [HarmonyPatch(typeof(FactorySystem), nameof(FactorySystem.GameTickLabOutputToNext), new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]

@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.15
+\- Fix ejectors don't auto retarget orbit on remote plaents.  
+
 #### v0.6.14
 \- Update PlanetMiner compat to v3.1.1  
 
