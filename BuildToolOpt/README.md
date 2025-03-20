@@ -2,6 +2,7 @@
 
 ![Hologram](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BuildToolOpt/img/demo1.jpg)  
 Provides optimization and extra QoL features to build tool and blueprint UI.
+对建筑工具和蓝图 UI 提供优化和额外的便利功能。  
 
 ![ReplaceStation](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BuildToolOpt/img/demo1.gif)  
 替换升级物流塔相当于作了以下的步骤:
@@ -17,7 +18,7 @@ Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.c
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。    
 
 ```
-## Settings file was created by plugin BuildToolOpt v1.0.7
+## Settings file was created by plugin BuildToolOpt v1.0.8
 ## Plugin GUID: starfi5h.plugin.BuildToolOpt
 
 [BuildTool]
@@ -46,6 +47,12 @@ ReplaceStation = true
 # Default value: false
 EnableHologram = false
 
+## Optimize RefreshTraffic to reduce lag when placing stations (experimental)
+## 优化RefreshTraffic以减少放置物流塔的卡顿 (实验性)
+# Setting type: Boolean
+# Default value: false
+EnableStationBuildOptimize = false
+
 [UI]
 
 ## Optimize blueprint UI to reduce lag time
@@ -64,7 +71,7 @@ ClipboardPaste = true
 ## Compatibility  
 
 [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)  
-ReplaceStation and EnableHologram will be disabled.  
+ReplaceStation, EnableHologram and EnableStationBuildOptimize will be disabled.  
 当与联机mod共用时, 替换物流塔和建筑虚影功能将暂停使用  
   
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.3.26)  

@@ -1,3 +1,6 @@
+### v1.0.8
+\- Add config option `EnableStationBuildOptimize` (Default: false)  
+
 ### v1.0.7
 \- Add config option `GC when pause`.  
 \- Update Cheat Enabler compat to v2.3.26  

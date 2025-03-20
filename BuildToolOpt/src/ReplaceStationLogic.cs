@@ -28,12 +28,14 @@ namespace BuildToolOpt
 						stationId = entityData.stationId;
 						buildPreview.lpos = entityData.pos;
 						buildPreview.lrot = entityData.rot;
+
+						// Warn user about station getting too close, but still allow them to build
 						buildPreview.condition = EBuildCondition.Ok;
-						if (!VFInput.onGUI)
-							UICursor.SetCursor(ECursor.Default);
+						if (!VFInput.onGUI) UICursor.SetCursor(ECursor.Default);
 						__result = true;
-						__instance.actionBuild.model.cursorState = 0;
-						__instance.actionBuild.model.cursorText = BuildPreview.GetConditionText(GetCondition(__instance, buildPreview));
+						var realCondition = GetRealStationCondition(__instance, buildPreview);
+						__instance.actionBuild.model.cursorState = realCondition == EBuildCondition.Ok ? 0 : -1;
+						__instance.actionBuild.model.cursorText = BuildPreview.GetConditionText(realCondition);
 						return;
 					}
 				}
@@ -70,7 +72,7 @@ namespace BuildToolOpt
 			return 0;
 		}
 
-		private static EBuildCondition GetCondition(BuildTool_Click tool, BuildPreview buildPreview)
+		private static EBuildCondition GetRealStationCondition(BuildTool_Click tool, BuildPreview buildPreview)
         {
 			var stationPool = tool.factory.transport.stationPool;
 			var stationCursor = tool.factory.transport.stationCursor;

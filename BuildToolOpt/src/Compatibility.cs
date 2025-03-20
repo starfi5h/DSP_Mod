@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Reflection;
 
@@ -23,6 +22,7 @@ namespace BuildToolOpt
 
                 Plugin.EnableReplaceStation = false;
                 Plugin.EnableHologram = false;
+                Plugin.EnableStationBuildOptimize = false;
                 Plugin.Log.LogDebug("Nebula: Disable replace station and hologram function");
             }
         }
