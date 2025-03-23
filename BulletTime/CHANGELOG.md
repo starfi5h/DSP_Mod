@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.8
+\- Add config `Hotkey`:`KeyStepOneFrame`, default value is none  
+\- The bottom right time text now shows the current gameTick in pause mode.  
+
 #### v1.5.7
 \- Fix crash when background autosaving.  
 

@@ -26,6 +26,7 @@ When pressing `KeyPause` key, the game will enter tactical pause mode (true paus
 - Place down blueprints.  
 
 Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaFunc` to true.  
+The hotkey `KeyStepOneFrame` can step forward 1 frame. It is recommended to use the step function when the mecha has stopped moving.  
 
 ### World speed adjustment  
 ![World speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
@@ -50,6 +51,9 @@ Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)
 
 - `KeyPause`  
 Hotkey for toggling pause mode. (Default:`Pause｜Break`)  
+
+- `KeyStepOneFrame`  
+Hotkey to forward 1 frame in pause mode. (Default:`None`)  
 
 - `EnableMechaFunc`  
 When enabled, mecha will be able to move in pause mode and projectiles will fly at normal speed. (Default:`fasle`)    
@@ -111,7 +115,8 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 - 更改建筑物设置。
 - 放置蓝图。
 
-在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。
+在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。  
+可以设置热键`KeyStepOneFrame`前进1逻辑帧。建议在机甲停止移动时再使用步进功能。  
 
 ### 调整世界速度(时缓)
 
@@ -135,6 +140,9 @@ Maximum game speed multiplier for speedup button. (Default:`10`)
 - `KeyPause`  
 战术暂停(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
   
+- `KeyStepOneFrame`  
+暂停模式下前进1帧的热键 (默认为`None`)  
+
 - `EnableMechaFunc`  
 启用后，机甲能够在暂停模式中活动。弹射物将以正常速度飞行。 (默认为关闭`false`)    
 
