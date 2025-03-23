@@ -15,6 +15,7 @@ namespace BulletTime
         // 右下角的時間速度控制
         private static GameObject timeTextGo;
         private static GameObject infoTextGo;
+        private static Text infoText; // Show the current (stored) gameTick
         private static Text speedRatioText;
         private static readonly GameObject[] speedBtnGo = new GameObject[3];
 
@@ -46,6 +47,7 @@ namespace BulletTime
             }
             GameObject.Destroy(infoTextGo);
             infoTextGo = null;
+            infoText = null;
             GameObject.Destroy(speedRatioText?.gameObject);
             speedRatioText = null;
         }
@@ -150,8 +152,9 @@ namespace BulletTime
                     // Create info text
                     infoTextGo = GameObject.Instantiate(timeTextGo, timeTextGo.transform.parent);
                     infoTextGo.name = "pause info-text";
-                    infoTextGo.GetComponent<Text>().text = "Pause".Translate();
-                    infoTextGo.GetComponent<Text>().enabled = true;
+                    infoText = infoTextGo.GetComponent<Text>();
+                    infoText.text = "Pause".Translate();
+                    infoText.enabled = true;
                     infoTextGo.SetActive(false);
 
                     // Create speed ratio text
@@ -257,12 +260,22 @@ namespace BulletTime
                 speedRatioText.text = $"{ratio:0.0} x"; //顯示到小數點1位
         }
 
+        public static void OnStoredGameTickChange()
+        {
+            if (infoTextGo != null)
+            {
+                infoText.text = GameStateManager.StoredGameTick.ToString();
+            }
+        }
+
         public static void OnPauseModeChange(bool pause)
         {
             if (infoTextGo != null)
             {
                 timeTextGo.SetActive(!pause);
                 infoTextGo.SetActive(pause);
+                infoText.text = GameStateManager.StoredGameTick.ToString();
+
                 if (sliderText != null)
                 {
                     sliderText.text = pause ? "Pause".Translate() : $"{(int)slider.value}%";
@@ -350,6 +363,11 @@ namespace BulletTime
                 if (NebulaCompat.IsMultiplayerActive) // 主機廣播恢復訊息
                     NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Resume);
             }
+        }
+
+        public static void OnKeyStepOneFrame()
+        {
+            GameStateManager.StepOneFrame = true;
         }
 
         private static void OnAutosaveToggleChange(bool val)

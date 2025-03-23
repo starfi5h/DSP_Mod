@@ -8,6 +8,7 @@ namespace BulletTime
         public static bool Pause { get; private set; }
         public static bool ManualPause { get; set; } // Manual pause state set by user (slider, hotkey)
         public static bool HotkeyPause { get; set; } // Hotkey pause mode
+        public static bool StepOneFrame { get; set; } // Forward 1 frame by hotkey
         public static bool EnableMechaFunc { get; set; } // Is mecha available to move in hotkey pause mode?
         public static bool IsSaving { get; set; } // Is during saving?
 
@@ -82,6 +83,21 @@ namespace BulletTime
                     timer -= 1f;
                     pauseThisFrame = true;
                     AdvanceTick = false;
+                }
+            }
+            else
+            {
+                if (StepOneFrame && Interactable)
+                {
+                    if (StoredGameTick != 0)
+                    {
+                        StoredGameTick++; // The real gametick advance too
+                        IngameUI.OnStoredGameTickChange();
+                    }
+                    AdvanceTick = GameMain.data.guideComplete && Interactable;
+                    pauseThisFrame = false;
+                    StepOneFrame = false;
+                    //Log.Debug("StepOneFrame. gameTick = " + StoredGameTick);
                 }
             }
             return pauseThisFrame;

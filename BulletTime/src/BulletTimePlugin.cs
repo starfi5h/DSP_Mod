@@ -25,6 +25,7 @@ namespace BulletTime
         public static ConfigEntry<float> StartingSpeed;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<KeyCode> KeyPause;
+        public static ConfigEntry<KeyCode> KeyStepOneFrame;
         public static ConfigEntry<int> StatusTextHeightOffset;
         public static ConfigEntry<string> StatusTextPause;
         public static ConfigEntry<bool> EnableMechaFunc;
@@ -35,6 +36,7 @@ namespace BulletTime
         {
             KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
             KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n战术暂停(世界停止+画面提示)的热键");
+            KeyStepOneFrame = Config.Bind("Hotkey", "KeyStepOneFrame", KeyCode.None, "Hotkey to forward 1 frame in pause mode\n暂停模式下前进1帧的热键");
             EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键战术暂停模式下启用机甲功能");
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
             EnableHotkeyAutosave = Config.Bind("Save", "EnableHotkeyAutosave", false, "Enable hotkey to trigger autosave\n允许用热键触发自动存档");
@@ -111,6 +113,10 @@ namespace BulletTime
             if (Input.GetKeyDown(KeyPause.Value))
             {
                 IngameUI.OnKeyPause();
+            }
+            if (Input.GetKeyDown(KeyStepOneFrame.Value))
+            {
+                IngameUI.OnKeyStepOneFrame();
             }
             if (EnableHotkeyAutosave.Value && KeyAutosave.Value.IsDown() && UIRoot.instance.uiGame.autoSave.showTime == 0)
             {
