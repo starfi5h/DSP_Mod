@@ -101,15 +101,13 @@ namespace DeliverySlotsTweaks
 				{
 					int num = packageItemCount[itemId] - count;
 					packageItemCount[itemId] = num;
-					if (num == 0)
-						packageItemCount.Remove(itemId);
+					if (num <= 0) packageItemCount.Remove(itemId);
 				}
 				else if (deliveryItemCount.ContainsKey(itemId))
                 {
 					int num = deliveryItemCount[itemId] - count;
 					deliveryItemCount[itemId] = num;
-					if (num == 0)
-						deliveryItemCount.Remove(itemId);
+					if (num <= 0) deliveryItemCount.Remove(itemId);
 				}
 				
 			}
@@ -120,8 +118,7 @@ namespace DeliverySlotsTweaks
                 {
 					int num = packageItemCount[itemId] - count;
 					packageItemCount[itemId] = num;
-					if (num == 0)
-						packageItemCount.Remove(itemId);
+					if (num <= 0) packageItemCount.Remove(itemId);
 				}
 			}
 		}
@@ -374,8 +371,9 @@ namespace DeliverySlotsTweaks
 		{
 			try
 			{
-				int count = 1;
-				if (__originalMethod.Name == "StationAutoReplenishIfNeeded") count = 2;
+				int count = 1; // Match the count to target positions of TakeTailItems for each functions
+				if (__originalMethod.DeclaringType.Name == "BuildTool_BlueprintPaste" && __originalMethod.Name == "CreatePrebuilds") count = 2;
+				else if (__originalMethod.Name == "StationAutoReplenishIfNeeded") count = 2;
 				else if (__originalMethod.Name == "EntityAutoReplenishIfNeeded") count = 3;
 
 				var codeMacher = new CodeMatcher(instructions).End();

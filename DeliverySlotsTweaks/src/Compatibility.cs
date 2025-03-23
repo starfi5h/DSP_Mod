@@ -12,6 +12,7 @@ namespace DeliverySlotsTweaks
         {
             BlueprintTweaks_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
+            CheatEnabler_Patch.Init(harmony);
             RebindBuildBar_Patch.Init(harmony);
             UnlimitedFoundations_Patch.Init(harmony);
             Nebula_Patch.Init(harmony);
@@ -67,6 +68,39 @@ namespace DeliverySlotsTweaks
             }
         }
 
+        public static class CheatEnabler_Patch
+        {
+            public const string GUID = "org.soardev.cheatenabler";
+            static ConfigEntry<bool> ArchitectModeEnabled;
+
+            public static void Init(Harmony _)
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+
+                try
+                {
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("CheatEnabler.Patches.FactoryPatch");
+                    ArchitectModeEnabled = (ConfigEntry<bool>)AccessTools.Field(classType, "ArchitectModeEnabled").GetValue(null);
+                    ArchitectModeEnabled.SettingChanged += OnArchitectModeEnabledChange;
+                    DeliveryPackagePatch.architectMode |= ArchitectModeEnabled.Value;
+                    Plugin.Log.LogDebug("CheatEnabler ArchitectModeEnabled: " + ArchitectModeEnabled.Value);
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.27");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            internal static void OnArchitectModeEnabledChange(object sender, EventArgs e)
+            {
+                if (ArchitectModeEnabled == null) return;
+                DeliveryPackagePatch.architectMode = ArchitectModeEnabled.Value;
+                Plugin.Log.LogDebug("CheatEnabler ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
+            }
+        }
+
         public static class Multfunction_mod_Patch
         {
             public const string GUID = "cn.blacksnipe.dsp.Multfuntion_mod";
@@ -82,8 +116,8 @@ namespace DeliverySlotsTweaks
                     harmony.Patch(AccessTools.Method(classType, "BuildPannel"), null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod(nameof(BuildPannel_Postfix))));
 
                     architectMode = (ConfigEntry<bool>)(AccessTools.Field(AccessTools.TypeByName("Multifunction_mod.Multifunction"), "ArchitectMode").GetValue(null));
-                    DeliveryPackagePatch.architectMode = architectMode.Value;
-                    Plugin.Log.LogDebug("Multfunction_mod ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
+                    DeliveryPackagePatch.architectMode |= architectMode.Value;
+                    Plugin.Log.LogDebug("Multfunction_mod ArchitectModeEnabled: " + architectMode.Value);
 
                 }
                 catch (Exception e)
