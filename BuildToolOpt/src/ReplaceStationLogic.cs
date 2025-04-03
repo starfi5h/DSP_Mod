@@ -56,6 +56,40 @@ namespace BuildToolOpt
 			}
 		}
 
+		[HarmonyPrefix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.TakeBackItems_Station))]
+		public static void TakeBackItems_Station(PlanetTransport __instance, int stationId, ref bool __runOriginal)
+        {
+			__runOriginal = !IsReplacing;
+			if (__runOriginal) return;
+
+			// When replacing the old station, don't put items into player package
+			if (stationId == 0) return;
+			StationComponent stationComponent = __instance.GetStationComponent(stationId);
+			if (stationComponent == null || stationComponent.id != stationId)
+			{
+				return;
+			}
+			int storageLength = stationComponent.storage?.Length ?? 0;
+			for (int i = 0; i < storageLength; i++)
+			{
+				if (stationComponent.storage[i].count > 0 && stationComponent.storage[i].itemId > 0)
+				{
+					stationComponent.storage[i].count = 0;
+					stationComponent.storage[i].inc = 0;
+				}
+			}
+			stationComponent.idleDroneCount = 0;
+			stationComponent.idleShipCount = 0;
+			stationComponent.warperCount = 0;
+			Plugin.Log.LogDebug("TakeBackItems_Station");
+        }
+
+		[HarmonyPrefix, HarmonyPatch(typeof(UIItemup), "Up")]
+		static void Up()
+        {
+			Plugin.Log.LogDebug(System.Environment.StackTrace);
+        }
+
 		private static int GetOverlapStationEntityId(BuildTool_Click tool)
 		{
 			PlanetPhysics physics = tool.player.planetData.physics;
@@ -140,7 +174,6 @@ namespace BuildToolOpt
 			parameters.CopyFromFactoryObject(oldStation.entityId, tool.factory);
 			SlotData[] slots = oldStation.slots;
 			SaveState(oldStation, out StationState state);
-			CleanState(oldStation);
 			tool.actionBuild.DoDismantleObject(oldStation.entityId);
 
 			// Create prebuild and apply config
@@ -195,20 +228,6 @@ namespace BuildToolOpt
 			state.storage = new StationStore[station.storage.Length];
 			for (int i = 0; i < station.storage.Length; i++)
 				state.storage[i] = station.storage[i];
-		}
-
-		private static void CleanState(StationComponent station)
-		{
-			station.warperCount = 0;
-			station.idleDroneCount = 0;
-			station.workDroneCount = 0;
-			station.idleShipCount = 0;
-			station.workShipCount = 0;
-			for (int i = 0; i < station.storage.Length; i++)
-			{
-				station.storage[i].count = 0;
-				station.storage[i].inc = 0;
-			}
 		}
 
 		private static void LoadState(StationComponent station, in StationState state)

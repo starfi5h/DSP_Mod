@@ -1,3 +1,6 @@
+### v1.0.9
+\- Fix a bug that replace station doesn't clean up the localOrder/remoteOrder of other stations correctly.   
+
 ### v1.0.8
 \- Add config option `EnableStationBuildOptimize` (Default: false)  
 

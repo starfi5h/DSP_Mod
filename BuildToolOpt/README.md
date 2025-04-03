@@ -11,14 +11,14 @@ Provides optimization and extra QoL features to build tool and blueprint UI.
 3. 拆除旧塔
 4. 放上贴上旧塔设定的新塔
 5. 重新连上传送带
-6. 尝试将物品放回塔内
+6. 尝试将物品放回塔内，无法放入的则收进背包  
 
 ## Configuration
 Run the game one time to generate `BepInEx\config\starfi5h.plugin.BuildToolOpt.cfg` file.  
 配置文件(.cfg)需要先运行过游戏一次才会出现。修改后需重启游戏才会生效。    
 
 ```
-## Settings file was created by plugin BuildToolOpt v1.0.8
+## Settings file was created by plugin BuildToolOpt
 ## Plugin GUID: starfi5h.plugin.BuildToolOpt
 
 [BuildTool]
