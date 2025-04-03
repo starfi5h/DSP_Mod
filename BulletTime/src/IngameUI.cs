@@ -107,8 +107,8 @@ namespace BulletTime
                     // Create pause, resume and speedup button
                     RectTransform prefab = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/button-1-bg").GetComponent<RectTransform>();
                     Vector3 newPos = prefab.localPosition;
-                    newPos.x += 35f;
-                    newPos.y -= 20f;
+                    newPos.x += 35f + 5f;
+                    newPos.y -= 20f - 13f;
                     for (int i = 0; i  < 3; i++)
                     {
                         var go = GameObject.Instantiate<RectTransform>(prefab, timeTextGo.transform.parent);
@@ -158,12 +158,16 @@ namespace BulletTime
                     infoTextGo.SetActive(false);
 
                     // Create speed ratio text
-                    var ratioGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/real-time-text");
-                    ratioGo = GameObject.Instantiate(ratioGo, ratioGo.transform.parent);
+                    var realTimeTextGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/real-time-text");
+                    var ratioGo = GameObject.Instantiate(realTimeTextGo, realTimeTextGo.transform.parent);
                     ratioGo.name = "speed ratio-text";                    
                     ratioGo.transform.localPosition += new Vector3(0, 15f);
                     ratioGo.SetActive(true);
-                    speedRatioText = ratioGo.GetComponent<Text>();                    
+                    speedRatioText = ratioGo.GetComponent<Text>();
+
+                    // Make sure time text stays on top
+                    timeTextGo.transform.SetAsLastSibling();
+                    realTimeTextGo.transform.SetAsLastSibling();
                 }
                 // Test: Let client has speedUp button enable
                 // speedBtnGo[2].SetActive(!NebulaCompat.IsClient);

@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.9
+\- Prevent user from using sandbox teleport during pause mode to avoid endless loading.  
+\- (UI) Move speed control buttons to higher position.  
+
 #### v1.5.8
 \- Add config `Hotkey`:`KeyStepOneFrame`, default value is none  
 \- The bottom right time text now shows the current gameTick in pause mode.  

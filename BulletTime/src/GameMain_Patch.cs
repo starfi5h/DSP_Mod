@@ -190,10 +190,11 @@ namespace BulletTime
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(UIStarmap), nameof(UIStarmap.StartFastTravelToPlanet))]
-        private static bool StartFastTravelToPlanet_Prefix()
+        [HarmonyPatch(typeof(PlayerMove_Sail), nameof(PlayerMove_Sail.StartFastTravelToPlanet))]
+        [HarmonyPatch(typeof(PlayerMove_Sail), nameof(PlayerMove_Sail.StartFastTravelToUPosition))]
+        private static bool StartFastTravel_Prefix()
         {
-            if (GameMain.isFullscreenPaused)
+            if (GameStateManager.Pause)
             {
                 UIRealtimeTip.Popup("Can't teleport to another planet during BulletTime pause!");
                 return false;
