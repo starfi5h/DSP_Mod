@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.12 (DSP-0.10.32.25779)
+\- Adapt to game version 0.10.32.25779  
+
 #### v1.5.11 (DSP-0.10.32.25712)  
 \- Fix placing a blueprint while the required buildings are in the delivery slots causes white holograms instead of green ones.  
 \- Add CheatEnabler compat to v2.3.27  

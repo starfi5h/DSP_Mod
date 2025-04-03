@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.11";
+        public const string VERSION = "1.5.12";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -180,10 +180,11 @@ namespace DeliverySlotsTweaks
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerPackageUtility), nameof(PlayerPackageUtility.AddItemToAllPackages))]
-        static void AddItemToAllPackages(ref bool deliveryFirst)
+        static void AddItemToAllPackages(ref int priorityMode)
         {
             // Use in DispenserComponent.InternalTick
-            deliveryFirst = DeliveryFirst.Value;
+            // priorityMode: <0 to delievery first >0 to player package first 0(default) balance mode?
+            if (DeliveryFirst.Value) priorityMode = -1;
         }
     }
 }

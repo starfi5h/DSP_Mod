@@ -73,7 +73,7 @@ namespace DeliverySlotsTweaks
 		{
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
-				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc);
+				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc, false);
 				return count;
 			}
 			else
@@ -96,7 +96,7 @@ namespace DeliverySlotsTweaks
 
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
-				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc);
+				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc, false);
 				if (packageItemCount.ContainsKey(itemId))
 				{
 					int num = packageItemCount[itemId] - count;
