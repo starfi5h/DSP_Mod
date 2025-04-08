@@ -77,3 +77,7 @@ ReplaceStation, EnableHologram and EnableStationBuildOptimize will be disabled.
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.3.26)  
 When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  
 使用替换物流塔功能时mod会暂时关闭CE的`建造秒完成`功能直到替换完成  
+
+[DSPCalculator](https://thunderstore.io/c/dyson-sphere-program/p/jinxOAO/DSPCalculator/) (v0.5.11)  
+按住Shift键并单击建筑物图标将复制该建筑物虚影及其配方设置至手中。  
+Shift-clicking on building icon will copy that building with recipe settings to hand.  

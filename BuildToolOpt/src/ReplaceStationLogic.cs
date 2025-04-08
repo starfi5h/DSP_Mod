@@ -84,12 +84,6 @@ namespace BuildToolOpt
 			Plugin.Log.LogDebug("TakeBackItems_Station");
         }
 
-		[HarmonyPrefix, HarmonyPatch(typeof(UIItemup), "Up")]
-		static void Up()
-        {
-			Plugin.Log.LogDebug(System.Environment.StackTrace);
-        }
-
 		private static int GetOverlapStationEntityId(BuildTool_Click tool)
 		{
 			PlanetPhysics physics = tool.player.planetData.physics;

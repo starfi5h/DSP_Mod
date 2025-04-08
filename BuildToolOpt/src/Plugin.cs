@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.0.9";
+        public const string VERSION = "1.0.10";
 
         public static ManualLogSource Log;
         static Harmony harmony;

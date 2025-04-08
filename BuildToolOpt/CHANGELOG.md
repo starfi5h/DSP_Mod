@@ -1,3 +1,6 @@
+### v1.0.10
+\- Add DSPCalculator v0.5.11 enhance: Shift-clicking on building icon will copy that building with recipe settings to hand.  
+
 ### v1.0.9
 \- Fix a bug that replace station doesn't clean up the localOrder/remoteOrder of other stations correctly.   
 

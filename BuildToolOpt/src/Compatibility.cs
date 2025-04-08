@@ -1,6 +1,9 @@
-﻿using HarmonyLib;
+﻿using DSPCalculator.Logic;
+using DSPCalculator.UI;
+using HarmonyLib;
 using System;
 using System.Reflection;
+using UnityEngine.UI;
 
 namespace BuildToolOpt
 {
@@ -10,6 +13,7 @@ namespace BuildToolOpt
         {
             Nebula_Patch.Init();
             CheatEnabler_Patch.Init(harmony);
+            DSPCalculator_Patch.Init(harmony);
         }
 
         public static class Nebula_Patch
@@ -53,6 +57,106 @@ namespace BuildToolOpt
             internal static bool ArrivePlanet_Prefix()
             {
                 return !ReplaceStationLogic.IsReplacing;
+            }
+        }
+
+        public static class DSPCalculator_Patch
+        {
+            public const string GUID = "com.GniMaerd.DSPCalculator";
+
+            public static void Init(Harmony harmony)
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID)) return;
+
+                try
+                {
+                    harmony.PatchAll(typeof(Warpper));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("DSPCalculator compatibility failed! Last working version: 0.5.11");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+
+            private static class Warpper
+            {
+                [HarmonyPostfix]
+                [HarmonyPatch(typeof(UIItemNode), MethodType.Constructor, new Type[] { typeof(ItemNode), typeof(UICalcWindow) })]
+                public static void UIItemNode_Postfix(UIItemNode __instance)
+                {
+                    if (__instance.assemblerIconObj == null) return;
+                    __instance.assemblerIconObj.GetComponent<Button>().onClick.AddListener(() => { OnAssemblerIconClick(__instance); });
+                }
+
+                public static void OnAssemblerIconClick(UIItemNode @this)
+                {
+                    if (!VFInput.shift || !VFInput.readyToBuild) return;
+                                        
+                    var recipeInfo = @this.itemNode.mainRecipe;
+                    if (recipeInfo == null) return;
+                    int protoId = recipeInfo.assemblerItemId;
+                    int recipeId = recipeInfo.recipeNorm.oriProto.ID;
+                    bool forceAccMode = !(recipeInfo.isInc && recipeInfo.canInc);
+
+                    Plugin.Log.LogDebug($"SetHandBuilding protoId={protoId} recipeId={recipeId} forceAcc={forceAccMode}");
+                    SetHandBuilding(protoId, recipeId, forceAccMode);
+                }
+
+                public static void SetHandBuilding(int protoId, int recipeId, bool forceAccMode)
+                {
+                    var player = GameMain.mainPlayer;
+                    if (player == null || protoId <= 0) return;
+
+                    // VFInput._copyBuilding
+                    if (player.inhandItemId > 0) player.SetHandItems(0, 0, 0);
+                    player.SetHandItems(protoId, 0, 0);
+                    player.controller.cmd.type = ECommand.Build;
+                    VFInput.UseMouseLeft();
+
+                    //Set the required building parameters in template
+                    //ref: BuildingParameters.template.CopyFromFactoryObject(num, factory, true, false);
+                    BuildingParameters.template.SetEmpty();
+                    BuildingParameters.template.type = BuildingType.Other;
+                    BuildingParameters.template.itemId = protoId;
+                    BuildingParameters.template.modelIndex = LDB.items.Select(protoId).ModelIndex;
+
+                    if (recipeId > 0)
+                    {
+                        var recipeType = LDB.recipes.Select(recipeId).Type;
+                        switch (recipeType)
+                        {
+                            case ERecipeType.Smelt:
+                            case ERecipeType.Chemical:
+                            case ERecipeType.Refine:
+                            case ERecipeType.Assemble:
+                            case ERecipeType.Particle:
+                                BuildingParameters.template.type = BuildingType.Assembler;
+                                BuildingParameters.template.recipeId = recipeId;
+                                BuildingParameters.template.recipeType = recipeType;
+                                BuildingParameters.template.parameters = new int[1];
+                                BuildingParameters.template.parameters[0] = forceAccMode ? 1 : 0;
+                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()));
+                                break;
+
+                            case ERecipeType.Research:
+                                BuildingParameters.template.type = BuildingType.Lab;
+                                BuildingParameters.template.recipeId = recipeId;
+                                BuildingParameters.template.recipeType = recipeType;
+                                BuildingParameters.template.mode0 = 1;
+                                BuildingParameters.template.mode1 = forceAccMode ? 1 : 0;
+                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()));
+                                break;
+
+                            default:
+                                //BuildingParameters.template.SetEmpty();
+                                //player.SetHandItems(0, 0, 0);
+                                break;
+                        }
+                    }
+                    player.controller.actionBuild.NotifyTemplateChange();                    
+                }
+
             }
         }
     }
