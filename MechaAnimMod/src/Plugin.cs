@@ -15,7 +15,7 @@ namespace MechaAnimMod
     {
         public const string GUID = "starfi5h.plugin.MechaAnimMod";
         public const string NAME = "MechaAnimMod";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.1.0";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -33,6 +33,20 @@ namespace MechaAnimMod
         {
             harmony.UnpatchSelf();
             harmony = null;
+        }
+
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.Start))]
+        static void CopyRtsPoserParameters(GameCamera __instance)
+        {
+            var buildPoser = __instance.buildPoser;
+            var rtsPoser = __instance.rtsPoser;
+
+            buildPoser.distMin = rtsPoser.distMin; // 3.7 => 1
+            buildPoser.distMax = rtsPoser.distMax; // 120
+            buildPoser.normalFov = rtsPoser.normalFov; // 38 => 36
+            buildPoser.damp = rtsPoser.damp; // 0.15
         }
 
         [HarmonyPostfix]

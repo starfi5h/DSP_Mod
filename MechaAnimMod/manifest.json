@@ -1,7 +1,7 @@
 {
     "name": "MechaAnimMod",
-    "description": "Trigger mecha idle animations by Ctrl + Numpad 0-6",
-    "version_number": "1.0.0",
+    "description": "Trigger mecha idle animations by Ctrl + Numpad 0-6. Reduce camera zoom effect when switching to build mode.",
+    "version_number": "1.1.0",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/MechaAnimMod",
     "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
 }

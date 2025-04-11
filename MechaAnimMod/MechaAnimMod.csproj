@@ -25,19 +25,12 @@
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.17" />
-    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.10.28.21172-r.0" />
+    <PackageReference Include="DysonSphereProgram.GameLibs" Version="0.10.32.25779-r.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2018.4.12" IncludeAssets="compile" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms">
-      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
