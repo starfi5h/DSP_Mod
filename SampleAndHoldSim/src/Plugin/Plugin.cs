@@ -15,7 +15,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.6.15";
+        public const string VERSION = "0.6.16";
         public static Plugin instance;
         Harmony harmony;
 
@@ -37,6 +37,7 @@ namespace SampleAndHoldSim
             WarnIncompat = Config.Bind("UI", "WarnIncompat", true, "Show warning for incompatible mods\n显示不兼容mod的警告");
             EnableRelayLanding = Config.Bind("Combat", "EnableRelayLanding", true, "Allow Dark Fog relay to land on planet.\n允许黑雾中继器登陆星球");
 
+            if (UpdatePeriod.Value < 1) UpdatePeriod.Value = 1;
             MainManager.UpdatePeriod = UpdatePeriod.Value;
             MainManager.FocusLocalFactory = FocusLocalFactory.Value;
             UIcontrol.SliderMax = SliderMaxUpdatePeriod.Value;
@@ -58,11 +59,11 @@ namespace SampleAndHoldSim
         public void Awake()
         {
             instance = this;
-            Log.Init(Logger);
-            
-            LoadConfig();
-            GameData_Patch.GameMain_Begin();
             harmony = new Harmony(GUID);
+            Log.Init(Logger);
+            LoadConfig();
+
+            GameData_Patch.GameMain_Begin();
             harmony.PatchAll(typeof(GameData_Patch));
             harmony.PatchAll(typeof(ManagerLogic));
             harmony.PatchAll(typeof(UIcontrol));

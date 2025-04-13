@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.16
+\- Scale Dark Fog drop lifetime on remote planets in order to fix Dark Fog farm production lower issue.  
+
 #### v0.6.15
 \- Fix ejectors don't auto retarget orbit on remote plaents.  
 

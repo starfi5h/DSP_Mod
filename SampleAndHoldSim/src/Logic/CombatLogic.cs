@@ -43,7 +43,14 @@ namespace SampleAndHoldSim
 			return false;
 		}
 
-
+		[HarmonyPrefix, HarmonyPriority(Priority.High)]
+		[HarmonyPatch(typeof(TrashSystem), nameof(TrashSystem.AddTrashFromGroundEnemy))]
+		public static void AddTrashFromGroundEnemy_Prefix(PlanetFactory factory, ref int life)
+        {
+			// Scale the life (1800) of dark fog drop on remote planets
+			if (factory.planetId != MainManager.FocusPlanetId)
+				life *= MainManager.UpdatePeriod;
+		}
 	}
 
 	class Combat_Patch

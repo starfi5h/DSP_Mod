@@ -16,9 +16,10 @@ Additional UI for displaying flow-in/flow-out rate of cargo in stations. Configu
 ## How does it work
 
 The difference between vanilla behavior:  
-- Stations may have negative value to maintain the cargo balance between slowed and unslowed environment.  
-- Lancer attacks will be scaled down in remote systems.  
-- Turrets that attack space unit will be scaled up in remote systems.  
+- Stations storages may have negative item count to maintain the cargo balance between slowed and unslowed environment.  
+- Lancers attack damage will be scaled down in remote systems.  
+- Turrets that attack Dark Fog space units will be scaled up damage in remote systems.  
+- Dark Fog drops on remote planets will exist longer for BAB to pick up.  
 
 <details>
 <summary>Detial (Click to expand)</summary>
@@ -77,6 +78,7 @@ If true, allow Dark Fog relays to land on planet (vanilla).
 (⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.   
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - Fix mine rate on idle factories, let it not be affected by FPS.   
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Some game-breaking features are not compatible.  
+(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - Incompatible.  
 
 ----
 ## [模擬帧 - 修改游戏运算方式以提升逻辑帧率](https://b23.tv/BV1oB4y1X78J)
@@ -90,11 +92,12 @@ If true, allow Dark Fog relays to land on planet (vanilla).
 ## 运作原理
 
 和原版不同之处:  
-- 为了保持内外部物品时恒定, 物流塔内的货物可能为负数  
+- 为了保持内部与外部间的物品记帐平衡, 物流塔内的货物数量可能为负数  
   
 目前对战斗系统进行了以下的修改, 可能会影响平衡:  
 - 远程星系的枪骑攻击力依照倍率缩减, 避免远程星系的星球被攻破  
 - 远程星球的导弹和电浆炮伤害依照倍率增加, 但可能有溢伤的问题  
+- 远程星球的黑雾掉落会存在更久，好让战场分析基站可以即时捡取  
 
 <details>
 <summary>详情(点击展开)</summary>
@@ -153,3 +156,4 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 (⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复黑盒产物统计会倍增的问题。目前数据统计的UPS耗用会异常增加    
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - 修复星球矿机速率不正确的问题, 使其不随FPS变动。    
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 兼容问题: 在跳过子弹时,太阳帆的数量没有被倍增。其他某些改机制功能(星球矿机等)不兼容。  
+(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - 不兼容。  
