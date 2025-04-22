@@ -16,6 +16,7 @@ You can now build or remove multiple entities at once!
 Symmetric tool can be toggle with `tab`.  There are two types of symmetry in the tool:   
 Mirror symmetry: When it is activated (hotkey `m`), it will create corresponding reflections on the other side of the equator.  
 Rotational symmetry: Numpad `[+]`/`[-]` to increase/decrease the number of brushes on the same latitude, ranging from 1 to 90.  
+To multiple selection, hold `ctrl` and click 3 times to include the original object. To keep selecting, hold Ctrl and click on other objects.  
 
 ### Orbit Modification Tool
 Anchor Mode: When enabled, the selected layer rotation will stop, the grid orientation will be changed immediately when the orbit is modified and the position of structures will remain unchanged. It can fix the grid misalignment problem.  
@@ -24,6 +25,10 @@ Angular speed: Change the angular speed of selected layer. Input empty string wi
 ### Hide Object
 When mask is enabled in the GUI window, a black mask will appear in the background.  
 You can also use hotkey `h` to hide dyson swarm and the star.  
+
+## Compatiblity
+- [ImportDysonLayer](https://thunderstore.io/c/dyson-sphere-program/p/Mr_AqiKouda/ImportDysonLayer/): The symmetry building tools may not work with this mod.  
+- [NebulaMultiplayerMod](https://thunderstore.io/c/dyson-sphere-program/p/nebula/NebulaMultiplayerMod/): Some features (e.g. anchor mode) won't sync. Recommand to create blueprint in single player mode.  
 
 ## Installation
 Via [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), or manual download the file and put `SphereEditorTools.dll` in `BepInEx/plugins` folder.
@@ -92,6 +97,10 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 在操作窗口中启用遮罩后，会出现一个黑色遮罩并挡住戴森球体的背部部分。  
 热键`h`可以切换恒星和遮罩的显示状态。  
 
+## 兼容性
+- [ImportDysonLayer](https://thunderstore.io/c/dyson-sphere-program/p/Mr_AqiKouda/ImportDysonLayer/)：对称建设工具无法与此mod兼容。  
+- [NebulaMultiplayerMod](https://thunderstore.io/c/dyson-sphere-program/p/nebula/NebulaMultiplayerMod/)：部分功能（例如轨道修改）无法同步。建议在单人模式下创建蓝图再使用。  
+
 
 ## 安装
 通过管理器[r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/)，或者手动下载文件并将`SphereEditorTools.dll`放入`BepInEx/plugins`文件夹。
@@ -139,6 +148,9 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 ----
 
 ## Changelog
+
+#### v2.2.4
+\- Attempt to fix symmetry tools error when deleting the layer.  
 
 #### v2.2.3
 \- Remove EnableNonemptyList as it is in game now. (DSP v0.10.29.28154)  

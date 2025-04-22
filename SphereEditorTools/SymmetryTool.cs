@@ -158,7 +158,6 @@ namespace SphereEditorTools
                         brush?._OnClose(); //Clean previous brushes
                         brush?.gameObject.SetActive(false);
                     }
-                    brushId = (int)dysnoEditor.brushMode;
                 }
             }
         }
@@ -168,6 +167,9 @@ namespace SphereEditorTools
         {
             try
             {
+                Brushes_Prepare(); 
+                brushId = (int)dysnoEditor.brushMode;
+
                 if (brushId == (int)BrushMode.Paint)
                 {
                     if (dysnoEditor.brush_paint.castNodeGizmo != null) paint_cast_type = 1;
@@ -251,10 +253,20 @@ namespace SphereEditorTools
                             dataPoint = quaternion * pos;
                             clickPoint = currentRotation * dataPoint;
                             castRay = new Ray(quaternion * ray.origin, quaternion * ray.direction);
+                            
                             brushes[brushId][t].SetDysonSphere(sphere);
-                            brushes[brushId][t].layer = layer;                                
-                            brushes[brushId][t]._Open();
-                            brushes[brushId][t].gameObject.SetActive(true);
+                            brushes[brushId][t].layer = layer;
+                            if (!brushes[brushId][t].active)
+                            {
+                                brushes[brushId][t]._Open();
+                                brushes[brushId][t]._OnOpen();
+                                brushes[brushId][t].gameObject.SetActive(true);
+                                brushes[brushId][t].active = true;
+                            }
+                            if (!brushes[brushId][t].gameObject.activeSelf)
+                            {
+                                brushes[brushId][t].gameObject.SetActive(true);
+                            }
                             brushes[brushId][t]._OnUpdate();                                
                         }
                         if (mirrorMode > 0)
@@ -277,9 +289,16 @@ namespace SphereEditorTools
                                 castRay = new Ray(quaternion * ray.origin, quaternion * ray.direction);
                                 brushes[brushId][t].SetDysonSphere(sphere);
                                 brushes[brushId][t].layer = layer;
-                                brushes[brushId][t].active = true;
-                                brushes[brushId][t]._Open();
-                                brushes[brushId][t].gameObject.SetActive(true);
+                                if (!brushes[brushId][t].active)
+                                {
+                                    brushes[brushId][t]._Open();
+                                    brushes[brushId][t]._OnOpen();
+                                    brushes[brushId][t].active = true;
+                                }
+                                if (!brushes[brushId][t].gameObject.activeSelf)
+                                {
+                                    brushes[brushId][t].gameObject.SetActive(true);
+                                }
                                 brushes[brushId][t]._OnUpdate();
                             }
                         }
