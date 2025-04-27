@@ -189,8 +189,10 @@ namespace BulletTime
                 HighStopwatch highStopwatch = new HighStopwatch();
                 highStopwatch.Begin();
                 // Wait a tick to let game full stop?
-                Thread.Sleep((int)(1000/FPSController.currentUPS));
-                Log.Info($"Background Autosave start. UPS: {FPSController.currentUPS:F2}");
+                double ups = Maths.Clamp(FPSController.averageUPS, 1.0, 60.0);
+                int sleepTime = (int)(1000 / ups); // sleep 17ms to 1 second to let game fully stop
+                Thread.Sleep(sleepTime);
+                Log.Info($"Background Autosave start. UPS: {FPSController.averageUPS:F2}");
                 bool result = GameSave.AutoSave();
                 Log.Info($"Background Autosave end. Duration: {highStopwatch.duration}s");
                 return () =>
@@ -319,7 +321,8 @@ namespace BulletTime
             {
                 //Log.Debug("Export local PlanetFactory start");
                 GameStateManager.SetLockFactory(true);
-                int sleepTime = (int)Maths.Clamp(1000 / FPSController.currentUPS, 17.0, 1000.0); // sleep at least 17ms to lock the local factory
+                double ups = Maths.Clamp(FPSController.averageUPS, 1.0, 60.0);
+                int sleepTime = (int)(1000 / ups); // sleep 17ms to 1 second to lock the local factory
                 Thread.Sleep(sleepTime);
             }
         }

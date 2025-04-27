@@ -1,7 +1,7 @@
 {
     "name": "BulletTime",
     "description": "Set game speed 0x~10x by pause/resume/speedup button or hotkey. Autosave in background. 游戏速度控制(0x~10x)。Pause热键战术暂停。(可选)在後台自動保存",
-    "version_number": "1.5.9",
+    "version_number": "1.5.10",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/BulletTime",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }

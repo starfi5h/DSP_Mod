@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.10
+\- Fix crash in async background autosave when UPS is very low.  
+
 #### v1.5.9
 \- Prevent user from using sandbox teleport during pause mode to avoid endless loading.  
 \- (UI) Move speed control buttons to higher position.  
