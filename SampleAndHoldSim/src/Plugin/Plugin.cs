@@ -15,7 +15,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.6.16";
+        public const string VERSION = "0.6.17";
         public static Plugin instance;
         Harmony harmony;
 
@@ -26,6 +26,7 @@ namespace SampleAndHoldSim
         public ConfigEntry<bool> UnitPerMinute;
         public ConfigEntry<bool> WarnIncompat;
         public ConfigEntry<bool> EnableRelayLanding;
+        public ConfigEntry<bool> EnableKillStatsFuzze;
 
         public void LoadConfig()
         {
@@ -36,6 +37,7 @@ namespace SampleAndHoldSim
             UnitPerMinute = Config.Bind("UI", "UnitPerMinute", false, "If true, show rate in unit per minute. otherwise show rate in unit per second. \ntrue: 显示单位设为每分钟速率 false: 显示每秒速率");
             WarnIncompat = Config.Bind("UI", "WarnIncompat", true, "Show warning for incompatible mods\n显示不兼容mod的警告");
             EnableRelayLanding = Config.Bind("Combat", "EnableRelayLanding", true, "Allow Dark Fog relay to land on planet.\n允许黑雾中继器登陆星球");
+            EnableKillStatsFuzze = Config.Bind("Combat", "EnableKillStatsFuzze", false, "Allow kill count not precise to improve performance\n允许击杀统计不精确以提高性能");
 
             if (UpdatePeriod.Value < 1) UpdatePeriod.Value = 1;
             MainManager.UpdatePeriod = UpdatePeriod.Value;
@@ -73,6 +75,11 @@ namespace SampleAndHoldSim
 
             if (UIstation.Period > 0)
                 harmony.PatchAll(typeof(UIstation));
+
+            if (EnableKillStatsFuzze.Value)
+                harmony.PatchAll(typeof(KillStatLogic2));
+            else
+                harmony.PatchAll(typeof(KillStatLogic1));
 
             Compatibility.Init(harmony);
         }

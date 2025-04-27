@@ -16,6 +16,7 @@ namespace SampleAndHoldSim
 
         public static void Init(Harmony harmony)
         {
+            Weaver.Init(harmony);
             CommonAPI.Init(harmony);
             DSPOptimizations.Init(harmony);
             Auxilaryfunction_Patch.Init(harmony);
@@ -47,13 +48,23 @@ namespace SampleAndHoldSim
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 errorMessage = "The following compatible patches didn't success:\n模拟帧对以下mod的兼容性补丁失效:\n" + errorMessage;
-                UIMessageBox.Show("SampleAndHoldSim 模拟帧", errorMessage, "确定".Translate(), "Don't show",
+                UIMessageBox.Show("SampleAndHoldSim Report 模拟帧兼容提示", errorMessage, "确定".Translate(), "Don't show",
                     3, null, () => Plugin.instance.WarnIncompat.Value = false);
             }
             if (!string.IsNullOrEmpty(warnMessage))
             {
-                UIMessageBox.Show("SampleAndHoldSim 模拟帧", warnMessage, "确定".Translate(), "Don't show", 
+                UIMessageBox.Show("SampleAndHoldSim Report 模拟帧兼容提示", warnMessage, "确定".Translate(), "Don't show", 
                     3, null, () => Plugin.instance.WarnIncompat.Value = false);
+            }
+        }
+
+        public static class Weaver
+        {
+            public const string GUID = "Weaver";
+
+            public static void Init(Harmony _)
+            {
+                warnMessage += "SampleAndHoldSim is not compatible with Weaver: stats may be incorrect\nSampleAndHoldSim对Weaver尚未兼容，可能会统计数据异常";
             }
         }
 

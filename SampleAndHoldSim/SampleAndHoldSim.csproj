@@ -354,6 +354,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Logic\KillStatLogic.cs" />
     <Compile Include="src\Logic\Fix_Patch.cs" />
     <Compile Include="src\Logic\CombatLogic.cs" />
     <Compile Include="src\Logic\DysonLogic.cs" />

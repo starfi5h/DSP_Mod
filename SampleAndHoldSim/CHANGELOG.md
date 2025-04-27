@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.6.17
+\- Add config `EnableKillStatsFuzze` to switch kill count algorithm.  
+\- Add Weaver incompatible warning.  
+
 #### v0.6.16
 \- Scale Dark Fog drop lifetime on remote planets in order to fix Dark Fog farm production lower issue.  
 

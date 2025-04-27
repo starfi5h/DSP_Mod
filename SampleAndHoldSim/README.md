@@ -78,7 +78,7 @@ If true, allow Dark Fog relays to land on planet (vanilla).
 (⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/) - Fix analysis can't start. Fix stats multiply.   
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - Fix mine rate on idle factories, let it not be affected by FPS.   
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Some game-breaking features are not compatible.  
-(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - Incompatible.  
+(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - Not compatible yet, may cause production stats incorrect.  
 
 ----
 ## [模擬帧 - 修改游戏运算方式以提升逻辑帧率](https://b23.tv/BV1oB4y1X78J)
@@ -156,4 +156,4 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 (⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复黑盒产物统计会倍增的问题。目前数据统计的UPS耗用会异常增加    
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - 修复星球矿机速率不正确的问题, 使其不随FPS变动。    
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 兼容问题: 在跳过子弹时,太阳帆的数量没有被倍增。其他某些改机制功能(星球矿机等)不兼容。  
-(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - 不兼容。  
+(⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - 尚未兼容，可能会数据异常。  

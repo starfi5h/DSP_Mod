@@ -54,9 +54,9 @@ namespace SampleAndHoldSim
                     foreach (var data in dysonList)
                     {
                         if (data.TargetId < 0)
-                            Dyson_Patch.AddBullet(factory.dysonSphere.swarm, data);
+                            Dyson_Patch.AddBullet(factory.dysonSphere.swarm, in data);
                         else
-                            Dyson_Patch.AddRocket(factory.dysonSphere, data, idleCount);
+                            Dyson_Patch.AddRocket(factory.dysonSphere, in data, idleCount);
                     }
                 }
             }
@@ -168,7 +168,7 @@ namespace SampleAndHoldSim
             }
         }
 
-        public static void AddBullet(DysonSwarm swarm, ProjectileData projectile)
+        public static void AddBullet(DysonSwarm swarm, in ProjectileData projectile)
         {
             ref AstroData[] astroDatas = ref GameMain.data.galaxy.astrosData;
             int orbitId = -projectile.TargetId;
@@ -185,7 +185,7 @@ namespace SampleAndHoldSim
             }
         }
 
-        public static void AddRocket(DysonSphere sphere, ProjectileData projectile, int idleCount)
+        public static void AddRocket(DysonSphere sphere, in ProjectileData projectile, int idleCount)
         {
             ref AstroData[] astroDatas = ref GameMain.data.galaxy.astrosData;
             // Assume layerId < 16, nodeId < 4096
