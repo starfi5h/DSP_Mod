@@ -9,7 +9,7 @@ With this mod, the direct insertion builds can get proliferation too.
 
 (*1) Support facilities list:  
 1. Smelting, Assembler, Refinery, Chemical facilities that use sorters to input
-2. Research Lab that use sorters to input
+2. Research Lab, Fuel Power Generator that use sorters to input
 3. Fractionator: materials go through will be spray
 4. Turret: bullets go into turrets will be spray
 
@@ -20,7 +20,7 @@ With this mod, the direct insertion builds can get proliferation too.
 
 (*1) 支援的生产设备:  
 1. 用爪子输入原料的熔炉, 制造台, 精炼厂, 化工厂
-2. 用爪子输入原料的研究站
+2. 用爪子输入原料的研究站, 燃料发电机
 3. 分馏塔: 经过分馏塔的原料将被喷涂
 3. 炮塔: 输入炮塔的弹药将会被喷涂
 
@@ -87,6 +87,7 @@ Spray Turret = true
 
 ## Changelog
 
+- v1.1.5 - Support fuel power generator.  
 - v1.1.4 - Add config `Spray Fractionator`, `Spray Turret`. (DSP-0.10.32.25595)  
 - v1.1.3 - Add config `Spray Station Input`. (DSP-0.10.31.24646)  
 - v1.1.2 - Fix NRE in SpraycoaterGameTick_Prefix.  

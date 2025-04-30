@@ -67,11 +67,15 @@ namespace PlanetwideSpray
         }
 
         [HarmonyPrefix, HarmonyPriority(Priority.High)]
-        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))]
+        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入
         static void AddItemInc(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc)
         {
-            ref var entity = ref __instance.entityPool[entityId];
-            if (entity.assemblerId == 0 && entity.labId == 0 && LimitSpray) return;
+            if (LimitSpray)
+            {
+                ref var entity = ref __instance.entityPool[entityId];
+                int hash = entity.assemblerId | entity.labId | entity.powerGenId;
+                if (hash == 0) return; // 輸入的不是支援的建築
+            }
 
             var status = statusArr[__instance.index]; //定位工廠
             var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
