@@ -126,35 +126,27 @@ namespace BuildToolOpt
                         var recipeType = LDB.recipes.Select(recipeId).Type;
                         switch (recipeType)
                         {
-                            case ERecipeType.Smelt:
-                            case ERecipeType.Chemical:
-                            case ERecipeType.Refine:
-                            case ERecipeType.Assemble:
-                            case ERecipeType.Particle:
-                                BuildingParameters.template.type = BuildingType.Assembler;
-                                BuildingParameters.template.recipeId = recipeId;
-                                BuildingParameters.template.recipeType = recipeType;
-                                BuildingParameters.template.parameters = new int[1];
-                                BuildingParameters.template.parameters[0] = forceAccMode ? 1 : 0;
-                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()));
-                                break;
-
                             case ERecipeType.Research:
                                 BuildingParameters.template.type = BuildingType.Lab;
                                 BuildingParameters.template.recipeId = recipeId;
                                 BuildingParameters.template.recipeType = recipeType;
                                 BuildingParameters.template.mode0 = 1;
                                 BuildingParameters.template.mode1 = forceAccMode ? 1 : 0;
-                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()));
+                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()), false);
                                 break;
 
                             default:
-                                //BuildingParameters.template.SetEmpty();
-                                //player.SetHandItems(0, 0, 0);
+                                // Given that GenesisBook add more ERecipeType, we will assume all the other recipe type are belong to Assembler building type
+                                BuildingParameters.template.type = BuildingType.Assembler;
+                                BuildingParameters.template.recipeId = recipeId;
+                                BuildingParameters.template.recipeType = recipeType;
+                                BuildingParameters.template.parameters = new int[1];
+                                BuildingParameters.template.parameters[0] = forceAccMode ? 1 : 0;
+                                UIRealtimeTip.Popup(LDB.recipes.Select(recipeId).name + " " + (forceAccMode ? "加速生产".Translate() : "额外产出".Translate()), false);
                                 break;
                         }
                     }
-                    player.controller.actionBuild.NotifyTemplateChange();                    
+                    player.controller.actionBuild.NotifyTemplateChange();
                 }
 
             }

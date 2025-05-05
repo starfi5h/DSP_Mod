@@ -1,3 +1,6 @@
+### v1.0.11
+\- Fix compatibility with GenesisBook for DSPCalculator shift-click enhance.  
+
 ### v1.0.10
 \- Add DSPCalculator v0.5.11 enhance: Shift-clicking on building icon will copy that building with recipe settings to hand.  
 
