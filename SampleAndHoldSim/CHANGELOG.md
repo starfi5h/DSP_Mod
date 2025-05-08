@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.18
+\- Fix Weaver warning detection.  
+
 #### v0.6.17
 \- Add config `EnableKillStatsFuzze` to switch kill count algorithm.  
 \- Add Weaver incompatible warning.  

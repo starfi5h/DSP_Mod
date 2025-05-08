@@ -15,7 +15,7 @@ namespace SampleAndHoldSim
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.6.17";
+        public const string VERSION = "0.6.18";
         public static Plugin instance;
         Harmony harmony;
 
@@ -80,10 +80,15 @@ namespace SampleAndHoldSim
                 harmony.PatchAll(typeof(KillStatLogic2));
             else
                 harmony.PatchAll(typeof(KillStatLogic1));
+        }
 
+        public void Start()
+        {
+            // At the timing of Start, all plugins should be loaded in Chainloader.PluginInfos
             Compatibility.Init(harmony);
         }
 
+#if DEBUG
         public void OnDestroy()
         {
             Compatibility.OnDestory();
@@ -91,6 +96,7 @@ namespace SampleAndHoldSim
             UIcontrol.OnDestory();
             UIstation.OnDestory();
         }
+#endif
+
     }
 }
-

@@ -64,6 +64,7 @@ namespace SampleAndHoldSim
 
             public static void Init(Harmony _)
             {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var _)) return;
                 warnMessage += "SampleAndHoldSim is not compatible with Weaver: stats may be incorrect\nSampleAndHoldSim对Weaver尚未兼容，可能会统计数据异常";
             }
         }
