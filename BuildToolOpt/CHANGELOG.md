@@ -1,3 +1,7 @@
+### v1.1.0
+\- Add CommonAPI feature: Toggle Blueprint View Mode hotkey (Default: `J`)  
+\- Add CommonAPI feature: Change building tier in blueprint pannel.  
+
 ### v1.0.11
 \- Fix compatibility with GenesisBook for DSPCalculator shift-click enhance.  
 

@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.0.11";
+        public const string VERSION = "1.1.0";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -37,8 +37,10 @@ namespace BuildToolOpt
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
             EnableHologram = Config.Bind("BuildTool", "EnableHologram", false, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableStationBuildOptimize = Config.Bind("BuildTool", "EnableStationBuildOptimize", false, "Optimize RefreshTraffic to reduce lag when placing stations (experimental)\n优化RefreshTraffic以减少放置物流塔的卡顿 (实验性)").Value;
+            
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
             EnableClipboardPaste = Config.Bind("UI", "ClipboardPaste", true, "Directly parse blueprint data from clipboard when Ctrl + V\n热键粘贴蓝图时,直接读取剪切板").Value;
+            
             Compatibility.Init(harmony);
 
             if (EnableReplaceStation)
@@ -82,10 +84,12 @@ namespace BuildToolOpt
             }
         }
 
+#if DEBUG
         public void OnDestroy()
         {
             harmony.UnpatchSelf();
             harmony = null;
         }
+#endif
     }
 }
