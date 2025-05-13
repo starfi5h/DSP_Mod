@@ -9,11 +9,9 @@ namespace PlanetwideSpray
 {
     public class Main_Patch
     {
-        public static bool LimitSpray = true;
         private static Status[] statusArr = null;
         private static readonly Dictionary<CargoContainer, int> containerToIndex = new();
         const int MAX_INC_COUNT = 11;
-
 
         public class Status
         {
@@ -66,25 +64,63 @@ namespace PlanetwideSpray
             }
         }
 
-        [HarmonyPrefix, HarmonyPriority(Priority.High)]
-        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入
-        static void AddItemInc(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc)
-        {
-            if (LimitSpray)
-            {
-                ref var entity = ref __instance.entityPool[entityId];
-                int hash = entity.assemblerId | entity.labId | entity.powerGenId;
-                if (hash == 0) return; // 輸入的不是支援的建築
-            }
+        #region 爪子輸入
 
+        //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(全噴)
+        public static void AddItemInc0(PlanetFactory __instance, byte itemCount, ref byte itemInc, ref bool __state)
+        {
             var status = statusArr[__instance.index]; //定位工廠
             var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
-            if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+            if (incToAdd > 0)
             {
-                Interlocked.Add(ref status.incDebt, itemCount); //記錄噴塗的物品數 (詳見num9 * this.incAbility)
+                __state = true; // 保存flag:將要噴塗
                 itemInc += (byte)incToAdd;
             }
         }
+
+        //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(LimitSpray)
+        public static void AddItemInc1(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc, ref bool __state)
+        {
+            ref var entity = ref __instance.entityPool[entityId];
+            int hash = entity.assemblerId | entity.labId;
+            if (hash == 0) return; // 輸入的不是支援的建築
+
+            var status = statusArr[__instance.index]; //定位工廠
+            var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
+            if (incToAdd > 0)
+            {
+                __state = true; // 保存flag:將要噴塗
+                itemInc += (byte)incToAdd;
+            }
+        }
+
+        //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(LimitSpray,含燃料)
+        public static void AddItemInc2(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc, ref bool __state)
+        {
+            ref var entity = ref __instance.entityPool[entityId];
+            int hash = entity.assemblerId | entity.labId | entity.powerGenId; //包含發電設備
+            if (hash == 0) return;
+
+            var status = statusArr[__instance.index]; //定位工廠
+            var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
+            if (incToAdd > 0)
+            {
+                __state = true; // 保存flag:將要噴塗
+                itemInc += (byte)incToAdd;
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))]
+        public static void InsertInto_Postfix(PlanetFactory __instance, int __result, bool __state)
+        {
+            if (__state && __result != 0) //有成功將物品送入機器, __result:送入的物品數
+            {
+                var status = statusArr[__instance.index]; //定位工廠
+                Interlocked.Add(ref status.incDebt, __result); //扣除噴塗的物品數，準備之後報銷
+            }
+        }
+
+        #endregion
 
         //[HarmonyPostfix]
         //[HarmonyPatch(typeof(FractionatorComponent), nameof(FractionatorComponent.InternalUpdate))]
@@ -139,7 +175,8 @@ namespace PlanetwideSpray
             if (status.incDebt > 0) //存在滯留扣除額, 嘗試報銷
             {
                 flag = true;
-                var incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt; // max: 7200/min
+                // 每幀最多補充incSprayTimes*2個(藍漆:60)，最大速率=120*60*60=432,000/每分鐘
+                var incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt;
                 status.incDebt -= incToAdd;
                 __instance.extraIncCount -= incToAdd;
                 //__instance.sprayTime = incToAdd; // Use in UI
@@ -159,7 +196,7 @@ namespace PlanetwideSpray
             }
             status.incCount[__instance.incAbility] += __instance.extraIncCount + __instance.incCount;
 
-
+            // 更新動畫
             int animStateTick = Mathf.RoundToInt(_animPool[__instance.entityId].state * 0.001f);
             if (flag)
             {
@@ -186,7 +223,7 @@ namespace PlanetwideSpray
             {
                 if (status.incCount[incLevel] > 0) break;
             }
-            status.incLevel = incLevel;
+            status.incLevel = incLevel; // 設置目前最大的增產劑等級
         }
 
 #pragma warning disable Harmony003

@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.5";
+        public const string VERSION = "1.1.6";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -40,6 +40,9 @@ namespace PlanetwideSpray
             var EnableSprayTurret = Config.Bind("General", "Spray Turret", true,
                 "Spray every item flow into turret\n喷涂输入防御塔的弹药");
 
+            var EnableFuelPowerGenerator = Config.Bind("General", "Spray Fuel Power Generator", false,
+                "Spray every item flow into fuel power generator\n喷涂输入燃料发电机的燃料");
+
             if (ForceProliferatorLevel.Value > 0)
             {
                 ForceProliferatorLevel.Value = Math.Min(ForceProliferatorLevel.Value, 10);
@@ -49,9 +52,31 @@ namespace PlanetwideSpray
             }
             else
             {
-                Logger.LogInfo($"Normal mode: spray all [{EnableSprayAll.Value}], station input [{EnableSprayStation.Value}], fractionator [{EnableSprayFractionator.Value}], turret [{EnableSprayTurret.Value}]");
+                Logger.LogInfo($"Normal mode: spray all [{EnableSprayAll.Value}] fuel power generator [{EnableFuelPowerGenerator.Value}] \n" +
+                $" station input [{EnableSprayStation.Value}], fractionator [{EnableSprayFractionator.Value}], turret [{EnableSprayTurret.Value}]");
                 harmony.PatchAll(typeof(Main_Patch));
-                Main_Patch.LimitSpray = !EnableSprayAll.Value;
+
+                // 爪子
+                var insertMethod = AccessTools.Method(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto));
+                if (EnableSprayAll.Value)
+                {
+                    Log.LogDebug("AddItemInc0: spray all insert");
+                    harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc0)), 600));
+                }
+                else
+                {
+                    if (EnableFuelPowerGenerator.Value)
+                    {
+                        Log.LogDebug("AddItemInc2: spray assembler, lab, powerGen");
+                        harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc2)), 600));
+                    }
+                    else
+                    {
+                        Log.LogDebug("AddItemInc1: spray assembler, lab");
+                        harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc1)), 600));
+                    }
+                }
+                
                 if (EnableSprayStation.Value)
                 {
                     harmony.PatchAll(typeof(Main_Patch.Station_Patch));

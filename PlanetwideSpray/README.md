@@ -83,10 +83,16 @@ Spray Fractionator = true
 # Default value: true
 Spray Turret = true
 
+## Spray every item flow into fuel power generator
+## 喷涂输入燃料发电机的燃料
+# Setting type: Boolean
+# Default value: false
+Spray Fuel Power Generator = false
 ```
 
 ## Changelog
 
+- v1.1.6 - Add config `Spray Fuel Power Generator`. Fix a bug that blocking sorters consume more proliferator.  
 - v1.1.5 - Support fuel power generator.  
 - v1.1.4 - Add config `Spray Fractionator`, `Spray Turret`. (DSP-0.10.32.25595)  
 - v1.1.3 - Add config `Spray Station Input`. (DSP-0.10.31.24646)  
