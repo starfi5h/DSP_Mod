@@ -25,6 +25,8 @@ namespace SampleAndHoldSim
                 workFactoryTimes = new long[length]; // the scale tick of the working factories
                 MainManager.Init();
                 UIstation.SetVeiwStation(-1, -1, 0);
+
+                //Fix_Patch.FixMinerProductCount(); // the fix is applied in StationComponent.UpdateVeinCollection
             }
         }
 

@@ -151,7 +151,7 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 ## MOD相容性:
 (✅) [DSPOptimizations](https://dsp.thunderstore.io/package/Selsion/DSPOptimizations/)(优化mod)  
 (✅) [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)(联机mod) - 只有主机可使用, 客户端会自动停用并关闭介面  
-(🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - 修复启用'跳过子弹阶段'时造成的冲突。切换后需重启游戏  
+(🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - 修复启用'跳过子弹阶段'时造成的冲突。切换设置后需重启游戏才会套用兼容  
 (⚠️) [Auxilaryfunction](https://thunderstore.io/c/dyson-sphere-program/p/blacksnipebiu/Auxilaryfunction/) - 在停止工厂时会将倍率暂时调为1避免产物异常    
 (⚠️) [Blackbox](https://dsp.thunderstore.io/package/Raptor/Blackbox/)(黑盒化mod) - 修复无法分析黑盒的问题。修复黑盒产物统计会倍增的问题。目前数据统计的UPS耗用会异常增加    
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - 修复星球矿机速率不正确的问题, 使其不随FPS变动。    

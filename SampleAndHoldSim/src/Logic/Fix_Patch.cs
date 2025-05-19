@@ -31,5 +31,22 @@ namespace SampleAndHoldSim
 			__result = __instance.energyPerTick;
 			return false;
 		}
+
+		public static void FixMinerProductCount()
+        {
+			int facotryCount = GameMain.data.factoryCount;
+			for (int factoryIndex = 0; factoryIndex < facotryCount; factoryIndex++)
+            {
+				var factory = GameMain.data.factories[factoryIndex];
+				if (factory == null) continue;
+				var factorySystem = factory.factorySystem;
+
+				for (int i = 0; i < factorySystem.minerCursor; i++)
+                {
+					ref var miner = ref factorySystem.minerPool[i];
+					if (miner.productCount < 0) miner.productCount = 0; // Fix miners that have negative tmp storage
+				}
+            }
+		}
 	}
 }

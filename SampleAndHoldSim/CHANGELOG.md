@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.19
+\- Fix that Advance Miners sometimes have negative number in temp storage.  
+
 #### v0.6.18
 \- Fix Weaver warning detection.  
 

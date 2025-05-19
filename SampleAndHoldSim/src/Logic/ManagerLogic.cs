@@ -89,7 +89,11 @@ namespace SampleAndHoldSim
             if (MainManager.TryGet(factory.index, out FactoryManager manager))
             {
                 if (manager.IsActive)
+                {
                     manager.SetMineral(__instance, __instance.storage[0].count - __state);
+                    ref var miner = ref factory.factorySystem.minerPool[__instance.minerId];
+                    if (miner.productCount < 0) miner.productCount = 0; // Fix miners that have negative tmp storage
+                }
             }
         }
 
