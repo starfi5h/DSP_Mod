@@ -378,7 +378,6 @@
   <ItemGroup>
     <Content Include="reference\Blackbox-nstrip.dll" />
     <Content Include="reference\CheatEnabler-nstrip.dll" />
-    <Content Include="reference\Multifunction_mod-nstrip.dll" />
     <Content Include="reference\UXAssist-nstrip.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

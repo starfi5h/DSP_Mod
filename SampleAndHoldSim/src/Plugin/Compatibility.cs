@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using static CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch;
 
 namespace SampleAndHoldSim
 {
@@ -36,7 +37,6 @@ namespace SampleAndHoldSim
 
         public static void OnDestory()
         {
-            CheatEnabler_Patch.OnDestory();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
@@ -467,157 +467,105 @@ namespace SampleAndHoldSim
             {
                 if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var _))
                 {
-                    harmony.PatchAll(typeof(Ejector_Patch)); // No need to dynamic patch ejectors in this case
                     return;
                 }
 
                 try
                 {
-                    //harmony.PatchAll(typeof(Warper)); //Note: Patching on generic class PatchImpl will make CE unable to function.
-                    harmony.PatchAll(typeof(CheatEnabler_Patch));
-#if DEBUG
-                    OnGameBegin();
-#endif
+                    harmony.PatchAll(typeof(Warper));
                     Log.Debug("CheatEnabler compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler skipbullet compatibility failed! Last working version: 2.3.26";
+                    string message = "CheatEnabler 'Skip bullet period'(跳过子弹阶段) compatibility failed! Last working version: 2.3.31";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
                 }
             }
 
-            [HarmonyPostfix]
-            [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
-            static void OnGameBegin()
-            {
-                try
-                {
-                    Warper.Init();
-                }
-                catch (Exception e)
-                {
-                    string message = "CheatEnabler skipbullet compatibility failed! Last working version: 2.3.26";
-                    Log.Warn(message);
-                    Log.Warn(e);
-                }
-            }
-
-            public static void OnDestory()
-            {
-                Warper.OnDestory();
-            }
-
             private static class Warper
             {
-                private static Harmony patch_sample = null;
-                private static Harmony patch_cheatEnabler = null;
-
-                public static void Init()
-                {
-                    bool enable = CheatEnabler.Patches.DysonSpherePatch.SkipBulletEnabled.Value;
-                    SkipBulletValueChanged_Prefix(enable);
-                    SkipBulletValueChanged_Postfix(enable);
-                }
-
-                public static void OnDestory()
-                {
-                    if (patch_sample != null)
-                    {
-                        patch_sample.UnpatchSelf();
-                        patch_sample = null;
-                    }
-                    if (patch_cheatEnabler != null)
-                    {
-                        patch_cheatEnabler.UnpatchSelf();
-                        patch_cheatEnabler = null;
-                    }
-                }
-
-                internal static void SkipBulletValueChanged_Prefix(bool enable)
-                {
-                    if (enable)
-                    {
-                        if (patch_sample != null)
-                        {
-                            Log.Info("patch_sample UnpatchSelf");
-                            patch_sample.UnpatchSelf(); // Remove Ejector_Patch frist to avoid conflict
-                            patch_sample = null;
-                        }
-                    }
-                    else
-                    {
-                        if (patch_cheatEnabler != null)
-                        {
-                            Log.Info("patch_cheatEnabler UnpatchSelf");
-                            patch_cheatEnabler.UnpatchSelf(); // Remove the IL modification first
-                            patch_cheatEnabler = null;
-                        }
-                    }
-                }
-
-                internal static void SkipBulletValueChanged_Postfix(bool enable)
-                {
-                    if (enable)
-                    {
-                        if (patch_cheatEnabler == null)
-                        {
-                            // Somehow this gets constantly trigger when CE unpatchself
-                            Log.Info("patch_cheatEnabler create");
-                            patch_cheatEnabler = Harmony.CreateAndPatchAll(typeof(SkipBullet_Compat_Patch), Plugin.GUID + ".patch_cheatEnabler");
-                        }
-                    }
-                    else
-                    {
-                        if (patch_sample == null)
-                        {
-                            Log.Info("patch_sample create");
-                            patch_sample = Harmony.CreateAndPatchAll(typeof(Ejector_Patch), Plugin.GUID+ ".patch_sample"); // Apply Ejector_Patch after CE patch is unload
-                        }
-                    }
-                }
-            }
-
-            private static class SkipBullet_Compat_Patch
-            {
-                [HarmonyTranspiler]
-                [HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
-                private static IEnumerable<CodeInstruction> EjectorComponent_ReplaceAddDysonSail(IEnumerable<CodeInstruction> instructions)
-                {
-                    try
-                    {
-                        var matcher = new CodeMatcher(instructions);
-                        matcher.MatchForward(false,
-                            new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch), "AddDysonSail"))
-                        );
-                        if (matcher.IsInvalid)
-                        {
-                            Log.Warn("Unable to replace SkipBulletPatch.AddDysonSail for CheatEnabler");
-                            return instructions;
-                        }
-                        matcher.RemoveInstruction().Insert(
-                            new CodeInstruction(OpCodes.Ldarg_0),
-                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))), //new
-                            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(SkipBullet_Compat_Patch), nameof(AddDysonSailWithPlanetId)))
-                        );
-                        return matcher.InstructionEnumeration();
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warn("Error in EjectorComponent_ReplaceAddDysonSail");
-                        Log.Warn(e);
-                        return instructions;
-                    }
-                }
-
-                private static void AddDysonSailWithPlanetId(DysonSwarm swarm, int orbitId, VectorLF3 uPos, VectorLF3 endVec, int planetId)
+                [HarmonyPrefix]
+                [HarmonyPatch(typeof(CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch), "AddDysonSail")]
+                public static bool AddDysonSail_Prefix(ref EjectorComponent ejector, DysonSwarm swarm, VectorLF3 uPos, VectorLF3 endVec, int[] consumeRegister)
                 {
                     // If the sail doesn't come from the focus local planet, repeat
-                    int repeatCount = (planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
-                    for (int i = 0; i < repeatCount; i++)
-                        CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch.AddDysonSail(swarm, orbitId, uPos, endVec);
+                    int repeatCount = (ejector.planetId == MainManager.FocusPlanetId) ? 1 : MainManager.UpdatePeriod;
+
+                    // AddDysonSail origin author: soarqin
+                    // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/Patches/DysonSpherePatch.cs
+                    var index = swarm.starData.index;
+                    var orbitId = ejector.orbitId;
+                    var delta1 = endVec - swarm.starData.uPosition;
+                    var delta2 = VectorLF3.Cross(endVec - uPos, swarm.orbits[orbitId].up).normalized * Math.Sqrt(swarm.dysonSphere.gravity / swarm.orbits[orbitId].radius);
+                    var bulletCount = ejector.bulletCount;
+                    lock (swarm)
+                    {
+                        var cache = _sailsCache[index];
+                        var len = _sailsCacheLen[index];
+                        if (cache == null)
+                        {
+                            SetSailsCacheCapacity(index, 256);
+                            cache = _sailsCache[index];
+                        }
+
+                        // Main modify part
+                        var shootCount = _fireAllBullets ? (bulletCount * repeatCount) : repeatCount; // Repeat
+                        var capacity = _sailsCacheCapacity[index];
+                        var leastCapacity = len + shootCount; // Repeat
+                        if (leastCapacity > capacity)
+                        {
+                            do
+                            {
+                                capacity *= 2;
+                            } while (leastCapacity > capacity);
+                            SetSailsCacheCapacity(index, capacity);
+                            cache = _sailsCache[index];
+                        }
+                        _sailsCacheLen[index] = len + shootCount; // Repeat
+                        var end = len + shootCount; // Repeat
+                        for (var i = len; i < end; i++)
+                            cache[i].FromData(delta1, delta2 + RandomTable.SphericNormal(ref swarm.randSeed, 0.5), orbitId);
+                    }
+
+                    // consumeRegister is handle in elsewhere, so no need to modify
+                    if (_fireAllBullets)
+                    {
+                        if (!ejector.incUsed)
+                        {
+                            ejector.incUsed = ejector.bulletInc >= bulletCount;
+                        }
+                        ejector.bulletInc = 0;
+                        ejector.bulletCount = 0;
+                        lock (consumeRegister)
+                        {
+                            consumeRegister[ejector.bulletId] += bulletCount;
+                        }
+                    }
+                    else
+                    {
+                        var inc = ejector.bulletInc / bulletCount;
+                        if (!ejector.incUsed)
+                        {
+                            ejector.incUsed = inc > 0;
+                        }
+                        ejector.bulletInc -= inc;
+                        ejector.bulletCount = bulletCount - 1;
+                        if (ejector.bulletCount == 0)
+                        {
+                            ejector.bulletInc = 0;
+                        }
+                        lock (consumeRegister)
+                        {
+                            consumeRegister[ejector.bulletId]++;
+                        }
+                    }
+                    ejector.time = ejector.coldSpend;
+                    ejector.direction = -1;
+
+                    // Full replace
+                    return false;
                 }
             }
         }

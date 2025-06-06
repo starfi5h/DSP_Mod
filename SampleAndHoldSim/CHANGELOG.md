@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.6.20
+\- Update CheatEnabler compat to v2.3.31  
+
 #### v0.6.19
 \- Fix that Advance Miners sometimes have negative number in temp storage.  
 
