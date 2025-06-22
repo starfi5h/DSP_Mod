@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.6.21
+\- Fix Advance Miner sometimes buffer overflow when cargo is exceed the limit.  
+\- The miner will have buffer item set to normal range (0-50) when the game loads.  
+
 #### v0.6.20
 \- Update CheatEnabler compat to v2.3.31  
 

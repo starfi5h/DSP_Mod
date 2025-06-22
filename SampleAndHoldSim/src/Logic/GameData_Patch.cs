@@ -26,7 +26,7 @@ namespace SampleAndHoldSim
                 MainManager.Init();
                 UIstation.SetVeiwStation(-1, -1, 0);
 
-                //Fix_Patch.FixMinerProductCount(); // the fix is applied in StationComponent.UpdateVeinCollection
+                Fix_Patch.FixMinerProductCount(); // the fix is also applied in StationComponent.UpdateVeinCollection
             }
         }
 
