@@ -47,8 +47,8 @@ ReplaceStation = true
 # Default value: false
 EnableHologram = false
 
-## Optimize RefreshTraffic to reduce lag when placing stations (experimental)
-## 优化RefreshTraffic以减少放置物流塔的卡顿 (实验性)
+## Optimize RefreshTraffic to reduce lag when placing stations
+## 优化RefreshTraffic以减少放置物流塔的卡顿
 # Setting type: Boolean
 # Default value: false
 EnableStationBuildOptimize = false
@@ -83,5 +83,10 @@ When replacing a station, `Finish build immediately` in CheatEnabler will be tem
 Shift-clicking on building icon will copy that building with recipe settings to hand.  
 
 [BlueprintTweaks](https://thunderstore.io/c/dyson-sphere-program/p/kremnev8/BlueprintTweaks/) (v1.6.8)  
-When the mod is not enabled and CommonAPI is enabled, add toggle blueprint view mode hotkey (`J`) and enable changing building tier in bluepirnt pannel.  
-当 蓝图增强MOD不启用 并且 启用了 CommonAPI 时，添加切换蓝图视图模式热键(`J`)并启用在蓝图面板中更改建筑层级。  
+Add some features of BlueprintTweaks when it is not present (require CommonAPI enable)  
+- Toggle blueprint view mode by hotkey (`J`)  
+- Enable changing building tier in bluepirnt pannel.  
+  
+添加部分蓝图增强MOD的功能(需要有CommonAPI前置):  
+- 添加切换蓝图视图模式热键(`J`)  
+- 在蓝图面板中更改建筑层级。  

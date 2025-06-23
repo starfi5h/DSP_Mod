@@ -1,3 +1,6 @@
+### v1.1.1
+\- `EnableStationBuildOptimize` now apply to station2station and route changes too.  
+
 ### v1.1.0
 \- Add CommonAPI feature: Toggle Blueprint View Mode hotkey (Default: `J`)  
 \- Add CommonAPI feature: Change building tier in blueprint pannel.  

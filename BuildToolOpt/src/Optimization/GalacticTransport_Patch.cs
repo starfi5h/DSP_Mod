@@ -1,11 +1,121 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace BuildToolOpt
 {
     static class GalacticTransport_Patch
     {
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.AddStation2StationRoute))]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RemoveStation2StationRoute),
+			new Type[] { typeof(int) })]
+		public static IEnumerable<CodeInstruction> S2S_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			// Replace: this.RefreshTraffic(0);
+			// With:    RefreshTraffic_S2S(this, gid0, gid1);
+			var codeMacher = new CodeMatcher(instructions)
+				.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "RefreshTraffic"))
+				.Repeat(matcher => matcher
+					.Advance(-1)
+					.RemoveInstructions(2)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldarg_1),
+						new CodeInstruction(OpCodes.Ldarg_2),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GalacticTransport_Patch), nameof(RefreshTraffic_S2S)))
+					));
+
+			return codeMacher.InstructionEnumeration();
+		}
+
+		public static void RefreshTraffic_S2S(GalacticTransport galacticTransport, int gid0, int gid1)
+        {
+			// Refresh only two stations and those pair with them
+			galacticTransport.RefreshTraffic(gid0);
+			galacticTransport.RefreshTraffic(gid1);
+		}
+
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.AddAstro2AstroBan))]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.AddAstro2AstroRoute))]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RemoveAstro2AstroBan))]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RemoveAstro2AstroRoute))]
+		public static IEnumerable<CodeInstruction> A2A_Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			// Replace: this.RefreshTraffic(0);
+			// With:    RefreshTraffic_A2A(astroId0, astroId1, itemId);
+			var codeMacher = new CodeMatcher(instructions)
+				.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "RefreshTraffic"))
+				.Repeat(matcher => matcher
+					.Advance(-2)
+					.SetAndAdvance(OpCodes.Nop, null)
+					.RemoveInstructions(2)
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldarg_1),
+						new CodeInstruction(OpCodes.Ldarg_2),
+						new CodeInstruction(OpCodes.Ldarg_3),
+						new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GalacticTransport_Patch), nameof(RefreshTraffic_A2A)))
+					));
+
+			return codeMacher.InstructionEnumeration();
+		}
+
+		public static void RefreshTraffic_A2A(int astroId0, int astroId1, int itemId)
+		{
+			// Refresh only stations on the target planet / system
+			RefreshTraffic_Astro(astroId0, itemId);
+			RefreshTraffic_Astro(astroId1, itemId);
+		}
+
+		public static void RefreshTraffic_Astro(int astroId, int itemId)
+        {
+			if (astroId % 100 == 0)
+			{
+				var star = GameMain.data.galaxy.StarById(astroId / 100);
+				if (star != null)
+				{
+					foreach (var planet in star.planets)
+					{
+						if (planet?.factory != null)
+						{
+							RefreshTraffic_Planet(planet.factory.transport, itemId);
+						}
+					}
+				}
+			}
+			else
+            {
+				var planet = GameMain.data.galaxy.PlanetById(astroId);
+				if (planet?.factory != null)
+                {
+					RefreshTraffic_Planet(planet.factory.transport, itemId);
+				}
+            }
+		}
+
+		public static void RefreshTraffic_Planet(PlanetTransport planetTransport, int itemId)
+        {
+			// Refresh only stations that have the item, and those pair with them
+			for (int staionId = 1; staionId < planetTransport.stationCursor; staionId++)
+            {
+				var station = planetTransport.stationPool[staionId];
+				if (station?.storage == null || !station.isStellar) continue;
+
+				bool hasItem = false;
+				for (int i = 0; i < station.storage.Length; i++)
+                {
+					if (station.storage[i].itemId == itemId)
+                    {
+						hasItem = true;
+						break;
+                    }
+                }
+				if (!hasItem) continue;
+				GameMain.data.galacticTransport.RefreshTraffic(station.gid);
+            }
+        }
 
 #if DEBUG
 		static HighStopwatch stopwatch = new();
