@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.13
+\- Add UXAssist compat for auto-config logistic stations (v1.3.6)  
+
 #### v1.5.12 (DSP-0.10.32.25779)
 \- Adapt to game version 0.10.32.25779  
 

@@ -71,6 +71,12 @@ namespace DeliverySlotsTweaks
 		// Replace StorageComponent.TakeItem
 		public static int TakeItem(StorageComponent storage, int itemId, int count, out int inc)
 		{
+			if (architectMode)
+			{
+				inc = 0;
+				return count;
+			}
+
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
 				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc, false);
@@ -297,6 +303,7 @@ namespace DeliverySlotsTweaks
 		[HarmonyTranspiler]
 		[HarmonyPatch(typeof(MechaForge), nameof(MechaForge.AddTaskIterate))]
 		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishAmmo))]
+		[HarmonyPatch(typeof(Mecha), nameof(Mecha.AutoReplenishBomb))]
 		public static IEnumerable<CodeInstruction> TakeItem_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			try

@@ -12,6 +12,7 @@ namespace DeliverySlotsTweaks
         {
             BlueprintTweaks_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
+            UXAssist_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
             RebindBuildBar_Patch.Init(harmony);
             UnlimitedFoundations_Patch.Init(harmony);
@@ -63,6 +64,31 @@ namespace DeliverySlotsTweaks
                 catch (Exception e)
                 {
                     Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 2.8.2");
+                    Plugin.Log.LogWarning(e);
+                }
+            }
+        }
+
+        public static class UXAssist_Patch
+        {
+            public const string GUID = "org.soardev.uxassist";
+
+            public static void Init(Harmony harmony)
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+
+                try
+                {
+                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
+                    Type classType = assembly.GetType("UXAssist.Patches.LogisticsPatch+AutoConfigLogistics");
+                    harmony.Patch(AccessTools.Method(classType, "DoConfigStation"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                    harmony.Patch(AccessTools.Method(classType, "DoConfigDispenser"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.3.6");
                     Plugin.Log.LogWarning(e);
                 }
             }
