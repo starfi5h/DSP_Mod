@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.14
+\- Fix architect mode doesn't initial after loading the game when enable by other mods.  
+
 #### v1.5.13
 \- Add UXAssist compat for auto-config logistic stations (v1.3.6)  
 

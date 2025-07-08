@@ -8,12 +8,14 @@ namespace DeliverySlotsTweaks
 {
     public class Compatibility
     {
+        public static bool IsArchitectModeModExist { get; private set; } = false;
+
         public static void Init(Harmony harmony)
         {
             BlueprintTweaks_Patch.Init(harmony);
-            Multfunction_mod_Patch.Init(harmony);
+            Multfunction_mod_Patch.Init(harmony); // ArchitectMode Mod
             UXAssist_Patch.Init(harmony);
-            CheatEnabler_Patch.Init(harmony);
+            CheatEnabler_Patch.Init(harmony); // ArchitectMode Mod
             RebindBuildBar_Patch.Init(harmony);
             UnlimitedFoundations_Patch.Init(harmony);
             Nebula_Patch.Init(harmony);
@@ -102,6 +104,7 @@ namespace DeliverySlotsTweaks
             public static void Init(Harmony _)
             {
                 if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                IsArchitectModeModExist = true;
 
                 try
                 {
@@ -137,6 +140,7 @@ namespace DeliverySlotsTweaks
                 try
                 {
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    IsArchitectModeModExist = true;
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
                     Type classType = assembly.GetType("Multifunction_mod.GUIDraw");
                     harmony.Patch(AccessTools.Method(classType, "BuildPannel"), null, new HarmonyMethod(typeof(Multfunction_mod_Patch).GetMethod(nameof(BuildPannel_Postfix))));

@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.13";
+        public const string VERSION = "1.5.14";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -134,7 +134,12 @@ namespace DeliverySlotsTweaks
             ParameterOverwrite();
             PlayerPackagePatch.OnConfigChange();
             SetMaxDeliveryGridIndex(GameMain.mainPlayer?.deliveryPackage);
-            DeliveryPackagePatch.architectMode = EnableArchitectMode.Value;
+            if (!Compatibility.IsArchitectModeModExist)
+            {
+                bool oldvalue = DeliveryPackagePatch.architectMode;
+                DeliveryPackagePatch.architectMode = EnableArchitectMode.Value;
+                if (oldvalue != DeliveryPackagePatch.architectMode) Log.LogDebug("ArchitectModeEnabled: " + DeliveryPackagePatch.architectMode);
+            }
         }
 
         [HarmonyPostfix, HarmonyPriority(Priority.HigherThanNormal)]
