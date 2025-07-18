@@ -20,7 +20,7 @@ namespace AudioReplacer
     {
         public const string GUID = "starfi5h.plugin.AudioReplacer";
         public const string NAME = "AudioReplacer";
-        public const string VERSION = "0.1.3";
+        public const string VERSION = "0.1.4";
         public static AudioReplacerPlugin Instance;
 
         public Harmony harmony;
@@ -105,7 +105,7 @@ namespace AudioReplacer
                 if (!cleanAll && !pair.Value.filePath.StartsWith(dir)) continue;
                 audioProto.audioClip = pair.Value.originAudioClip;
                 audioProto.Volume = pair.Value.originVolume;
-                audioProto.ClipCount = pair.Value.originClipCount;
+                audioProto.loadedClipCount = pair.Value.originClipCount;
                 audioCount++;
                 removedList.Add(pair.Key);
             }
@@ -253,23 +253,23 @@ namespace AudioReplacer
                 Logger.LogDebug($"Unload [{audioName}]: {value.filePath}");
                 audioProto.audioClip = value.originAudioClip;
                 audioProto.Volume = value.originVolume;
-                audioProto.ClipCount = value.originClipCount;
+                audioProto.loadedClipCount = value.originClipCount;
                 ModifyAudio.Remove(audioName);
             }
 
             Logger.LogDebug($"Load [{audioName}]: {Path.GetFileName(fullFilePath)}");
 
-            // Note: In VFAudio.Play(), proto.ClipCount == 1 will play proto.audioClip, else it will play proto.audioClipGroup[this.playClipId] or RandomClip() 
+            // Note: In VFAudio.Play(), proto.loadedClipCount == 1 will play proto.audioClip, else it will play proto.audioClipGroup[this.playClipId] or RandomClip() 
             // For proto that has multiple clips (e.g. footsteps), it will convert to the single clip
             var record = new AudioEntry
             {
                 originAudioClip = audioProto.audioClip,
                 originVolume = audioProto.Volume,
-                originClipCount = audioProto.ClipCount,
+                originClipCount = audioProto.loadedClipCount,
                 filePath = fullFilePath
             };
             audioProto.audioClip = audioClip;
-            audioProto.ClipCount = 1;
+            audioProto.loadedClipCount = 1;
             ModifyAudio.Add(audioName, record);
 
             // Reload planet audio. Apply after restarting the game or reloading the planet.

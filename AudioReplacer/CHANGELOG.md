@@ -1,3 +1,6 @@
+### v0.1.4
+\- Adpat to DSP-0.10.32  
+
 ### v0.1.3
 \- Add config `Enable UI`  
 \- Fix that custom audio doesn't replace the whole AudioProto with multiple clips.  
