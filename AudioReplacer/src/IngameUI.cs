@@ -51,7 +51,7 @@ namespace AudioReplacer
                 try
                 {
                     GameObject settingTab = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2");
-                    GameObject checkBoxWithTextTemple = __instance.fullscreenComp.transform.parent.gameObject;
+                    GameObject checkBoxWithTextTemple = __instance.vsyncComp.transform.parent.gameObject;
                     GameObject comboBoxTemple = __instance.resolutionComp.transform.gameObject;
                     GameObject inputTemple = UIRoot.instance.uiGame.planetGlobe.nameInput.gameObject; //UI Root/Overlay Canvas/In Game/Globe Panel/name-input
                     GameObject buttonTemple = __instance.revertButtons[0].gameObject; //../Option Window/details/content-1/revert-button
