@@ -35,6 +35,9 @@ The upper input field can filter the drop-down list of the audio.
 
 ## Changelog
 
+#### v1.3.1
+\- Adpat to DSP-0.10.33  
+
 #### v1.3.0
 \- Remove "Mute in background" feature as it is in vanilla game now.  
 \- Fix UI change for 0.10.30.23430  

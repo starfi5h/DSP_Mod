@@ -12,7 +12,7 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "1.3.0";
+        public const string VERSION = "1.3.1";
 
         internal static Plugin Instance;
         internal static ManualLogSource Log; 
