@@ -16,7 +16,7 @@ namespace LossyCompression
     {
         public const string GUID = "starfi5h.plugin.LossyCompression";
         public const string NAME = "LossyCompression";
-        public const string VERSION = "0.3.5";
+        public const string VERSION = "0.3.6";
         public const int FORMAT_VERSION = 1;
 
         public static Plugin Instance { get; private set; }
@@ -146,7 +146,6 @@ namespace LossyCompression
                 Log.Info($"Import format version: " + format_version);
                 DysonShellCompress.Import(r);
                 DysonSwarmCompress.Import(r);
-                UIRoot.instance.uiGame.statWindow.performancePanelUI.RefreshDataStatTexts();
 
                 if (ModCompatibility.AfeterImport != null)
                 {

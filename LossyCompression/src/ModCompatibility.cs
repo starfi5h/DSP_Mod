@@ -59,7 +59,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    LogNotice("SphereOpt", "0.8.3");
+                    LogNotice("SphereOpt", "0.9.1");
                     Log.Warn(e);
                 }
             }
@@ -88,7 +88,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    LogNotice("DSPOptimizations", "1.1.14");
+                    LogNotice("DSPOptimizations", "1.1.18");
                     Log.Warn(e);
                 }
             }
@@ -138,7 +138,7 @@ namespace LossyCompression
                 }
                 catch (Exception e)
                 {
-                    LogNotice("Nebula", "0.8.14");
+                    LogNotice("Nebula", "0.9.17");
                     Log.Warn(e);
                 }
             }

@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.3.6 (DSP 0.10.33.26540)  
+\- Fix error of RefreshDataStatTexts when loading the compressed game.  
+
 #### v0.3.5 (DSP 0.10.29.21950)  
 \- Update for NebulaAPIv2.0.0.  
 
