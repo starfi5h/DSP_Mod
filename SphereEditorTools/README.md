@@ -149,6 +149,9 @@ If you're using [r2modman](https://dsp.thunderstore.io/package/ebkr/r2modman/), 
 
 ## Changelog
 
+#### v2.2.5
+\- Fix for DSP 0.10.33.26941  
+
 #### v2.2.4
 \- Attempt to fix symmetry tools error when deleting the layer.  
 
