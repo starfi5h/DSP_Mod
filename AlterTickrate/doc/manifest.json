@@ -1,7 +1,0 @@
-{
-    "name": "AlterTickrate",
-    "description": "Change update frequency of buildings to improve UPS. 降频mod-调整各种设施的更新频率以提升逻辑帧",
-    "version_number": "0.2.4",
-    "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/AlterTickrate",
-    "dependencies": ["xiaoye97-BepInEx-5.4.17"]
-}

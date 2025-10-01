@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReorderTechQueue", "Reorder
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAndHoldSim", "SampleAndHoldSim\SampleAndHoldSim.csproj", "{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{806B18C4-E083-4295-8D66-D12B7B6F9EA9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoverTooltipDelay", "HoverTooltipDelay\HoverTooltipDelay.csproj", "{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoMute", "AutoMute\AutoMute.csproj", "{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}"
@@ -24,13 +22,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailgunsRetargetMini", "RailgunsRetargetMini\RailgunsRetargetMini.csproj", "{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LossyCompression", "LossyCompression\LossyCompression.csproj", "{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinerInfo", "MinerInfo\MinerInfo.csproj", "{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlterTickrate", "AlterTickrate\AlterTickrate.csproj", "{45586200-ECD0-42EB-82FA-C855FDB91A91}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogisticsBotsTweaks", "LogisticsBotsTweaks\LogisticsBotsTweaks.csproj", "{474D68B7-26CF-448C-A081-ADE16FBE5C8C}"
 EndProject
@@ -38,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeliverySlotsTweaks", "Deli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuildToolOpt", "BuildToolOpt\BuildToolOpt.csproj", "{F2E7C42A-3707-4BA0-8525-2C959A100E32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechaAnimMod", "MechaAnimMod\MechaAnimMod.csproj", "{991762F5-FA2F-4E42-8607-E665D62450E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechaAnimMod", "MechaAnimMod\MechaAnimMod.csproj", "{991762F5-FA2F-4E42-8607-E665D62450E0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioReplacer", "AudioReplacer\AudioReplacer.csproj", "{8D715F08-CC57-4D11-8AF9-30EDCBFB03DC}"
 EndProject
@@ -72,10 +66,6 @@ Global
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}.Release|Any CPU.Build.0 = Release|Any CPU
-		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{806B18C4-E083-4295-8D66-D12B7B6F9EA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -84,10 +74,6 @@ Global
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B2C8CF7-FB91-4B71-B98C-6C209E9BDB68}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8AF1F300-EBA5-4713-A112-A284AAE0A1B0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D05132AD-B613-4B05-9EC5-B7A4194D7D2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -96,10 +82,6 @@ Global
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D50A9E26-ADDF-46FC-BB22-12C171A89D1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{45586200-ECD0-42EB-82FA-C855FDB91A91}.Release|Any CPU.Build.0 = Release|Any CPU
 		{474D68B7-26CF-448C-A081-ADE16FBE5C8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{474D68B7-26CF-448C-A081-ADE16FBE5C8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{474D68B7-26CF-448C-A081-ADE16FBE5C8C}.Release|Any CPU.ActiveCfg = Release|Any CPU

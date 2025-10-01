@@ -4,10 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # custom
+assemblies/
 [Ll]ibs/
 Test/
-TestMod/
-TestingMod/
 output/
 
 # User-specific files
