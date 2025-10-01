@@ -41,7 +41,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 1.6.4");
+                    Plugin.Log.LogWarning("BlueprintTweaks compatibility failed! Last working version: 1.6.9");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -65,7 +65,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 2.8.2");
+                    Plugin.Log.LogWarning("Auxilaryfunction compatibility failed! Last working version: 3.0.1");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -90,7 +90,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.3.6");
+                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.4.2");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -117,7 +117,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.27");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.4.0");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -152,7 +152,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 3.4.5");
+                    Plugin.Log.LogWarning("Multfunction_mod compatibility failed! Last working version: 4.0.1");
                     Plugin.Log.LogWarning(e);
                 }
             }

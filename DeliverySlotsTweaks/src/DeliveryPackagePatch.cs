@@ -401,34 +401,52 @@ namespace DeliverySlotsTweaks
 			}
 		}
 
-		//[HarmonyTranspiler] // For backward compatiblity, use function call in Plugin to call instead
-		//[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CalculateReformData))]
-		public static IEnumerable<CodeInstruction> CalculateReformData_Transpiler(IEnumerable<CodeInstruction> instructions)
+		[HarmonyTranspiler]
+		[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CalculateReformData))]
+		[HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.DetermineReforms))]
+		public static IEnumerable<CodeInstruction> TmpPackage_Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
 		{
 			try
 			{
-				// Change: Array.Copy(base.player.package.grids, this.tmpPackage.grids, this.tmpPackage.size);
-				// To:     Array.Copy(base.player.package.grids, this.tmpPackage.grids, base.player.package.size);
+				// 因為tmpPackage被修改後比player.package更長, 任何使用Array.Copy的函式都要進行修改
+
 				// Because tmpPackage size is changed to the size larger than player package by this mod
 
 				var codeMacher = new CodeMatcher(instructions)
-					.MatchForward(false,
-						new CodeMatch(OpCodes.Ldarg_0),
-						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "tmpPackage"),
-						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "size"),
-						new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Copy"))
-					.Advance(1)
-					.RemoveInstruction()
-					.Insert(
-						new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(BuildTool), nameof(BuildTool.player))),
-						new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Player), nameof(Player.package)))
-					);
+					.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Copy"));
+
+				// Change: Array.Copy(base.player.package.grids, this.tmpPackage.grids, this.tmpPackage.size);
+				// To:     Array.Copy(base.player.package.grids, this.tmpPackage.grids, base.player.package.size);
+
+				var operand = codeMacher.InstructionAt(-1).operand;
+				if (operand != null && ((FieldInfo)operand).Name == "size")
+				{
+					codeMacher.Advance(-3)
+					.RemoveInstructions(3);
+				}
+				else if (operand == null)
+                {
+					codeMacher.Advance(-5)
+					.RemoveInstructions(5);
+				}
+				else
+                {
+					Plugin.Log.LogWarning("Transpiler TmpPackage_Transpiler unexpected operand!");
+					return instructions;
+				}
+
+				codeMacher.Insert(
+					new CodeInstruction(OpCodes.Ldarg_0),
+					new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(BuildTool), nameof(BuildTool.player))),
+					new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Player), nameof(Player.package))),
+					new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(StorageComponent), nameof(StorageComponent.size)))
+				);
 
 				return codeMacher.InstructionEnumeration();
 			}
 			catch (Exception e)
 			{
-				Plugin.Log.LogWarning("Transpiler BuildTool_BlueprintPaste.CalculateReformData error");
+				Plugin.Log.LogWarning("Transpiler TmpPackage_Transpiler error: " + __originalMethod.Name);
 				Plugin.Log.LogWarning(e);
 				return instructions;
 			}

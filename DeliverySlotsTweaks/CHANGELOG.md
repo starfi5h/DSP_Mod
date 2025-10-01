@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v1.5.15 (DSP-0.10.33.26941)
+\- Adapt to game version 0.10.33.26941. No longer supports 0.10.32 and below versions  
+\- Fix error when auto place foundation
+
+----
+
 #### v1.5.14
 \- Fix architect mode doesn't initial after loading the game when enable by other mods.  
 
