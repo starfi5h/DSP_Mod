@@ -34,6 +34,7 @@ namespace PlanetwideSpray
 
         public class Station_Patch
         {
+            // 創世之書 - 巨構使用 https://github.com/Awbugl/ProjectGenesis/blob/main/src/Patches/MegaAssembler/MegaAssemblerPatches.cs
             [HarmonyPostfix]
             [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.TryPickItemAtRear))]
             static void TryPickItemAtRear(CargoTraffic __instance, int __result, ref byte stack, ref byte inc)
@@ -48,15 +49,16 @@ namespace PlanetwideSpray
                 }
             }
 
+            // 原版 - 物流塔傳送帶輸入
             [HarmonyPostfix]
             [HarmonyPatch(typeof(CargoPath), nameof(CargoPath.TryPickItemAtRear))]
             static void TryPickItemAtRear(CargoPath __instance, int __result, ref byte stack, ref byte inc)
             {
                 if (__result == 0 || __result == 1210) return;
-                if (containerToIndex.TryGetValue(__instance.cargoContainer, out int factoryIndex)) return; //從cargoContainer嘗試反找所屬factory
+                if (containerToIndex.TryGetValue(__instance.cargoContainer, out int factoryIndex)) return; //從cargoContainer嘗試反找所屬factory                                
                 var status = statusArr[factoryIndex];
                 var incToAdd = (stack * status.incLevel) - inc;
-                if (incToAdd > 0 && status.incDebt < status.incCount[status.incLevel])
+                if (incToAdd > 0) // incLevel > 0: 有工作中的全球噴塗機有足夠儲量
                 {
                     Interlocked.Add(ref status.incDebt, stack);
                     inc += (byte)incToAdd;
@@ -150,18 +152,22 @@ namespace PlanetwideSpray
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.SpraycoaterGameTick))]
-        static void SpraycoaterGameTick_Prefix(CargoTraffic __instance)
+        [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.LogicFrame))]
+        static void LogicFrame_Prefix()
         {
             if (statusArr == null) SetArray();
-            var status = statusArr[__instance.factory.index];
-            if (status == null)
+            for (int factoryIndex = 0; factoryIndex < GameMain.data.factoryCount; factoryIndex++)
             {
-                status = new Status();
-                statusArr[__instance.factory.index] = status;
-                containerToIndex[__instance.factory.cargoContainer] = __instance.factory.index;
+                if (GameMain.data.factories[factoryIndex] == null) continue;
+                var status = statusArr[factoryIndex];
+                if (status == null)
+                {
+                    status = new Status();
+                    statusArr[factoryIndex] = status;
+                    containerToIndex[GameMain.data.factories[factoryIndex].cargoContainer] = factoryIndex;
+                }
+                Array.Clear(status.incCount, 0, MAX_INC_COUNT);
             }
-            Array.Clear(status.incCount, 0, MAX_INC_COUNT);
         }
 
         [HarmonyPostfix]
@@ -174,12 +180,16 @@ namespace PlanetwideSpray
             var status = statusArr[_traffic.factory.index];
             if (status.incDebt > 0) //存在滯留扣除額, 嘗試報銷
             {
-                flag = true;
                 // 每幀最多補充incSprayTimes*2個(藍漆:60)，最大速率=120*60*60=432,000/每分鐘
-                var incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt;
-                status.incDebt -= incToAdd;
+                int incToAdd = 0;
+                lock (statusArr) // InternalUpdate為多線程,所以要鎖住
+                {
+                    incToAdd = (__instance.incSprayTimes * 2) < status.incDebt ? (__instance.incSprayTimes * 2) : status.incDebt;
+                    status.incDebt -= incToAdd;
+                }
                 __instance.extraIncCount -= incToAdd;
                 //__instance.sprayTime = incToAdd; // Use in UI
+                flag = true;
 
                 if (__instance.extraIncCount < 0)
                 {
@@ -214,16 +224,20 @@ namespace PlanetwideSpray
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(CargoTraffic), nameof(CargoTraffic.SpraycoaterGameTick))]
-        static void SpraycoaterGameTick_Postfix(CargoTraffic __instance)
+        [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.LogicFrame))]
+        static void LogicFrame_Postfix()
         {
-            var status = statusArr[__instance.factory.index];
-            var incLevel = 10;
-            for (; incLevel > 0; incLevel--)
+            for (int factoryIndex = 0; factoryIndex < GameMain.data.factoryCount; factoryIndex++)
             {
-                if (status.incCount[incLevel] > 0) break;
+                var status = statusArr[factoryIndex];
+                if (status == null) continue;
+                var incLevel = 10;
+                for (; incLevel > 0; incLevel--)
+                {
+                    if (status.incCount[incLevel] > 0) break;
+                }
+                status.incLevel = incLevel; // 設置目前最大的增產劑等級
             }
-            status.incLevel = incLevel; // 設置目前最大的增產劑等級
         }
 
 #pragma warning disable Harmony003

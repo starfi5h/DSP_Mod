@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.6";
+        public const string VERSION = "1.1.7";
 
         public static ManualLogSource Log;
         static Harmony harmony;
