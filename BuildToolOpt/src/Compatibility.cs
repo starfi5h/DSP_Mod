@@ -13,7 +13,7 @@ namespace BuildToolOpt
         {
             Nebula_Patch.Init();
             CheatEnabler_Patch.Init(harmony);
-            DSPCalculator_Patch.Init(harmony);
+            DSPCalculator_Patch.Init(harmony); // Can't test it in debug mode due to type loading
         }
 
         public static class Nebula_Patch
@@ -48,12 +48,12 @@ namespace BuildToolOpt
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.3.26");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.4.0");
                     Plugin.Log.LogWarning(e);
                 }
             }
 
-            // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/Patches/FactoryPatch.cs#L146-L173
+            // https://github.com/soarqin/DSP_Mods/blob/master/CheatEnabler/Patches/FactoryPatch.cs
             internal static bool ArrivePlanet_Prefix()
             {
                 return !ReplaceStationLogic.IsReplacing;
@@ -74,13 +74,13 @@ namespace BuildToolOpt
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("DSPCalculator compatibility failed! Last working version: 0.5.11");
+                    Plugin.Log.LogWarning("DSPCalculator compatibility failed! Last working version: 0.5.19");
                     Plugin.Log.LogWarning(e);
                 }
             }
-
-            private static class Warpper
+            private class Warpper
             {
+#if !DEBUG
                 [HarmonyPostfix]
                 [HarmonyPatch(typeof(UIItemNode), MethodType.Constructor, new Type[] { typeof(ItemNode), typeof(UICalcWindow) })]
                 public static void UIItemNode_Postfix(UIItemNode __instance)
@@ -148,8 +148,9 @@ namespace BuildToolOpt
                     }
                     player.controller.actionBuild.NotifyTemplateChange();
                 }
-
+#endif
             }
+
         }
     }
 }

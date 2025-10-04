@@ -14,12 +14,23 @@ namespace BuildToolOpt
 		{
 			try
 			{
+				// Change: if (this.cursorValid) { if (this.castObjectId > 0) { ... } }
+				// To:     if (this.cursorValid) { if (this.castObjectId != 0) { ... } }
+				// 因為虛影(prebuild)的castObjectId < 0, 將原本判定實體改為判定是否有物體
+
+				var codeMacher = new CodeMatcher(instructions)
+					.MatchForward(true,
+						new CodeMatch(OpCodes.Ldarg_0),
+						new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.castObjectId))),
+						new CodeMatch(OpCodes.Ldc_I4_0),
+						new CodeMatch(OpCodes.Ble))
+					.SetOpcodeAndAdvance(OpCodes.Beq);
+
 				// Change: if (this.cursorValid && this.startObjectId != this.castObjectId && this.startObjectId > 0 && this.castObjectId > 0)
 				// To:     if (this.cursorValid && this.startObjectId != this.castObjectId)
 				// To allow prebuild as startObject and castObject
 
-				var codeMacher = new CodeMatcher(instructions)
-					.MatchForward(false,
+				codeMacher.MatchForward(false,
 						new CodeMatch(OpCodes.Ldarg_0),
 						new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BuildTool_Inserter), nameof(BuildTool_Inserter.startObjectId))),
 						new CodeMatch(OpCodes.Ldc_I4_0),
@@ -42,6 +53,10 @@ namespace BuildToolOpt
 					.Repeat(
 						matcher => matcher.SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(BuildTool_Inserter_Patch), nameof(ObjectIsBeltEntity)))
 					);
+
+
+
+
 				return codeMacher.InstructionEnumeration();
 			}
 			catch (Exception e)
@@ -121,6 +136,9 @@ namespace BuildToolOpt
 			bool endIsBelt = __instance.castObjectId < 0 && __instance.ObjectIsBelt(__instance.castObjectId);
 
 			var buildPreview = __instance.buildPreviews[0];
+
+
+
 			if (buildPreview.condition == EBuildCondition.TooSkew)
             {
 				if (startIsBelt && !endIsBelt && __instance.endSlots.Count > 0)

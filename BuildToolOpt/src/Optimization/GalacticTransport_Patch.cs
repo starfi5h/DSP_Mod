@@ -146,7 +146,7 @@ namespace BuildToolOpt
 			if (keyStationGId == 0) return true;
 			if (keyStationGId > __instance.stationPool.Length || __instance.stationPool[keyStationGId] == null) return true;
 
-			Plugin.Log.LogDebug("GalacticTransport.RefreshTraffic key gid = " + keyStationGId);
+			//Plugin.Log.LogDebug("GalacticTransport.RefreshTraffic key gid = " + keyStationGId);
 			var keyStation = __instance.stationPool[keyStationGId];
 			int oldPairCount = keyStation.remotePairOffsets?[6] ?? 0;
 			var otherGIds = ClearOtherStationRemotePairs(__instance.stationPool, keyStation);
@@ -154,7 +154,7 @@ namespace BuildToolOpt
 			keyStation.ClearRemotePairs();			
 			AddRemotePairs(keyStation, __instance);
 			int newPairCount = keyStation.remotePairOffsets?[6] ?? 0;
-			Plugin.Log.LogDebug($"Related station count = {otherGIds.Count}. RemotePairs count {oldPairCount} => {newPairCount}");
+			//Plugin.Log.LogDebug($"Related station count = {otherGIds.Count}. RemotePairs count {oldPairCount} => {newPairCount}");
 
 			// Update ship status for key station and the stations that have ships going to the key station
 			int logisticShipCarries = GameMain.history.logisticShipCarries;

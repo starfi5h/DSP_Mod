@@ -81,7 +81,7 @@ namespace BuildToolOpt
 			stationComponent.idleDroneCount = 0;
 			stationComponent.idleShipCount = 0;
 			stationComponent.warperCount = 0;
-			Plugin.Log.LogDebug("TakeBackItems_Station");
+			//Plugin.Log.LogDebug("TakeBackItems_Station");
         }
 
 		private static int GetOverlapStationEntityId(BuildTool_Click tool)
