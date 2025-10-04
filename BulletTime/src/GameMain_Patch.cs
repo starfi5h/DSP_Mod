@@ -1,5 +1,7 @@
 ﻿using BulletTime.Nebula;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Threading;
 using UnityEngine;
 
@@ -7,140 +9,13 @@ namespace BulletTime
 {
     class GameMain_Patch
     {
-        static bool pasueThisFrame;
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
-        private static bool FixedUpdate_Prefix(GameMain __instance)
-        {
-            // If the game is paused already, we run original function
-            if (!GameMain.isRunning || GameMain.isPaused)
-            {
-                if (!NebulaCompat.IsMultiplayerActive)
-                {
-                    // Don't skip in Multiplayer mode
-                    return true;
-                }
-            }
-
-            pasueThisFrame = GameStateManager.PauseInThisFrame();
-            if (!pasueThisFrame)
-            {
-                return true;
-            }
-
-            if (GameStateManager.AdvanceTick)
-            {
-                __instance.timei += 1L;
-                __instance.timei_once += 1L;
-            }
-            __instance.timef = __instance.timei * 0.016666666666666666;
-            __instance.timef_once = __instance.timei_once * 0.016666666666666666;
-            GameData gameData = GameMain.data;
-
-            PerformanceMonitor.BeginLogicFrame();
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.GameLogic);            
-
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.UniverseSimulate);
-            bool flag = !__instance.isMenuDemo && gameData.DetermineLocalPlanet();
-            gameData.DetermineRelative();
-            __instance.SetStarmapReferences(GameMain.data);
-            if (flag)
-                GameCamera.instance.FrameLogic();
-            VFInput.UpdateGameStates();
-            if (GameMain.mainPlayer?.controller.actionSail.fastTravelling ?? false) // Use original path for fast travel
-            {
-                GameMain.universeSimulator.GameTick(__instance.timef);
-                gameData.DetermineRelative();
-                PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
-                goto EndLogic;
-            }
-            else
-            {
-                UniverseSimulatorGameTick(); //靜止宇宙
-            }
-            PerformanceMonitor.EndSample(ECpuWorkEntry.UniverseSimulate);
-            // Scenario的部分需要時間前進才有用, 跳過
-
-            // Extract the part meaningful to player in GameData.GameTick():
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.Statistics);
-            gameData.mainPlayer.packageUtility.Count();
-            PerformanceMonitor.EndSample(ECpuWorkEntry.Statistics);
-            if (GameMain.localPlanet != null && GameMain.localPlanet.factoryLoaded)
-            {                
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
-                GameMain.localPlanet.factory.cargoTraffic.ClearStates();
-                GameMain.localPlanet.physics.GameTick(); // update player.cmd.raycast
-                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
-            }
-            if (gameData.spaceSector != null)
-            {
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
-                if (!DSPGame.IsMenuDemo)
-                    gameData.spaceSector.physics.GameTick(); // update raycast in PlayerAction_Inspect
-                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
-            }
-
-            if (gameData.guideMission != null)
-            {
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.Scenario);
-                gameData.guideMission.GameTick(); // what does this do?
-                PerformanceMonitor.EndSample(ECpuWorkEntry.Scenario);
-            }
-            if (GameMain.mainPlayer != null)
-            {
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.Player);
-                gameData.mainPlayer.ApplyGamePauseState(false);
-                PlayerGameTick(__instance.timei);
-                gameData.DetermineRelative();
-                PerformanceMonitor.EndSample(ECpuWorkEntry.Player);
-            }
-
-            if (gameData.spaceSector != null)
-            {
-                if (GameStateManager.Interactable)
-                    SkillSystem_Patch.GameTick(gameData.spaceSector.skillSystem);
-
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalPhysics);
-                gameData.spaceSector.model.PostGameTick(); //refresh visaul position
-                if (!DSPGame.IsMenuDemo)
-                {
-                    gameData.spaceSector.physics.PostGameTick(); //refresh collision box
-                }
-                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalPhysics);
-            }
-            if (gameData.localPlanet != null && gameData.localPlanet.factoryLoaded)
-            {
-                PerformanceMonitor.BeginSample(ECpuWorkEntry.LocalAudio);
-                gameData.localPlanet.audio.GameTick();
-                PerformanceMonitor.EndSample(ECpuWorkEntry.LocalAudio);
-            }
-
-        EndLogic:
-            PerformanceMonitor.EndSample(ECpuWorkEntry.GameLogic);
-            PerformanceMonitor.EndLogicFrame();
-
-            return false;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
-        private static void FixedUpdate_Postfix()
-        {
-            if (pasueThisFrame)
-            {
-                pasueThisFrame = false;
-            }
-        }
+        static bool pauseThisFrame;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
         private static void Begin_Postfix()
         {
-            if (!GameMain.instance.isMenuDemo)
-            {
-                IngameUI.Init();
-            }
+            if (!GameMain.instance.isMenuDemo) IngameUI.Init();
         }
 
         [HarmonyPostfix]
@@ -156,10 +31,7 @@ namespace BulletTime
         private static void SaveCurrentGame_Prefix()
         {
             // Save real gameTick
-            if (GameStateManager.StoredGameTick != 0)
-            {
-                GameMain.gameTick = GameStateManager.StoredGameTick;
-            }
+            if (GameStateManager.StoredGameTick != 0) GameMain.gameTick = GameStateManager.StoredGameTick;
         }
 
         [HarmonyPrefix]
@@ -202,57 +74,134 @@ namespace BulletTime
             return true;
         }
 
-        private static void UniverseSimulatorGameTick()
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(UniverseSimulator), nameof(UniverseSimulator.GameTick))]
+        private static IEnumerable<CodeInstruction> UniverseSimulatorGameTick_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            UniverseSimulator universe = GameMain.universeSimulator;
-            universe.backgroundStars.transform.position = Camera.main.transform.position;
-            if (GameMain.localPlanet != null)
+            // Due to Galactic Scale has prefix for galaxyData.UpdatePoses, we will use transpiler to replace here
+            var codeMacher = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(GalaxyData), nameof(GalaxyData.UpdatePoses))))
+                .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(GameMain_Patch), nameof(UpdatePoses)));
+            return codeMacher.InstructionEnumeration();
+        }
+
+        private static void UpdatePoses(GalaxyData galaxyData, double time)
+        {
+            // Guard for galaxyData.UpdatePoses in UniverseSimulator.GameTick
+            // if pauseThisFrame and player is not fastTravelling, then skip updating the planets positions
+            if (!pauseThisFrame || GameMain.mainPlayer == null || GameMain.mainPlayer.fastTravelling)       
+                galaxyData.UpdatePoses(time);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
+        private static void FixedUpdate_Postfix()
+        {
+            pauseThisFrame = false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.FixedUpdate))]
+        private static bool FixedUpdate_Prefix(GameMain __instance)
+        {
+            // If the game is paused already, we run original function
+            if (!GameMain.isRunning || GameMain.isPaused)
             {
-                universe.backgroundStars.transform.rotation = Quaternion.Inverse(GameMain.localPlanet.runtimeRotation);
-            }
-            else
-            {
-                universe.backgroundStars.transform.rotation = Quaternion.identity;
-            }
-            // this.galaxyData.UpdatePoses(time); //保留原本星球位置,只在接下來計算鏡頭相對位置
-            Vector3 position = GameMain.mainPlayer.position;
-            VectorLF3 uPosition = GameMain.mainPlayer.uPosition;
-            Vector3 position2 = GameCamera.main.transform.position;
-            Quaternion rotation = GameCamera.main.transform.rotation;
-            for (int i = 0; i < universe.starSimulators.Length; i++)
-            {
-                universe.starSimulators[i].UpdateUniversalPosition(position, uPosition, position2, rotation);
-            }
-            if (universe.planetSimulators != null)
-            {
-                for (int i = 0; i < universe.planetSimulators.Length; i++)
+                if (!NebulaCompat.IsMultiplayerActive)
                 {
-                    if (universe.planetSimulators[i] != null)
-                    {
-                        universe.planetSimulators[i].UpdateUniversalPosition(uPosition, position2);
-                    }
+                    // Don't skip in Multiplayer mode
+                    return true;
                 }
+            }
+
+            pauseThisFrame = GameStateManager.PauseInThisFrame();
+            if (!pauseThisFrame)
+            {
+                return true;
+            }
+
+            // 時間停止模式
+            // 取代DetermineGameTickRate loop之中的內容, 只更新必要的內容(鏡頭,相對位置,機甲動作等)
+            GameData data = GameMain.data;
+            data.mainPlayer.ApplyGamePauseState(false);
+            if (GameStateManager.AdvanceTick)
+            {
+                __instance.timei += 1L;
+                __instance.timei_once += 1L;
+            }
+            __instance.timef = __instance.timei * 0.016666666666666666;
+            __instance.timef_once = __instance.timei_once * 0.016666666666666666;
+            DeepProfiler.BeginMajorSample(DPEntry.LogicTick, -1, __instance.timei);
+            LogicFrame(GameMain.logic); //用處理時停模式的特殊邏輯取代
+            DeepProfiler.EndMajorSample();
+            return false;
+        }
+
+
+        private static void LogicFrame(GameLogic logic)
+        {
+            // 以單線程進行必要的運算, 函式從GameLogic.OnGameLogicFrame提取           
+            logic.UniverseGameTick();   // 修改: 靜止宇宙,使星球不移動(要阻止UpdatePoses),只計算鏡頭相對位置和按鍵
+            logic.LocalPlanetPhysics(); // 更新本地星球的物理, 包含碰撞和raycastLogic(游標指向的東西)
+            if (logic.sector != null)
+            {
+                logic.SpaceSectorPhysics(); // 宇宙和載具物理邏輯
+                logic.SpaceSectorPrepare(); // skillSystem.CollectTempStates
+            }
+            logic.LocalFactoryPrepare();// cargoTraffic.ClearStates
+
+            GameLogicPlayerGameTick(logic); // 修改: 玩家的動作處理(要阻止和外界交互的部分),以及姿態數據收集
+
+            // 工廠邏輯和黑霧邏輯全部跳過, 只更新物理和音效
+            //logic.FactoryBeforeGameTick();// 跳過:無人機建設和戴森球創建
+            //logic.FactoryConstructionSystemGameTick(); // 跳過:戰場分析站和無人機建設
+            //logic.WarningSystemGameTick();// 跳過:警報系統狀態更新和廣播
+            //logic.TrashSystemGameTick();  // 跳過:垃圾移動和壽命
+            //logic.ScenarioGameTick();     // 跳過: 場景邏輯(需要時間前進才有用):教程,成就,目標,元數據,異常偵測,彩蛋
+
+            SpaceSectorGameTick(logic); // 特殊處理: 投射物運動
+
+            logic.LocalPlanetAudio();
+            logic.SpaceSectorAudio();
+            logic.SpaceSectorAudioPost();
+
+            SpaceSectorPostGameTick(logic); // 特殊處理: 黑霧模型的位置更新和物理碰撞
+
+            logic.CollectPreferences(); // 收集玩家的偏好設定
+        }
+
+        [HarmonyReversePatch(HarmonyReversePatchType.Original)]
+        [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.PlayerGameTick))]
+        public static void GameLogicPlayerGameTick(GameLogic logic)
+        {
+            _ = Transpiler(null);
+            return;
+
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                // Replace this.mainPlayer.GameTick(this.timei) with our own guard function
+                var codeMacher = new CodeMatcher(instructions)
+                    .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Player), nameof(Player.GameTick))))
+                    .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(GameMain_Patch), nameof(PlayerGameTick)));
+                return codeMacher.InstructionEnumeration();
             }
         }
 
-        private static void PlayerGameTick(long time)
-        {            
-            Player player = GameMain.data.mainPlayer;
-            if (player == null)
-                return;
-
-            if (GameStateManager.HotkeyPause) //熱鍵暫停模式
+        private static void PlayerGameTick(Player player, long time)
+        {
+            if (GameStateManager.HotkeyPause) //熱鍵戰術暫停模式:機甲無法移動
             {
                 if (GameStateManager.EnableMechaFunc) //允許完整互動
                 {
                     player.GameTick(time);
                     return;
                 }
-                player.controller.SetCommandStateHeader();
-                player.controller.UpdateCommandState();
-                player.controller.GetInput();
-                player.controller.HandleBaseInput();
-                player.controller.actionRts.GameTick(time);
+                // 擷取PlayerController.GameTick中放置藍圖和查看的部分
+                player.controller.SetCommandStateHeader(); // 更新cmd的參數
+                player.controller.UpdateCommandState(); // 更新cmd的狀態
+                player.controller.GetInput(); // 處理按鍵輸入VFInput
+                player.controller.HandleBaseInput(); // 處理手拿東西
+                player.controller.actionRts.GameTick(time); 
                 player.controller.actionBuild.GameTick(time);
                 player.controller.actionInspect.GameTick(time); //阻止立即建造
                 player.controller.ClearForce();
@@ -271,6 +220,7 @@ namespace BulletTime
             // In auto-saving, we need to make sure mecha data is not corrupted
             Monitor.Enter(player);
 
+            // 時停模式:機甲可以自由移動
             player.mecha.GenerateEnergy(0.016666666666666666);
             if (player.controller.cmd.raycast != null)
             {
@@ -285,6 +235,28 @@ namespace BulletTime
             player.mecha.UpdateSkillColliders(); //更新玩家的護盾位置
 
             Monitor.Exit(player);
+        }
+
+        private static void SpaceSectorGameTick(GameLogic logic)
+        {            
+            SkillSystem_Patch.GameTick(); // 對於SpaceSectorGameTick來說,只有SkillSystem有必要更新(投射物)
+            logic.RefreshFactoryArray();  // 同步logic.factories陣列
+        }
+
+        private static void SpaceSectorPostGameTick(GameLogic logic)
+        {
+            if (logic.sector != null)
+            {
+                DeepProfiler.BeginSample(DPEntry.Sector, -1, 3L);
+                logic.sector.model.PostGameTick(); //refresh visaul position
+                DeepProfiler.BeginSample(DPEntry.LocalPhysics, -1, 0L);
+                if (!DSPGame.IsMenuDemo)
+                {
+                    logic.sector.physics.PostGameTick(); //refresh collision box
+                }
+                DeepProfiler.EndSample(-1, -2L);
+                DeepProfiler.EndSample(-1, -2L);
+            }
         }
     }
 }

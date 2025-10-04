@@ -1,5 +1,17 @@
 ## Changelog
 
+#### v1.5.11 (DSP-0.10.33.26941)
+\- Adapt to game version 0.10.33.26941
+\- Show notification when the current game version is not supported (0.10.32 and below)  
+\- Move screenshot button upward to prevent it from overlapping with speed scale text  
+\- Known issue: time cost in performance test panel does not display correctly when pausing  
+\- 适配游戏版本 0.10.33.26941  
+\- 当前游戏版本不支援（0.10.32 及更早版本）时，显示通知。  
+\- 将截图按钮上移，避免与游戏速度倍率文字重叠。  
+\- 已知问题: 性能测试面板中的耗时在游戏暂停时显示不正确。  
+
+----
+
 #### v1.5.10
 \- Fix crash in async background autosave when UPS is very low.  
 
@@ -28,6 +40,9 @@
 \- Adapt to game version 0.10.32.25496  
 \- Add config `Save`:`EnableHotkeyAutosave`, default value is false  
 
+<details>
+<summary>Previous Changelog</summary>
+
 #### v1.5.2
 \- Add config `UI`:`MaxSpeedupScale`  
 
@@ -37,9 +52,6 @@
 
 #### v1.5.0 (DSP-0.10.30.22350)
 \- Add pause/resume/speedup speed control buttons.  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v1.4.8 (DSP-0.10.30.22292)
 \- (Nebula) Update download progression for other players.  

@@ -1,179 +1,168 @@
-# Bullet Time
+# Bullet Time - Game Speed Control Mod
 
-Decouple the mecha (player actions) from the world simulation.  
-1. Provide speed control buttons at bottom right corner to set game speed from 0x to 10x.  
-2. Provide hotkey to pause the game and view the freeze in-game world.  
-3. Let user slow down world speed to reduce CPU workload, so FPS may improve if it is slowed down by UPS.  
-4. Run autosave in the background to make the game stay responsive.  
-5. Skip planet modeling for cover to speed up main menu loading.   
+Take full control of time in Dyson Sphere Program\! This mod allows you to speed up, slow down, or completely pause the game to fit your playstyle.  
+This is quality of life mod. It doesn't affect achievements or metadata.
 
-## Feature
+## Key Features
 
-### Speed control buttons
+By decoupling the mecha (player actions) from the world simulation, Bullet Time offers three main ways to control the flow of time:
+
+#### 1\. Overall Game Speed (Speed Buttons)
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
-- Pause: Toggle tactical pause mode.
-- Resume: Unpause the game, or reset game speed back to 1x.
-- Speed Up: Increase game speed (max 10x).  
-The speed adjustment is done by setting the target UPS goal. Hardware still limits the real game speed.  
-You can shift + f12 to view the real FPS/UPS at the top-left. The default 1x speed UPS is 60 tick/s.  
+  - **What it does:** Use the buttons at the bottom-right of your screen to change the entire game's speed, from 0x (pause) up to a 10x multiplier. This affects you, your factories, and everything in the universe.
+  - **Best for:** Speeding up long interstellar flights, waiting for resources to accumulate, or fast-forwarding through early-game tasks.
+  - **Note:** The speed adjustment is done by setting the target UPS (Updates Per Second, the game's simulation speed). The default 1x speed is 60 UPS. Your actual maximum speed is still limited by your PC's hardware performance.
 
-### Tactical pause mode
+#### 2\. Tactical Pause Mode (Hotkey)
 ![Tactical pause](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo3.gif)  
-When pressing `KeyPause` key, the game will enter tactical pause mode (true pause). The following actions are allowed:
-- Freely move camera and inspect in-game objects.  
-- Queue up mecha RTS order and mecha replicator.  
-- Change settings of buildings.  
-- Place down blueprints.  
+  - **What it does:** Press the `Pause` key to "hard freeze" the game. In this mode, the world and your mecha stop completely, but you can still freely move the camera, queue up construction, place blueprints, and change building settings.
+  - **Best for:** View and plan your factory without time pressure. Or observe frame-by-frame.
+  - **By default:** Your mecha actions are disabled in this mode. You can change this in the configuration (`EnableMechaFunc`).  
+You can also advance the game by a single frame using the `KeyStepOneFrame` hotkey. It is recommended to use the step function when the mecha has stopped moving.  
 
-Mecha activity is disabled in this true pause mode. To enable, set `EnableMechaFunc` to true.  
-The hotkey `KeyStepOneFrame` can step forward 1 frame. It is recommended to use the step function when the mecha has stopped moving.  
-
-### World speed adjustment  
+#### 3\. Bullet-Time Mode (World Speed Slider)
 ![World speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
-Reduce game speed to lower the calculation workload and improve FPS in the late game.  
-This adjustment affects everything except the mecha, which will continue at normal speed.  
-The control slider is available in the in-game performance statistics panel.  
-When speed is set to 0, the game will enter pause mode, and game ticks and factories will stop.  
-Unlike tactical pause mode, mecha can move freely in this pause mode (similar to Sandevistan in 2077)  
-  
-### Background autosave  
-Run autosave on a background thread to prevent game freezes.  
-The game will enter pause mode during autosave to ensure factory data consistency.  
-Interaction with the factory is prohibited during local factory data export.
+  - **What it does:** In the in-game **Performance Statistics Panel**, you'll find a "World Speed" slider. Lowering this slows down everything *except* your mecha. You continue to move, build, and interact at normal speed while the world operates in slow motion.
+  - **Best for:** Improving FPS in massive late-game factories by reducing the CPU's calculation load. It's also great for enjoying a "Sandevistan"-like experience where you have more time to react.
+  - **If set to 0%:** This creates a unique time-stop where your factories halt, but you can still move around freely.
+
+## Other Utility Features
+
+  - **Background Autosave:** Runs the autosave process on a background thread to prevent the game from freezing. The game will briefly enter the bullet-time pause mode (mecha can still move) to ensure data consistency during the save.  
+  Note: This function has risk potential, so it's better to test it first.  
+  - **Fast Main Menu Loading:** Speeds up loading into the main menu by skipping the 3D planet model rendering on the title screen.
+  - **Reduce Stuttering:** Includes an option to remove the game's forced garbage collection (GC) when using build tools, which can help reduce stuttering when placing many buildings.
+
+## How to Use
+
+It is recommended to install it through [r2modman](https://thunderstore.io/c/dyson-sphere-program/p/ebkr/r2modman/) or [GaleModManager](https://thunderstore.io/c/dyson-sphere-program/p/Kesomannen/GaleModManager/).  
+
+  - **Speed Controls:** Use the buttons in the bottom-right corner to Pause, Resume (or reset to 1x), and Speed Up.
+  - **Tactical Pause:** Press the `Pause` / `Break` key to toggle.
+  - **Bullet-Time Slider:** Open the Performance Statistics panel to find and adjust the World Speed slider.
+  - **Background Autosave Toggle:** Open the Performance Statistics panel to enable background autosave on the top-right checkbox.  
+  - **View Performance:** Press `Shift + F12` to see the real-time FPS and UPS in the top-left corner.
 
 ## Configuration
 
-Run the game one time to generate `com.starfi5h.plugin.BulletTime.cfg` file.  
-Key name can be found in [Unity manual - InputManager](https://docs.unity3d.com/Manual/class-InputManager.html).   
+After running the game once with the mod installed, a config file will be generated. You can edit it in two ways:
 
-- `KeyAutosave`  
-Keyboard shortcut for auto-save. (Default:`F10 + LeftShift`)  
+  - **Via Mod Manager (Recommended):** In your mod manager (e.g., r2modman), go to the "Config editor" section, find `com.starfi5h.plugin.BulletTime`, and click "Edit Config".
+  - **Manually:** Navigate to `BepInEx\config\` in your game folder and open the `com.starfi5h.plugin.BulletTime.cfg` file with a text editor.
 
-- `KeyPause`  
-Hotkey for toggling pause mode. (Default:`Pause｜Break`)  
+*Changes will take effect after you restart the game.*
 
-- `KeyStepOneFrame`  
-Hotkey to forward 1 frame in pause mode. (Default:`None`)  
+| Key | Description | Default |
+|---|---|---|
+| `KeyAutosave` | Keyboard shortcut for auto-save. | `F10 + LeftShift` |
+| `KeyPause` | Hotkey for toggling Tactical Pause mode. | `Pause`｜`Break` |
+| `KeyStepOneFrame` | Hotkey to advance 1 frame in pause mode. | `None` |
+| `EnableMechaFunc` | If true, your mecha can move in Tactical Pause mode. | `false` |
+| `EnableBackgroundAutosave` | Run autosave in the background. | `false` |
+| `EnableHotkeyAutosave` | Enable hotkey to trigger autosave. | `false` |
+| `StartingSpeed` | Game speed (in percent) when the game begins. | `100` |
+| `EnableFastLoading` | Skip planet rendering on title screen for faster loading. | `true` |
+| `RemoveGC` | Remove force garbage collection of build tools to reduce stutter. | `true` |
+| `MaxSpeedupScale` | Maximum game speed multiplier for the speedup button. | `10` |
 
-- `EnableMechaFunc`  
-When enabled, mecha will be able to move in pause mode and projectiles will fly at normal speed. (Default:`fasle`)    
+## Multiplayer Features (Nebula)
 
-- `EnableBackgroundAutosave`  
-Run autosave in the background. This can also be toggled in the performance test panel. (Default:`false`)  
-
-- `EnableHotkeyAutosave`  
-Enable hotkey to trigger autosave. (Default:`false`)  
-
-- `StartingSpeed`  
-Game speed when the game begins. range:0-100  (Default:`100`)  
-
-- `EnableFastLoading`  
-Increase main menu loading speed by skipping planet loading. (Default:`true`)  
-
-- `RemoveGC`  
-Remove force garbage collection of build tools. (Default:`true`)  
-
-- `MaxSpeedupScale`  
-Maximum game speed multiplier for speedup button. (Default:`10`)  
+  - When a player is joining or the host is saving, the game will enter a pause mode (where players can only move) and resume automatically when finished.
+  - If the game gets stuck in pause mode, the host can manually resume it by moving the World Speed slider.
+  - Both host and clients can use the pause hotkey. Game speedup is only synced if the "SyncUPS" multiplayer option is enabled.
+  - Players can stop/resume Dyson Sphere rotation in the editor.
 
 ## Compatibility
 
-- [✅] GalacticScale  
-- [✅] NebulaMultiplayer  
+  - [✅] GalacticScale
+  - [✅] NebulaMultiplayer
 
-### Extra Functions in Nebula Multiplayer  
+-----
 
-- When a player is joining or requesting factory data, unfreeze and enter pasue mode (the player can move).  
-- When host is saving or manually entering pause mode, the client will enter pause mode too.  
-- If clients disconnect during pausing, the host can manually resume the game by changing the slider.  
-- Players can stop/resume dyson sphere rotation in the editor at top-left button.  
-- Both host and client can stop the game using hotkey pause. Speedup button is only sync when SyncUPS multiplayer option is enabled.  
+-----
 
+# BulletTime 子弹时间-游戏速度控制MOD
 
-----
+完全掌控你的游戏时间！这个 Mod 让你可以在《戴森球计划》中自由地加速、减速或暂停游戏。  
+(便利性mod，不会影响成就和元数据)  
 
-# BulletTime 子弹时间-游戏速度控制mod
+## 核心功能详解
 
-将机甲与世界的更新逻辑解离，使两者可以以不同的时间流速运行
+本 Mod 提供三种主要的时间控制方式：
 
-## 功能
-
-### 游戏速度倍率调整
+#### 1\. 全局游戏速度（速度按钮）
 ![Speed control buttons](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/speedbuttons.png)  
-- 暂停：切换战术暂停模式。
-- 恢复：取消暂停, 或将游戏速度重置为 1 倍。
-- 加速：提高游戏速度（最高 10 倍）。  
-速度调整是通过设置目标 UPS 来完成的。实际上的游戏速度由硬体性能决定。  
-您可以按 Shift + f12 在左上角查看实际 FPS/UPS。默认1倍速 UPS 为 60 tick/s。  
+  - **功能介绍：** 使用屏幕右下角的按钮，将整个游戏的速度在 0 倍（暂停）到最高 10 倍之间调整。这会同时影响你的机甲和游戏世界中的一切。
+  - **适用场景：** 加速漫长的星际飞行、等待资源积累，或快速推进游戏前期进程。
+  - **请注意：** 速度调整的原理是设定游戏的 UPS（Updates Per Second，每秒更新次数）目标。默认 1 倍速为 60 UPS。你的实际最大速度仍然受电脑硬件性能的限制。
 
+#### 2\. 战术暂停模式（热键）
+![Tactical pause](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo3.gif)  
+  - **功能介绍：** 按下 `Pause` 键，将游戏“完全冻结”。在此模式下，世界和你的机甲都会停止，但你仍然可以自由移动视角、下达建造指令、放置蓝图和更改建筑设置。
+  - **适用场景：** 不受时间压力地查看和规划您的工厂。或者逐帧观察游戏运行。
+  - **默认状态：** 在此模式下机甲无法移动。你可以在设置中（`EnableMechaFunc`）更改此项。  
+你也可以使用 `KeyStepOneFrame` 热键来让游戏前进一个逻辑帧。建议在机甲停止移动时再使用步进功能。  
 
-### 战术暂停
+#### 3\. 子弹时间模式（世界速度滑块）
+![World speed adjustment](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/BulletTime/img/demo1.gif)  
+  - **功能介绍：** 在游戏内的 **性能测试面板** 中，可以找到一个“世界速度”滑块。调低它，只会让世界（工厂、运输机、建造无人机等）的运行速度变慢，而你的机甲移动和建造等操作则维持正常速度。
+  - **适用场景：** 在后期超大型工厂导致帧率（FPS）下降时，降低世界速度可以减轻 CPU 负担，让游戏运行更流畅。或是享受“黑客帝国”一般，周围一切慢动作的感觉。
+  - **速度为 0 时：** 这会创造一个独特的时停效果，所有工厂都将停止运作，但你依然可以自由行动。
 
-按下`KeyPause`键时，游戏将进入战术暂停模式。允许以下操作：
-- 自由移动摄像头并检查游戏内物体。
-- 队列机甲 RTS 动作指令和手搓。
-- 更改建筑物设置。
-- 放置蓝图。
+## 其他实用功能
 
-在战术暂停模式下，机甲移动以及动作将被禁用。要启用，请将`EnableMechaFunc`设置为 true。  
-可以设置热键`KeyStepOneFrame`前进1逻辑帧。建议在机甲停止移动时再使用步进功能。  
+  - **后台自动存档：** 将自动存档功能放到后台线程执行，避免游戏存档时停止回应。为了确保数据一致，存档期间游戏会短暂进入时停模式（机甲可移动），阻止机甲和工厂的互动。这项功能有一定的风险，使用前建议先测试。  
+  - **快速载入主菜单：** 跳过主菜单界面的星球模型渲染，加快进入游戏主菜单的速度。
+  - **减少卡顿：** 提供移除建筑工具强制内存回收（GC）的选项，有助于缓解在放置大量建筑时可能发生的瞬间卡顿。
 
-### 调整世界速度(时缓)
+## 如何使用
 
-在性能测试面板可以调整世界速度(0~100%)，只影响机甲以外的世界，机甲仍保持正常速度。  
-速度为0或启用热键时进入时停模式，gameTick会在离开时停模式后恢复。  
-不同于战术暂停模式，机甲是可以在这个时停模式下移动的(Za Warudo!)  
+建议透过模组管理器[r2modman](https://thunderstore.io/c/dyson-sphere-program/p/ebkr/r2modman/)或[GaleModManager](https://thunderstore.io/c/dyson-sphere-program/p/Kesomannen/GaleModManager/)安装。  
 
-### 後台自动保存
+  - **速度控制：** 点击屏幕右下角的按钮进行暂停、恢复（或重置为1倍速）和加速。
+  - **战术暂停：** 按下 `Pause` / `Break` 键切换。
+  - **子弹时间滑块：** 打开游戏内的“性能测试”面板，即可在上方找到并调整“世界速度”滑块。
+  - **后台自动保存**：打开性能统计面板，在右上角的选框上启用后台自动保存。
+  - **查看性能：** 按 `Shift + F12` 可以在左上角查看实时的 FPS 和 UPS。
 
-在後台自动保存的期间，游戏会进入时停模式。写入当地工厂時，玩家和唯读的工厂互动会被阻止。  
-使用这项功能时建议先测试。
+## 组态设定
 
-## 设置   
-.cfg文件需要先运行过游戏一次才会出现，修改后要重启游戏才会生效。  
-管理器安装: 左边选项Config editor -> 找到`starfi5h.plugin.BulletTime` -> Edit Config  
-手动安装: 更改`BepInEx\config\com.starfi5h.plugin.BulletTime.cfg`文件  
+安装 Mod 并运行过一次游戏后，将会生成配置文件。你可以通过以下两种方式修改：
 
-- `KeyAutosave`  
-自动存档的热键组合 (默认为`F10 + LeftShift`)  
+  - **通过Mod管理器（推荐）：** 在你的 Mod 管理器中（如 r2modman），于左侧菜单进入“Config editor”，找到 `com.starfi5h.plugin.BulletTime` 并点击“Edit Config”。
+  - **手动修改：** 前往游戏根目录下的 `BepInEx\config\` 文件夹，用文本编辑器打开 `com.starfi5h.plugin.BulletTime.cfg` 文件。
 
-- `KeyPause`  
-战术暂停(世界停止+画面提示)的热键 (默认为`Pause｜Break`)  
-  
-- `KeyStepOneFrame`  
-暂停模式下前进1帧的热键 (默认为`None`)  
+*所有修改将在重启游戏后生效。*
 
-- `EnableMechaFunc`  
-启用后，机甲能够在暂停模式中活动。弹射物将以正常速度飞行。 (默认为关闭`false`)    
+| 选项名称 | 功能描述 | 默认值 |
+|---|---|---|
+| `KeyAutosave` | 触发自动存档的热键。 | `F10 + LeftShift` |
+| `KeyPause` | 切换战术暂停模式的热键。 | `Pause`｜`Break` |
+| `KeyStepOneFrame` | 在暂停模式下，让游戏前进1帧的热键。 | `None` |
+| `EnableMechaFunc` | 设为 true 时，你的机甲能在战术暂停模式中移动。 | `false` |
+| `EnableBackgroundAutosave` | 在后台执行自动存档。 | `false` |
+| `EnableHotkeyAutosave` | 允许用热键触发自动存档。 | `false` |
+| `StartingSpeed` | 游戏开始时的默认世界速度（百分比）。 | `100` |
+| `EnableFastLoading` | 跳过标题画面的星球渲染以加快载入。 | `true` |
+| `RemoveGC` | 移除建筑工具的强制内存回收以减少卡顿。 | `true` |
+| `MaxSpeedupScale` | 加速按钮的最大游戏速度倍率。 | `10` |
 
-- `EnableBackgroundAutosave`  
-在背景执行自动保存。可以在统计-性能测试面板中切换。 (默认为关闭`false`)  
+## 联机功能 (Nebula)
 
-- `EnableHotkeyAutosave`  
-允许用热键触发自动存档 (默认为`false`)  
+  - 当有玩家加入或主机存档时，游戏会自动进入时停模式（此模式下玩家只可移动），并在完成后自动恢复。
+  - 如果游戏意外卡在时停模式，主机可以通过拖动世界速度滑块来手动恢复游戏运行。
+  - 主机和客户端都可以使用暂停热键。加速功能只有在联机选项“SyncUPS”启用时才会同步。
+  - 玩家可以在戴森球编辑器中暂停或恢复戴森球的旋转。
 
-- `StartingSpeed`   
-开始时的游戏速度，范围: 0-100 (默认为`100`)  
+## 相容性
 
-- `EnableFastLoading`  
-跳过封面的星球模型加载，加快载入主选单 (默认为开启`true`)  
+  - [✅] GalacticScale
+  - [✅] NebulaMultiplayer
 
-- `RemoveGC`  
-移除建筑工具的强制内存回收 (默认为开启`true`)  
-
-- `MaxSpeedupScale`  
-加速按钮的最大游戏速度倍率 (默认为`10`)  
-
-## 联机功能  
-
-- 当玩家加入、请求工厂数据、存檔時，进入时停模式。在载入完成后恢复。  
-- 如果游戏卡在时停模式，主机可以通过拖动滑块来恢复游戏运行。 
-- 玩家可以在编辑器左上角的按钮中停止/恢复戴森球旋转。  
-- 暂停/恢复/加速的功能主机和客机都可以使用。加速功能只有在SyncUPS联机选项开启时才会同步。    
-
-----
+-----
 
 #### Acknowledgements
-All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.  
-<a href="https://www.flaticon.com/free-icons/pause-button" title="pause-button icons">Pause-button icons created by Uniconlabs - Flaticon</a>  
-Speed button UI desgin from [DspGameSpeed](https://thunderstore.io/c/dyson-sphere-program/p/dsp-mods/DspGameSpeed/)  
+
+All trademarks, copyright, and resources related to Dyson Sphere Project itself, remain the property of Gamera Game and Youthcat Studio as applicable according to the license agreement distributed with Dyson Sphere Program.
+\<a href="https://www.flaticon.com/free-icons/pause-button" title="pause-button icons"\>Pause-button icons created by Uniconlabs - Flaticon\</a\>
+Speed button UI desgin from [DspGameSpeed](https://thunderstore.io/c/dyson-sphere-program/p/dsp-mods/DspGameSpeed/)

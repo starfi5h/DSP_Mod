@@ -4,23 +4,32 @@
     {
         public static bool Enable { get; set; } = false;
 
-        public static void GameTick(SkillSystem skillSystem)
+        public static void GameTick()
         {
-            if (!Enable) return;
+            if (!Enable || !GameStateManager.Interactable) return;
 
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.Combat);
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.Skill);
+            SkillSystem skillSystem = GameMain.data.spaceSector?.skillSystem;
+            if (skillSystem == null) return;
             AdvanceSkillSystem(skillSystem);
-            PerformanceMonitor.EndSample(ECpuWorkEntry.Skill);
-            PerformanceMonitor.BeginSample(ECpuWorkEntry.Combat);
         }
 
         static void AdvanceSkillSystem(SkillSystem skillSystem)
         {
+            DeepProfiler.BeginSample(DPEntry.Sector, -1, 0L);
+
+            DeepProfiler.BeginSample(DPEntry.SkillSystem, -1, 0L);
             skillSystem.PrepareTick();
-            skillSystem.CollectPlayerStates();
+            DeepProfiler.EndSample(-1, -2L);
+
+            DeepProfiler.BeginSample(DPEntry.SkillSystem, -1, 1L);
             skillSystem.GameTick(GameMain.gameTick);
+            DeepProfiler.EndSample(-1, -2L);
+
+            DeepProfiler.BeginSample(DPEntry.SkillSystem, -1, 2L);
             skillSystem.AfterTick();
+            DeepProfiler.EndSample(-1, -2L);
+
+            DeepProfiler.EndSample(-1, -2L);
         }
     }
 }

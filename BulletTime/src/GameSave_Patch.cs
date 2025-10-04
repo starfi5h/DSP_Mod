@@ -186,7 +186,7 @@ namespace BulletTime
 
             ThreadingHelper.Instance.StartAsyncInvoke(() =>
             {
-                HighStopwatch highStopwatch = new HighStopwatch();
+                HighStopwatch highStopwatch = new();
                 highStopwatch.Begin();
                 // Wait a tick to let game full stop?
                 double ups = Maths.Clamp(FPSController.averageUPS, 1.0, 60.0);
@@ -251,7 +251,7 @@ namespace BulletTime
             return true;
         }
 
-        static readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
+        static readonly AutoResetEvent autoEvent = new (false);
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.Export))]

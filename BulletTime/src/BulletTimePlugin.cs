@@ -5,7 +5,11 @@ using BulletTime.Nebula;
 using HarmonyLib;
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
+
+[assembly: AssemblyTitle(BulletTime.BulletTimePlugin.NAME)]
+[assembly: AssemblyVersion(BulletTime.BulletTimePlugin.VERSION)]
 
 namespace BulletTime
 {
@@ -16,7 +20,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.10";
+        public const string VERSION = "1.5.11";
         
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableHotkeyAutosave;
@@ -31,6 +35,7 @@ namespace BulletTime
         public static ConfigEntry<bool> EnableMechaFunc;
         public static ConfigEntry<int> MaxSpeedupScale;
         static Harmony harmony;
+        static string errorMessage = "";
 
         private void LoadConfig()
         {
@@ -38,12 +43,12 @@ namespace BulletTime
             KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n战术暂停(世界停止+画面提示)的热键");
             KeyStepOneFrame = Config.Bind("Hotkey", "KeyStepOneFrame", KeyCode.None, "Hotkey to forward 1 frame in pause mode\n暂停模式下前进1帧的热键");
             EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键战术暂停模式下启用机甲功能");
-            EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在背景执行自动存档");
+            EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在後台执行自动存档");
             EnableHotkeyAutosave = Config.Bind("Save", "EnableHotkeyAutosave", false, "Enable hotkey to trigger autosave\n允许用热键触发自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
-            StatusTextHeightOffset = Config.Bind("UI", "StatusTextHeightOffset", 100, "Height of Status text relative to auto save text\n状态提示相对于自动保存提示的高度");
+            StatusTextHeightOffset = Config.Bind("UI", "StatusTextHeightOffset", 100, "Height of Status text relative to auto save text\n状态提示相对于自动存档提示的高度");
             StatusTextPause = Config.Bind("UI", "StatusTextPause", "Bullet Time", "Status text when in pause mode\n暂停时的状态提示文字");
             MaxSpeedupScale = Config.Bind("UI", "MaxSpeedupScale", 10, "Maximum game speed multiplier for speedup button\n加速按钮的最大游戏速度倍率");
             if (MaxSpeedupScale.Value <= 0) MaxSpeedupScale.Value = 1;
@@ -51,17 +56,38 @@ namespace BulletTime
             GameStateManager.EnableMechaFunc = EnableMechaFunc.Value;
         }
 
-        public void Start()
+        private bool TestGameVersion()
         {
             if (GameConfig.gameVersion.Major == 0 && GameConfig.gameVersion.Minor < 10)
-                throw new Exception($"BulletTime {VERSION} only support 0.10.x game version!\nPlease roll back to BulletTime 1.2.14 for 0.9.x game version");
+            {
+                errorMessage = $"BulletTime {VERSION} only supports 0.10.33 game version!\nPlease roll back to BulletTime 1.2.14 for 0.9.27 game version";
+                return false;
+            }
+            if (GameConfig.gameVersion < new Version(0, 10, 33))
+            {
+                errorMessage = $"BulletTime {VERSION} only supports 0.10.33 game version!\nPlease roll back to BulletTime 1.5.10 for 0.10.32 game version";
+                return false;
+            }
+            return true;
+        }
 
+        public void Start()
+        {
             Log.Init(Logger);
             harmony = new Harmony(GUID);
             LoadConfig();
 
             try
             {
+                if (!TestGameVersion())
+                {
+                    // Show error message at the game start and disable the plugin
+                    enabled = false;
+                    Log.Error(errorMessage);
+                    harmony.PatchAll(typeof(BulletTimePlugin));                    
+                    return;
+                }
+
                 if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
                     NebulaCompat.Init(harmony);
 
@@ -134,6 +160,15 @@ namespace BulletTime
             GameSave_Patch.Enable(false);
             if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(NebulaCompat.GUID))
                 NebulaCompat.Dispose();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameMain), nameof(GameMain.Begin))]
+        static void ShowMessageOnBegin()
+        {
+            if (string.IsNullOrEmpty(errorMessage)) return;
+            UIMessageBox.Show("BulletTime mod version mismatch", errorMessage, "OK", 3, null);
+            errorMessage = "";
         }
     }
 

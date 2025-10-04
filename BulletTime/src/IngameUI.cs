@@ -30,7 +30,7 @@ namespace BulletTime
             sliderText = null;
             if (stateMessage != null)
             {
-                GameObject.Destroy(stateMessage.transform.GetParent().gameObject);
+                GameObject.Destroy(stateMessage.transform.parent.gameObject);
                 stateMessage = null;
             }
             if (backgroundSaveToggle != null)
@@ -71,7 +71,7 @@ namespace BulletTime
                     OnSliderChange(slider.value);
 
                     // Set toggle
-                    GameObject checkBoxWithText = UIRoot.instance.optionWindow.fullscreenComp.transform.parent.gameObject;
+                    GameObject checkBoxWithText = UIRoot.instance.optionWindow.vsyncComp.transform.parent.gameObject;
                     Transform dataPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.dataActiveButton.gameObject.transform.parent;
                     GameObject backgroundSaveGo = GameObject.Instantiate(checkBoxWithText, dataPanel);
                     backgroundSaveGo.name = "Background autosave toggle";
@@ -157,17 +157,24 @@ namespace BulletTime
                     infoText.enabled = true;
                     infoTextGo.SetActive(false);
 
-                    // Create speed ratio text
+                    // Create speed ratio text and reduce realTime text width
                     var realTimeTextGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/real-time-text");
+                    var rectTransfrom = (RectTransform)realTimeTextGo.transform;
+                    rectTransfrom.sizeDelta = new Vector2(50, rectTransfrom.sizeDelta.y); // Reduce button width
                     var ratioGo = GameObject.Instantiate(realTimeTextGo, realTimeTextGo.transform.parent);
                     ratioGo.name = "speed ratio-text";                    
                     ratioGo.transform.localPosition += new Vector3(0, 15f);
+                    GameObject.Destroy(ratioGo.GetComponent<UIButton>()); // Remove the time format toggle
                     ratioGo.SetActive(true);
                     speedRatioText = ratioGo.GetComponent<Text>();
 
                     // Make sure time text stays on top
                     timeTextGo.transform.SetAsLastSibling();
                     realTimeTextGo.transform.SetAsLastSibling();
+
+                    // Make screenshot button little higher to avoid overlap
+                    var screenshotGo = GameObject.Find("UI Root/Overlay Canvas/In Game/Game Menu/button-screenshot");
+                    screenshotGo.transform.localPosition = new Vector2(-28, 75);
                 }
                 // Test: Let client has speedUp button enable
                 // speedBtnGo[2].SetActive(!NebulaCompat.IsClient);
@@ -394,7 +401,7 @@ namespace BulletTime
                 GameObject.Destroy(statePanel.transform.Find("achiev-ban-text").gameObject);
                 stateMessage = statePanel.transform.Find("text").GetComponent<Text>();
             }
-            stateMessage.transform.GetParent().gameObject.SetActive(message != "");
+            stateMessage.transform.parent.gameObject.SetActive(message != "");
             stateMessage.text = message;
             CurrentStatus = message;
         }
