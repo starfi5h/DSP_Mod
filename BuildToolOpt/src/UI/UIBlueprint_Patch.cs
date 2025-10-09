@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace BuildToolOpt
@@ -47,13 +50,44 @@ namespace BuildToolOpt
             return true;
         }
 
-        [HarmonyPrefix, HarmonyPriority(Priority.Low)]
+        [HarmonyTranspiler, HarmonyPriority(Priority.Low)]
         [HarmonyPatch(typeof(UIBlueprintInspector), nameof(UIBlueprintInspector._OnOpen))]
-        public static bool UIBlueprintInspector_OnOpen(UIBlueprintInspector __instance)
+        public static IEnumerable<CodeInstruction> UIBlueprintInspector_OnOpen(IEnumerable<CodeInstruction> instructions)
         {
-            __instance.player.package.onStorageChange += __instance.OnPlayerPackageChange;
-            __instance.Refresh(false, true, false, false); // code preview will use info of the file instead of generate from blueprint data
+            try
+            {
+                // code preview will use info from the file instead of generate from blueprint data
+                // Change: this.Refresh(false, true, true, false);
+                // To:     this.Refresh(false, true, false, false); // refreshCode = false
+                // and insert UpdateCodeFromFile(this) at the end of the function
 
+                var matcher = new CodeMatcher(instructions)
+                    .MatchForward(true,
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldc_I4_0),
+                        new CodeMatch(OpCodes.Ldc_I4_1),
+                        new CodeMatch(OpCodes.Ldc_I4_1),
+                        new CodeMatch(OpCodes.Ldc_I4_0),
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Refresh"))
+                    .Advance(-2)
+                    .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
+                    .End()
+                    .Insert(
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(UIBlueprint_Patch), nameof(UpdateCodeFromFile)))
+                    );
+                return matcher.InstructionEnumeration();
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning("Transpiler UIBlueprintInspector._OnOpen fail!");
+                Plugin.Log.LogWarning(e);
+                return instructions;
+            }
+        }
+
+        static void UpdateCodeFromFile(UIBlueprintInspector __instance)
+        {
             // Update the string preview by reading the first 256 charactors in the file
             __instance.shareLengthText.text = "";
             __instance.shareCodeText.text = "";
@@ -77,8 +111,6 @@ namespace BuildToolOpt
                     Plugin.Log.LogWarning("UIBlueprintInspector_OnOpen: " + e);
                 }
             }
-
-            return false;
         }
     }
 }
