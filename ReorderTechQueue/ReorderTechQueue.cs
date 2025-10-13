@@ -2,9 +2,14 @@
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+
+[assembly: AssemblyTitle(ReorderTechQueue.ReorderTechQueuePlugin.NAME)]
+[assembly: AssemblyVersion(ReorderTechQueue.ReorderTechQueuePlugin.VERSION)]
 
 namespace ReorderTechQueue
 {
@@ -13,7 +18,7 @@ namespace ReorderTechQueue
     {
         public const string GUID = "com.starfi5h.plugin.ReorderTechQueue";
         public const string NAME = "ReorderTechQueue";
-        public const string VERSON = "1.2.1";
+        public const string VERSON = "1.2.2";
 
         Harmony harmony;
         public static ConfigEntry<int> TechQueueLength;
@@ -23,8 +28,8 @@ namespace ReorderTechQueue
         {
             harmony = new Harmony("com.starfi5h.plugin.ReorderTechQueue");
             harmony.PatchAll(typeof(ReorderTechQueue));
-            TechQueueLength = Config.Bind("General", "TechQueueLength", 8, "Length of reserach queue.\n研究佇列的长度");
-            EnableCostPreview = Config.Bind("General", "EnableCostPreview", true, "Add icons below tech cards to show the required matrices.\n在科技树的研究节点下方新增消耗矩阵种类的预览小图");
+            TechQueueLength = Config.Bind("General", "TechQueueLength", 0, "Length of research queue. Value 0 = using vanilla settings\n研究佇列的长度。0 = 不更改");
+            EnableCostPreview = Config.Bind("General", "EnableCostPreview", true, "Add indicator below tech cards to show the required materials.\n在科技树的研究节点下方新增科技需求材料的小图预览");
             harmony.PatchAll(typeof(UITechNodePatch));
 #if DEBUG
             ReorderTechQueue.Init();
@@ -49,6 +54,8 @@ namespace ReorderTechQueue
         [HarmonyPatch(typeof(GameHistoryData), "SetForNewGame")]
         public static void ChangeTechQueueLength(GameHistoryData __instance)
         {
+            if (ReorderTechQueuePlugin.TechQueueLength.Value <= 0) return;
+
             int[] newArray = new int[ReorderTechQueuePlugin.TechQueueLength.Value];
             int minLength = Math.Min(__instance.techQueue.Length, newArray.Length);
             Array.Copy(__instance.techQueue, newArray, minLength);
@@ -83,6 +90,8 @@ namespace ReorderTechQueue
 
         public static void AddUIReorderNode(UIResearchQueueNode[] nodes)
         {
+            // The reorder function is in 0.10.33 base game
+            if (GameConfig.gameVersion > new Version(0, 10, 32)) return;
             for (int i = 0; i < nodes.Length; i++)
             {
                 GameObject gameObject = nodes[i].gameObject;
@@ -260,7 +269,7 @@ namespace ReorderTechQueue
                 GameMain.data.history.EnqueueTech(newQueue[i]);
             }
 
-            // if techId is removed due to dependenies conflict, reset currIndex
+            // if techId is removed due to dependencies conflict, reset currIndex
             return GameMain.data.history.techQueue[newIndex] == techId ? newIndex : -1;
         }
     }
