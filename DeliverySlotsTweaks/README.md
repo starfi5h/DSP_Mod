@@ -72,12 +72,12 @@ When reducing ColCount, please clean up logistic slots first to prevent hidden s
 
 ## MOD兼容性
 RebindBuildBar(1.0.4): 可改工具列会显示背包+物流清单的建筑数目  
-BlueprintTweaks(1.6.4): 使用带地基的蓝图时允许使用物流栏内的物品  
 Auxilaryfunction(2.8.2): 飞往未完成建筑也会使用物流栏位的物品  
 UXAssist(1.3.6): 自动配置物流站也会使用物流栏位的物品填充  
 Multifunction_mod(3.4.5), CheatEnabler(2.3.27): 建筑师模式开启时, 工具列将显示建筑数目为999并且不再消耗  
 NebulaMultiplayerMod(0.9.0): 其他玩家发起的建筑事件不会消耗本地背包中的建筑  
-  
+FractionateEverything(2.2.1): 万物分馏mod存在时不再套用使用物流清单相关修改, 避免冲突  
+
 BuildBarTool(1.0.1): 第二建造栏未支援此mod的功能  
 可能会和改机甲物流背包的mod冲突  
 

@@ -18,7 +18,7 @@ namespace DeliverySlotsTweaks
     {
         public const string GUID = "starfi5h.plugin.DeliverySlotsTweaks";
         public const string NAME = "DeliverySlotsTweaks";
-        public const string VERSION = "1.5.15";
+        public const string VERSION = "1.5.16";
 
         public static Plugin Instance;
         public static ManualLogSource Log;
@@ -36,22 +36,24 @@ namespace DeliverySlotsTweaks
 
         Harmony harmony;
 
-        public void Start()
+        private void InitConfig()
         {
             UseLogisticSlots = Config.Bind("DeliveryPackage", "UseLogisticSlots", true,
-                "Let replicator and build tools use items in logistic slots.\n使手动制造和建筑工具可以使用物流清单内的物品");
+                "Let replicator and build tools use items in logistic slots. (require restart)\n使手动制造和建筑工具可以使用物流清单内的物品");
 
             AutoRefillFuel = Config.Bind("DeliveryPackage", "AutoRefillFuel", false,
-                "Allow fuel chamber to also take from logistics slots.\n自动补充燃料时也会使用物流清单内的物品");
+                "Allow fuel chamber to also take from logistics slots. (require restart)\n自动补充燃料时也会使用物流清单内的物品");
 
             AutoRefillWarper = Config.Bind("DeliveryPackage", "AutoRefillWarper", false,
                 "Auto refill space warper from inventory and logistics slots.\n从背包和物流清单自动补充翘曲器");
 
             ColCount = Config.Bind("DeliveryPackage", "ColCount", 0,
                 new ConfigDescription("NoChange:0 TechMax:3 Limit:5\n物流清单容量-列(不改:0 原版科技:3 最高上限:5)", new AcceptableValueRange<int>(0, 5)));
+            ColCount.SettingChanged += (_, _) => ApplyConfigs();
 
             StackSizeMultiplier = Config.Bind("DeliveryPackage", "StackSizeMultiplier", 0,
                 "NoChange:0 TechMax:10\n物流清单物品堆叠倍率(不改:0 原版科技:10)");
+            StackSizeMultiplier.SettingChanged += (_, _) => ApplyConfigs();
 
             DeliveryFirst = Config.Bind("DeliveryPackage", "DeliveryFirst", true,
                 "When logistic bots send items to mecha, send them to delivery slots first.\n配送机会优先将物品送入物流清单的栏位");
@@ -61,25 +63,35 @@ namespace DeliverySlotsTweaks
 
             PlayerPackageStackSize = Config.Bind("PlayerPackage", "StackSize", 0,
                 "Overwrite stack size in inventory. NoChange:0\n统一设置玩家背包中的物品数量堆疊上限(上限=常数值,每件物品皆相同) (不改:0)");
+            PlayerPackageStackSize.SettingChanged += (_, _) => ApplyConfigs();
 
             PlayerPackageStackMultiplier = Config.Bind("PlayerPackage", "StackMultiplier", 0,
                 "Apply multiplier for stack size in inventory. NoChange:0\n修改玩家背包中的物品堆疊倍率乘积(上限=原物品堆叠*倍率) (不改:0)");
+            PlayerPackageStackMultiplier.SettingChanged += (_, _) => ApplyConfigs();
 
             EnableArchitectMode = Config.Bind("BuildTool", "EnableArchitectMode", false,
                 "Build without requirement of items (infinite buildings)\n建筑师模式:建造无需物品");
+            EnableArchitectMode.SettingChanged += (_, _) => ApplyConfigs();
 
             EnableFastReplicator = Config.Bind("BuildTool", "EnableFastReplicator", true,
-                "Right click on hotbar to queue the building in replicator\n右键单击快捷栏中的建筑可直接在合成器排程制造");
+                "Right click on hotbar to queue the building in replicator (require restart)\n右键单击快捷栏中的建筑可直接在合成器排程制造");
+        }
 
+        public void Start()
+        {
             Instance = this;
             Log = Logger;
             harmony = new(GUID);
+            InitConfig();
             Compatibility.Init(harmony);
    
             harmony.PatchAll(typeof(Plugin));
             if (UseLogisticSlots.Value)
             {
-                harmony.PatchAll(typeof(DeliveryPackagePatch));
+                if (!Compatibility.IsDeliveryPackageModExist)
+                {
+                    harmony.PatchAll(typeof(DeliveryPackagePatch));
+                }
                 if (AutoRefillFuel.Value)
                 {
                     harmony.Patch(AccessTools.Method(typeof(Mecha), nameof(Mecha.AutoReplenishFuel)), null, null,
@@ -116,7 +128,6 @@ namespace DeliverySlotsTweaks
         internal static void OnApplyClick()
         {
             Instance.Config.Reload(); // Reload config file when clicking 'Apply' in game settings
-            ApplyConfigs();
         }
 
         [HarmonyPostfix]

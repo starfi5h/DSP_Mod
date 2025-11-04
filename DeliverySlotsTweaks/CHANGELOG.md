@@ -1,29 +1,34 @@
 ## Changelog
 
+#### v1.5.16 (DSP-0.10.33.27026)
+- Fix issue that using foundation blueprint doesn't cost foundations in logistic slots
+- `UseLogisticSlots` functions will not apply when FractionateEverything mod is present to fix compatibility.  
+- Some configs can be changed by configuration manager in real-time  
+
 #### v1.5.15 (DSP-0.10.33.26941)
-\- Adapt to game version 0.10.33.26941. No longer supports 0.10.32 and below versions  
-\- Fix error when auto place foundation
+- Adapt to game version 0.10.33.26941. No longer supports 0.10.32 and below versions  
+- Fix error when auto place foundation
 
 ----
 
 #### v1.5.14
-\- Fix architect mode doesn't initial after loading the game when enable by other mods.  
+- Fix architect mode doesn't initial after loading the game when enable by other mods.  
 
 #### v1.5.13
-\- Add UXAssist compat for auto-config logistic stations (v1.3.6)  
+- Add UXAssist compat for auto-config logistic stations (v1.3.6)  
 
 #### v1.5.12 (DSP-0.10.32.25779)
-\- Adapt to game version 0.10.32.25779  
+- Adapt to game version 0.10.32.25779  
 
 #### v1.5.11 (DSP-0.10.32.25712)  
-\- Fix placing a blueprint while the required buildings are in the delivery slots causes white holograms instead of green ones.  
-\- Add CheatEnabler compat to v2.3.27  
+- Fix placing a blueprint while the required buildings are in the delivery slots causes white holograms instead of green ones.  
+- Add CheatEnabler compat to v2.3.27  
 
 #### v1.5.10 (DSP-0.10.32.25496)
-\- Fix error when laying foundations in blueprint mode.  
+- Fix error when laying foundations in blueprint mode.  
 
 #### v1.5.9 (DSP-0.10.31.24646)
-\- Adapt to game version 0.10.31.24646  
+- Adapt to game version 0.10.31.24646  
 
 <details>
 <summary>Previous Changelog</summary>

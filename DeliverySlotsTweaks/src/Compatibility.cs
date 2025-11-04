@@ -9,44 +9,18 @@ namespace DeliverySlotsTweaks
     public class Compatibility
     {
         public static bool IsArchitectModeModExist { get; private set; } = false;
+        public static bool IsDeliveryPackageModExist { get; private set; } = false;
 
         public static void Init(Harmony harmony)
         {
-            BlueprintTweaks_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony); // ArchitectMode Mod
             UXAssist_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony); // ArchitectMode Mod
             RebindBuildBar_Patch.Init(harmony);
             UnlimitedFoundations_Patch.Init(harmony);
             Nebula_Patch.Init(harmony);
+            FractionateEverything_Patch.Init();
         }
-
-        public static class BlueprintTweaks_Patch
-        {
-            public const string GUID = "org.kremnev8.plugin.BlueprintTweaks";
-
-            public static void Init(Harmony harmony)
-            {
-                try
-                {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("BlueprintTweaks.BlueprintPasteExtension");
-                    harmony.Patch(AccessTools.Method(classType, "OnUpdate"), null, null,
-                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
-                    harmony.Patch(AccessTools.Method(classType, "CheckItems"), null, null,
-                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.UIBuildMenu_Transpiler))));
-                    harmony.Patch(AccessTools.Method(classType, "CheckItems"), null, null,
-                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
-                }
-                catch (Exception e)
-                {
-                    Plugin.Log.LogWarning("BlueprintTweaks compatibility failed! Last working version: 1.6.9");
-                    Plugin.Log.LogWarning(e);
-                }
-            }
-        }
-
 
         public static class Auxilaryfunction_Patch
         {
@@ -266,6 +240,20 @@ namespace DeliverySlotsTweaks
                 if (itemId == 1131) // FOUNDATION_ITEM_ID
                 {
                     __result = 9999;
+                }
+            }
+        }
+
+        public static class FractionateEverything_Patch
+        {
+            public const string GUID = "com.menglei.dsp.fe";
+
+            public static void Init()
+            {
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID))
+                {
+                    Plugin.Log.LogInfo("Disable UseLogisticSlots functions as FractionateEverything mod exist!");
+                    IsDeliveryPackageModExist = true;
                 }
             }
         }
