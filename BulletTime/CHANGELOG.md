@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.12 (DSP-0.10.33.27026)
+\- Add new config `MaxSimulationSpeed` to fast set/reset simulation speed in outer space by shift-click.  
+\- 添加新配置项 `MaxSimulationSpeed`，可通过按住 Shift 键并单击来快速设置/重置在外太空时的模拟速度。  
+
 #### v1.5.11 (DSP-0.10.33.26941)
 \- Adapt to game version 0.10.33.26941
 \- Show notification when the current game version is not supported (0.10.32 and below)  

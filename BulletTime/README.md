@@ -64,6 +64,7 @@ After running the game once with the mod installed, a config file will be genera
 | `EnableFastLoading` | Skip planet rendering on title screen for faster loading. | `true` |
 | `RemoveGC` | Remove force garbage collection of build tools to reduce stutter. | `true` |
 | `MaxSpeedupScale` | Maximum game speed multiplier for the speedup button. | `10` |
+| `MaxSimulationSpeed` | In outer space, shift-click to set the simulation speed to this value. | `10.0` |
 
 ## Multiplayer Features (Nebula)
 
@@ -146,6 +147,7 @@ After running the game once with the mod installed, a config file will be genera
 | `EnableFastLoading` | 跳过标题画面的星球渲染以加快载入。 | `true` |
 | `RemoveGC` | 移除建筑工具的强制内存回收以减少卡顿。 | `true` |
 | `MaxSpeedupScale` | 加速按钮的最大游戏速度倍率。 | `10` |
+| `MaxSimulationSpeed` | 在外太空时,可以shift+点击快速达到此指定倍率 | `10.0` |
 
 ## 联机功能 (Nebula)
 

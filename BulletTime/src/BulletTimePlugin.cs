@@ -20,7 +20,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.11";
+        public const string VERSION = "1.5.12";
         
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableHotkeyAutosave;
@@ -34,6 +34,7 @@ namespace BulletTime
         public static ConfigEntry<string> StatusTextPause;
         public static ConfigEntry<bool> EnableMechaFunc;
         public static ConfigEntry<int> MaxSpeedupScale;
+        public static ConfigEntry<float> MaxSimulationSpeed;
         static Harmony harmony;
         static string errorMessage = "";
 
@@ -52,6 +53,7 @@ namespace BulletTime
             StatusTextPause = Config.Bind("UI", "StatusTextPause", "Bullet Time", "Status text when in pause mode\n暂停时的状态提示文字");
             MaxSpeedupScale = Config.Bind("UI", "MaxSpeedupScale", 10, "Maximum game speed multiplier for speedup button\n加速按钮的最大游戏速度倍率");
             if (MaxSpeedupScale.Value <= 0) MaxSpeedupScale.Value = 1;
+            MaxSimulationSpeed = Config.Bind("UI", "MaxSimulationSpeed", 10f, "In outer space, shift-click to set the simulation speed to this value. 在外太空时,可以shift+点击快速达到此指定倍率");
 
             GameStateManager.EnableMechaFunc = EnableMechaFunc.Value;
         }
@@ -103,26 +105,13 @@ namespace BulletTime
 
                 if (EnableFastLoading.Value)
                 {
-                    try
-                    {
-                        harmony.PatchAll(typeof(GameLoader_Patch));
-                    }
-                    catch
-                    {
-                        Log.Warn("Fast loading patch didn't success!");
-                    }
+                    TryPatch(harmony, typeof(GameLoader_Patch), "Fast loading patch didn't success!");
                 }
                 if (RemoveGC.Value)
                 {
-                    try
-                    {
-                        harmony.PatchAll(typeof(BuildTool_Patch));
-                    }
-                    catch
-                    {
-                        Log.Warn("BuildTool no GC patch didn't success!");
-                    }
+                    TryPatch(harmony, typeof(BuildTool_Patch), "BuildTool no GC patch didn't success!");
                 }
+                TryPatch(harmony, typeof(SimulateSpeed_Patch), "Simulate Tool shift-click fuction disable!");
             }
             catch (Exception e)
             {
@@ -133,6 +122,20 @@ namespace BulletTime
             IngameUI.Init(); //Only enable in develop mode
 #endif
         }
+
+        private void TryPatch(Harmony harmony, Type type, string failMessage = "")
+        {
+            try
+            {
+                harmony.PatchAll(type);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(failMessage);
+                Log.Warn(ex);
+            }
+        }
+
 
         public void Update()
         {
