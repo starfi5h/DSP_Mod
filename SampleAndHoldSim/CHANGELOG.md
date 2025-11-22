@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v0.7.0 (DSP-0.10.33.27026)
+\- Adapt to game new multithreading system version.  
+
+<details>
+<summary>Previous Changelog</summary>
+
 #### v0.6.21
 \- Fix Advance Miner sometimes buffer overflow when cargo is exceed the limit.  
 \- The miner will have buffer item set to normal range (0-50) when the game loads.  
@@ -37,9 +43,6 @@
 
 #### v0.6.10
 \- Fix UI change for DSP-0.10.30.23430  
-
-<details>
-<summary>Previous Changelog</summary>
 
 #### v0.6.9
 \- Update for DSP-0.10.30.23292  
