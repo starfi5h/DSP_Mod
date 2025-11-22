@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.7.1
+\- Fix a bug that sails cannot be absorbed.  
+
 #### v0.7.0 (DSP-0.10.33.27026)
 \- Adapt to game new multithreading system version.  
 

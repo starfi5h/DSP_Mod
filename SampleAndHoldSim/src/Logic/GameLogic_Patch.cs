@@ -46,6 +46,16 @@ namespace SampleAndHoldSim
             idleFactoryCount = GameMain.data.factoryCount - workFactoryCount;
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(GameLogic), nameof(GameLogic.RefreshFactoryArray))]
+        static bool RefreshFactoryArray_Prefix(GameLogic __instance)
+        {
+            if (MainManager.UpdatePeriod <= 1) return true;
+
+            __instance.factories = workFactories;
+            __instance.factoryCount = workFactoryCount;
+            return false;
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.UniverseGameTick))]
         [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.PlayerGameTick))]
@@ -69,7 +79,7 @@ namespace SampleAndHoldSim
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(GameLogic), nameof(GameLogic.OnFactoryFrameBegin))]
-        static void OnFactoryFrameBegin(GameLogic __instance)
+        static void OnFactoryBegin(GameLogic __instance)
         {
             // 將時間替換成倍率縮減後的真實時間, 以讓idle工廠可以正常運作
             // 對於focus local的本地工廠則在GameLogic_Patch特殊處理
@@ -81,16 +91,6 @@ namespace SampleAndHoldSim
 
             // 處理相關Manager邏輯
             ManagerLogic.OnFactoryFrameBegin();
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(GameLogic), nameof(GameLogic.RefreshFactoryArray))]
-        static bool RefreshFactoryArray_Prefix(GameLogic __instance)
-        {
-            if (MainManager.UpdatePeriod <= 1) return true;
-
-            __instance.factories = workFactories;
-            __instance.factoryCount = workFactoryCount;
-            return false;
         }
 
         // Used by mod compat 做為兼容替代保留

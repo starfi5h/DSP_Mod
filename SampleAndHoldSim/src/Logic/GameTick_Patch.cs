@@ -15,6 +15,23 @@ namespace SampleAndHoldSim
             return GameMain.gameTick / scale;
         }
 
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        [HarmonyPatch(typeof(TrashSystem), nameof(TrashSystem.GameTick))]
+        [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.GameTick))]
+        [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.BulletGameTick))]
+        static void Time_Correct(ref long time)
+        {
+            time = GameMain.gameTick;
+        }
+
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        [HarmonyPatch(typeof(DysonSphere), nameof(DysonSphere.GameTick))]
+        static void GameTick_Correct(ref long gameTick)
+        {
+            // 不能直接改GameLogic.timei, 會報錯
+            gameTick = GameMain.gameTick;
+        }
+
         [HarmonyPrefix, HarmonyPriority(Priority.High)]
         [HarmonyPatch(typeof(TrashSystem), nameof(TrashSystem.AddTrashFromGroundEnemy))]
         public static void AddTrashFromGroundEnemy_Prefix(PlanetFactory factory, ref int life)

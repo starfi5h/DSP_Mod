@@ -79,6 +79,15 @@ namespace SampleAndHoldSim
 
     public partial class FactoryManager
     {
+        // 用以下的執行順序紀錄貨物在非物流期間的變動量:
+        // StationBeforeTick()
+        // ...接口入塔
+        // StationBeforeTransport()
+        // ...物流期(小飛機,船)
+        // StationAfterTransport()
+        // ...接口出塔,爪子等
+        // StationAfterTick()
+
         private StationData[] stationDataPool;
 
         public void SetMineral(StationComponent station, int mineralCount)

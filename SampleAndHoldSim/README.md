@@ -329,7 +329,7 @@ If issues persist, report with log files and mod list.
 
 ---
 
-## Advanced Questions / 高级问题
+## Advanced Questions / 进阶问题
 
 ### Q: How does the "sample and hold" algorithm work? / "采样保持"算法如何工作？
 
