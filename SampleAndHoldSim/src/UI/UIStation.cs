@@ -8,7 +8,7 @@ namespace SampleAndHoldSim
     {
         public static bool UnitPerMinute = false;
         public static int ViewFactoryIndex = -1;
-        public static int VeiwStationId = -1;
+        public static int ViewStationId = -1;
         static Text[] changeRateText;
 
         static int[,] periodArray;
@@ -53,7 +53,7 @@ namespace SampleAndHoldSim
         {
             if (GameMain.gameTick % 10 != 0)
                 return;
-            if (__instance.stationId != VeiwStationId)
+            if (__instance.stationId != ViewStationId)
             {
                 UIStationWindow_OnOpen(__instance);
                 return;
@@ -104,23 +104,23 @@ namespace SampleAndHoldSim
         public static void Record(StationData data)
         {
             // Reset record array if veinGroups length change
-            if (sumArray.Length < data.tmpCount.Length)
+            if (sumArray.Length < data.deltaCount.Length)
             {
-                Log.Warn($"UIstation.Record: length: {sumArray.Length} -> {data.tmpCount.Length}");
-                periodArray = new int[Period + 1, data.tmpCount.Length];
-                sumArray = new int[data.tmpCount.Length];
+                Log.Warn($"UIstation.Record: length: {sumArray.Length} -> {data.deltaCount.Length}");
+                periodArray = new int[Period + 1, data.deltaCount.Length];
+                sumArray = new int[data.deltaCount.Length];
                 cursor = 0;
                 counter = 0;
             }
 
-            for (int i = 0; i < data.tmpCount.Length; i++)
+            for (int i = 0; i < data.deltaCount.Length; i++)
             {
                 // collect item count change in SETP ticks
-                periodArray[Period, i] += data.tmpCount[i];
+                periodArray[Period, i] += data.deltaCount[i];
             }
             if (++counter >= STEP)
             {
-                for (int i = 0; i < data.tmpCount.Length; i++)
+                for (int i = 0; i < data.deltaCount.Length; i++)
                 {
                     // sliding window: replace old value with new value
                     sumArray[i] += -periodArray[cursor, i] + periodArray[Period, i];
@@ -139,10 +139,10 @@ namespace SampleAndHoldSim
             if (Period == 0)
                 return;
 
-            if (ViewFactoryIndex != factoryId || VeiwStationId != stationId)
+            if (ViewFactoryIndex != factoryId || ViewStationId != stationId)
             {
                 ViewFactoryIndex = factoryId;
-                VeiwStationId = stationId;
+                ViewStationId = stationId;
                 if (length > 0)
                 {
                     periodArray = new int[Period + 1, length];

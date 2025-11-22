@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -8,7 +7,7 @@ namespace SampleAndHoldSim
 {
     class UIcontrol
     {
-        public static int SliderMax = 10;
+        public static int SliderMax = 20;
 
         static bool initialized;
         static GameObject group;
@@ -29,7 +28,7 @@ namespace SampleAndHoldSim
                     Slider slider0 = UIRoot.instance.uiGame.dysonEditor.controlPanel.inspector.layerInfo.slider0;
                     InputField input0 = UIRoot.instance.uiGame.dysonEditor.controlPanel.inspector.layerInfo.input0;
                     Text text0 = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuValueText1;
-                    GameObject checkBoxWithTextTemple = UIRoot.instance.optionWindow.fullscreenComp.transform.parent.gameObject;
+                    GameObject checkBoxWithTextTemple = UIRoot.instance.optionWindow.vsyncComp.transform.parent.gameObject;
                     GameObject panelObj = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuActiveButton.gameObject.transform.parent.gameObject;
 
                     group = new GameObject("SAHS_Group");
@@ -39,13 +38,13 @@ namespace SampleAndHoldSim
 
                     GameObject tmp = GameObject.Instantiate(text0.gameObject, group.transform);
                     tmp.name = "text_factory";
-                    tmp.transform.localPosition = new Vector3(-50, 9);
+                    tmp.transform.localPosition = new Vector3(-50, 9 - 10);
                     text_factory = tmp.GetComponent<Text>();
                     text_factory.text = "Ratio".Translate();
 
                     tmp = GameObject.Instantiate(input0.gameObject, group.transform);
                     tmp.name = "input_UpdatePeriod";
-                    tmp.transform.localPosition = new Vector3(155, 1);
+                    tmp.transform.localPosition = new Vector3(155, 1 - 10);
                     tmp.GetComponent<RectTransform>().sizeDelta = new Vector2(36, 20);
                     input = tmp.GetComponent<InputField>();
                     input.characterValidation = InputField.CharacterValidation.Integer;
@@ -57,7 +56,8 @@ namespace SampleAndHoldSim
 
                     tmp = GameObject.Instantiate(slider0.gameObject, group.transform);
                     tmp.name = "slider_UpdatePeriod";
-                    tmp.transform.localPosition = new Vector3(60, -20, -2);
+                    tmp.transform.localPosition = new Vector3(157, -27, -2);
+                    tmp.GetComponent<RectTransform>().sizeDelta = new Vector2(180, 12);
                     slider = tmp.GetComponent<Slider>();
                     slider.minValue = 1;
                     slider.maxValue = SliderMax;
@@ -69,11 +69,11 @@ namespace SampleAndHoldSim
 
                     tmp = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
                     tmp.name = "checkbox_local";
-                    tmp.transform.localPosition = new Vector3(60, -25, 0);
+                    tmp.transform.localPosition = new Vector3(80, 30, 0);
                     GameObject.Destroy(tmp.GetComponent<Localizer>());
                     Text text_local = tmp.GetComponent<Text>();
                     text_local.font = text_factory.font;
-                    text_local.fontSize = 14;
+                    text_local.fontSize = 12;
                     text_local.text = "Focus local".Translate();
 
                     tip3 = tmp.AddComponent<UItooltip>();
@@ -83,7 +83,7 @@ namespace SampleAndHoldSim
                     toggle_local = tmp.GetComponentInChildren<UIToggle>().toggle;
                     toggle_local.onValueChanged.AddListener(new UnityAction<bool>(OnToggleChange));
                     tmp = toggle_local.gameObject;
-                    tmp.transform.localPosition = new Vector3(70, 0); //60
+                    tmp.transform.localPosition = new Vector3(52, 0); //60
                     tmp.transform.localScale = new Vector3(0.75f, 0.75f);
                     initialized = true;
 

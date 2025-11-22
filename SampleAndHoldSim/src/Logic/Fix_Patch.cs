@@ -8,6 +8,15 @@ namespace SampleAndHoldSim
 {
     public class Fix_Patch // Fixes for potential errors
 	{
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(ScatterTaskContext), nameof(ScatterTaskContext.ResetFrame), new Type[] { typeof(int), typeof(int) })]
+		[HarmonyPatch(typeof(ScatterTaskContext), nameof(ScatterTaskContext.ResetFrame), new Type[] { typeof(long), typeof(int), typeof(int) })]
+		public static void ResetFrame_Prefix(ref int _batchCount)
+		{
+			// Avoid DivideByZeroException
+			if (_batchCount == 0) _batchCount = 1;
+		}
+
 		[HarmonyPrefix, HarmonyPriority(Priority.High)]
 		[HarmonyPatch(typeof(PowerExchangerComponent), nameof(PowerExchangerComponent.CalculateActualEnergyPerTick))]
 		public static bool CalculateActualEnergyPerTick_Overwrite(ref PowerExchangerComponent __instance, bool isOutput, ref long __result)
@@ -36,40 +45,105 @@ namespace SampleAndHoldSim
 			return false;
 		}
 
-		[HarmonyTranspiler]
-		[HarmonyPatch(typeof(StationComponent), nameof(StationComponent.UpdateVeinCollection))]
-		static IEnumerable<CodeInstruction> UpdateVeinCollection_Fix(IEnumerable<CodeInstruction> instructions)
-		{
-			// 修正原版遊戲中, 當大礦機儲量超過上限時會反而增加礦機緩衝礦物的bug
-
-			// Changes:
-			//		num2 = ((num2 > productCount) ? productCount : num2);
-			//		if (num2 != 0) => 改成 if (num2 > 0)
-			//		{
-			//			StationStore[] array2 = this.storage;
-			//			int num3 = 0;
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(GameLogic), nameof(GameLogic._spraycoater_parallel))]
+        public static IEnumerable<CodeInstruction> _spraycoater_parallel_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+			// 修復增產劑消耗統計數據不正確的問題
+			// 目標: 將consumeRegister的索引改成和其他函式一致 (mod替換後兩者將不是同一值)
+			// Change: int[] consumeRegister = factoryStatPool[batchCurrent].consumeRegister;
+			// To:     int[] consumeRegister = factoryStatPool[this.factories[batchCurrent].index].consumeRegister;
 
 			try
 			{
-				var codeMatcher = new CodeMatcher(instructions)
-					.End()
-					.MatchBack(false,
-						new CodeMatch(OpCodes.Ldloc_S),
-						new CodeMatch(OpCodes.Brfalse),
-						new CodeMatch(OpCodes.Ldarg_0),
-						new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "storage"),
-						new CodeMatch(OpCodes.Ldc_I4_0)
-					)
-					.Advance(1)
-					.InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4_0))
-					.SetOpcodeAndAdvance(OpCodes.Ble);
-				return codeMatcher.InstructionEnumeration();
+				var matcher = new CodeMatcher(instructions)
+					// 尋找: factoryStatPool[batchCurrent].consumeRegister
+					// IL 模式:
+					// ldloc.s factoryStatPool (或其他 ldloc 變體)
+					// ldloc.s batchCurrent
+					// ldelem.ref
+					// ldfld consumeRegister
+					.MatchForward(false,
+						new CodeMatch(ci => ci.IsLdloc()), // factoryStatPool
+						new CodeMatch(ci => ci.IsLdloc()), // batchCurrent
+						new CodeMatch(OpCodes.Ldelem_Ref),
+						new CodeMatch(ci => ci.opcode == OpCodes.Ldfld &&
+							((FieldInfo)ci.operand).Name == "consumeRegister")
+					);
+
+				if (matcher.IsValid)
+				{
+					// 將batchCurrent替換成this.factories[batchCurrent].index
+					matcher.Advance(1);
+					var batchCurrentInstruction = matcher.Instruction;
+					matcher.RemoveInstruction()
+						.Insert(
+							new CodeInstruction(OpCodes.Ldarg_0),
+							new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(GameLogic), nameof(GameLogic.factories))),
+							batchCurrentInstruction,
+							new CodeInstruction(OpCodes.Ldelem_Ref),
+							new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(PlanetFactory), nameof(PlanetFactory.index)))
+						);
+				}
+				else
+				{
+					Log.Warn("Transpiler GameLogic._spraycoater_parallel fail. Can't find the target");
+				}
+				return matcher.InstructionEnumeration();
 			}
 			catch (Exception ex)
             {
-				Log.Warn("Fix_Patch.UpdateVeinCollection_Fix fail!");
+				Log.Warn("Transpiler GameLogic._spraycoater_parallel error:");
 				Log.Warn(ex);
 				return instructions;
+			}            
+        }
+
+		[HarmonyPrefix, HarmonyPriority(Priority.Low)]
+		[HarmonyPatch(typeof(GameLogic), nameof(GameLogic.ContextCollect_FactoryComponents_MultiMain))]
+		static void ContextCollect_FactoryComponents_MultiMain_Prefix(GameLogic __instance, ref PlanetFactory __state)
+		{
+			// 改動了就不要執行presentCargo, 因為localLoadedFactory.index的對應關係失效
+			// if (this.localLoadedFactory != null) Array.Fill<int>(...)
+			if (__instance.factoryCount != GameMain.data.factoryCount)
+			{
+				__state = __instance.localLoadedFactory;
+				__instance.localLoadedFactory = null;
+			}
+		}
+
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(GameLogic), nameof(GameLogic.ContextCollect_FactoryComponents_MultiMain))]
+		static void ContextCollect_FactoryComponents_MultiMain_Postfix(GameLogic __instance, int threadCount, PlanetFactory __state)
+		{
+			// 在factories內容不相同時, 需要對presentCargo的設定做修正			
+			if (__state != null)
+			{
+				__instance.localLoadedFactory = __state;
+				DeepProfiler.BeginSample(DPEntry.CargoPresent, -1, 0L);
+				ScatterTaskContext presentCargo = __instance.threadController.gameThreadContext.presentCargo;
+				int[] ordinals = presentCargo.ordinals;
+				presentCargo.ResetFrame(__instance.factoryCount, threadCount);
+				// 找出localLoadedFactory在factories中真正的index
+				int realIndex = -1;
+				for (int i = 0; i < __instance.factoryCount; i++)
+				{
+					if (__instance.factories[i] == __instance.localLoadedFactory)
+					{
+						realIndex = i;
+						break;
+					}
+				}
+				if (realIndex != -1)
+				{
+					var fillValue = __instance.localLoadedFactory.cargoTraffic.pathCursor - 1;
+					for (int i = realIndex + 1; i <= __instance.factoryCount; i++)
+					{
+						ordinals[i] = fillValue;
+					}
+				}
+				presentCargo.DetermineThreadTasks();
+				DeepProfiler.EndSample(-1, -2L);
 			}
 		}
 

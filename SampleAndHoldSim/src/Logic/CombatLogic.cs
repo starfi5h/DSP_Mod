@@ -5,54 +5,6 @@ using System.Reflection.Emit;
 
 namespace SampleAndHoldSim
 {
-    public partial class GameData_Patch
-	{
-		public static bool DFGroundSystemLogic_Prefix(GameData gameData, long time)
-		{
-			if (MainManager.UpdatePeriod <= 1) return true;
-
-			// [Copy] tweak part in if (this.gameDesc.isCombatMode) { ... }
-			PlanetFactory localLoadedPlanetFactory = gameData.localLoadedPlanetFactory;
-			if (localLoadedPlanetFactory != null)
-			{
-				localLoadedPlanetFactory.LocalizeEnemies();
-			}
-			if (time > 0L)
-			{
-				PerformanceMonitor.BeginSample(ECpuWorkEntry.Enemy);
-				for (int i = 0; i < workFactoryCount; i++)
-				{
-					workFactories[i].enemySystem.GameTickLogic(workFactoryTimes[i]); // keytick_timer++ in this
-					workFactories[i].enemySystem.ExecuteDeferredEnemyChange();
-				}
-				PerformanceMonitor.EndSample(ECpuWorkEntry.Enemy);
-
-				for (int i = 0; i < workFactoryCount; i++)
-				{
-					var enemySystem = workFactories[i].enemySystem;
-					if (enemySystem != null && enemySystem.keytick_timer >= 60) // Update KeyTickLogic every 60 ticks
-					{
-						enemySystem.DecisionAI();
-						enemySystem.KeyTickLogic(workFactoryTimes[i]);
-						enemySystem.ExecuteDeferredEnemyChange();
-						enemySystem.ExecuteDeferredUnitFormation();
-						enemySystem.PostKeyTick();
-					}
-				}
-			}
-			return false;
-		}
-
-		[HarmonyPrefix, HarmonyPriority(Priority.High)]
-		[HarmonyPatch(typeof(TrashSystem), nameof(TrashSystem.AddTrashFromGroundEnemy))]
-		public static void AddTrashFromGroundEnemy_Prefix(PlanetFactory factory, ref int life)
-        {
-			// Scale the life (1800) of dark fog drop on remote planets
-			if (factory.planetId != MainManager.FocusPlanetId)
-				life *= MainManager.UpdatePeriod;
-		}
-	}
-
 	class Combat_Patch
     {
 		[HarmonyTranspiler]

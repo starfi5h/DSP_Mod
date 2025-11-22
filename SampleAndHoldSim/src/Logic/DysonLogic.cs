@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
 using UnityEngine;
 
 namespace SampleAndHoldSim
@@ -17,7 +18,7 @@ namespace SampleAndHoldSim
 
     partial class FactoryManager
     {
-        public long EnergyReqCurrentTick { get; set; } // requested energy in this factory from ray receivers
+        public long EnergyReqCurrentTick; // requested energy in this factory from ray receivers
         ConcurrentBag<ProjectileData> dysonBag;
         readonly List<ProjectileData> dysonList = new List<ProjectileData>();
         int idleCount;
@@ -27,6 +28,11 @@ namespace SampleAndHoldSim
             if (dysonBag == null)
                 dysonBag = new ConcurrentBag<ProjectileData>(); // may miss few data?
             dysonBag.Add(new ProjectileData() { PlanetId = planetId, TargetId = targetId, LocalPos = localPos });
+        }
+
+        public void DysonBeforeTick()
+        {
+            EnergyReqCurrentTick = 0;
         }
 
         public void DysonColletEnd()
@@ -103,33 +109,81 @@ namespace SampleAndHoldSim
 
     class Dyson_Patch
     {
-        [HarmonyTranspiler, HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.RequestDysonSpherePower))]
+        internal static void AddEnergyReqCurrentTick(PlanetFactory factory, long value)
+        {
+            if (MainManager.TryGet(factory.index, out var manager))
+            {
+                Interlocked.Add(ref manager.EnergyReqCurrentTick, value);
+            }
+        }
+
+        [HarmonyTranspiler, HarmonyPriority(Priority.Low)]
+        [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.RequestDysonSpherePower))]
         static IEnumerable<CodeInstruction> RequestDysonSpherePower_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             try
             {
                 // Record num in this.dysonSphere.energyReqCurrentTick += num;
                 CodeMatcher matcher = new CodeMatcher(instructions)
-                    .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "energyReqCurrentTick"));
+                    .End()
+                    .MatchBack(false, new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "energyReqCurrentTick"));
                 CodeInstruction loadInstruction = matcher.InstructionAt(-2); //ldloc.3
                 matcher.Advance(1)
                     .InsertAndAdvance(
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PowerSystem), nameof(PowerSystem.factory))),
                         loadInstruction,
-                        HarmonyLib.Transpilers.EmitDelegate<Action<PlanetFactory, long>>((factory, energyReq) =>
-                        {
-                            if (factory.index < MainManager.Factories.Count)
-                            {
-                                MainManager.Factories[factory.index].EnergyReqCurrentTick = energyReq;
-                            }
-                        })
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Dyson_Patch), nameof(AddEnergyReqCurrentTick)))
                     );
                 return matcher.InstructionEnumeration();
             }
             catch
             {
                 Log.Warn("PowerSystem.RequestDysonSpherePower Transpiler failed.");
+                return instructions;
+            }
+        }
+
+        [HarmonyTranspiler, HarmonyPriority(Priority.Low)]
+        [HarmonyPatch(typeof(GameLogic), nameof(GameLogic._power_gen_gamma_parallel))]
+        static IEnumerable<CodeInstruction> _power_gen_gamma_parallel_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            try
+            {
+                // 多線程
+                var matcher = new CodeMatcher(instructions);
+
+                // 任務1: 擷取PlanetFactory planetFactory = this.factories[batchCurrent];                
+                matcher.MatchForward(true,
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(i => i.opcode == OpCodes.Ldfld && ((FieldInfo)i.operand).Name == "factories"),
+                        new CodeMatch(OpCodes.Ldloc_S),
+                        new CodeMatch(OpCodes.Ldelem_Ref),
+                        new CodeMatch(OpCodes.Stloc_S)
+                    );
+                var facotryInstruction = new CodeInstruction(OpCodes.Ldloc_S, matcher.Operand);
+
+                // 任務2: 在Interlocked.Add(ref dysonSphere.energyReqCurrentTick, num4);
+                //        之後加上AddEnergyReqCurrentTick(planetFactory, num4);
+                matcher.End()
+                    .MatchBack(true, 
+                        new CodeMatch(i => i.opcode == OpCodes.Ldflda && ((FieldInfo)i.operand).Name == "energyReqCurrentTick"),
+                        new CodeMatch(OpCodes.Ldloc_S),
+                        new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Add")                        
+                    );
+                var loadInstruction = matcher.InstructionAt(-1); //value
+                matcher.Advance(2)
+                    .InsertAndAdvance(
+                        facotryInstruction,
+                        loadInstruction,
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Dyson_Patch), nameof(AddEnergyReqCurrentTick)))
+                    );
+
+                return matcher.InstructionEnumeration();
+            }
+            catch
+            {
+                Log.Warn("Transpiler GameLogic._power_gen_gamma_parallel Transpiler failed.");
                 return instructions;
             }
         }

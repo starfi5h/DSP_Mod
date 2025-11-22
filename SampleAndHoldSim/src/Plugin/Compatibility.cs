@@ -1,5 +1,4 @@
-﻿using DysonSphereProgram.Modding.Blackbox;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -19,12 +18,10 @@ namespace SampleAndHoldSim
         {
             Weaver.Init(harmony);
             CommonAPI.Init(harmony);
-            DSPOptimizations.Init(harmony);
+            CheatEnabler_Patch.Init(harmony);
             Auxilaryfunction_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             PlanetMiner.Init(harmony);
-            Blackbox_Patch.Init(harmony);
-            CheatEnabler_Patch.Init(harmony);
 
             if (!string.IsNullOrEmpty(errorMessage) || !string.IsNullOrEmpty(warnMessage))
             {
@@ -82,57 +79,21 @@ namespace SampleAndHoldSim
                     if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
                     Type targetType = assembly.GetType("CommonAPI.Systems.PlanetExtensionSystem");
-                    harmony.Patch(targetType.GetMethod("PowerUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
-                    harmony.Patch(targetType.GetMethod("PreUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
-                    harmony.Patch(targetType.GetMethod("UpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
-                    harmony.Patch(targetType.GetMethod("PostUpdateOnlySinglethread"), null, null, new HarmonyMethod(typeof(GameData_Patch).GetMethod("ReplaceFactories")));
+                    var harmontyMethod = new HarmonyMethod(typeof(GameLogic_Patch).GetMethod("ReplaceFactories"));
+                    harmony.Patch(targetType.GetMethod("PowerUpdateOnlySinglethread"), null, null, harmontyMethod);
+                    harmony.Patch(targetType.GetMethod("PreUpdateOnlySinglethread"), null, null, harmontyMethod);
+                    harmony.Patch(targetType.GetMethod("UpdateOnlySinglethread"), null, null, harmontyMethod);
+                    harmony.Patch(targetType.GetMethod("PostUpdateOnlySinglethread"), null, null, harmontyMethod);
 
                     Log.Debug("CommonAPI compatibility - OK");
                 }
                 catch (Exception e)
                 {
-                    string message = "CommonAPI compatibility failed! Last working version: 1.6.5";
+                    string message = "CommonAPI compatibility failed! Last working version: 1.6.7";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
                 }
-            }
-        }
-
-        public static class DSPOptimizations
-        {
-            public const string GUID = "com.Selsion.DSPOptimizations";
-
-            public static void Init(Harmony harmony)
-            {
-                try
-                {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    harmony.PatchAll(typeof(DSPOptimizations));
-                    Log.Debug("DSPOptimizations compatibility - OK");
-                }
-                catch (Exception e)
-                {
-                    string message = "DSPOptimizations compatibility failed! Last working version: 1.1.16";
-                    Log.Warn(message);
-                    Log.Warn(e);
-                    errorMessage += message + "\n";
-                }
-            }
-
-            [HarmonyPrefix]
-            [HarmonyPatch(typeof(StationComponent), "UpdateInputSlots")]
-            [HarmonyPatch(typeof(StationComponent), "UpdateOutputSlots")]
-            public static bool UpdateSlots_Prefix(CargoTraffic traffic)
-            {
-                if (MainManager.TryGet(traffic.factory.index, out var factory))
-                {
-                    // StationStorageOpt will let slots update happen in idle tick, so we need to disable them
-                    // If station's factory is idle, skip update
-                    if (!factory.IsActive)
-                        return false;
-                }
-                return true;
             }
         }
 
@@ -155,7 +116,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "Auxilaryfunction compatibility failed! Last working version: 2.7.7";
+                    string message = "Auxilaryfunction compatibility failed! Last working version: 3.0.2";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
@@ -285,7 +246,7 @@ namespace SampleAndHoldSim
                         new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(StationComponent), "energy"))
                     )
                     .Insert(
-                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainManager), "get_UpdatePeriod")),
+                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(MainManager), nameof(MainManager.UpdatePeriod))),
                         new CodeInstruction(OpCodes.Conv_I8),
                         new CodeInstruction(OpCodes.Mul)
                     );
@@ -395,74 +356,11 @@ namespace SampleAndHoldSim
 #pragma warning restore CS8321
         }
 
-        public static class Blackbox_Patch
-        {
-            public const string GUID = "dev.raptor.dsp.Blackbox";
-            public static bool IsPatched { get; private set; } = false;
-
-            public static void Init(Harmony harmony)
-            {
-                try
-                {
-                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-                    harmony.PatchAll(typeof(Warper));
-                    IsPatched = true;
-                    Log.Debug("Blackbox compatibility - OK");
-                }
-                catch (Exception e)
-                {
-                    string message = "Blackbox compatibility failed! Last working version: 0.2.4";
-                    Log.Warn(message);
-                    Log.Warn(e);
-                    errorMessage += message + "\n";
-                }
-            }
-
-            public static class Warper
-            {
-                public static void RevertStats(int factoryIndex)
-                {
-                    foreach (var blackbox in BlackboxManager.Instance.blackboxes)
-                    {
-                        var simulation = blackbox.Simulation;
-                        if (simulation == null || simulation.factoryRef == null) continue;
-
-                        if (simulation.factoryRef.TryGetTarget(out var factory) && factory.index == factoryIndex)
-                        {
-                            if (!simulation.isWorking) continue;
-
-                            var Recipe = blackbox.Recipe;
-                            var timeIdx = simulation.timeIdx <= 0 ? Recipe.timeSpend - 1 : simulation.timeIdx - 1; // revert to last time
-                            
-                            //if (BlackboxSimulation.continuousStats)
-                            {
-                                var totalTimeSpend = (float)Recipe.timeSpend;
-                                var curPercent = timeIdx / totalTimeSpend;
-                                var nextPercent = (timeIdx + 1) / totalTimeSpend;
-                                var factoryStatPool = GameMain.data.statistics.production.factoryStatPool[factory.index];
-
-                                foreach (var production in Recipe.produces)
-                                {
-                                    var countToAdd = (int)(nextPercent * production.Value) - (int)(curPercent * production.Value);
-                                    factoryStatPool.productRegister[production.Key] -= countToAdd; // revert count
-                                }
-                                foreach (var consumption in Recipe.consumes)
-                                {
-                                    var countToAdd = (int)(nextPercent * consumption.Value) - (int)(curPercent * consumption.Value);
-                                    factoryStatPool.consumeRegister[consumption.Key] -= countToAdd; // revert count
-                                }
-                            }
-                            /* BlackboxSimulation.continuousStats is always true */
-                        }
-                    }
-                }
-            }
-        }
     
         public static class CheatEnabler_Patch
         {
-            public const string GUID = "org.soardev.cheatenabler";            
-
+            public const string GUID = "org.soardev.cheatenabler";
+            
             public static void Init(Harmony harmony)
             {
                 if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var _))
@@ -477,7 +375,7 @@ namespace SampleAndHoldSim
                 }
                 catch (Exception e)
                 {
-                    string message = "CheatEnabler 'Skip bullet period'(跳过子弹阶段) compatibility failed! Last working version: 2.3.31";
+                    string message = "CheatEnabler 'Skip bullet period'(跳过子弹阶段) compatibility failed! Last working version: 2.4.0";
                     Log.Warn(message);
                     Log.Warn(e);
                     errorMessage += message + "\n";
