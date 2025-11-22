@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.3.7 (DSP 0.10.33.27026)
+\- Add `MultiThreading` config  
+
 #### v0.3.6 (DSP 0.10.33.26540)  
 \- Fix error of RefreshDataStatTexts when loading the compressed game.  
 
