@@ -84,6 +84,7 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 (🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - Fix the error when enabling 'skip bullet' function. Need to restart the game after switching.  
 (🛠️) [Auxilaryfunction](https://thunderstore.io/c/dyson-sphere-program/p/blacksnipebiu/Auxilaryfunction/) - Temporarily set ratio to 1 when stopping factory.  
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - Fix mine rate on idle factories, let it not be affected by FPS.   
+(⚠️) [GenesisBook](https://thunderstore.io/c/dyson-sphere-program/p/HiddenCirno/GenesisBook/) - Quantum box may have abnormal behavior.  
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/) - Some game-breaking features are not compatible.  
 (⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - Not compatible.
 
@@ -93,6 +94,7 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 (🛠️) [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) - 修复启用'跳过子弹阶段'时造成的冲突。切换设置后需重启游戏才会套用兼容  
 (🛠️) [Auxilaryfunction](https://thunderstore.io/c/dyson-sphere-program/p/blacksnipebiu/Auxilaryfunction/) - 在停止工厂时会将倍率暂时调为1避免产物异常    
 (⚠️) [PlanetMiner](https://dsp.thunderstore.io/package/blacksnipebiu/PlanetMiner/) - 修复星球矿机速率不正确的问题, 使其不随FPS变动。    
+(⚠️) [GenesisBook](https://thunderstore.io/c/dyson-sphere-program/p/HiddenCirno/GenesisBook/) - 量子箱的跨星球运输可能会异常。  
 (⛔) [Multfuntion mod](https://dsp.thunderstore.io/package/blacksnipebiu/Multfuntion_mod/)(多功能OPmod) - 兼容问题: 在跳过子弹时,太阳帆的数量没有被倍增。其他某些改机制功能(星球矿机等)不兼容。  
 (⛔) [Weaver](https://thunderstore.io/c/dyson-sphere-program/p/Loom/Weaver/) - 不兼容。  
 

@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace SampleAndHoldSim
 {
@@ -11,27 +13,43 @@ namespace SampleAndHoldSim
 
         public static void OnTaskBegin(int taskNum)
         {
-            // 在OnTaskLogic前呼叫
-            currentTask = (EGameLogicTask)taskNum;
-
-            switch (currentTask)
+            try
             {
-                //case EGameLogicTask.FactoryTransport: // 1751
-                case EGameLogicTask.FactoryLabResearch: // 1700 (取尾數為0有barrier的)
-                    BeforeTransport();
-                    break;
+                // 在OnTaskLogic前呼叫
+                currentTask = (EGameLogicTask)taskNum;
+
+                switch (currentTask)
+                {
+                    //case EGameLogicTask.FactoryTransport: // 1751
+                    case EGameLogicTask.FactoryLabResearch: // 1700 (取尾數為0有barrier的)
+                        BeforeTransport();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 用try-catch避免卡死
+                Debug.LogError($"[SampleAndHoldSim] Error on task begin {currentTask}: \n" + ex.ToString());
             }
         }
 
         public static void OnPhaseEnd()
         {
-            // 在phaseBarrier.SignalAndWait後呼叫
-            // 只有尾數為0的task有phase barrier
-            switch (currentTask)
+            try
             {
-                case EGameLogicTask.FactoryLabOutput: // 1800
-                    AfterTransport();
-                    break;
+                // 在phaseBarrier.SignalAndWait後呼叫
+                // 只有尾數為0的task有phase barrier
+                switch (currentTask)
+                {
+                    case EGameLogicTask.FactoryLabOutput: // 1800
+                        AfterTransport();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 用try-catch避免走不到SignalAndWait卡死
+                Debug.LogError($"[SampleAndHoldSim] Error on phase end {currentTask}: \n" + ex.ToString());
             }
         }
 

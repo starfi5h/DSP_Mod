@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v0.7.2
+\- Fix error when building new stations.  
+\- Add GenesisBook compat v3.1.4 for dyson sail ejectors.  
+
 #### v0.7.1
 \- Fix a bug that sails cannot be absorbed.  
 

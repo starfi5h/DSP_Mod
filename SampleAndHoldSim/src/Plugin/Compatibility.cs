@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 using static CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch;
 
 namespace SampleAndHoldSim
@@ -14,6 +15,11 @@ namespace SampleAndHoldSim
         static string errorMessage = "";
         static string warnMessage = "";
 
+        public static bool ShouldPatchEjector()
+        {
+            return !BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GenesisBook_Patch.GUID);
+        }
+
         public static void Init(Harmony harmony)
         {
             Weaver.Init(harmony);
@@ -22,6 +28,7 @@ namespace SampleAndHoldSim
             Auxilaryfunction_Patch.Init(harmony);
             Multfunction_mod_Patch.Init(harmony);
             PlanetMiner.Init(harmony);
+            GenesisBook_Patch.Init(harmony);
 
             if (!string.IsNullOrEmpty(errorMessage) || !string.IsNullOrEmpty(warnMessage))
             {
@@ -165,39 +172,7 @@ namespace SampleAndHoldSim
 
             public static class Warper
             {
-                /*
-                [HarmonyTranspiler, HarmonyPatch(typeof(Multifunctionpatch.SomePatch), nameof(Multifunctionpatch.SomePatch.EjectorComponentPatch))]
-                public static IEnumerable<CodeInstruction> EjectorComponentPatch_Transpiler(IEnumerable<CodeInstruction> instructions)
-                {
-                    // Repeat __instance.AddSolarSail(tempsail.ss, tempsail.orbitid, tempsail.time + time) multiple times
-                    try
-                    {
-                        // EjectorComponentPatch use prefix to patch, so we need to apply transpiler on it
-                        var newinstructions = Ejector_Patch.EjectorComponent_Transpiler(instructions);
-
-                        // Fix skip bullet
-                        CodeMatcher matcher = new CodeMatcher(newinstructions)
-                            .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(List<Multifunction_mod.Tempsail>), "Add")))
-                            .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
-                            .SetAndAdvance(OpCodes.Call, AccessTools.Method(typeof(Warper), nameof(AddTempSail)));
-
-                        return matcher.InstructionEnumeration();
-                    }
-                    catch
-                    {
-                        Log.Warn("Transpiler EjectorComponentPatch failed.");
-                        return instructions;
-                    }
-                }
-
-                static void AddTempSail(List<Multifunction_mod.Tempsail> list, Multifunction_mod.Tempsail tempSail, ref EjectorComponent ejector)
-                {
-                    // Do not multiply if it is local focus planet
-                    int times = ejector.planetId == MainManager.FocusPlanetId ? 1 : MainManager.UpdatePeriod;
-                    for (int i = 0; i < times; i++)
-                        list.Add(tempSail);
-                }
-                */
+                // TODO
             }
         }
 
@@ -371,6 +346,7 @@ namespace SampleAndHoldSim
                 try
                 {
                     harmony.PatchAll(typeof(Warper));
+                    Warper.Init();
                     Log.Debug("CheatEnabler compatibility - OK");
                 }
                 catch (Exception e)
@@ -384,6 +360,17 @@ namespace SampleAndHoldSim
 
             private static class Warper
             {
+                
+                public static void Init()
+                {
+                    CheatEnabler.Patches.DysonSpherePatch.SkipBulletEnabled.SettingChanged += (obj, s) => OnSettingChanged();
+                }
+
+                static void OnSettingChanged()
+                {
+                    Log.Debug(CheatEnabler.Patches.DysonSpherePatch.SkipBulletEnabled.Value);
+                }
+
                 [HarmonyPrefix]
                 [HarmonyPatch(typeof(CheatEnabler.Patches.DysonSpherePatch.SkipBulletPatch), "AddDysonSail")]
                 public static bool AddDysonSail_Prefix(ref EjectorComponent ejector, DysonSwarm swarm, VectorLF3 uPos, VectorLF3 endVec, int[] consumeRegister)
@@ -464,6 +451,92 @@ namespace SampleAndHoldSim
 
                     // Full replace
                     return false;
+                }
+            }
+        }
+
+        public static class GenesisBook_Patch
+        {
+            public const string GUID = "org.LoShin.GenesisBook";
+
+            public static void Init(Harmony harmony)
+            {
+                try
+                {
+                    if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
+                    harmony.PatchAll(typeof(GenesisBook_Patch));
+                    Log.Debug("GenesisBook compatibility - OK");
+                }
+                catch (Exception e)
+                {
+                    string message = "GenesisBook compatibility failed! Last working version: 3.1.4";
+                    Log.Warn(message);
+                    Log.Warn(e);
+                    errorMessage += message + "\n";
+                }
+            }
+
+
+            [HarmonyTranspiler, HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
+            public static IEnumerable<CodeInstruction> EjectorComponent_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                try
+                {
+                    CodeMatcher matcher = new CodeMatcher(instructions)
+                        .MatchForward(false,
+                            new CodeMatch(OpCodes.Ldloc_S),
+                            new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(SailBullet), nameof(SailBullet.lBegin)))
+                            );
+                    if (matcher.IsInvalid)
+                    {
+                        Log.Warn("EjectorComponent_Transpiler: Can't find SailBullet.lBegin");
+                        return instructions;
+                    }
+                    CodeInstruction loadInstruction = matcher.Instruction;
+
+                    // 改動: 目標從DysonSwarm.AddBullet改成EjectorPatches.Ejector_PatchMethod
+                    matcher.MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "Ejector_PatchMethod"));
+                    if (matcher.IsInvalid)
+                    {
+                        Log.Warn("EjectorComponent_Transpiler: Can't find Ejector_PatchMethod");
+                        return instructions;
+                    }
+
+                    matcher.MatchBack(false, new CodeMatch(i => i.opcode == OpCodes.Stfld && ((FieldInfo)i.operand).Name == "time"));
+
+                    matcher
+                        .Advance(1)
+                        .InsertAndAdvance(
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))),
+                            loadInstruction,
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.orbitId))),
+                            new CodeInstruction(OpCodes.Ldarg_0),
+                            new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.bulletCount))),
+                            HarmonyLib.Transpilers.EmitDelegate<Action<int, Vector3, int, int>>((planetId, localPos, orbitId, bulletCount) =>
+                            {
+                                if (MainManager.Planets.TryGetValue(planetId, out var factoryData) && factoryData.IsNextIdle)
+                                {
+                                    int stationPilerLevel = GameMain.history.stationPilerLevel;
+                                    int count = stationPilerLevel > bulletCount ? bulletCount : stationPilerLevel;
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        factoryData.AddDysonData(planetId, -orbitId, localPos);
+                                    }
+                                }
+                            })
+                        );
+
+                    return matcher.InstructionEnumeration();
+                }
+                catch (Exception ex)
+                {
+                    string message = "GenesisBook compatibility failed! Last working version: 3.1.4";
+                    errorMessage += message + "\n";
+                    Log.Warn(message);
+                    Log.Warn(ex);
+                    return instructions;
                 }
             }
         }

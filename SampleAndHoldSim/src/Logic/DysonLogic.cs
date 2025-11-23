@@ -69,7 +69,7 @@ namespace SampleAndHoldSim
         }
     }
 
-    class Ejector_Patch // Separate to compat with CheatEnabler
+    class Ejector_Patch // Separate to compat with CheatEnabler and GenesisBook
     {
         [HarmonyTranspiler, HarmonyPatch(typeof(EjectorComponent), nameof(EjectorComponent.InternalUpdate))]
         public static IEnumerable<CodeInstruction> EjectorComponent_Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -77,12 +77,27 @@ namespace SampleAndHoldSim
             try
             {
                 CodeMatcher matcher = new CodeMatcher(instructions)
-                    .MatchForward(false, new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(SailBullet), nameof(SailBullet.lBegin))));
-                CodeInstruction loadInstruction = matcher.InstructionAt(-1);
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Ldloc_S),
+                        new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(SailBullet), nameof(SailBullet.lBegin)))
+                        );
+                if (matcher.IsInvalid)
+                {
+                    Log.Warn("EjectorComponent_Transpiler: Can't find SailBullet.lBegin");
+                    return instructions;
+                }
+                CodeInstruction loadInstruction = matcher.Instruction;
+
                 matcher.MatchForward(false,
-                        new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(DysonSwarm), nameof(DysonSwarm.AddBullet)))
-                    )
-                    .Advance(2)
+                        new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(DysonSwarm), nameof(DysonSwarm.AddBullet))),
+                        new CodeMatch(OpCodes.Pop));
+                if (matcher.IsInvalid)
+                {
+                    Log.Warn("EjectorComponent_Transpiler: Can't find AddBullet");
+                    return instructions;
+                }
+
+                matcher.Advance(1)
                     .InsertAndAdvance(
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(EjectorComponent), nameof(EjectorComponent.planetId))),
@@ -99,9 +114,10 @@ namespace SampleAndHoldSim
                     );
                 return matcher.InstructionEnumeration();
             }
-            catch
+            catch (Exception ex)
             {
-                Log.Warn("EjectorComponent.InternalUpdate Transpiler failed.");
+                Log.Warn("EjectorComponent_Transpiler error!");
+                Log.Warn(ex);
                 return instructions;
             }
         }

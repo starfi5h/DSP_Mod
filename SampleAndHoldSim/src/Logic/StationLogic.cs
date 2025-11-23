@@ -223,6 +223,15 @@ namespace SampleAndHoldSim
         public static void ActiveBeforeTransport(StationData data, StationComponent station)
         {
             int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length)
+            {
+                // 如果新的station在這個期間放置,則不紀錄變動
+                data.SetArray(length);
+                data.tmpWarperCount = 0;
+                data.tmpMineralCount = 0;
+                return;
+            }
+
             for (int i = 0; i < length; i++)
             {               
                 data.deltaCount[i] += station.storage[i].count - data.tmpCount[i];
@@ -233,6 +242,8 @@ namespace SampleAndHoldSim
         public static void ActiveAfterTransport(StationData data, StationComponent station)
         {
             int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length) data.SetArray(length);
+
             for (int i = 0; i < length; i++)
             {
                 data.tmpCount[i] = station.storage[i].count;
@@ -245,6 +256,15 @@ namespace SampleAndHoldSim
         public static void ActiveEnd(StationData data, StationComponent station)
         {
             int length = station.storage?.Length ?? 0;
+            if (length != data.tmpCount.Length)
+            {
+                // 如果新的station在這個期間放置,則不紀錄變動
+                data.SetArray(length);
+                data.tmpWarperCount = 0;
+                data.tmpMineralCount = 0;
+                return;
+            }
+
             for (int i = 0; i < length; i++)
             {
                 data.deltaCount[i] += station.storage[i].count - data.tmpCount[i];
@@ -281,7 +301,7 @@ namespace SampleAndHoldSim
                 station.storage[i].inc += data.deltaInc[i];
                 if (station.storage[i].count < MainManager.StationStoreLowerbound)
                 {
-                    Log.Debug($"station{station.id} - store{i}: {station.storage[i].count}");
+                    //Log.Debug($"station{station.id} - store{i}: {station.storage[i].count}");
                     station.storage[i].count = MainManager.StationStoreLowerbound;
                 }
             }

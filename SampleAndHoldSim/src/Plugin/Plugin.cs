@@ -2,6 +2,10 @@
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
+using System.Reflection;
+
+[assembly: AssemblyTitle(SampleAndHoldSim.Plugin.NAME)]
+[assembly: AssemblyVersion(SampleAndHoldSim.Plugin.VERSION)]
 
 namespace SampleAndHoldSim
 {
@@ -10,11 +14,12 @@ namespace SampleAndHoldSim
     [BepInDependency(Compatibility.Multfunction_mod_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.PlanetMiner.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.CheatEnabler_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GenesisBook_Patch.GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string GUID = "starfi5h.plugin.SampleAndHoldSim";
         public const string NAME = "SampleAndHoldSim";
-        public const string VERSION = "0.7.1";
+        public const string VERSION = "0.7.2";
         public static Plugin instance;
         Harmony harmony;
 
@@ -73,7 +78,14 @@ namespace SampleAndHoldSim
             harmony.PatchAll(typeof(UIcontrol));
             harmony.PatchAll(typeof(Station_Patch));
             harmony.PatchAll(typeof(Dyson_Patch));
-            harmony.PatchAll(typeof(Ejector_Patch));
+            if (Compatibility.ShouldPatchEjector())
+            {
+                harmony.PatchAll(typeof(Ejector_Patch));
+            }
+            else
+            {
+                Log.Debug("Skip Ejector_Patch due to Genesis Book mod exist!");
+            }
             harmony.PatchAll(typeof(Combat_Patch));
             harmony.PatchAll(typeof(Fix_Patch));
 

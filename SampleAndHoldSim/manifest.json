@@ -1,7 +1,7 @@
 {
     "name": "SampleAndHoldSim",
     "description": "Reduce the update rate of remote planets to improve UPS (warning: may disable Milkyway upload).  模拟帧-降低远端星球工厂的运算频率以提升帧率(可能会无法上传银河系)",
-    "version_number": "0.7.1",
+    "version_number": "0.7.2",
     "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/SampleAndHoldSim",
     "dependencies": ["xiaoye97-BepInEx-5.4.17"]
 }
