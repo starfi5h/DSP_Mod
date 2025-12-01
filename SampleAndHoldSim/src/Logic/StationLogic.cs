@@ -28,6 +28,18 @@ namespace SampleAndHoldSim
             }
         }
 
+        [HarmonyPrefix, HarmonyPriority(Priority.High)]
+        [HarmonyPatch(typeof(DispenserComponent), nameof(DispenserComponent.InternalTick))]
+        static bool StopIdle(PlanetFactory factory)
+        {
+            if (MainManager.TryGet(factory.index, out FactoryManager manager))
+            {
+                return manager.IsActive; // 不在idle更新物流配送器
+            }
+            return true;
+        }
+
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameLogic), nameof(GameLogic.FactoryTransportGameTick))]
         static bool FactoryTransportGameTick_Postfix(GameLogic __instance)
@@ -182,6 +194,8 @@ namespace SampleAndHoldSim
     {
         public int[] deltaCount;
         public int[] deltaInc;
+        public int deltaWarperCount;
+
         int[] tmpCount;
         int[] tmpInc;
         int tmpWarperCount;
@@ -195,10 +209,14 @@ namespace SampleAndHoldSim
 
         private void SetArray(int length)
         {
+            deltaCount = new int[length];
+            deltaInc = new int[length];            
             tmpCount = new int[length];
             tmpInc = new int[length];
-            deltaCount = new int[length];
-            deltaInc = new int[length];
+
+            deltaWarperCount = 0;
+            tmpWarperCount = 0;
+            tmpMineralCount = 0;
         }
 
         public static void SetMineral(StationData data, int mineralCount)
@@ -218,6 +236,8 @@ namespace SampleAndHoldSim
                 data.deltaCount[i] = 0;
                 data.deltaInc[i] = 0;
             }
+            data.tmpWarperCount = station.warperCount;
+            data.deltaWarperCount = 0;
         }
 
         public static void ActiveBeforeTransport(StationData data, StationComponent station)
@@ -227,8 +247,6 @@ namespace SampleAndHoldSim
             {
                 // 如果新的station在這個期間放置,則不紀錄變動
                 data.SetArray(length);
-                data.tmpWarperCount = 0;
-                data.tmpMineralCount = 0;
                 return;
             }
 
@@ -237,6 +255,7 @@ namespace SampleAndHoldSim
                 data.deltaCount[i] += station.storage[i].count - data.tmpCount[i];
                 data.deltaInc[i] += station.storage[i].inc - data.tmpInc[i];
             }
+            data.deltaWarperCount += station.warperCount - data.tmpWarperCount;
         }
 
         public static void ActiveAfterTransport(StationData data, StationComponent station)
@@ -260,8 +279,6 @@ namespace SampleAndHoldSim
             {
                 // 如果新的station在這個期間放置,則不紀錄變動
                 data.SetArray(length);
-                data.tmpWarperCount = 0;
-                data.tmpMineralCount = 0;
                 return;
             }
 
@@ -287,7 +304,9 @@ namespace SampleAndHoldSim
                 //    Log.Debug($"station: {station.planetId} - {station.id} [{i}] itemId:{station.storage[i].itemId} diff:{data.tmpCount[i]}");
 
             }
-            data.tmpWarperCount = station.warperCount - data.tmpWarperCount;
+            data.deltaWarperCount += station.warperCount - data.tmpWarperCount;
+            if (data.deltaWarperCount > 64) data.deltaWarperCount = 64;
+            else if (data.deltaWarperCount < -64) data.deltaWarperCount = -64;
         }
 
         public static void IdleEnd(StationData data, StationComponent station)
@@ -308,7 +327,7 @@ namespace SampleAndHoldSim
             if (station.isVeinCollector && data.tmpMineralCount > 0)
                 station.storage[0].count += data.tmpMineralCount;
             else
-                station.warperCount += data.tmpWarperCount;
+                station.warperCount += data.deltaWarperCount;
         }
     }
 }

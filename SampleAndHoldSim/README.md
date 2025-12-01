@@ -341,7 +341,7 @@ If issues persist, report with log files and mod list.
 3. On **idle ticks**: Factory doesn't simulate, but applies the recorded changes
 
 Example with Period = 10:
-- Active: Mine 10 ore, produce 10 items
+- Active: Mine 10 ore, produce 10 items and send into the station storage
 - Idle (9 ticks): Apply +10 items to station storage (held from last active tick)
 - Result: Same long-term throughput with 90% less computation
 
@@ -351,6 +351,7 @@ Example with Period = 10:
 3. **空闲帧**：工厂不模拟，但应用记录的变化
 
 周期 = 10 的例子：
-- 活跃：开采10矿石，生产10物品
+- 活跃：开采10矿石，生产10物品，并送入物流塔存储
 - 空闲（9帧）：向物流塔存储应用+10物品（保持自上次活跃帧）
 - 结果：相同的长期吞吐量，计算量减少90%
+

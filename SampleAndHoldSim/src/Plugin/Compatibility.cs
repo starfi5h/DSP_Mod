@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -22,6 +23,13 @@ namespace SampleAndHoldSim
 
         public static void Init(Harmony harmony)
         {
+            System.Version bepInExVersion = typeof(BaseUnityPlugin).Assembly.GetName().Version;
+            if (bepInExVersion.Minor != 4 || bepInExVersion.Build != 17)
+            {
+                warnMessage = $"You are using BepInEx version {bepInExVersion}. The version that is not 5.4.17 may not work correctly.\n";
+                warnMessage += $"您使用的BepInEx版本为{bepInExVersion}。非5.4.17可能无法正常运作";
+            }
+
             Weaver.Init(harmony);
             CommonAPI.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
@@ -57,6 +65,7 @@ namespace SampleAndHoldSim
             }
             if (!string.IsNullOrEmpty(warnMessage))
             {
+                Log.Warn(warnMessage);
                 UIMessageBox.Show("SampleAndHoldSim Report 模拟帧兼容提示", warnMessage, "确定".Translate(), "Don't show", 
                     3, null, () => Plugin.instance.WarnIncompat.Value = false);
             }
