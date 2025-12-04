@@ -19,6 +19,9 @@ namespace SampleAndHoldSim
         [HarmonyPatch(typeof(TrashSystem), nameof(TrashSystem.GameTick))]
         [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.GameTick))]
         [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.BulletGameTick))]
+        [HarmonyPatch(typeof(DysonSwarm), nameof(DysonSwarm.ExecuteDeferredAddSolarSail))] // 修正AddSolarSail的expiryTime
+        [HarmonyPatch(typeof(TrafficStatistics), nameof(TrafficStatistics.GameTick_Parallel))] // 統計的ILS進出淡條
+        [HarmonyPatch(typeof(SpaceSector), nameof(SpaceSector.GameTick))] // 黑霧巢穴太空位置更新
         static void Time_Correct(ref long time)
         {
             time = GameMain.gameTick;
@@ -39,6 +42,72 @@ namespace SampleAndHoldSim
             // Scale the life (1800) of dark fog drop on remote planets
             if (factory.planetId != MainManager.FocusPlanetId)
                 life *= MainManager.UpdatePeriod;
+        }
+
+
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        
+        [HarmonyPatch(typeof(DefenseSystem), nameof(DefenseSystem.GameTick))]
+        [HarmonyPatch(typeof(PlanetATField), nameof(PlanetATField.GameTick))]
+        static void LocalTick_Correct(ref long tick, bool isActive)
+        {
+            if (isActive && MainManager.FocusLocalFactory)
+            {
+                tick = GameMain.gameTick;
+            }
+        }
+
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        [HarmonyPatch(typeof(CombatGroundSystem), nameof(CombatGroundSystem.GameTick))]
+        [HarmonyPatch(typeof(CombatGroundSystem), nameof(CombatGroundSystem.PostGameTick))]
+        static void LocalTick_Correct(ref long tick, PlanetFactory ___factory)
+        {
+            if (___factory.index == MainManager.FocusFactoryIndex)
+            {
+                tick = GameMain.gameTick;
+            }
+        }
+
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        [HarmonyPatch(typeof(EnemyDFGroundSystem), nameof(EnemyDFGroundSystem.GameTickLogic_Turret))]
+        [HarmonyPatch(typeof(EnemyDFGroundSystem), nameof(EnemyDFGroundSystem.GameTickLogic_Unit))]
+        static void LocalGameTick_Correct(ref long gameTick, PlanetFactory ___factory)
+        {
+            if (___factory.index == MainManager.FocusFactoryIndex)
+            {
+                gameTick = GameMain.gameTick;
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EnemyDFGroundSystem), nameof(EnemyDFGroundSystem.PostGameTick))]
+        static void OnEnemyDFGroundSystemPostGameTick(EnemyDFGroundSystem __instance)
+        {
+            if (__instance.factory.index != MainManager.FocusFactoryIndex) return;
+
+            // 擷取EnemyDFGroundSystem.GameTickLogic_Unit
+            // 對於本地工廠, 需要60tick更新一次enemyData的hash
+            // 這樣無人攻擊機的DiscoverLocalEnemy才能找到目標
+            ref EnemyData[] ptr = ref __instance.factory.enemyPool;
+            if (__instance.units.count == 0) return;
+
+
+            int gene = (int)(GameMain.gameTick % 60L);
+            EnemyUnitComponent[] buffer = __instance.units.buffer;
+            int cursor = __instance.units.cursor;
+            var hashSystem = __instance.factory.hashSystemDynamic;
+
+            for (int i = 1; i < cursor; i++)
+            {
+                if (i % 60 == gene)
+                {
+                    ref EnemyUnitComponent ptr2 = ref buffer[i];
+                    if (ptr2.id != i) continue;                    
+                    ref EnemyData ptr3 = ref ptr[ptr2.enemyId];
+                    ptr3.hashAddress = hashSystem.UpdateObjectHashAddress(ptr3.hashAddress, ptr3.id, ptr3.pos, EObjectType.Enemy);
+                }
+            }
+
         }
 
         [HarmonyPrefix, HarmonyPriority(Priority.High)]

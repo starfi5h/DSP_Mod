@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v0.7.4
+\- Fix solar sails disappear.  
+\- Fix ILS import and export stats.  
+\- Fix attack drone doesn't attack enemies.  
+\- Known issue: Patrolling Dark Fog ground units animation is discontinuous.  
+
 #### v0.7.3
 \- Fix space warper count change abnormal in stations.  
 
