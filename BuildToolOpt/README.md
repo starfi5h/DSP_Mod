@@ -41,8 +41,8 @@ GC when pause = false
 # Default value: true
 ReplaceStation = true
 
-## Place white holograms when lacking of item
-## 即使物品不足也可以放置建筑虚影
+## Place white holograms when lacking of item (may cause lag in build mode)
+## 即使物品不足也可以放置建筑虚影(可能使建造模式卡顿)
 # Setting type: Boolean
 # Default value: false
 EnableHologram = false
@@ -72,11 +72,7 @@ ClipboardPaste = true
 
 [NebulaMultiplayer](https://dsp.thunderstore.io/package/nebula/NebulaMultiplayerMod/)  
 ReplaceStation, EnableHologram and EnableStationBuildOptimize will be disabled.  
-当与联机mod共用时, 替换物流塔和建筑虚影功能将暂停使用  
-  
-[UXAssist](https://thunderstore.io/c/dyson-sphere-program/p/soarqin/UXAssist//) (v1.4.5)  
-(Compat) When EnableStationBuildOptimize is enabled, apply compat patch to "dismantle all" and "initialize planet" functions.  
-(兼容) 启用 EnableStationBuildOptimize 时，应用兼容性补丁在"拆除全建築"和"初始化星球"功能。  
+当与联机mod共用时, 替换物流塔和建筑虚影功能以及物流塔建造优化将暂停使用  
   
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.4.0)  
 (Compat) When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  

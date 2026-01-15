@@ -1,3 +1,6 @@
+### v1.1.5
+- Fix a bug regarding vessels that go to the dismantling station.  
+
 ### v1.1.4
 - `EnableStationBuildOptimize` now apply to station dismantling too.  
 

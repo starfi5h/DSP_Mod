@@ -119,17 +119,17 @@ namespace BuildToolOpt
 
 		[HarmonyPrefix, HarmonyPriority(Priority.Low)]
 		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RemoveStationComponent))]
-		static void RemoveStationComponent_Prefix(ref bool __runOriginal, GalacticTransport __instance, int gid)
+		static void RemoveILS_Prefix(ref bool __runOriginal, GalacticTransport __instance, int gid)
         {
 			if (!__runOriginal) return;
 
 			if (__instance.stationPool[gid] != null)
 			{
 				// 如果remote pair已經淨空, 那就不用呼叫refresh traffic
-				int remotePairCount = __instance.stationPool[gid].remotePairOffsets?[6] ?? 0;
-				Plugin.Log.LogDebug($"Remove Station[{gid}]: remote pair count = {remotePairCount}");
+				int remotePairCount = __instance.stationPool[gid].remotePairOffsets?[6] ?? 0;				
 				if (remotePairCount > 0)
 				{
+					Plugin.Log.LogDebug($"Remove ILS[{gid}]: remote pair count = {remotePairCount}");
 					var storage = __instance.stationPool[gid].storage;
 					int length = storage?.Length ?? 0;
 					for (int i = 0; i < length; i++)
@@ -157,7 +157,51 @@ namespace BuildToolOpt
 			__runOriginal = false;
 		}
 
+		struct StationPairInfo
+        {
+			public int gid;
+			public HashSet<int> otherGIds;
+        }
 
+		[HarmonyPrefix, HarmonyPriority(Priority.High)]
+		[HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.RemoveStationComponent))]
+		static void Guard_Prefix(PlanetTransport __instance, int id, ref StationPairInfo __state)
+		{
+			__state.gid = 0;
+			if (__instance.stationPool[id] == null || __instance.stationPool[id].id == 0) return;
+			var station = __instance.stationPool[id];
+			var gid = station.gid;
+			if (gid == 0 || station.remotePairOffsets == null || station.remotePairs == null || station.remotePairOffsets[6] == 0) return;
+
+			// 搜集所有配對的塔, 存入到state中
+			__state.gid = gid;
+			__state.otherGIds = new HashSet<int>();
+			for (int i = 0; i < station.remotePairOffsets[6]; i++)
+			{
+				ref var remotePair = ref station.remotePairs[i];
+				int otherGId = remotePair.supplyId != station.gid ? remotePair.supplyId : remotePair.demandId;
+				if (otherGId != 0) __state.otherGIds.Add(otherGId);
+			}
+		}
+
+		[HarmonyPostfix, HarmonyPriority(Priority.Low)]
+		[HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.RemoveStationComponent))]
+		static void Guard_Postfix(ref StationPairInfo __state)
+		{
+			// 確保配對的塔, 配對和船隻狀態是正常的, 避免報錯
+			if (__state.gid == 0) return;			
+			var galacticTransport = GameMain.data.galacticTransport;
+			int logisticShipCarries = GameMain.history.logisticShipCarries;
+			var otherGIds = __state.otherGIds;
+			int keyStationId = __state.gid;
+			Plugin.Log.LogDebug($"UpdateShipStatus gid={keyStationId} count={__state.otherGIds.Count}");
+
+			foreach (int gid in otherGIds)
+			{
+				ClearStationRemotePairs(galacticTransport.stationPool[gid], keyStationId);
+				UpdateShipStatus(galacticTransport.stationPool[gid], galacticTransport, keyStationId, logisticShipCarries);
+			}
+		}
 
 #if DEBUG
 		static HighStopwatch stopwatch = new();

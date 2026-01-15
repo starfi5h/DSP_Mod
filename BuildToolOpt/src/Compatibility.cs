@@ -12,7 +12,6 @@ namespace BuildToolOpt
         public static void Init(Harmony harmony)
         {
             Nebula_Patch.Init();
-            UXAssist_Patch.Init(harmony);
             CheatEnabler_Patch.Init(harmony);
             DSPCalculator_Patch.Init(harmony); // Can't test it in debug mode due to type loading
         }
@@ -29,110 +28,6 @@ namespace BuildToolOpt
                 Plugin.EnableHologram = false;
                 Plugin.EnableStationBuildOptimize = false;
                 Plugin.Log.LogDebug("Nebula: Disable replace station and hologram function");
-            }
-        }
-
-        public static class UXAssist_Patch
-        {
-            public const string GUID = "org.soardev.uxassist";
-
-            public static void Init(Harmony harmony)
-            {
-                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(GUID, out var pluginInfo)) return;
-
-                try
-                {
-                    if (Plugin.EnableStationBuildOptimize)
-                    {
-                        Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                        var classType = assembly.GetType("UXAssist.Functions.PlanetFunctions");
-                        harmony.Patch(AccessTools.Method(classType, "DismantleAll"),
-                            new HarmonyMethod(AccessTools.Method(typeof(UXAssist_Patch), nameof(DismantleAll_Prefix))));
-                        harmony.Patch(AccessTools.Method(classType, "RecreatePlanet"),
-                            new HarmonyMethod(AccessTools.Method(typeof(UXAssist_Patch), nameof(RecreatePlanet_Prefix))));
-
-                        Plugin.Log.LogDebug("UXAssist.Functions.PlanetFunctions patched.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.4.5");
-                    Plugin.Log.LogWarning(e);
-                }
-            }
-
-            // https://github.com/soarqin/DSP_Mods/blob/master/UXAssist/Functions/PlanetFunctions.cs
-
-            internal static void DismantleAll_Prefix(bool toBag, ref bool __runOriginal)
-            {
-                __runOriginal = false;
-                var player = GameMain.mainPlayer;
-                if (player == null) return;
-                var planet = GameMain.localPlanet;
-                var factory = planet?.factory;
-                if (factory == null) return;
-
-                var stopwatch = new HighStopwatch();
-                stopwatch.Begin();
-                foreach (var etd in factory.entityPool)
-                {
-                    var stationId = etd.stationId;
-                    if (stationId > 0)
-                    {
-                        var sc = GameMain.localPlanet.factory.transport.stationPool[stationId];
-                        if (toBag)
-                        {
-                            for (var i = sc.storage.Length - 1; i >= 0; i--)
-                            {
-                                var package = player.TryAddItemToPackage(sc.storage[i].itemId, sc.storage[i].count, sc.storage[i].inc, true, etd.id);
-                                UIItemup.Up(sc.storage[i].itemId, package);
-                                sc.storage[i].count = 0;
-                            }
-                        }
-                        // 跳過sc.storage = new StationStore[sc.storage.Length]和sc.needs = new int[sc.needs.Length]
-                        // 這和RemoveStation優化會引發錯誤
-                    }
-                    if (toBag)
-                    {
-                        player.controller.actionBuild.DoDismantleObject(etd.id);
-                    }
-                    else
-                    {
-                        factory.RemoveEntityWithComponents(etd.id, false);
-                    }
-                }
-                Plugin.Log.LogInfo("Dismnatle All  done. Time:" + stopwatch.duration);
-            }
-
-
-            internal static void RecreatePlanet_Prefix()
-            {
-                var player = GameMain.mainPlayer;
-                if (player == null) return;
-                var planet = GameMain.localPlanet;
-                var factory = planet?.factory;
-                if (factory == null) return;
-
-                Plugin.Log.LogInfo("RecreatePlanet_Prefix: Compat patch to remove stations first");
-                var stopwatch = new HighStopwatch();
-                stopwatch.Begin();
-
-                var stationPool = factory.transport?.stationPool;
-                if (stationPool != null)
-                {
-                    foreach (var sc in stationPool)
-                    {
-                        // 先行拆掉物流塔, 避免報錯
-                        if (sc is not { id: > 0 }) continue;
-                        for (var i = sc.storage.Length - 1; i >= 0; i--)
-                        {
-                            sc.storage[i].count = 0;
-                        }
-                        int protoId = factory.entityPool[sc.entityId].protoId;
-                        factory.DismantleFinally(player, sc.entityId, ref protoId);
-                    }
-                }
-                Plugin.Log.LogInfo("Station dismnatle done. Time:" + stopwatch.duration);
             }
         }
 
