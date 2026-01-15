@@ -1,3 +1,6 @@
+### v1.1.4
+- `EnableStationBuildOptimize` now apply to station dismantling too.  
+
 ### v1.1.3
 - Fix operation setting not showing in blueprint copy mode.   
 

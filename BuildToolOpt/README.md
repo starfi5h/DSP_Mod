@@ -47,8 +47,8 @@ ReplaceStation = true
 # Default value: false
 EnableHologram = false
 
-## Optimize RefreshTraffic to reduce lag when placing stations
-## 优化RefreshTraffic以减少放置物流塔的卡顿
+## Optimize RefreshTraffic to reduce lag when placing or removing stations
+## 优化RefreshTraffic以减少建造/拆除星际物流塔的卡顿
 # Setting type: Boolean
 # Default value: false
 EnableStationBuildOptimize = false
@@ -74,9 +74,13 @@ ClipboardPaste = true
 ReplaceStation, EnableHologram and EnableStationBuildOptimize will be disabled.  
 当与联机mod共用时, 替换物流塔和建筑虚影功能将暂停使用  
   
+[UXAssist](https://thunderstore.io/c/dyson-sphere-program/p/soarqin/UXAssist//) (v1.4.5)  
+(Compat) When EnableStationBuildOptimize is enabled, apply compat patch to "dismantle all" and "initialize planet" functions.  
+(兼容) 启用 EnableStationBuildOptimize 时，应用兼容性补丁在"拆除全建築"和"初始化星球"功能。  
+  
 [CheatEnabler](https://dsp.thunderstore.io/package/soarqin/CheatEnabler/) (v2.4.0)  
-When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  
-使用替换物流塔功能时mod会暂时关闭CE的`建造秒完成`功能直到替换完成  
+(Compat) When replacing a station, `Finish build immediately` in CheatEnabler will be temporarily disabled until replace is done.  
+(兼容) 使用替换物流塔功能时mod会暂时关闭CE的`建造秒完成`功能直到替换完成  
 
 [DSPCalculator](https://thunderstore.io/c/dyson-sphere-program/p/jinxOAO/DSPCalculator/) (v0.5.17)  
 按住Shift键并单击建筑物图标将复制该建筑物虚影及其配方设置至手中。  

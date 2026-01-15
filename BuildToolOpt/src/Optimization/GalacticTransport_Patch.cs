@@ -117,14 +117,56 @@ namespace BuildToolOpt
             }
         }
 
+		[HarmonyPrefix, HarmonyPriority(Priority.Low)]
+		[HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RemoveStationComponent))]
+		static void RemoveStationComponent_Prefix(ref bool __runOriginal, GalacticTransport __instance, int gid)
+        {
+			if (!__runOriginal) return;
+
+			if (__instance.stationPool[gid] != null)
+			{
+				// 如果remote pair已經淨空, 那就不用呼叫refresh traffic
+				int remotePairCount = __instance.stationPool[gid].remotePairOffsets?[6] ?? 0;
+				Plugin.Log.LogDebug($"Remove Station[{gid}]: remote pair count = {remotePairCount}");
+				if (remotePairCount > 0)
+				{
+					var storage = __instance.stationPool[gid].storage;
+					int length = storage?.Length ?? 0;
+					for (int i = 0; i < length; i++)
+					{
+						// 重置remoteLogic, 使AddRemotePairs不增加新的pair
+						storage[i].remoteLogic = ELogisticStorage.None;
+					}
+					// 改用新的的RefreshTraffic, 只移除相關station的pairing
+					__instance.RefreshTraffic(gid);
+				}
+
+				__instance.stationPool[gid] = null;
+				int[] array = __instance.stationRecycle;
+				int num = __instance.stationRecycleCursor;
+				__instance.stationRecycleCursor = num + 1;
+				array[num] = gid;
+			}
+
+			__instance.RemoveStation2StationRoute(gid);
+			// 取代這裡的this.RefreshTraffic(gid), 這個因為station已是null所以會整個重新rematch, 大量耗時
+			if (__instance.OnStellarStationRemoved != null)
+			{
+				__instance.OnStellarStationRemoved();
+			}			
+			__runOriginal = false;
+		}
+
+
+
 #if DEBUG
 		static HighStopwatch stopwatch = new();
 
 		[HarmonyPostfix, HarmonyPatch(typeof(GalacticTransport), nameof(GalacticTransport.RefreshTraffic))]
-		static void RefreshTraffic_Postfix()
+		static void RefreshTraffic_Postfix(bool __runOriginal)
         {
-			Plugin.Log.LogDebug("RefreshTraffic time: " + stopwatch.duration);
-        }
+			Plugin.Log.LogInfo($"RefreshTraffic time: {stopwatch.duration} runOriginal: {__runOriginal}");			
+		}
 
 		public static void Print(StationComponent station)
 		{
@@ -146,9 +188,10 @@ namespace BuildToolOpt
 			if (keyStationGId == 0) return true;
 			if (keyStationGId > __instance.stationPool.Length || __instance.stationPool[keyStationGId] == null) return true;
 
-			//Plugin.Log.LogDebug("GalacticTransport.RefreshTraffic key gid = " + keyStationGId);
+			
 			var keyStation = __instance.stationPool[keyStationGId];
 			int oldPairCount = keyStation.remotePairOffsets?[6] ?? 0;
+			Plugin.Log.LogDebug($"GalacticTransport.RefreshTraffic key gid = {keyStationGId} pair count = {oldPairCount}");
 			var otherGIds = ClearOtherStationRemotePairs(__instance.stationPool, keyStation);
 			
 			keyStation.ClearRemotePairs();			
@@ -234,7 +277,7 @@ namespace BuildToolOpt
         {
 			// Upper half part of StationComponent.RematchRemotePairs
 
-			int num = @this.storage.Length;
+			int num = @this.storage?.Length ?? 0;
 			StationComponent[] stationPool = galacticTransport.stationPool;
 			int gStationCursor = galacticTransport.stationCursor;
 			for (int i = 0; i < num; i++)
