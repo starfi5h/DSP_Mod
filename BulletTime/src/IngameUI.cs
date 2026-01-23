@@ -58,6 +58,8 @@ namespace BulletTime
             {
                 if (slider == null)
                 {
+                    bool oldUIflag = GameConfig.gameVersion < new Version(0, 10, 34);
+
                     // Set slider
                     GameObject sliderGo = UIRoot.instance.optionWindow.audioVolumeComp.transform.gameObject;
                     Transform cpuPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuActiveButton.gameObject.transform.parent;
@@ -70,22 +72,49 @@ namespace BulletTime
                     slider.onValueChanged.AddListener(value => OnSliderChange(value));
                     OnSliderChange(slider.value);
 
-                    // Set toggle
-                    GameObject checkBoxWithText = UIRoot.instance.optionWindow.vsyncComp.transform.parent.gameObject;
-                    Transform dataPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.dataActiveButton.gameObject.transform.parent;
-                    GameObject backgroundSaveGo = GameObject.Instantiate(checkBoxWithText, dataPanel);
-                    backgroundSaveGo.name = "Background autosave toggle";
-                    backgroundSaveGo.transform.localPosition = new Vector3(250, 390, 0);
-                    GameObject.Destroy(backgroundSaveGo.GetComponent<Localizer>());
-                    Text text_local = backgroundSaveGo.GetComponent<Text>();
-                    //text_local.font = text_factory.font;
-                    text_local.fontSize = 14;
-                    text_local.text = "Background autosave".Translate();
+                    if (oldUIflag)
+                    {
+                        // Set toggle
+                        GameObject checkBoxWithText = UIRoot.instance.optionWindow.vsyncComp.transform.parent.gameObject;
+                        Transform dataPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.dataActiveButton.gameObject.transform.parent;
+                        GameObject backgroundSaveGo = GameObject.Instantiate(checkBoxWithText, dataPanel);
+                        backgroundSaveGo.name = "Background autosave toggle";
+                        backgroundSaveGo.transform.localPosition = new Vector3(250, 390, 0);
+                        GameObject.Destroy(backgroundSaveGo.GetComponent<Localizer>());
+                        Text text_local = backgroundSaveGo.GetComponent<Text>();
+                        //text_local.font = text_factory.font;
+                        text_local.fontSize = 14;
+                        text_local.text = "Background autosave".Translate();
 
-                    backgroundSaveToggle = backgroundSaveGo.GetComponentInChildren<UIToggle>();
-                    backgroundSaveToggle.transform.localPosition = new Vector3(65, -20, 0);
-                    backgroundSaveToggle.isOn = GameSave_Patch.isEnabled;
-                    backgroundSaveToggle.toggle.onValueChanged.AddListener(OnAutosaveToggleChange);
+                        backgroundSaveToggle = backgroundSaveGo.GetComponentInChildren<UIToggle>();
+                        backgroundSaveToggle.transform.localPosition = new Vector3(65, -20, 0);
+                        backgroundSaveToggle.isOn = GameSave_Patch.isEnabled;
+                        backgroundSaveToggle.toggle.onValueChanged.AddListener(OnAutosaveToggleChange);
+                    }
+                    else // 0.10.34 and above version
+                    {
+                        Transform dataPanel = UIRoot.instance.uiGame.statWindow.performancePanelUI.dataActiveButton.gameObject.transform.parent;
+                        GameObject textGo = UIRoot.instance.uiGame.statWindow.performancePanelUI.cpuValueText1.gameObject;
+                        GameObject checkBoxGo = UIRoot.instance.optionWindow.vsyncComp.transform.gameObject;
+
+                        GameObject group = new("[BulletTime]Background autosave toggle");
+                        group.transform.SetParent(dataPanel);
+                        group.transform.localPosition = new Vector3(260, 390, 0);
+                        group.transform.localScale = Vector3.one;
+
+                        GameObject backgroundSaveGo = GameObject.Instantiate(checkBoxGo, group.transform);
+                        backgroundSaveGo.transform.localPosition = new Vector3(0, 0, 0);
+                        backgroundSaveToggle = backgroundSaveGo.GetComponent<UIToggle>();
+                        backgroundSaveToggle.isOn = GameSave_Patch.isEnabled;
+                        backgroundSaveToggle.toggle.onValueChanged.AddListener(OnAutosaveToggleChange);
+
+                        GameObject backgroundSaveTextGo = GameObject.Instantiate(textGo, group.transform);
+                        backgroundSaveTextGo.transform.localPosition = new Vector3(-60, 0, 0);
+                        GameObject.Destroy(backgroundSaveTextGo.GetComponent<Localizer>());
+                        Text backgroundSaveText = backgroundSaveTextGo.GetComponent<Text>();
+                        backgroundSaveText.fontSize = 12;
+                        backgroundSaveText.text = "Background\nautosave".Translate();
+                    }
                 }
                 // Only host can have control slider
                 slider.gameObject.SetActive(!NebulaCompat.IsClient);
@@ -395,10 +424,10 @@ namespace BulletTime
                 GameObject go = GameObject.Find("UI Root/Overlay Canvas/In Game/Top Tips/Auto Save/content/tip-panel");
                 GameObject statePanel = GameObject.Instantiate(go, go.transform.parent.parent);
                 statePanel.transform.localPosition = new Vector3(-35, statePanel.transform.localPosition.y + BulletTimePlugin.StatusTextHeightOffset.Value, 0);
-                GameObject.Destroy(statePanel.transform.Find("bg").gameObject);
-                GameObject.Destroy(statePanel.transform.Find("icon").gameObject);
-                GameObject.Destroy(statePanel.transform.Find("glow-1").gameObject);
-                GameObject.Destroy(statePanel.transform.Find("achiev-ban-text").gameObject);
+                GameObject.Destroy(statePanel.transform.Find("bg")?.gameObject);
+                GameObject.Destroy(statePanel.transform.Find("icon")?.gameObject);
+                GameObject.Destroy(statePanel.transform.Find("glow-1")?.gameObject);
+                GameObject.Destroy(statePanel.transform.Find("achiev-ban-text")?.gameObject);
                 stateMessage = statePanel.transform.Find("text").GetComponent<Text>();
             }
             stateMessage.transform.parent.gameObject.SetActive(message != "");

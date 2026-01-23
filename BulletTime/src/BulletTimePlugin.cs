@@ -20,7 +20,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.12";
+        public const string VERSION = "1.5.13";
         
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableHotkeyAutosave;
@@ -62,12 +62,12 @@ namespace BulletTime
         {
             if (GameConfig.gameVersion.Major == 0 && GameConfig.gameVersion.Minor < 10)
             {
-                errorMessage = $"BulletTime {VERSION} only supports 0.10.33 game version!\nPlease roll back to BulletTime 1.2.14 for 0.9.27 game version";
+                errorMessage = $"BulletTime {VERSION} only supports 0.10.33+ game version!\nPlease roll back to BulletTime 1.2.14 for 0.9.27 game version";
                 return false;
             }
             if (GameConfig.gameVersion < new Version(0, 10, 33))
             {
-                errorMessage = $"BulletTime {VERSION} only supports 0.10.33 game version!\nPlease roll back to BulletTime 1.5.10 for 0.10.32 game version";
+                errorMessage = $"BulletTime {VERSION} only supports 0.10.33+ game version!\nPlease roll back to BulletTime 1.5.10 for 0.10.32 game version";
                 return false;
             }
             return true;

@@ -1,5 +1,9 @@
 ## Changelog
 
+#### v1.5.13 (DPS-0.10.34.28289)
+\- Fix error in IngameUI.ShowStatus  
+\- 修正IngameUI.ShowStatus在新版本的报错  
+
 #### v1.5.12 (DSP-0.10.33.27026)
 \- Add new config `MaxSimulationSpeed` to fast set/reset simulation speed in outer space by shift-click.  
 \- 添加新配置项 `MaxSimulationSpeed`，可通过按住 Shift 键并单击来快速设置/重置在外太空时的模拟速度。  
