@@ -67,24 +67,48 @@ namespace SampleAndHoldSim
                     tip2.Title = "Update Period".Translate();
                     tip2.Text = "Compute actual factory simulation every x ticks.".Translate();
 
-                    tmp = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
-                    tmp.name = "checkbox_local";
-                    tmp.transform.localPosition = new Vector3(80, 30, 0);
-                    GameObject.Destroy(tmp.GetComponent<Localizer>());
-                    Text text_local = tmp.GetComponent<Text>();
-                    text_local.font = text_factory.font;
-                    text_local.fontSize = 12;
-                    text_local.text = "Focus local".Translate();
+                    if (GameConfig.gameVersion < new Version(0, 10, 34))
+                    {
+                        tmp = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
+                        tmp.name = "checkbox_local";
+                        tmp.transform.localPosition = new Vector3(80, 30, 0);
+                        GameObject.Destroy(tmp.GetComponent<Localizer>());
+                        Text text_local = tmp.GetComponent<Text>();
+                        text_local.font = text_factory.font;
+                        text_local.fontSize = 12;
+                        text_local.text = "Focus local".Translate();
 
-                    tip3 = tmp.AddComponent<UItooltip>();
-                    tip3.Title = "Focus on local factory".Translate();
-                    tip3.Text = "Let local planet factory always active.".Translate();
+                        tip3 = tmp.AddComponent<UItooltip>();
+                        tip3.Title = "Focus on local factory".Translate();
+                        tip3.Text = "Let local planet factory always active.".Translate();
 
-                    toggle_local = tmp.GetComponentInChildren<UIToggle>().toggle;
-                    toggle_local.onValueChanged.AddListener(new UnityAction<bool>(OnToggleChange));
-                    tmp = toggle_local.gameObject;
-                    tmp.transform.localPosition = new Vector3(52, 0); //60
-                    tmp.transform.localScale = new Vector3(0.75f, 0.75f);
+                        toggle_local = tmp.GetComponentInChildren<UIToggle>().toggle;
+                        toggle_local.onValueChanged.AddListener(new UnityAction<bool>(OnToggleChange));
+                        tmp = toggle_local.gameObject;
+                        tmp.transform.localPosition = new Vector3(52, 0); //60
+                        tmp.transform.localScale = new Vector3(0.75f, 0.75f);
+                    }
+                    else
+                    {                       
+                        tmp = GameObject.Instantiate(UIRoot.instance.optionWindow.vsyncComp.gameObject, group.transform);
+                        tmp.name = "checkbox_local";
+                        tmp.transform.localPosition = new Vector3(133, 30, 0);
+                        tmp.transform.localScale = new Vector3(0.75f, 0.75f);
+                        tip3 = tmp.AddComponent<UItooltip>();
+                        tip3.Title = "Focus on local factory".Translate();
+                        tip3.Text = "Let local planet factory always active.".Translate();
+
+                        GameObject textGo = GameObject.Instantiate(text0.gameObject, group.transform);
+                        textGo.transform.localPosition = new Vector3(-25, 20);
+                        textGo.name = "text_focus_local";
+                        Text text_local = textGo.GetComponent<Text>();                        
+                        text_local.fontSize = 12;
+                        text_local.text = "Focus local".Translate();
+
+                        toggle_local = tmp.GetComponentInChildren<UIToggle>().toggle;
+                        toggle_local.onValueChanged.AddListener(new UnityAction<bool>(OnToggleChange));
+                    }
+
                     initialized = true;
 
                     RefreshUI();

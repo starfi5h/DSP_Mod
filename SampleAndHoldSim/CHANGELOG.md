@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.7.5 (DSP-0.10.34.28326)
+\- Fix UI in new game version.  
+
 #### v0.7.4
 \- Fix solar sails disappear.  
 \- Fix ILS import and export stats.  
