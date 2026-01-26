@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.8";
+        public const string VERSION = "1.1.9";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -115,7 +115,9 @@ namespace PlanetwideSpray
         public static int IncAbility = 0;
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))]
+        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto),
+            new Type[] { typeof(uint), typeof(int), typeof(int), typeof(byte), typeof(byte), typeof(byte) }, 
+            new ArgumentType[] { ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Out })]
         static void AddItemInc(byte itemCount, ref byte itemInc)
         {
             itemInc = (byte)(itemCount * IncAbility);
