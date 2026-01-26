@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.7";
+        public const string VERSION = "1.1.8";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -57,26 +57,30 @@ namespace PlanetwideSpray
                 harmony.PatchAll(typeof(Main_Patch));
 
                 // 爪子
-                var insertMethod = AccessTools.Method(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto));
+                HarmonyMethod insertMethod_Prefix = null;
                 if (EnableSprayAll.Value)
                 {
                     Log.LogDebug("AddItemInc0: spray all insert");
-                    harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc0)), 600));
+                    insertMethod_Prefix = new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc0)), 600);
                 }
                 else
                 {
                     if (EnableFuelPowerGenerator.Value)
                     {
                         Log.LogDebug("AddItemInc2: spray assembler, lab, powerGen");
-                        harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc2)), 600));
+                        insertMethod_Prefix = new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc2)), 600);
                     }
                     else
                     {
                         Log.LogDebug("AddItemInc1: spray assembler, lab");
-                        harmony.Patch(insertMethod, new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc1)), 600));
+                        insertMethod_Prefix = new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc1)), 600);
                     }
                 }
-                
+                var insertMethod = AccessTools.Method(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto),
+                    new Type[] { typeof(uint), typeof(int), typeof(int), typeof(byte), typeof(byte), typeof(byte).MakeByRefType() });
+                var insertMethod_Postfix = new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.InsertInto_Postfix)));
+                harmony.Patch(insertMethod, insertMethod_Prefix, insertMethod_Postfix);
+
                 if (EnableSprayStation.Value)
                 {
                     harmony.PatchAll(typeof(Main_Patch.Station_Patch));

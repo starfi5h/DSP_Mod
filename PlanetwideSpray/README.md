@@ -92,6 +92,7 @@ Spray Fuel Power Generator = false
 
 ## Changelog
 
+- v1.1.8 - Adapt to game version 0.10.34.28326  
 - v1.1.7 - Adapt to game version 0.10.33.26941  
 - v1.1.6 - Add config `Spray Fuel Power Generator`. Fix a bug that blocking sorters consume more proliferator.  
 - v1.1.5 - Support fuel power generator.  

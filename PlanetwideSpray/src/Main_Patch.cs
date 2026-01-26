@@ -81,11 +81,10 @@ namespace PlanetwideSpray
         }
 
         //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(LimitSpray)
-        public static void AddItemInc1(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc, ref bool __state)
+        public static void AddItemInc1(PlanetFactory __instance, uint ioTargetTypedId, byte itemCount, ref byte itemInc, ref bool __state)
         {
-            ref var entity = ref __instance.entityPool[entityId];
-            int hash = entity.assemblerId | entity.labId;
-            if (hash == 0) return; // 輸入的不是支援的建築
+            var targetType = (EFactoryIOTargetType)(ioTargetTypedId & 0xFF000000u); // EFactoryIOTargetType.TypeMask
+            if (targetType != EFactoryIOTargetType.Assembler && targetType != EFactoryIOTargetType.Lab) return;
 
             var status = statusArr[__instance.index]; //定位工廠
             var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
@@ -97,11 +96,10 @@ namespace PlanetwideSpray
         }
 
         //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(LimitSpray,含燃料)
-        public static void AddItemInc2(PlanetFactory __instance, int entityId, byte itemCount, ref byte itemInc, ref bool __state)
+        public static void AddItemInc2(PlanetFactory __instance, uint ioTargetTypedId, byte itemCount, ref byte itemInc, ref bool __state)
         {
-            ref var entity = ref __instance.entityPool[entityId];
-            int hash = entity.assemblerId | entity.labId | entity.powerGenId; //包含發電設備
-            if (hash == 0) return;
+            var targetType = (EFactoryIOTargetType)(ioTargetTypedId & 0xFF000000u); // EFactoryIOTargetType.TypeMask
+            if (targetType != EFactoryIOTargetType.Assembler && targetType != EFactoryIOTargetType.Lab && targetType != EFactoryIOTargetType.PowerGen) return;
 
             var status = statusArr[__instance.index]; //定位工廠
             var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
@@ -112,7 +110,7 @@ namespace PlanetwideSpray
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))]
+        //[HarmonyPostfix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))]
         public static void InsertInto_Postfix(PlanetFactory __instance, int __result, bool __state)
         {
             if (__state && __result != 0) //有成功將物品送入機器, __result:送入的物品數
@@ -206,7 +204,8 @@ namespace PlanetwideSpray
             }
             status.incCount[__instance.incAbility] += __instance.extraIncCount + __instance.incCount;
 
-            // 更新動畫
+            // 更新動畫。注意在遠端工廠_animPool為null
+            if (_animPool == null) return;
             int animStateTick = Mathf.RoundToInt(_animPool[__instance.entityId].state * 0.001f);
             if (flag)
             {
