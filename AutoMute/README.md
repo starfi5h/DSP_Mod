@@ -16,9 +16,10 @@ After changing `.cfg` file, go to in-game settings and click 'Apply' to apply th
 For example, to mute Ray receiver and Artificial star, key in `2208 2210`. Reload the planet to take effect.  
 - `MuteList` - The list of audio name to mute, separated by white spaces. Check [mod page wiki](https://dsp.thunderstore.io/package/starfi5h/AutoMute/wiki/) for available names.  
 For example, to mute `flight mode` system broadcast, key in `vc-broadcast-4 vc-broadcast-5`  
+- `Enable UI` - Enable mod UI in audio settings page.  
 
 ![Settings](https://raw.githubusercontent.com/starfi5h/DSP_Mod/dev/AutoMute/img/setting.png)  
-In Settings - Audio tab, there is a mod UI to play and toggle each audio.  
+In Settings - Audio page, there is a mod UI to play and toggle each audio.  
 The upper input field can filter the drop-down list of the audio.  
 
 ----
@@ -30,36 +31,41 @@ The upper input field can filter the drop-down list of the audio.
 
 - `Mute Building Ids` 输入[物品ID](https://dsp-wiki.com/Modding:Items_IDs)即可静音该建筑。以逗号分隔。(需重新载入星球)
 - `MuteList` 消除指定的音讯。输入:音效名称, 以空白分隔(名称可以在[mod页面wiki](https://dsp.thunderstore.io/package/starfi5h/AutoMute/wiki/)查询)
+- `Enable UI` - 在音频设置页面启用模组用户界面。  
 
 ----
 
 ## Changelog
 
+#### v1.3.2
+- Adpat to DSP-0.10.34
+- Add config `Enable UI`
+
 #### v1.3.1
-\- Adpat to DSP-0.10.33  
+- Adpat to DSP-0.10.33  
 
 #### v1.3.0
-\- Remove "Mute in background" feature as it is in vanilla game now.  
-\- Fix UI change for 0.10.30.23430  
+- Remove "Mute in background" feature as it is in vanilla game now.  
+- Fix UI change for 0.10.30.23430  
 
 #### v1.2.1
-\- Add button to filter only mute audio.  
+- Add button to filter only mute audio.  
 
 #### v1.2.0
-\- Add mod UI in game Settings - Audio.  
+- Add mod UI in game Settings - Audio.  
 
 #### v1.1.1
-\- Fix error when installing for the first time.  
+- Fix error when installing for the first time.  
 
 #### v1.1.0
-\- Add config option `MuteList`  
-\- Config changes now can apply when clicking in-game setting apply button.  
+- Add config option `MuteList`  
+- Config changes now can apply when clicking in-game setting apply button.  
 
 #### v1.0.0
-\- Initial release.  
+- Initial release.  
 
 #### v0.1.0  
-\- Beta test. (Game Version 0.9.25.12201)
+- Beta test. (Game Version 0.9.25.12201)
 
 ----
 

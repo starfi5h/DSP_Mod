@@ -48,6 +48,8 @@ namespace AutoMute
                 {
                     GameObject settingTab = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2");
                     GameObject checkBoxWithTextTemple = __instance.vsyncComp.transform.parent.gameObject;
+                    GameObject checkBoxTemple = __instance.vsyncComp.gameObject;
+                    GameObject textTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/title-text");
                     GameObject comboBoxTemple = __instance.resolutionComp.transform.gameObject;
                     GameObject inputTemple = UIRoot.instance.uiGame.planetGlobe.nameInput.gameObject; //UI Root/Overlay Canvas/In Game/Globe Panel/name-input
                     GameObject buttonTemple = __instance.revertButtons[0].gameObject; //../Option Window/details/content-1/revert-button
@@ -72,16 +74,46 @@ namespace AutoMute
                     // tmp.transform.parent.GetChild(0).GetComponent<Button>().onClick.AddListener(new UnityAction(OnComboBoxClicked));
                     go.SetActive(true);
 
-                    // 狀態回報文字, 以及勾選按鈕過濾靜音列表
-                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
-                    go.name = "Filter Mute Only Toggle";
-                    go.transform.localPosition = new Vector3(210 + 30, -30, 0);
-                    GameObject.Destroy(go.GetComponent<Localizer>());
-                    muteInfoText = go.GetComponent<Text>();
-                    muteInfoText.text = "";
+                    if (!(GameConfig.gameVersion < new Version(0, 10, 34)))
+                    {
+                        for (var i = go.transform.childCount - 1; i >= 0; i--)
+                        {
+                            if (go.transform.GetChild(i).name != "name-text")
+                            {
+                                GameObject.Destroy(go.transform.GetChild(i).gameObject);
+                            }
+                        }
+                    }
 
-                    filterMuteOnlyToggle = go.GetComponentInChildren<UIToggle>();
-                    filterMuteOnlyToggle.transform.localPosition = new Vector3(-40, 5, 0);
+                    // 狀態回報文字, 以及勾選按鈕過濾靜音列表
+                    if (GameConfig.gameVersion < new Version(0, 10, 34))
+                    {
+                        go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
+                        go.name = "Filter Mute Only Toggle";
+                        go.transform.localPosition = new Vector3(210 + 30, -30, 0);
+                        filterMuteOnlyToggle = go.GetComponentInChildren<UIToggle>();
+                        filterMuteOnlyToggle.transform.localPosition = new Vector3(-40, 5, 0);
+
+                        GameObject.Destroy(go.GetComponent<Localizer>());
+                        muteInfoText = go.GetComponent<Text>();
+                        muteInfoText.text = "";
+                    }
+                    else
+                    {
+                        go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                        go.name = "Filter Mute Only Toggle";
+                        go.transform.localPosition = new Vector3(195, -25, 0);
+                        filterMuteOnlyToggle = go.GetComponent<UIToggle>();
+
+                        go = GameObject.Instantiate(textTemple, group.transform);
+                        go.name = "Filter Mute Only Text";
+                        go.transform.localPosition = new Vector3(230, 15, 0);
+                        go.SetActive(true);
+                        GameObject.Destroy(go.GetComponent<Localizer>());
+                        muteInfoText = go.GetComponent<Text>();
+                        muteInfoText.text = "";
+                        muteInfoText.fontSize = 14;
+                    }
                     filterMuteOnlyToggle.isOn = filterMuteOnly;
                     filterMuteOnlyToggle.toggle.onValueChanged.AddListener(OnFilterMuteOnlyToggleChange);
 
@@ -115,15 +147,32 @@ namespace AutoMute
                     audioComboBox.onItemIndexChange.AddListener(OnComboBoxIndexChange);
 
                     // 創建音頻文件的路徑文字, 及靜音勾選按鈕
-                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
-                    go.name = "Audio Enable Toggle";
-                    go.transform.localPosition = new Vector3(210 + 30, -60, 0);
-                    GameObject.Destroy(go.GetComponent<Localizer>());
-                    audioClipPath = go.GetComponent<Text>();
-                    audioClipPath.text = "(Audio ClipPath)";
+                    if (GameConfig.gameVersion < new Version(0, 10, 34))
+                    {
+                        go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
+                        go.name = "Audio Enable Toggle";
+                        go.transform.localPosition = new Vector3(210 + 30, -60, 0);
+                        audioEnableToggle = go.GetComponentInChildren<UIToggle>();
+                        audioEnableToggle.transform.localPosition = new Vector3(-40, 5, 0);
+                        GameObject.Destroy(go.GetComponent<Localizer>());
+                        audioClipPath = go.GetComponent<Text>();
+                        audioClipPath.text = "(Audio ClipPath)";
+                    }
+                    else
+                    {
+                        go = GameObject.Instantiate(checkBoxTemple, group.transform);
+                        go.name = "Audio Enable Toggle";
+                        go.transform.localPosition = new Vector3(195, -55, 0);
+                        audioEnableToggle = go.GetComponent<UIToggle>();
 
-                    audioEnableToggle = go.GetComponentInChildren<UIToggle>();
-                    audioEnableToggle.transform.localPosition = new Vector3(-40, 5, 0);
+                        go = GameObject.Instantiate(textTemple, group.transform);
+                        go.name = "Audio Enable Text";
+                        go.transform.localPosition = new Vector3(230, -15, 0);
+                        GameObject.Destroy(go.GetComponent<Localizer>());
+                        audioClipPath = go.GetComponent<Text>();
+                        audioClipPath.text = "(Audio ClipPath)";
+                        audioClipPath.fontSize = 14;
+                    }
                     audioEnableToggle.isOn = true;
                     audioEnableToggle.toggle.onValueChanged.AddListener(OnAudioEnableToggleChange);
 

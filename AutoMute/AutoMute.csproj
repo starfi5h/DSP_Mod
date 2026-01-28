@@ -40,7 +40,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.34.28347-r.0\lib\net45\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.17.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BepInEx.BaseLib.5.4.17\lib\net35\BepInEx.dll</HintPath>
@@ -78,260 +78,206 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AccessibilityModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.AccessibilityModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AccessibilityModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.AIModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AndroidJNIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AndroidJNIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.AnimationModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ARModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ARModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.AssetBundleModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.AudioModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.BaselibModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.BaselibModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClothModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ClothModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ClothModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterInputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ClusterInputModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ClusterInputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ClusterRendererModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ClusterRendererModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ClusterRendererModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ContentLoadModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ContentLoadModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CrashReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.CrashReportingModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.CrashReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.DirectorModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.DirectorModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.FileSystemHttpModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.FileSystemHttpModule.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="UnityEngine.DSPGraphModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.DSPGraphModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.GameCenterModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.GIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GridModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.GridModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.GridModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.HotReloadModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.HotReloadModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.HotReloadModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.InputModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.JSONSerializeModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.JSONSerializeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.LocalizationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.LocalizationModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\UnityEngine.Networking.dll</HintPath>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.LocalizationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ParticleSystemModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PerformanceReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.PerformanceReportingModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.PerformanceReportingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.Physics2DModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ProfilerModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ProfilerModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ProfilerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PropertiesModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.PropertiesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ScreenCaptureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.ScreenCaptureModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.ScreenCaptureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SharedInternalsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.SharedInternalsModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.SpatialTracking, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\UnityEngine.SpatialTracking.dll</HintPath>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.SharedInternalsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteMaskModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.SpriteMaskModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.SpriteMaskModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpriteShapeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.SpriteShapeModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.SpriteShapeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.StreamingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.StreamingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.StyleSheetsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.StyleSheetsModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.StreamingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SubstanceModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.SubstanceModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.SubstanceModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SubsystemsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.SubsystemsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TerrainModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TerrainModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainPhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TerrainPhysicsModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TerrainPhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextCoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TextCoreModule.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TilemapModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TilemapModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Timeline, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\UnityEngine.Timeline.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TimelineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TimelineModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TilemapModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TLSModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.TLSModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.TLSModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.32.25779-r.0\lib\net45\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\packages\DysonSphereProgram.GameLibs.0.10.34.28347-r.0\lib\net45\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UIElementsModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UIElementsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UmbraModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UmbraModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UmbraModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UNETModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UNETModule.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityAnalyticsModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityAnalyticsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityConnectModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityConnectModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityCurlModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityTestProtocolModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityTestProtocolModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityTestProtocolModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityWebRequestModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestTextureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VehiclesModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.VehiclesModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.VehiclesModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VFXModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.VFXModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.VFXModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.VideoModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.VirtualTexturingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.VRModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.VRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.WindModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.WindModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.WindModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.Modules.2018.4.12\lib\net45\UnityEngine.XRModule.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\UnityEngine.Modules.2022.3.62\lib\net45\UnityEngine.XRModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -341,7 +287,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="manifest.json" />
     <None Include="packages.config" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BepInEx.Core.5.4.17\build\BepInEx.Core.targets" Condition="Exists('..\packages\BepInEx.Core.5.4.17\build\BepInEx.Core.targets')" />

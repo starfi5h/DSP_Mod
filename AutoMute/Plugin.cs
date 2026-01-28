@@ -12,14 +12,15 @@ namespace AutoMute
     {
         public const string GUID = "starfi5h.plugin.AutoMute";
         public const string NAME = "AutoMute";
-        public const string VERSION = "1.3.1";
+        public const string VERSION = "1.3.2";
 
         internal static Plugin Instance;
         internal static ManualLogSource Log; 
         internal Harmony harmony;
         internal ConfigEntry<string> MuteBuildingIds;
         internal ConfigEntry<string> MuteList;
-        
+        internal ConfigEntry<bool> EnableUI;
+
         // Audio volume backups
         public readonly static Dictionary<string, float> AudioVolumes = new Dictionary<string, float>();
         readonly static Dictionary<int, float> ModelVolumes = new Dictionary<int, float>();
@@ -29,6 +30,7 @@ namespace AutoMute
         {            
             MuteBuildingIds = Config.Bind("- General -", "Mute Building Ids", "", "The ids of building to mute, separated by white spaces.\n消除指定建筑的音讯。输入:建筑物品id, 以空白分隔。");
             MuteList = Config.Bind("- General -", "MuteList", "vc-broadcast-4 vc-broadcast-5 vc-broadcast-6 vc-broadcast-7 vc-broadcast-8 vc-broadcast-22", "The list of audio name to mute, separated by white spaces. Check mod page wiki for available names.\n消除指定的音讯。输入:音讯名称, 以空白分隔(名称可以在mod页面wiki查询)");
+            EnableUI = Config.Bind("- General -", "Enable UI", true, "Enable mod UI in audio settings page.\n在音频设置页面启用模组用户界面。");
         }
 
         internal void Awake()
@@ -38,7 +40,7 @@ namespace AutoMute
             Log = Logger;
             harmony = new Harmony(GUID);
             harmony.PatchAll(typeof(Plugin));
-            harmony.PatchAll(typeof(IngameUI));
+            if (EnableUI.Value) harmony.PatchAll(typeof(IngameUI));
 
             // Suppress the sound when finishing craft
             var method = AccessTools.Method(typeof(UIMechaMoveTip), "OnForgeTaskDelivery");
