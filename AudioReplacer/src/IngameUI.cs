@@ -51,7 +51,7 @@ namespace AudioReplacer
                 try
                 {
                     GameObject settingTab = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/details/content-2");
-                    GameObject checkBoxWithTextTemple = __instance.vsyncComp.transform.parent.gameObject;
+                    GameObject textTemple = GameObject.Find("UI Root/Overlay Canvas/Top Windows/Option Window/title-text");
                     GameObject comboBoxTemple = __instance.resolutionComp.transform.gameObject;
                     GameObject inputTemple = UIRoot.instance.uiGame.planetGlobe.nameInput.gameObject; //UI Root/Overlay Canvas/In Game/Globe Panel/name-input
                     GameObject buttonTemple = __instance.revertButtons[0].gameObject; //../Option Window/details/content-1/revert-button
@@ -99,14 +99,24 @@ namespace AudioReplacer
                     folderPathInput = go.GetComponent<InputField>();
                     folderPathInput.text = AudioReplacerPlugin.Instance.AudioFolderPath.Value;
                     folderPathInput.characterLimit = 256;
+                    if (!(GameConfig.gameVersion < new Version(0, 10, 34)))
+                    {
+                        for (var i = go.transform.childCount - 1; i >= 0; i--)
+                        {
+                            if (go.transform.GetChild(i).name != "name-text")
+                            {
+                                GameObject.Destroy(go.transform.GetChild(i).gameObject);
+                            }
+                        }
+                    }
 
-                    go = GameObject.Instantiate(checkBoxWithTextTemple, group.transform);
+                    go = GameObject.Instantiate(textTemple, group.transform);
                     go.name = "Load Info";
-                    go.transform.localPosition = new Vector3(0, -35, 0);
+                    go.transform.localPosition = new Vector3(0, 0, 0);
                     GameObject.Destroy(go.GetComponent<Localizer>());
                     loadInfoText = go.GetComponent<Text>();
                     loadInfoText.text = plugin.lastInfoMsg + " " + plugin.lastWarningMsg;
-                    GameObject.Destroy(go.GetComponentInChildren<UIToggle>().gameObject);
+                    loadInfoText.fontSize = 14;
 
                     // Create InputField filterInput to search audio with string
                     const int OffsetAudioY = -80;
@@ -119,6 +129,16 @@ namespace AudioReplacer
                     go.GetComponent<RectTransform>().sizeDelta = new Vector2(203f, 30f);
                     go.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.5f);
                     go.SetActive(true);
+                    if (!(GameConfig.gameVersion < new Version(0, 10, 34)))
+                    {
+                        for (var i = go.transform.childCount - 1; i >= 0; i--)
+                        {
+                            if (go.transform.GetChild(i).name != "name-text")
+                            {
+                                GameObject.Destroy(go.transform.GetChild(i).gameObject);
+                            }
+                        }
+                    }
 
                     // Create UIComboBox audioComboBox for drop-down select audio
                     go = GameObject.Instantiate(comboBoxTemple, group.transform, false);
@@ -154,7 +174,7 @@ namespace AudioReplacer
                     // Create UIToggle audioEnableToggle and Text audioClipPath
                     go = GameObject.Instantiate(loadInfoText.gameObject, group.transform);
                     go.name = "Audio ClipPath";
-                    go.transform.localPosition = new Vector3(210, OffsetAudioY - 30, 0);
+                    go.transform.localPosition = new Vector3(210, OffsetAudioY + 15, 0);
                     audioClipPath = go.GetComponent<Text>();
                     audioClipPath.text = "(Custom Audio Path)".Translate();
 
