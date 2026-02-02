@@ -43,6 +43,7 @@ namespace SampleAndHoldSim
                 {
                     case EGameLogicTask.FactoryLabOutput: // 1800
                         AfterTransport();
+                        GameTick_Patch.FixLocalLabOutput();
                         break;
                 }
             }

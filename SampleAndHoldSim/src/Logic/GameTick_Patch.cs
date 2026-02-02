@@ -161,6 +161,34 @@ namespace SampleAndHoldSim
                 // bool useCata = time % 10L == 0L;
                 if (manager.IsNextIdle)
                     time /= MainManager.UpdatePeriod;
+                else if (__instance.factory.index == MainManager.FocusFactoryIndex)
+                    time = GameMain.gameTick; // Restore real time for focused local factory
+            }
+        }
+
+        /// <summary>
+        /// Corrective pass for local factory lab output in parallel mode.
+        /// Called from ThreadManager_Patch.OnPhaseEnd after all threads finish FactoryLabOutput.
+        /// The parallel method uses divided timei for num2, which is wrong for the focused local factory.
+        /// This runs UpdateOutputToNext for labs that were skipped due to incorrect num2.
+        /// </summary>
+        public static void FixLocalLabOutput()
+        {
+            if (MainManager.FocusFactoryIndex < 0 || MainManager.UpdatePeriod <= 1) return;
+
+            int correctNum = (int)(GameMain.gameTick & 3L);
+            int wrongNum = (int)((GameMain.gameTick / MainManager.UpdatePeriod) & 3L);
+            if (correctNum == wrongNum) return;
+
+            var factory = GameMain.data.factories[MainManager.FocusFactoryIndex];
+            var labPool = factory.factorySystem.labPool;
+            int labCursor = factory.factorySystem.labCursor;
+
+            for (int i = 1; i < labCursor; i++)
+            {
+                ref LabComponent lab = ref labPool[i];
+                if (lab.id == i && (i & 3) == correctNum && lab.nextLabId > 0)
+                    lab.UpdateOutputToNext(labPool);
             }
         }
     }
