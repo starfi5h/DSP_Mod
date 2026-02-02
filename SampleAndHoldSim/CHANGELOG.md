@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.7.7
+- Fix errors in game main menu.  
+
 #### v0.7.6 (DSP-0.10.34.28396)
 Thanks FyisFe for the following fixes:  
 - Fix lab tower produce / consume rates drop on focus local planet.  

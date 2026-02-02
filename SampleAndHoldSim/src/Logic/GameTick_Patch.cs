@@ -173,10 +173,12 @@ namespace SampleAndHoldSim
         public static void FixLocalLabOutput()
         {
             // 對於多線程LabOutputToNext的補救方法: 將本地星球的研究站上下傳遞補齊
-            if (GameMain.localPlanet == null || GameMain.localPlanet.id != MainManager.FocusPlanetId) return;
+            if (MainManager.FocusFactoryIndex < 0 || MainManager.FocusFactoryIndex >= GameMain.data.factories.Length) return;
+            var localFactory = GameMain.data.factories[MainManager.FocusFactoryIndex];
 
             int gene = (int)(GameMain.gameTick & 3L);
-            var factorySystem = GameMain.localPlanet.factory.factorySystem;
+            var factorySystem = localFactory?.factorySystem;
+            if (factorySystem == null) return;
             for (int i = 1; i < factorySystem.labCursor; i++)
             {
                 ref LabComponent ptr = ref factorySystem.labPool[i];
