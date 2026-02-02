@@ -5,6 +5,8 @@ using System.Reflection.Emit;
 
 namespace SampleAndHoldSim
 {
+    // 在GameLogic.OnFactoryFrameBegin後, timei = GameMain.timei / scale
+    // 對於全域和本地focus工廠, 我們需要把計算用的時間還原成GameMain.timei
     public class GameTick_Patch
     {
         // 參考GameMain.gameTick的值要適當的調整, 避免直接使用
@@ -76,6 +78,17 @@ namespace SampleAndHoldSim
             if (___factory.index == MainManager.FocusFactoryIndex)
             {
                 gameTick = GameMain.gameTick;
+            }
+        }
+
+        [HarmonyPrefix, HarmonyPriority(Priority.VeryHigh)]
+        [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
+        static void PowerSystem_Gametick(PowerSystem __instance, ref long time)
+        {
+            if (__instance.factory.index == MainManager.FocusFactoryIndex)
+            {
+                // Restore real time for focused local factory
+                time = GameMain.gameTick;
             }
         }
 
@@ -151,44 +164,30 @@ namespace SampleAndHoldSim
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PowerSystem), nameof(PowerSystem.GameTick))]
-        static void PowerSystem_Gametick(PowerSystem __instance, ref long time)
-        {
-            if (MainManager.TryGet(__instance.factory.index, out var manager))
-            {
-                // Fix len consumption rate in idle factory
-                // bool useCata = time % 10L == 0L;
-                if (manager.IsNextIdle)
-                    time /= MainManager.UpdatePeriod;
-                else if (__instance.factory.index == MainManager.FocusFactoryIndex)
-                    time = GameMain.gameTick; // Restore real time for focused local factory
-            }
-        }
-
         /// <summary>
         /// Corrective pass for local factory lab output in parallel mode.
         /// Called from ThreadManager_Patch.OnPhaseEnd after all threads finish FactoryLabOutput.
         /// The parallel method uses divided timei for num2, which is wrong for the focused local factory.
-        /// This runs UpdateOutputToNext for labs that were skipped due to incorrect num2.
+        /// This runs UpdateOutputToNext for labs that were skipped.
         /// </summary>
         public static void FixLocalLabOutput()
         {
-            if (MainManager.FocusFactoryIndex < 0 || MainManager.UpdatePeriod <= 1) return;
+            // 對於多線程LabOutputToNext的補救方法: 將本地星球的研究站上下傳遞補齊
+            if (GameMain.localPlanet == null || GameMain.localPlanet.id != MainManager.FocusPlanetId) return;
 
-            int correctNum = (int)(GameMain.gameTick & 3L);
-            int wrongNum = (int)((GameMain.gameTick / MainManager.UpdatePeriod) & 3L);
-            if (correctNum == wrongNum) return;
-
-            var factory = GameMain.data.factories[MainManager.FocusFactoryIndex];
-            var labPool = factory.factorySystem.labPool;
-            int labCursor = factory.factorySystem.labCursor;
-
-            for (int i = 1; i < labCursor; i++)
+            int gene = (int)(GameMain.gameTick & 3L);
+            var factorySystem = GameMain.localPlanet.factory.factorySystem;
+            for (int i = 1; i < factorySystem.labCursor; i++)
             {
-                ref LabComponent lab = ref labPool[i];
-                if (lab.id == i && (i & 3) == correctNum && lab.nextLabId > 0)
-                    lab.UpdateOutputToNext(labPool);
+                ref LabComponent ptr = ref factorySystem.labPool[i];
+                if (ptr.id == i)
+                {
+                    if ((i & 3) == gene && ptr.nextLabId > 0)
+                    {
+                        // 這個做法沒有檢查原版已重複的搬運, 但可以保證本地的lab 每 3 tick 必更新一次
+                        ptr.UpdateOutputToNext(factorySystem.labPool);
+                    }
+                }
             }
         }
     }

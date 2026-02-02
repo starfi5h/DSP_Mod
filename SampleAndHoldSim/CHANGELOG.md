@@ -1,26 +1,31 @@
 ## Changelog
 
+#### v0.7.6 (DSP-0.10.34.28396)
+Thanks FyisFe for the following fixes:  
+- Fix lab tower produce / consume rates drop on focus local planet.  
+- Fix ray recivers don't receive lens on focus local planet.
+
 #### v0.7.5 (DSP-0.10.34.28326)
-\- Fix UI in new game version.  
+- Fix UI in new game version.  
 
 #### v0.7.4
-\- Fix solar sails disappear.  
-\- Fix ILS import and export stats.  
-\- Fix attack drone doesn't attack enemies.  
-\- Known issue: Patrolling Dark Fog ground units animation is discontinuous.  
+- Fix solar sails disappear.  
+- Fix ILS import and export stats.  
+- Fix attack drone doesn't attack enemies.  
+- Known issue: Patrolling Dark Fog ground units animation is discontinuous.  
 
 #### v0.7.3
-\- Fix space warper count change abnormal in stations.  
+- Fix space warper count change abnormal in stations.  
 
 #### v0.7.2
-\- Fix error when building new stations.  
-\- Add GenesisBook compat v3.1.4 for dyson sail ejectors.  
+- Fix error when building new stations.  
+- Add GenesisBook compat v3.1.4 for dyson sail ejectors.  
 
 #### v0.7.1
-\- Fix a bug that sails cannot be absorbed.  
+- Fix a bug that sails cannot be absorbed.  
 
 #### v0.7.0 (DSP-0.10.33.27026)
-\- Adapt to game new multithreading system version.  
+- Adapt to game new multithreading system version.  
 
 <details>
 <summary>Previous Changelog</summary>

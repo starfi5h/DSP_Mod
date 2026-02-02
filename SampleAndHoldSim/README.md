@@ -129,6 +129,7 @@ true: 允许黑雾中继器登陆星球(原版逻辑) false: 不允许
 On the other hand, it doesn't have much improvement with early game <4 developed planets.  
 Higher Ratio = more performance, less accuracy. Choose based on your tolerance for "spiky" behavior.  
 For example, if your "Planet Factroy" takes 80% of the time, then setting ratio to 20 will make about 4x UPS.  
+Adjust the ratio to have stable 60 logical frames per second. It's recommended not to set it above 100.  
 
 | Aspect | Ratio 10 | Ratio 20 |
 |--------|-----------|-----------|
@@ -140,6 +141,7 @@ For example, if your "Planet Factroy" takes 80% of the time, then setting ratio 
 相对地，对于早期游戏（已开发星球<4）来说，它并没有太大的改进。  
 Ratio更高 = 更多性能，更低准确性。根据你对"波动"行为的容忍度选择。  
 举例来说，如果你的“星球工厂”占用 80% 的时间，那么将Ratio设置为 20 将使 UPS 提高至约 4 倍。  
+Ratio调到可以稳60逻辑帧就好。建议不要设超过100。  
 
 | 方面 | Ratio 10 | Ratio 20 |
 |------|---------|---------|
