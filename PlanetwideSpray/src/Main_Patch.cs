@@ -68,6 +68,31 @@ namespace PlanetwideSpray
 
         #region 爪子輸入
 
+        // 白爪輸出到傳送帶(全噴)
+        public static void TryInsertItemToBeltWithStackIncreasement_Prefix
+            (CargoTraffic __instance, ref int itemCount, ref int itemInc, ref int __state)
+        {
+            var status = statusArr[__instance.factory.index];
+            var incToAdd = (itemCount * status.incLevel) - itemInc; //達到層級所需要的增產劑點數
+            if (incToAdd > 0)
+            {
+                __state = itemCount; // 保存嘗試送入前的itemCount
+                itemInc += (byte)incToAdd;
+            }
+        }
+
+        // 白爪輸出到傳送帶(全噴)
+        public static void TryInsertItemToBeltWithStackIncreasement_Postfix
+            (CargoTraffic __instance, ref int itemCount, ref int __state)
+        {
+            int insertedItemCount = __state - itemCount;
+            if (insertedItemCount != 0) //有成功將物品送入機器, insertedItemCount:送入的物品數
+            {
+                var status = statusArr[__instance.factory.index]; //定位工廠
+                Interlocked.Add(ref status.incDebt, insertedItemCount); //扣除噴塗的物品數，準備之後報銷
+            }
+        }
+
         //[HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.InsertInto))] //爪子輸入(全噴)
         public static void AddItemInc0(PlanetFactory __instance, byte itemCount, ref byte itemInc, ref bool __state)
         {
