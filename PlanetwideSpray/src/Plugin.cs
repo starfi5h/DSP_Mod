@@ -15,7 +15,7 @@ namespace PlanetwideSpray
     {
         public const string GUID = "starfi5h.plugin.PlanetwideSpray";
         public const string NAME = "PlanetwideSpray";
-        public const string VERSION = "1.1.9";
+        public const string VERSION = "1.1.10";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -62,6 +62,11 @@ namespace PlanetwideSpray
                 {
                     Log.LogDebug("AddItemInc0: spray all insert");
                     insertMethod_Prefix = new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.AddItemInc0)), 600);
+
+                    // 白爪
+                    harmony.Patch(AccessTools.Method(typeof(CargoTraffic), nameof(CargoTraffic.TryInsertItemToBeltWithStackIncreasement)),
+                        new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.TryInsertItemToBeltWithStackIncreasement_Prefix)), 600),
+                        new HarmonyMethod(AccessTools.Method(typeof(Main_Patch), nameof(Main_Patch.TryInsertItemToBeltWithStackIncreasement_Postfix)), 200));
                 }
                 else
                 {

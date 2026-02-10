@@ -92,6 +92,7 @@ Spray Fuel Power Generator = false
 
 ## Changelog
 
+- v1.1.10 - Fix pile sorter doesn't spray for config `Spray All Cargo`  
 - v1.1.9 - Fix patches for config `Force Proliferator Level`  
 - v1.1.8 - Adapt to game version 0.10.34.28326  
 - v1.1.7 - Adapt to game version 0.10.33.26941  
