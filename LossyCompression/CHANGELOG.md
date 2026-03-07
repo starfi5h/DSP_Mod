@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v0.3.8 (DSP 0.10.34.28392)
+\- Add hack for frameless shells (credit to soarqin)  
+
 #### v0.3.7 (DSP 0.10.33.27026)
 \- Add `MultiThreading` config  
 
