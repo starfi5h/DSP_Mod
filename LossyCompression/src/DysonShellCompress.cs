@@ -208,7 +208,12 @@ namespace LossyCompression
                             int index = j;
                             int index2 = (j + 1) % nodesCount;
                             DysonFrame dysonFrame = DysonNode.FrameBetween(dysonShell.nodes[index], dysonShell.nodes[index2]);
-                            Assert.NotNull(dysonFrame);
+                            // Hack for frameless shells: don't add frame if it's not found
+                            if (dysonFrame == null)
+                            {
+                                continue;
+                            }
+                            // End hack for frameless shells
                             dysonShell.frames.Add(dysonFrame);
                         }
 
@@ -218,6 +223,17 @@ namespace LossyCompression
                             DysonNode dysonNode2 = nodePool[list[k % list.Count]];
                             DysonNode b = nodePool[list[(k + 1) % list.Count]];
                             DysonFrame dysonFrame2 = DysonNode.FrameBetween(dysonNode2, b);
+                            // Hack for frameless shells: add temporary frame to avoid null reference exception here and later in GenerateGeometry()
+                            if (dysonFrame2 == null)
+                            {
+                                dysonFrame2 = new DysonFrame();
+                                dysonFrame2.nodeA = dysonNode2;
+                                dysonFrame2.nodeB = b;
+                                dysonFrame2.euler = false;
+                                dysonFrame2.spMax = -1;
+                                dysonShell.frames.Add(dysonFrame2);
+                            }
+                            // End hack for frameless shells
                             List<Vector3> segments = dysonFrame2.GetSegments();
                             if (dysonNode2 == dysonFrame2.nodeA)
                             {
@@ -263,6 +279,15 @@ namespace LossyCompression
                     if (dysonSphere.layersIdBased[layerId] != null && dysonSphere.layersIdBased[layerId].id == layerId)
                     {
                         DysonSphereLayer dysonSphereLayer = dysonSphere.layersIdBased[layerId];
+                        // Hack for frameless shells: Remove temporary frames in shells
+                        for (int shellId = 1; shellId < dysonSphereLayer.shellCursor; shellId++)
+                        {
+                            if (dysonSphereLayer.shellPool[shellId] != null && dysonSphereLayer.shellPool[shellId].id == shellId)
+                            {
+                                dysonSphereLayer.shellPool[shellId].frames.RemoveAll(frame => frame.euler == false && frame.spMax == -1);
+                            }
+                        }
+                        // End hack for frameless shells
                         for (int nodeId = 1; nodeId < dysonSphereLayer.nodeCursor; nodeId++)
                         {
                             if (dysonSphereLayer.nodePool[nodeId] != null && dysonSphereLayer.nodePool[nodeId].id == nodeId)
