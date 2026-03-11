@@ -102,7 +102,11 @@ namespace DeliverySlotsTweaks
 
 			if (deliveryGridindex.TryGetValue(itemId, out int gridindex))
 			{
+				// 修正如果count>背包物品數量且物流背包沒東西時, itemId會被設為0使物品被吞的bug
+				int originalItemId = itemId;
 				GameMain.mainPlayer.packageUtility.TakeItemFromAllPackages(gridindex, ref itemId, ref count, out inc, false);
+				itemId = originalItemId;
+
 				if (packageItemCount.ContainsKey(itemId))
 				{
 					int num = packageItemCount[itemId] - count;

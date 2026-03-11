@@ -1,5 +1,8 @@
 ## Changelog
 
+#### v1.5.17 (DSP-0.10.34.28470)
+- Fix item disappearance bug in fast fill when required count is greater than count in inventory and logistics backpack slot is empty.  
+
 #### v1.5.16 (DSP-0.10.33.27026)
 - Fix issue that using foundation blueprint doesn't cost foundations in logistic slots
 - `UseLogisticSlots` functions will not apply when FractionateEverything mod is present to fix compatibility.  
