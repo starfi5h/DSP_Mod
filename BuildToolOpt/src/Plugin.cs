@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.1.5";
+        public const string VERSION = "1.1.6";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -25,6 +25,7 @@ namespace BuildToolOpt
         public static bool EnableHologram = false;
         public static bool EnableStationBuildOptimize = false;
         public static bool EnableUIBlueprintOpt = true;
+        public static bool EnableUIBlueprintFolderSignalIcon = true;
         public static bool EnableClipboardPaste = true;
 
         public void Start() // Wait until all mods are awake
@@ -39,6 +40,7 @@ namespace BuildToolOpt
             EnableStationBuildOptimize = Config.Bind("BuildTool", "EnableStationBuildOptimize", false, "Optimize RefreshTraffic to reduce lag when placing or removing stations\n优化RefreshTraffic以减少建造/拆除星际物流塔的卡顿").Value;
             
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
+            EnableUIBlueprintFolderSignalIcon = Config.Bind("UI", "UIBlueprintFolderSignalIcon", true, "Allow blueprint folders to use signal icons\n允许蓝图文件夹使用信号图标").Value;
             EnableClipboardPaste = Config.Bind("UI", "ClipboardPaste", true, "Directly parse blueprint data from clipboard when Ctrl + V\n热键粘贴蓝图时,直接读取剪切板").Value;
             
             Compatibility.Init(harmony);
@@ -48,6 +50,9 @@ namespace BuildToolOpt
 
             if (EnableUIBlueprintOpt)
                 harmony.PatchAll(typeof(UIBlueprint_Patch));
+
+            if (EnableUIBlueprintFolderSignalIcon)
+                harmony.PatchAll(typeof(UIBlueprintIcon_Patch));
 
             if (EnableHologram)
             {

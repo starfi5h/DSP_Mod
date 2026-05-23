@@ -61,6 +61,12 @@ EnableStationBuildOptimize = false
 # Default value: true
 UIBlueprintOpt = true
 
+## Allow blueprint folders to use signal icons
+## 允许蓝图文件夹使用信号图标
+# Setting type: Boolean
+# Default value: true
+UIBlueprintFolderSignalIcon = true
+
 ## Directly parse blueprint data from clipboard when Ctrl + V
 ## 热键粘贴蓝图时,直接读取剪切板
 # Setting type: Boolean

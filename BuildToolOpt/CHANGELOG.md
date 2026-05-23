@@ -1,3 +1,6 @@
+### v1.1.6
+- Add config option `UIBlueprintFolderSignalIcon` (Default: true)  
+
 ### v1.1.5
 - Fix a bug regarding vessels that go to the dismantling station.  
 
