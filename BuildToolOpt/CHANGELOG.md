@@ -1,3 +1,6 @@
+### v1.1.7
+- Add config option `EnableUIMiningMachineKey` (Default: true)  
+
 ### v1.1.6
 - Add config option `UIBlueprintFolderSignalIcon` (Default: true)  
 

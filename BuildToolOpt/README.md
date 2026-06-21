@@ -67,6 +67,12 @@ UIBlueprintOpt = true
 # Default value: true
 UIBlueprintFolderSignalIcon = true
 
+## Use Advanced mining machine when clicking Q mouseover veins
+## 将滑鼠悬停在矿脉上Q时，使用大矿机
+# Setting type: Boolean
+# Default value: true
+UIMiningMachineKey = true
+
 ## Directly parse blueprint data from clipboard when Ctrl + V
 ## 热键粘贴蓝图时,直接读取剪切板
 # Setting type: Boolean
