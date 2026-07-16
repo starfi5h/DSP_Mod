@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.1.6";
+        public const string VERSION = "1.1.8";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -22,6 +22,7 @@ namespace BuildToolOpt
         public static bool EnableRemoveGC = true;
         public static bool EnableGCwhenPause = false;
         public static bool EnableReplaceStation = true;
+        public static bool ShowSpacingIndicator = true;
         public static bool EnableHologram = false;
         public static bool EnableStationBuildOptimize = false;
         public static bool EnableUIBlueprintOpt = true;
@@ -37,6 +38,7 @@ namespace BuildToolOpt
             EnableRemoveGC = Config.Bind("BuildTool", "RemoveGC", true, "Remove c# garbage collection of build tools to reduce lag\n移除建筑工具的强制内存回收以减少铺设时卡顿").Value;
             EnableGCwhenPause = Config.Bind("BuildTool", "GC when pause", false, "Trigger garbage collection when game pause (esc menu). Enable this option if memory usage grow rapidly.\n在游戏暂停时(Esc)回收内存。当内存占用快速增长时可启用此选项手动释放").Value;
             EnableReplaceStation = Config.Bind("BuildTool", "ReplaceStation", true, "Directly replace old station with new one in hand\n可直接替换物流塔").Value;
+            ShowSpacingIndicator = Config.Bind("BuildTool", "ShowSpacingIndicator", true, "Display the minimum spacing circle for station placement.\n显示物流塔之间最小间距的范围圆").Value;
             EnableHologram = Config.Bind("BuildTool", "EnableHologram", false, "Place white holograms when lacking of item\n即使物品不足也可以放置建筑虚影").Value;
             EnableStationBuildOptimize = Config.Bind("BuildTool", "EnableStationBuildOptimize", false, "Optimize RefreshTraffic to reduce lag when placing or removing stations\n优化RefreshTraffic以减少建造/拆除星际物流塔的卡顿").Value;
             
@@ -90,10 +92,14 @@ namespace BuildToolOpt
             {
                 harmony.PatchAll(typeof(PlayerController_Patch));
             }
-
             if (EnableStationBuildOptimize)
             {
                 harmony.PatchAll(typeof(GalacticTransport_Patch));
+            }
+
+            if (ShowSpacingIndicator)
+            {
+                harmony.PatchAll(typeof(PlayerControlGizmo_Patch));
             }
         }
 

@@ -1,7 +1,7 @@
 {
   "name": "BuildToolOpt",
-  "description": "Reduce lag when placing building. Allow directly replace PLS with ILS. Import blueprint from clipboard directly when Ctrl+V. (Optional)Build ghost/hologram when lack of items. 优化建筑工具:替换升级物流塔,优化蓝图UI,(可选)建设虚影,(可选)减少物流塔建造卡顿",
-  "version_number": "1.1.7",
+  "description": "Reduce lag when placing building. Allow directly replace PLS with ILS, and show allowed range. Import blueprint from clipboard directly when Ctrl+V. (Optional)Build ghost/hologram when lack of items. 优化建筑工具:替换升级物流塔,提示塔间距,优化蓝图UI,(可选)建设虚影,(可选)减少物流塔建造卡顿",
+  "version_number": "1.1.8",
   "website_url": "https://github.com/starfi5h/DSP_Mod/tree/master/BuildToolOpt",
   "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
 }

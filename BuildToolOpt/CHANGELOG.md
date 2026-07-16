@@ -1,3 +1,6 @@
+### v1.1.8
+- Add config option `ShowSpacingIndicator` (Default: true)  
+
 ### v1.1.7
 - Add config option `EnableUIMiningMachineKey` (Default: true)  
 

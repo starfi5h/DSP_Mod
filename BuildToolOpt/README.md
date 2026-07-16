@@ -41,6 +41,12 @@ GC when pause = false
 # Default value: true
 ReplaceStation = true
 
+## Display the minimum spacing circle for station placement
+## 显示物流塔之间最小间距的范围圆
+# Setting type: Boolean
+# Default value: true
+ShowSpacingIndicator = true
+
 ## Place white holograms when lacking of item (may cause lag in build mode)
 ## 即使物品不足也可以放置建筑虚影(可能使建造模式卡顿)
 # Setting type: Boolean
