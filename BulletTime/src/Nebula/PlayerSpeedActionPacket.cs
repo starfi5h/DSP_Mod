@@ -26,7 +26,8 @@ namespace BulletTime.Nebula
         SpeedSet,
         SpeedUp,
         SpeedMax,
-        SpeedReset
+        SpeedReset,
+        SpeedDown
     }
 
     [RegisterPacketProcessor]
@@ -42,6 +43,9 @@ namespace BulletTime.Nebula
                 {
                     case EPlayerSpeedAction.SpeedUp:
                         fixUPS = fixUPS == 0.0 ? 120.0 : fixUPS + 60.0;
+                        break;
+                    case EPlayerSpeedAction.SpeedDown:
+                        fixUPS = fixUPS < 120.0 ? fixUPS : fixUPS - 60.0;
                         break;
                     case EPlayerSpeedAction.SpeedMax:
                         fixUPS = 60.0 * BulletTimePlugin.MaxSpeedupScale.Value;

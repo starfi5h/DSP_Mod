@@ -1,6 +1,14 @@
 ## Changelog
 
-#### v1.5.13 (DPS-0.10.34.28289)
+#### v1.5.14 (DSP-0.10.34.28529)  
+\- Add `KeyImmediateSave` hotkey for immediate auto save. Default: F10 + LeftControl + LeftAlt   
+\- Add `KeySpeedUp` / `KeySpeedDown` hotkeys for speed up/down.  
+\- Add Nebula API as dependency in manifest to prevent error in LDBTool.  
+\- 新增 `KeyImmediateSave` 立即自动存档热键。默认按键: F10 + LeftControl + LeftAlt   
+\- 新增 `KeySpeedUp` / `KeySpeedDown` 热键配置：加速/减速。  
+\- 在清单中添加了 Nebula API 作为依赖项，以防止 LDBTool 报错。  
+
+#### v1.5.13 (DSP-0.10.34.28289)
 \- Fix error in IngameUI.ShowStatus  
 \- 修正IngameUI.ShowStatus在新版本的报错  
 

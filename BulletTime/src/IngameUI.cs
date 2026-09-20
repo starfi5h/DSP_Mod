@@ -410,6 +410,43 @@ namespace BulletTime
             GameStateManager.StepOneFrame = true;
         }
 
+        public static void OnKeySpeedUp()
+        {
+            // 直接复用现有的加速逻辑（mode=2）
+            OnSpeedButtonClick(2);
+        }
+
+        public static void OnKeySpeedDown()
+        {
+            // 如果处于暂停状态，先恢复（与加速行为一致）
+            if (GameStateManager.Pause)
+            {
+                OnKeyPause();
+            }
+
+            double currentUps = FPSController.instance.fixUPS;
+            // 减速一档：减60，但不低于0（普通速度）
+            double newUps = currentUps - 60.0;
+            if (newUps < 0.0) newUps = 0.0;
+
+            // 只有速度实际变化时才执行操作
+            if ((currentUps - newUps) > 0.001)
+            {
+                FPSController.SetFixUPS(newUps);
+
+                // 网络同步（参考加速逻辑，客户端用 SpeedDown，服务器用 SpeedSet）
+                if (NebulaCompat.IsMultiplayerActive && NebulaCompat.SyncUps)
+                {
+                    if (NebulaCompat.IsClient)
+                        NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedDown);
+                    else
+                        NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.SpeedSet);
+                }
+            }
+            // 更新速度显示
+            SetSpeedRatioText();
+        }
+
         private static void OnAutosaveToggleChange(bool val)
         {
             BulletTimePlugin.EnableBackgroundAutosave.Value = val;

@@ -32,12 +32,15 @@ You can also advance the game by a single frame using the `KeyStepOneFrame` hotk
   Note: This function has risk potential, so it's better to test it first.  
   - **Fast Main Menu Loading:** Speeds up loading into the main menu by skipping the 3D planet model rendering on the title screen.
   - **Reduce Stuttering:** Includes an option to remove the game's forced garbage collection (GC) when using build tools, which can help reduce stuttering when placing many buildings.
+  - **Save Hotkey:** You can bind hotkeys for immediate save (`KeyImmediateSave`). The immediate-save hotkey writes a save instantly and reports the result in the log.
+  - **Customizable Pause Status Text:** The status label shown while in Tactical Pause mode can be changed via `StatusTextPause`, and its vertical position relative to the autosave text can be adjusted with `StatusTextHeightOffset`.
+
 
 ## How to Use
 
 It is recommended to install it through [r2modman](https://thunderstore.io/c/dyson-sphere-program/p/ebkr/r2modman/) or [GaleModManager](https://thunderstore.io/c/dyson-sphere-program/p/Kesomannen/GaleModManager/).  
 
-  - **Speed Controls:** Use the buttons in the bottom-right corner to Pause, Resume (or reset to 1x), and Speed Up.
+  - **Speed Controls:** Use the buttons in the bottom-right corner to Pause, Resume (or reset to 1x), and Speed Up. You can also assign hotkeys (`KeySpeedUp` / `KeySpeedDown`) for the same actions.
   - **Tactical Pause:** Press the `Pause` / `Break` key to toggle.
   - **Bullet-Time Slider:** Open the Performance Statistics panel to find and adjust the World Speed slider.
   - **Background Autosave Toggle:** Open the Performance Statistics panel to enable background autosave on the top-right checkbox.  
@@ -54,7 +57,10 @@ After running the game once with the mod installed, a config file will be genera
 
 | Key | Description | Default |
 |---|---|---|
-| `KeyAutosave` | Keyboard shortcut for auto-save. | `F10 + LeftShift` |
+| `KeyAutosave` | Keyboard shortcut for scheduling auto save. | `F10 + LeftShift` |
+| `KeyImmediateSave` | Keyboard shortcut for immediate auto save. | `F10 + LeftControl + LeftAlt` |
+| `KeySpeedUp` | Keyboard shortcut for speed up. | `None` |
+| `KeySpeedDown` | Keyboard shortcut for speed down. | `None` |
 | `KeyPause` | Hotkey for toggling Tactical Pause mode. | `Pause`｜`Break` |
 | `KeyStepOneFrame` | Hotkey to advance 1 frame in pause mode. | `None` |
 | `EnableMechaFunc` | If true, your mecha can move in Tactical Pause mode. | `false` |
@@ -65,6 +71,8 @@ After running the game once with the mod installed, a config file will be genera
 | `RemoveGC` | Remove force garbage collection of build tools to reduce stutter. | `true` |
 | `MaxSpeedupScale` | Maximum game speed multiplier for the speedup button. | `10` |
 | `MaxSimulationSpeed` | In outer space, shift-click to set the simulation speed to this value. | `10.0` |
+| `StatusTextHeightOffset` | Height of Status text relative to auto save text. | `100` |
+| `StatusTextPause` | Status text when in pause mode. | `Bullet Time` |
 
 ## Multiplayer Features (Nebula)
 
@@ -77,6 +85,7 @@ After running the game once with the mod installed, a config file will be genera
 
   - [✅] GalacticScale
   - [✅] NebulaMultiplayer
+  - [✅] LDBTool (require NebulaAPI installed too)
 
 -----
 
@@ -115,12 +124,15 @@ After running the game once with the mod installed, a config file will be genera
   - **后台自动存档：** 将自动存档功能放到后台线程执行，避免游戏存档时停止回应。为了确保数据一致，存档期间游戏会短暂进入时停模式（机甲可移动），阻止机甲和工厂的互动。这项功能有一定的风险，使用前建议先测试。  
   - **快速载入主菜单：** 跳过主菜单界面的星球模型渲染，加快进入游戏主菜单的速度。
   - **减少卡顿：** 提供移除建筑工具强制内存回收（GC）的选项，有助于缓解在放置大量建筑时可能发生的瞬间卡顿。
+  - **存档热键：** 除了画面上的按钮外，你还可以自行绑定「立即存档」热键（`KeyImmediateSave`）。立即存档热键会立刻写入存档，并在日志中输出保存结果。
+  - **自定义暂停提示文字：** 战术暂停模式中显示的状态文字可通过 `StatusTextPause` 修改；它与自动存档提示之间的垂直高度差可用 `StatusTextHeightOffset` 调整。
+
 
 ## 如何使用
 
 建议透过模组管理器[r2modman](https://thunderstore.io/c/dyson-sphere-program/p/ebkr/r2modman/)或[GaleModManager](https://thunderstore.io/c/dyson-sphere-program/p/Kesomannen/GaleModManager/)安装。  
 
-  - **速度控制：** 点击屏幕右下角的按钮进行暂停、恢复（或重置为1倍速）和加速。
+  - **速度控制：** 点击屏幕右下角的按钮进行暂停、恢复（或重置为1倍速）和加速。你也可以为这些操作绑定热键（`KeySpeedUp` / `KeySpeedDown`）。  
   - **战术暂停：** 按下 `Pause` / `Break` 键切换。
   - **子弹时间滑块：** 打开游戏内的“性能测试”面板，即可在上方找到并调整“世界速度”滑块。
   - **后台自动保存**：打开性能统计面板，在右上角的选框上启用后台自动保存。
@@ -137,7 +149,10 @@ After running the game once with the mod installed, a config file will be genera
 
 | 选项名称 | 功能描述 | 默认值 |
 |---|---|---|
-| `KeyAutosave` | 触发自动存档的热键。 | `F10 + LeftShift` |
+| `KeyAutosave` | 触发排程自动存档的热键。 | `F10 + LeftShift` |
+| `KeyImmediateSave` | 立即自动存档的热键。 | `F10 + LeftControl + LeftAlt` |
+| `KeySpeedUp` | 加速的热键。 | `None` |
+| `KeySpeedDown` | 减速的热键。 | `None` |
 | `KeyPause` | 切换战术暂停模式的热键。 | `Pause`｜`Break` |
 | `KeyStepOneFrame` | 在暂停模式下，让游戏前进1帧的热键。 | `None` |
 | `EnableMechaFunc` | 设为 true 时，你的机甲能在战术暂停模式中移动。 | `false` |
@@ -148,6 +163,8 @@ After running the game once with the mod installed, a config file will be genera
 | `RemoveGC` | 移除建筑工具的强制内存回收以减少卡顿。 | `true` |
 | `MaxSpeedupScale` | 加速按钮的最大游戏速度倍率。 | `10` |
 | `MaxSimulationSpeed` | 在外太空时,可以shift+点击快速达到此指定倍率 | `10.0` |
+| `StatusTextHeightOffset` | 状态提示相对于自动存档提示的高度。 | `100` |
+| `StatusTextPause` | 暂停时的状态提示文字。 | `Bullet Time` |
 
 ## 联机功能 (Nebula)
 
@@ -160,6 +177,7 @@ After running the game once with the mod installed, a config file will be genera
 
   - [✅] GalacticScale
   - [✅] NebulaMultiplayer
+  - [✅] LDBTool （如果安装了此mod, 那就需要同时安装 NebulaAPI 避免报错）
 
 -----
 

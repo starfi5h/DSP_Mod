@@ -20,7 +20,7 @@ namespace BulletTime
     {
         public const string GUID = "com.starfi5h.plugin.BulletTime";
         public const string NAME = "BulletTime";
-        public const string VERSION = "1.5.13";
+        public const string VERSION = "1.5.14";
         
         public static ConfigEntry<bool> EnableBackgroundAutosave;
         public static ConfigEntry<bool> EnableHotkeyAutosave;
@@ -28,8 +28,12 @@ namespace BulletTime
         public static ConfigEntry<bool> RemoveGC;
         public static ConfigEntry<float> StartingSpeed;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
+        public static ConfigEntry<KeyboardShortcut> KeyImmediateSave;
+        public static ConfigEntry<KeyboardShortcut> KeySpeedUp;
+        public static ConfigEntry<KeyboardShortcut> KeySpeedDown;
         public static ConfigEntry<KeyCode> KeyPause;
         public static ConfigEntry<KeyCode> KeyStepOneFrame;
+
         public static ConfigEntry<int> StatusTextHeightOffset;
         public static ConfigEntry<string> StatusTextPause;
         public static ConfigEntry<bool> EnableMechaFunc;
@@ -41,8 +45,12 @@ namespace BulletTime
         private void LoadConfig()
         {
             KeyAutosave = Config.Bind("Hotkey", "KeyAutosave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftShift), "Keyboard shortcut for auto-save\n自动存档的热键组合");
+            KeyImmediateSave = Config.Bind("Hotkey", "KeyImmediateSave", new KeyboardShortcut(KeyCode.F10, KeyCode.LeftControl, KeyCode.LeftAlt), "Keyboard shortcut for immediate save (last exit)\n立即存档的热键组合");
+            KeySpeedUp = Config.Bind("Hotkey", "KeySpeedUp", new KeyboardShortcut(), "Keyboard shortcut for speed up\n加速的热键");
+            KeySpeedDown = Config.Bind("Hotkey", "KeySpeedDown", new KeyboardShortcut(), "Keyboard shortcut for speed down\n减速的热键");
             KeyPause = Config.Bind("Hotkey", "KeyPause", KeyCode.Pause, "Hotkey for toggling special pause mode\n战术暂停(世界停止+画面提示)的热键");
             KeyStepOneFrame = Config.Bind("Hotkey", "KeyStepOneFrame", KeyCode.None, "Hotkey to forward 1 frame in pause mode\n暂停模式下前进1帧的热键");
+
             EnableMechaFunc = Config.Bind("Pause", "EnableMechaFunc", false, "Enable mecha function in hotkey pause mode\n在热键战术暂停模式下启用机甲功能");
             EnableBackgroundAutosave = Config.Bind("Save", "EnableBackgroundAutosave", false, "Do auto-save in background thread\n在後台执行自动存档");
             EnableHotkeyAutosave = Config.Bind("Save", "EnableHotkeyAutosave", false, "Enable hotkey to trigger autosave\n允许用热键触发自动存档");
@@ -73,12 +81,15 @@ namespace BulletTime
             return true;
         }
 
-        public void Start()
+        public void Awake()
         {
             Log.Init(Logger);
             harmony = new Harmony(GUID);
             LoadConfig();
+        }
 
+        public void Start()
+        {
             try
             {
                 if (!TestGameVersion())
@@ -139,20 +150,41 @@ namespace BulletTime
 
         public void Update()
         {
+            if (KeySpeedUp.Value.IsDown())
+            {
+                Log.Debug("KeySpeedUp");
+                IngameUI.OnKeySpeedUp();
+            }
+            if (KeySpeedDown.Value.IsDown())
+            {
+                Log.Debug("KeySpeedDown");
+                IngameUI.OnKeySpeedDown();
+            }
             if (Input.GetKeyDown(KeyPause.Value))
             {
+                Log.Debug("KeyPause");
                 IngameUI.OnKeyPause();
             }
             if (Input.GetKeyDown(KeyStepOneFrame.Value))
             {
+                Log.Debug("KeyStepOneFrame");
                 IngameUI.OnKeyStepOneFrame();
             }
+
+
             if (EnableHotkeyAutosave.Value && KeyAutosave.Value.IsDown() && UIRoot.instance.uiGame.autoSave.showTime == 0)
             {
                 // Initial auto save when there is no autosave in process
                 UIAutoSave.lastSaveTick = 0L;
-                Log.Debug("Trigger auto save by hotkey");
+                Log.Info("Trigger auto save by hotkey");
             }
+            if (KeyImmediateSave.Value.IsDown())
+            {
+                Log.Info("Trigger immediate auto save by hotkey");
+                string saveText = GameSave.AutoSave() ? "保存成功".Translate() : "保存失败".Translate();
+                Log.Info("Call GameSave.AutoSave(). Result: " + saveText);
+            }
+
         }
 
         public void OnDestroy()
