@@ -33,7 +33,7 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Libs\2022\Assembly-CSharp-publicized.dll</HintPath>
+      <HintPath>..\assemblies\Assembly-CSharp-publicized.dll</HintPath>
     </Reference>
     <Reference Include="NebulaAPI">
       <HintPath>lib\NebulaAPI.dll</HintPath>

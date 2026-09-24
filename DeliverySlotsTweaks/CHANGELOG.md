@@ -1,5 +1,11 @@
 ## Changelog
 
+#### v1.5.18 (DSP-0.10.35.29057)
+
+- Adapt to game version 0.10.35.29057. No longer supports 0.10.34 and below versions    
+
+----
+
 #### v1.5.17 (DSP-0.10.34.28470)
 - Fix item disappearance bug in fast fill when required count is greater than count in inventory and logistics backpack slot is empty.  
 
