@@ -1,7 +1,10 @@
 ## Changelog
 
-#### v1.5.18 (DSP-0.10.35.29057)
+#### v1.5.19 (DSP-0.10.35.29088)
+- Update UXAssist compat to v1.6.0  
+- Update CheatEnabler compat to v2.4.5  
 
+#### v1.5.18 (DSP-0.10.35.29057)
 - Adapt to game version 0.10.35.29057. No longer supports 0.10.34 and below versions    
 
 ----

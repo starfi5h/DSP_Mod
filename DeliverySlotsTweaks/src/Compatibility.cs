@@ -56,15 +56,17 @@ namespace DeliverySlotsTweaks
                 try
                 {
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("UXAssist.Patches.LogisticsPatch+AutoConfigLogistics");
-                    harmony.Patch(AccessTools.Method(classType, "DoConfigStation"), null, null,
+                    Type classType = assembly.GetType("UXAssist.Patches.Logistics.LogisticsPatch");
+                    harmony.Patch(AccessTools.Method(classType, "StationFillDrones"), null, null,
                         new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
-                    harmony.Patch(AccessTools.Method(classType, "DoConfigDispenser"), null, null,
+                    harmony.Patch(AccessTools.Method(classType, "StationFillShips"), null, null,
+                        new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
+                    harmony.Patch(AccessTools.Method(classType, "DispenserFillCouriers"), null, null,
                         new HarmonyMethod(typeof(DeliveryPackagePatch).GetMethod(nameof(DeliveryPackagePatch.TakeItem_Transpiler))));
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.4.2");
+                    Plugin.Log.LogWarning("UXAssist compatibility failed! Last working version: 1.6.0");
                     Plugin.Log.LogWarning(e);
                 }
             }
@@ -83,7 +85,7 @@ namespace DeliverySlotsTweaks
                 try
                 {
                     Assembly assembly = pluginInfo.Instance.GetType().Assembly;
-                    Type classType = assembly.GetType("CheatEnabler.Patches.FactoryPatch");
+                    Type classType = assembly.GetType("CheatEnabler.Patches.Factory.FactoryPatch");
                     ArchitectModeEnabled = (ConfigEntry<bool>)AccessTools.Field(classType, "ArchitectModeEnabled").GetValue(null);
                     ArchitectModeEnabled.SettingChanged += OnArchitectModeEnabledChange;
                     DeliveryPackagePatch.architectMode |= ArchitectModeEnabled.Value;
@@ -91,7 +93,7 @@ namespace DeliverySlotsTweaks
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.4.0");
+                    Plugin.Log.LogWarning("CheatEnabler compatibility failed! Last working version: 2.4.5");
                     Plugin.Log.LogWarning(e);
                 }
             }
