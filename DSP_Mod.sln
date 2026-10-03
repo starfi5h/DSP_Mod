@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphereEditorTools", "Sphere
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoMilestone", "NoMilestone\NoMilestone.csproj", "{8FCE1FD9-FD71-4FCA-8E66-05E578E718F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulletTime", "BulletTime\BulletTime.csproj", "{4813207F-CA55-4857-9EDE-B1C9D2A90373}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulletTime", "BulletTime\BulletTime.csproj", "{4813207F-CA55-4857-9EDE-B1C9D2A90373}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReorderTechQueue", "ReorderTechQueue\ReorderTechQueue.csproj", "{20BDE779-7D7B-4372-ABC0-29162F9145FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAndHoldSim", "SampleAndHoldSim\SampleAndHoldSim.csproj", "{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleAndHoldSim", "SampleAndHoldSim\SampleAndHoldSim.csproj", "{81ABB0FD-FDA6-4540-BE7C-FC097CD16B18}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoverTooltipDelay", "HoverTooltipDelay\HoverTooltipDelay.csproj", "{8B627B35-BFC6-434F-A9A6-07746A7BA9FF}"
 EndProject
@@ -39,6 +39,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanetwideSpray", "PlanetwideSpray\PlanetwideSpray.csproj", "{8D45EDD4-03CD-40B7-8DDD-88041E64E5C6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DarkFogTweaks", "DarkFogTweaks\DarkFogTweaks.csproj", "{68546DAF-2E19-426F-ACC9-4621A1F5F899}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoGlobeClick", "NoGlobeClick\NoGlobeClick.csproj", "{7181CB1A-4F92-4B0B-A15B-4EE1D1CF456E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +112,10 @@ Global
 		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68546DAF-2E19-426F-ACC9-4621A1F5F899}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7181CB1A-4F92-4B0B-A15B-4EE1D1CF456E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7181CB1A-4F92-4B0B-A15B-4EE1D1CF456E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7181CB1A-4F92-4B0B-A15B-4EE1D1CF456E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7181CB1A-4F92-4B0B-A15B-4EE1D1CF456E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

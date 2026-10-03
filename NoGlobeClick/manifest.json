@@ -1,0 +1,7 @@
+{
+  "name": "NoGlobeClick",
+  "description": "Prevents right-clicking on the globe map from placing a location marker unless Shift is held. Fixes a God Mode issue where WASD cancels the current movement command. 防止在星球视图右键放置定位标记，改为只有按住Shift时才会生效。修复上帝模式下WASD会意外取消移动指令的问题。",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/starfi5h/DSP_Mod",
+  "dependencies": [ "xiaoye97-BepInEx-5.4.17" ]
+}
