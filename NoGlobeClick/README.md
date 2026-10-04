@@ -20,6 +20,13 @@ Fixes a God Mode issue where WASD cancels the current movement command.
 
   * 在 上帝模式 按下方向键（WASD）时，不会再自动打断已排队的移动指令。
 
+* **Fix God Mode Camera Following (修复上帝模式镜头跟随)**
+
+  * In God mode, the Mecha can now move independently while the camera remains where you positioned it, allowing you to place buildings while the Mecha is moving.
+
+  * 在上帝模式下，机甲移动时镜头将保持在原来的位置，不再跟随机甲，让你可以在机甲移动过程中正常进行建筑操作。
+
+
 ## Installation / 安装说明
 
 ### Via Mod Manager (Recommended) / 使用 Mod 管理器（推荐）

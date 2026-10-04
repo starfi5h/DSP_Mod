@@ -16,7 +16,7 @@ namespace NoGobleClick
     {
         public const string GUID = "starfi5h.plugin.NoGobleClick";
         public const string NAME = "NoGobleClick";
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.0.1";
 
         Harmony harmony;
 
@@ -39,6 +39,15 @@ namespace NoGobleClick
         {
             // ignore locate marker when shift is not pressed
             ___ignoreLocate = !VFInput._godModeMechaMove;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerAction_Creative), nameof(PlayerAction_Creative.UpdateBuildTarget))]
+        static void UpdateBuildTarget_Prefix(ref bool __runOriginal)
+        {
+            // disable the duplicated function as it will reset the previous actionBuild.UpdateBuildTarget()
+            // this should fix god mode camera issue when mecha is moving
+            __runOriginal = false;
         }
 
         [HarmonyTranspiler]
