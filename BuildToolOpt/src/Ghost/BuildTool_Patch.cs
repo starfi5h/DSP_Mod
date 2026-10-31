@@ -1,6 +1,7 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
@@ -134,7 +135,22 @@ namespace BuildToolOpt
 					codeMacher.RemoveInstruction();
 				} while (!(codeMacher.Opcode == OpCodes.Call && ((MethodInfo)codeMacher.Operand).Name == "Popup"));
 				codeMacher.RemoveInstruction();
-				codeMacher.Insert(list);
+
+				// Vanilla writes the addon connections (spray coater / dispenser / turret) only in the
+				// item-consumed branch, so a hologram prebuild is created without them and never binds
+				// to its target (dispenser can't see the storage below it). Use a variant that also
+				// writes the connections for the ghost branch.
+				List<CodeInstruction> insertList = list;
+				if (__originalMethod.DeclaringType.Name == "BuildTool_Addon")
+				{
+					insertList = list.Select(instruction => instruction.Clone()).ToList();
+					foreach (CodeInstruction instruction in insertList)
+					{
+						if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method && method.Name == nameof(AddPrebuildData_Path))
+							instruction.operand = AccessTools.Method(typeof(BuildTool_Patch), nameof(AddPrebuildData_GhostAddon));
+					}
+				}
+				codeMacher.Insert(insertList);
 
 
 			RemoveGC:
@@ -224,6 +240,37 @@ namespace BuildToolOpt
 				else if (buildPreview.input != null)
 				{
 					factory.WriteObjectConn(buildPreview.objId, buildPreview.inputToSlot, false, buildPreview.input.objId, buildPreview.inputFromSlot);
+				}
+			}
+			return prebuildId;
+		}
+
+		// Ghost branch of BuildTool_Addon.CreatePrebuilds: create the prebuild and write the addon
+		// connections that vanilla only writes when the item was consumed. Without them a hologram
+		// dispenser never binds to the storage below it (no item recognition / paste / routes).
+		public static int AddPrebuildData_GhostAddon(BuildPreview buildPreview, BuildTool_Addon tool, ref PrebuildData prebuildData)
+		{
+			prebuildData.itemRequired = 1;
+			int prebuildId = tool.factory.AddPrebuildDataWithComponents(prebuildData);
+			if (prebuildId != 0 && (buildPreview.desc.isSpraycoster || buildPreview.desc.isDispenser || buildPreview.desc.isTurret))
+			{
+				PlanetFactory factory = tool.factory;
+				int objId = -prebuildId;
+				if (buildPreview.outputObjId != 0)
+				{
+					factory.WriteObjectConn(objId, buildPreview.outputFromSlot, true, buildPreview.outputObjId, buildPreview.outputToSlot);
+				}
+				else if (buildPreview.output != null)
+				{
+					factory.WriteObjectConn(objId, buildPreview.outputFromSlot, true, buildPreview.output.objId, buildPreview.outputToSlot);
+				}
+				if (buildPreview.inputObjId != 0)
+				{
+					factory.WriteObjectConn(objId, buildPreview.inputToSlot, false, buildPreview.inputObjId, buildPreview.inputFromSlot);
+				}
+				else if (buildPreview.input != null)
+				{
+					factory.WriteObjectConn(objId, buildPreview.inputToSlot, false, buildPreview.input.objId, buildPreview.inputFromSlot);
 				}
 			}
 			return prebuildId;
