@@ -1,18 +1,9 @@
-### v1.1.13
-- Station replacement now also works on hologram prebuilds: hover a station ghost with a tower in hand to replace it. The ghost's settings carry over to the new tower; with a real tower it is built immediately, without one a new hologram is placed. The ghost was never paid for, so the swap is always balance-neutral.  
-
-### v1.1.12
-- Replacing a station without owning the tower now places a hologram prebuild (the "missing item" state) instead of being blocked. The dismantle refund is cancelled against the hologram's own one-tower requirement, so completing it costs exactly one tower and can never net a free one. The old station's drones/ships/warpers/storage are refunded to the package. The no-tower hologram path requires `EnableHologram`; without it the replacement falls back to a plain dismantle refund.  
-
-### v1.1.11
-- Fix station replacement still granting a free tower when the player owns none (e.g. in sandbox mode): the item gate now counts real items directly from the package grids and hand, trusting neither sandbox flags nor patched item-count methods; after replacing, the dismantle refund is reconciled so a faked item payment can never net a free tower.  
-
-### v1.1.10
-- Remove `EnableUIMiningMachineKey` (switch to Advanced mining machine with Q over veins). The feature is now built into the game since v0.10.35.29057.  
-
-### v1.1.9
-- Fix station replacement duplicating the tower item when the player owns none (ghost-build + dismantle refund exploit). Replacing now requires a real tower item in hand or in the package.  
-- Fix hologram-built dispensers not binding to the storage below them (couldn't recognize stored items, paste blueprints, or establish routes). Hologram spray coaters and turrets also get their connections written now.  
+### v1.2.0
+- Station replacement now also works on hologram prebuilds: hover a station ghost with a tower in hand to replace it. The ghost's settings carry over to the new tower; with a real tower it is built immediately, without one a new hologram is placed. With `EnableHologram` enabled, unbuilt stations can swap types between holograms.  
+- Replacing a station without owning the tower no longer gets blocked: the old station is dismantled and the new tower is placed as a hologram prebuild. The old station's drones/ships/warpers/storage are refunded to the package, and the hologram requires exactly one tower to complete, so replacing is always balance-neutral.  
+- Fix station replacement granting an extra tower item: the payment is verified against the real item count in the package grids and hand, and reconciled after the replacement.  
+- Fix hologram-built dispensers not binding to the storage below them (couldn't recognize stored items, paste blueprints, or establish routes). Hologram spray coaters and turrets also get their connections written now. Requires `EnableHologram`.  
+- Remove `EnableUIMiningMachineKey` (switch to Advanced mining machine with Q over veins). The feature is now built into the game since v0.10.35.29057. The leftover entry in old config files is harmless and can be deleted.  
 
 ### v1.1.8
 - Add config option `ShowSpacingIndicator` (Default: true)  
