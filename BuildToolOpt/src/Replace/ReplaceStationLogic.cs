@@ -106,16 +106,13 @@ namespace BuildToolOpt
 			return 0;
 		}
 
-		// The player must be able to actually pay one tower item for the replacement:
-		// a real item in hand, or one in the package (CreatePrebuilds takes it via TakeTailItems).
-		// A virtual hand (item selected with zero owned) pays nothing, so it must not trigger replacing.
+		// The player must be able to actually pay one tower item for the replacement.
+		// Uses the REAL item count (storage grids + hand), so virtual-stock or
+		// architect-mode patches on GetItemCount cannot bypass the gate:
+		// no real tower in the package/hand means no replacement.
 		private static bool HasReplaceItem(Player player, int itemId)
 		{
-			if (itemId <= 0) return false;
-			if (GameMain.sandboxToolsEnabled) return true;
-			if (player == null) return false;
-			if (player.inhandItemId == itemId && player.inhandItemCount > 0) return true;
-			return player.package != null && player.package.GetItemCount(itemId) > 0;
+			return itemId > 0 && RealItemCount(player, itemId) > 0;
 		}
 
 		private static EBuildCondition GetRealStationCondition(BuildTool_Click tool, BuildPreview buildPreview)
@@ -180,6 +177,10 @@ namespace BuildToolOpt
 		{
 			IsReplacing = true; // flag for other mods compat
 
+			Player player = tool.player;
+			int replaceItemId = tool.buildPreviews[0].item.ID;
+			int realBefore = RealItemCount(player, replaceItemId);
+
 			// Save status of old station
 			StationComponent oldStation = tool.factory.transport.stationPool[stationId];
 			BuildingParameters parameters = default;
@@ -195,7 +196,7 @@ namespace BuildToolOpt
 			int objId = tool.buildPreviews[0].objId;
 			ReconnectBelts(tool.factory, objId, slots);
 
-			// Build and apply state				
+			// Build and apply state
 			stationId = tool.factory.transport.stationCursor;
 			if (tool.factory.transport.stationRecycleCursor > 0)
 				stationId = tool.factory.transport.stationRecycle[tool.factory.transport.stationRecycleCursor - 1];
@@ -204,6 +205,41 @@ namespace BuildToolOpt
 			LoadState(newStation, state);
 
 			IsReplacing = false;
+
+			// Consumption reconciliation: dismantling refunds one real tower, but the
+			// item payment for the new one can be faked away by other mods (architect
+			// mode / virtual stock patch the takes to no-ops). If no real item was
+			// actually deducted, take one real tower back so replacing can never net
+			// a free tower.
+			if (RealItemCount(player, replaceItemId) > realBefore)
+			{
+				int takeId = replaceItemId;
+				int takeCount = 1;
+				player.package.TakeTailItems(ref takeId, ref takeCount, out _);
+			}
+		}
+
+		// Read the real item count straight from storage grids and hand fields.
+		// Virtual-stock / architect-mode patches hook methods like GetItemCount,
+		// but they cannot change what the grids actually contain.
+		private static int RealItemCount(Player player, int itemId)
+		{
+			if (player == null || itemId <= 0) return 0;
+			int count = 0;
+			StorageComponent package = player.package;
+			if (package != null)
+			{
+				StorageComponent.GRID[] grids = package.grids;
+				int length = package.size < grids.Length ? package.size : grids.Length;
+				for (int i = 0; i < length; i++)
+				{
+					if (grids[i].itemId == itemId)
+						count += grids[i].count;
+				}
+			}
+			if (player.inhandItemId == itemId)
+				count += player.inhandItemCount;
+			return count;
 		}
 
 		private static void ReconnectBelts(PlanetFactory factory, int objId, SlotData[] slots)

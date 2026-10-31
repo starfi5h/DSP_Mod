@@ -1,3 +1,6 @@
+### v1.1.11
+- Fix station replacement still granting a free tower when the player owns none (e.g. in sandbox mode): the item gate now counts real items directly from the package grids and hand, trusting neither sandbox flags nor patched item-count methods; after replacing, the dismantle refund is reconciled so a faked item payment can never net a free tower.  
+
 ### v1.1.10
 - Remove `EnableUIMiningMachineKey` (switch to Advanced mining machine with Q over veins). The feature is now built into the game since v0.10.35.29057.  
 
