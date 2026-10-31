@@ -1,5 +1,12 @@
 ## Changelog
 
+#### v1.6.0 (DSP-0.10.35)  
+\- Add preset speed-slot hotkeys: `KeySliderSpeed` (Ctrl+End, restore the memorized slider speed), `KeyFullSpeed` (Ctrl+Home, standard 1x speed, memorizes the slider value), `KeyFrameRate` (Ctrl+Ins, last frame-rate setting). New configs: `Speed`:`SliderSpeed`, `Speed`:`FrameRate`.  
+\- The bottom-right speed indicator now shows the actual speed together with the frame speed below the speed-up buttons (for example `60F/s 1x`); it is hidden while paused.  
+\- 新增预设档位热键：`KeySliderSpeed`（Ctrl+End，恢复记忆的滑块值）、`KeyFullSpeed`（Ctrl+Home，100% 速度档，自动记忆滑块值）、`KeyFrameRate`（Ctrl+Ins，帧速率档）。新增配置：`Speed`:`SliderSpeed`、`Speed`:`FrameRate`。
+- 暂停恢复精确化：帧速率档暂停后再按 Pause，精确回到 FrameRate 的帧速率（不再退化为滑块等效百分比）。  
+\- 右下角速度指示移至加速按钮下方，同时显示实际速度与帧速度（例如 `60F/s 1x`）；暂停时隐藏。  
+
 #### v1.5.14 (DSP-0.10.34.28529)  
 \- Add `KeyImmediateSave` hotkey for immediate auto save. Default: F10 + LeftControl + LeftAlt   
 \- Add `KeySpeedUp` / `KeySpeedDown` hotkeys for speed up/down.  

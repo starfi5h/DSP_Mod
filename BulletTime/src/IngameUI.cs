@@ -17,7 +17,18 @@ namespace BulletTime
         private static GameObject infoTextGo;
         private static Text infoText; // Show the current (stored) gameTick
         private static Text speedRatioText;
+        private static Text frameSpeedText;
         private static readonly GameObject[] speedBtnGo = new GameObject[3];
+
+        public static string FormatFrameRate(double fps) => fps < 10.0 ? $"{fps:0.00}F/s" : $"{fps:0.#}F/s";
+
+        // 当前有效速度：整体 UPS × (1 - SkipRatio)，暂停为 0（两轨道叠加时仍反映真实速度）
+        private static double EffectiveFrameRate()
+        {
+            if (GameStateManager.Pause) return 0.0;
+            double ups = FPSController.instance != null && FPSController.instance.fixUPS > 0.0 ? FPSController.instance.fixUPS : 60.0;
+            return ups * (1.0 - GameStateManager.SkipRatio);
+        }
 
         public static void Dispose()
         {
@@ -48,7 +59,15 @@ namespace BulletTime
             GameObject.Destroy(infoTextGo);
             infoTextGo = null;
             infoText = null;
-            GameObject.Destroy(speedRatioText?.gameObject);
+            if (frameSpeedText != null)
+            {
+                GameObject.Destroy(frameSpeedText.gameObject);
+            }
+            frameSpeedText = null;
+            if (speedRatioText != null) // 不能用 ?. ：对已销毁对象会绕过 Unity null 判断
+            {
+                GameObject.Destroy(speedRatioText.gameObject);
+            }
             speedRatioText = null;
         }
 
@@ -68,6 +87,9 @@ namespace BulletTime
                     sliderGo.transform.localPosition = cpuPanel.Find("title-text").localPosition + new Vector3(-120, 1, 0);
                     slider = sliderGo.GetComponent<Slider>();
                     sliderText = sliderGo.GetComponentInChildren<Text>();
+                    slider.minValue = 0f;
+                    slider.maxValue = 100f;
+                    slider.wholeNumbers = true;
                     slider.value = BulletTimePlugin.StartingSpeed.Value;
                     slider.onValueChanged.AddListener(value => OnSliderChange(value));
                     OnSliderChange(slider.value);
@@ -191,11 +213,23 @@ namespace BulletTime
                     var rectTransfrom = (RectTransform)realTimeTextGo.transform;
                     rectTransfrom.sizeDelta = new Vector2(50, rectTransfrom.sizeDelta.y); // Reduce button width
                     var ratioGo = GameObject.Instantiate(realTimeTextGo, realTimeTextGo.transform.parent);
-                    ratioGo.name = "speed ratio-text";                    
+                    ratioGo.name = "speed ratio-text";
                     ratioGo.transform.localPosition += new Vector3(0, 15f);
                     GameObject.Destroy(ratioGo.GetComponent<UIButton>()); // Remove the time format toggle
                     ratioGo.SetActive(true);
                     speedRatioText = ratioGo.GetComponent<Text>();
+                    // 帧速度文本：加速按钮下方、靠左对齐（倍率保持上游原位置，避免与时长/时钟重叠）
+                    var frameGo = GameObject.Instantiate(realTimeTextGo, realTimeTextGo.transform.parent);
+                    frameGo.name = "frame speed-text";
+                    GameObject.Destroy(frameGo.GetComponent<UIButton>());
+                    frameGo.SetActive(true);
+                    frameSpeedText = frameGo.GetComponent<Text>();
+                    var frameRect = (RectTransform)frameGo.transform;
+                    frameRect.sizeDelta = new Vector2(110f, frameRect.sizeDelta.y);
+                    frameRect.pivot = new Vector2(0f, 0.5f);
+                    frameSpeedText.alignment = TextAnchor.MiddleLeft;
+                    if (speedBtnGo[0] != null)
+                        frameGo.transform.localPosition = speedBtnGo[0].transform.localPosition + new Vector3(-16f, -22f);
 
                     // Make sure time text stays on top
                     timeTextGo.transform.SetAsLastSibling();
@@ -284,20 +318,28 @@ namespace BulletTime
 
         public static void SetSpeedRatioText()
         {
-            if (speedRatioText == null) return;
             if (NebulaCompat.IsClient) // 客戶端的UPS是跟隨主機隨時在變動的, 因此不顯示
-            { 
-                speedRatioText.text = "";
+            {
+                if (speedRatioText != null) speedRatioText.text = "";
+                if (frameSpeedText != null) frameSpeedText.text = "";
                 return;
             }
 
-            float ratio = (float)FPSController.instance.fixUPS / 60.0f;
-            if (ratio == 0.0f)
-                speedRatioText.text = "1 x"; //正常流速
-            else if ((ratio - (int)ratio) < 0.05) 
-                speedRatioText.text = (int)ratio + " x"; //整數倍率
-            else
-                speedRatioText.text = $"{ratio:0.0} x"; //顯示到小數點1位
+            // 倍率：上游原位置（时钟上方）；低于 1x 时精确到 3 位小数（尾零自动省略）
+            if (speedRatioText != null)
+            {
+                double ratio = EffectiveFrameRate() / 60.0;
+                string ratioText = ratio < 1.0
+                    ? System.Math.Round(ratio, 3).ToString("0.###")
+                    : System.Math.Round(ratio, 2).ToString("0.#");
+                speedRatioText.text = ratioText + "x";
+            }
+
+            // 帧速度：加速按钮下方
+            if (frameSpeedText != null)
+            {
+                frameSpeedText.text = FormatFrameRate(EffectiveFrameRate());
+            }
         }
 
         public static void OnStoredGameTickChange()
@@ -338,7 +380,7 @@ namespace BulletTime
             else
             {
                 GameStateManager.ManualPause = false;
-                sliderText.text = $"{(int)value}%";
+                UpdateSliderText(value);
                 if (GameStateManager.Pause && NebulaCompat.IsMultiplayerActive)
                 {
                     NebulaCompat.SendPacket(PauseEvent.Resume);                    
@@ -346,8 +388,10 @@ namespace BulletTime
                 ShowStatus("");
             }
             GameStateManager.SetSpeedRatio(value/100f);
+            GameStateManager.FrameRateModeActive = false; // 拖动滑块即离开帧速率模式
 
             SetHotkeyPauseMode(false); //當滑條有任何變化時取消熱鍵時停
+            SetSpeedRatioText(); // 右下角实际速度/帧速度随滑块实时更新
         }
 
         public static void SetHotkeyPauseMode(bool active)
@@ -397,9 +441,22 @@ namespace BulletTime
                         NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Pause);
                 }
             }
-            else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸滑條設定值
+            else if (GameStateManager.Interactable) //如果不是在自動存檔中, 回歸暫停前的模式
             {
-                OnSliderChange(slider.value);                
+                if (GameStateManager.FrameRateModeActive)
+                {
+                    // 帧速率档暂停：精确回到 FrameRate 的帧速率（滑块 <1% 无法表达整数百分比）
+                    GameStateManager.SetPauseMode(false);
+                    GameStateManager.ManualPause = false;
+                    GameStateManager.ApplyFrameRate(GameStateManager.LastFrameRate);
+                    SyncSliderPosition();
+                    ShowStatus(""); // 清除暂停状态提示（上游路径经 OnSliderChange 清除，此分支需显式清除）
+                }
+                else
+                {
+                    OnSliderChange(slider.value); // 回归滑块设定值
+                }
+                SetSpeedRatioText();
                 if (NebulaCompat.IsMultiplayerActive) // 主機廣播恢復訊息
                     NebulaCompat.SendPlayerActionPacket(EPlayerSpeedAction.Resume);
             }
@@ -445,6 +502,92 @@ namespace BulletTime
             }
             // 更新速度显示
             SetSpeedRatioText();
+        }
+
+        // ---- 预设档位热键 ----
+
+        // 切换任一非暂停档前，若处于暂停状态先解除（回归滑块设定值）
+        private static void ExitPauseIfPaused()
+        {
+            if (!GameStateManager.Pause) return;
+            if (slider != null && slider.value > 0f)
+            {
+                OnKeyPause(); // 正常路径：回归滑块设定值
+            }
+            else
+            {
+                // 滑块位于 0（帧速率 <0.6F/s 时等效百分比不足 1%，无法用整数滑块表达）：
+                // 若仍走 OnKeyPause 会经 OnSliderChange(0) 再次暂停。改为直接解除时停，
+                // 保持当前丢帧比例，随后由档位应用实际帧速率
+                GameStateManager.SetPauseMode(false);
+                GameStateManager.ManualPause = false;
+            }
+        }
+
+        // 100% 速度档：滑块归位 100%，重置加速档，恢复标准 1x
+        public static void OnKeyFullSpeed()
+        {
+            if (NebulaCompat.IsClient) return;
+            if (!GameStateManager.Interactable) return;
+            if (slider == null) return; // 主菜单中 UI 尚未创建
+            ExitPauseIfPaused();
+            // 记忆当前滑块值作为滑块减速模式（Ctrl+End 可恢复；100% 时保留原记忆）
+            if (slider.value > 0f && slider.value < 100f)
+            {
+                GameStateManager.LastSliderSpeed = slider.value;
+                if (BulletTimePlugin.SliderSpeed != null) BulletTimePlugin.SliderSpeed.Value = slider.value;
+            }
+            FPSController.SetFixUPS(0);
+            GameStateManager.SetSpeedRatio(1f);
+            GameStateManager.FrameRateModeActive = false;
+            slider.SetValueWithoutNotify(100f);
+            UpdateSliderText(100f); // 同步滑块文字（SetValueWithoutNotify 不触发 onValueChanged）
+            SetSpeedRatioText();
+        }
+
+        // 帧速率档：恢复上次帧速率设定值（运行期记忆，初始取 cfg FrameRate）
+        public static void OnKeyFrameRate()
+        {
+            if (NebulaCompat.IsClient) return;
+            if (!GameStateManager.Interactable) return;
+            if (slider == null) return; // 主菜单中 UI 尚未创建
+            ExitPauseIfPaused();
+            GameStateManager.ApplyFrameRate(GameStateManager.LastFrameRate);
+            SyncSliderPosition();
+            SetSpeedRatioText();
+        }
+
+        // 滑块减速模式：恢复记忆的滑块值（按 Ctrl+Home 时自动记忆，cfg SliderSpeed 跨存档保持）
+        public static void OnKeySliderSpeed()
+        {
+            if (NebulaCompat.IsClient) return; // 客户端不可控制速度
+            if (!GameStateManager.Interactable) return; // 自動存檔時停中不接受切換
+            if (slider == null) return; // 主菜单中 UI 尚未创建
+            ExitPauseIfPaused();
+            FPSController.SetFixUPS(0); // 重置加速档
+            float target = Mathf.Clamp(GameStateManager.LastSliderSpeed, 1f, 100f);
+            if (slider.value != target)
+            {
+                slider.value = target; // 触发 onValueChanged -> OnSliderChange（同步速度与文字）
+            }
+            else
+            {
+                OnSliderChange(target); // 位置已一致时显式结算
+            }
+        }
+
+        // 把滑块位置同步到帧速率档记忆值的等价百分比（不触发 OnSliderChange 重複結算）
+        private static void SyncSliderPosition()
+        {
+            if (slider == null) return;
+            slider.SetValueWithoutNotify(Mathf.Clamp((float)(GameStateManager.LastFrameRate / 60.0 * 100.0), 0f, 100f));
+            UpdateSliderText(slider.value);
+        }
+
+        // 滑块位置经 SetValueWithoutNotify 变化时，手动同步滑块上的百分比文字
+        private static void UpdateSliderText(float value)
+        {
+            if (sliderText != null) sliderText.text = $"{(int)value}%";
         }
 
         private static void OnAutosaveToggleChange(bool val)
