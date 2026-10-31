@@ -1,3 +1,6 @@
+### v1.1.10
+- Remove `EnableUIMiningMachineKey` (switch to Advanced mining machine with Q over veins). The feature is now built into the game since v0.10.35.29057.  
+
 ### v1.1.9
 - Fix station replacement duplicating the tower item when the player owns none (ghost-build + dismantle refund exploit). Replacing now requires a real tower item in hand or in the package.  
 - Fix hologram-built dispensers not binding to the storage below them (couldn't recognize stored items, paste blueprints, or establish routes). Hologram spray coaters and turrets also get their connections written now.  

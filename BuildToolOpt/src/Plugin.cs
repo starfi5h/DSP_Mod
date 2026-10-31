@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.1.9";
+        public const string VERSION = "1.1.10";
 
         public static ManualLogSource Log;
         static Harmony harmony;
@@ -27,7 +27,6 @@ namespace BuildToolOpt
         public static bool EnableStationBuildOptimize = false;
         public static bool EnableUIBlueprintOpt = true;
         public static bool EnableUIBlueprintFolderSignalIcon = true;
-        public static bool EnableUIMiningMachineKey = true;
         public static bool EnableClipboardPaste = true;
 
         public void Start() // Wait until all mods are awake
@@ -44,7 +43,6 @@ namespace BuildToolOpt
             
             EnableUIBlueprintOpt = Config.Bind("UI", "UIBlueprintOpt", true, "Optimize blueprint UI to reduce lag time\n优化蓝图UI减少卡顿").Value;
             EnableUIBlueprintFolderSignalIcon = Config.Bind("UI", "UIBlueprintFolderSignalIcon", true, "Allow blueprint folders to use signal icons\n允许蓝图文件夹使用信号图标").Value;
-            EnableUIMiningMachineKey = Config.Bind("UI", "EnableUIMiningMachineKey", true, "Use Advanced mining machine when clicking Q mouseover veins\n将滑鼠悬停在矿脉上Q时，使用大矿机").Value;
             EnableClipboardPaste = Config.Bind("UI", "ClipboardPaste", true, "Directly parse blueprint data from clipboard when Ctrl + V\n热键粘贴蓝图时,直接读取剪切板").Value;
             
 
@@ -81,11 +79,6 @@ namespace BuildToolOpt
             {
                 harmony.Patch(AccessTools.Method(typeof(GameMain), nameof(GameMain.Pause)), null,
                 new HarmonyMethod(AccessTools.Method(typeof(RemoveGC_Patch), nameof(RemoveGC_Patch.GCCollect))));
-            }
-
-            if (EnableUIMiningMachineKey)
-            {
-                harmony.PatchAll(typeof(PlayerAction_Inspect_Patch));
             }
 
             if (EnableClipboardPaste)
