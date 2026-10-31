@@ -1,3 +1,7 @@
+### v1.1.9
+- Fix station replacement duplicating the tower item when the player owns none (ghost-build + dismantle refund exploit). Replacing now requires a real tower item in hand or in the package.  
+- Fix hologram-built dispensers not binding to the storage below them (couldn't recognize stored items, paste blueprints, or establish routes). Hologram spray coaters and turrets also get their connections written now.  
+
 ### v1.1.8
 - Add config option `ShowSpacingIndicator` (Default: true)  
 

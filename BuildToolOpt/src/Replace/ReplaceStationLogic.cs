@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 
 namespace BuildToolOpt
@@ -23,6 +23,12 @@ namespace BuildToolOpt
 					int entityId = GetOverlapStationEntityId(__instance);
 					if (entityId > 0)
 					{
+						// Require a real tower item to replace, otherwise dismantling the old station
+						// refunds a free tower into the package while the hologram-built new one
+						// consumes nothing (BuildFinally does not charge itemRequired) -> infinite dupe.
+						if (!HasReplaceItem(__instance.player, buildPreview.item.ID))
+							return;
+
 						// Snap to the overlap station
 						ref var entityData = ref __instance.factory.entityPool[entityId];
 						stationId = entityData.stationId;
@@ -98,6 +104,18 @@ namespace BuildToolOpt
 				i++;
 			}
 			return 0;
+		}
+
+		// The player must be able to actually pay one tower item for the replacement:
+		// a real item in hand, or one in the package (CreatePrebuilds takes it via TakeTailItems).
+		// A virtual hand (item selected with zero owned) pays nothing, so it must not trigger replacing.
+		private static bool HasReplaceItem(Player player, int itemId)
+		{
+			if (itemId <= 0) return false;
+			if (GameMain.sandboxToolsEnabled) return true;
+			if (player == null) return false;
+			if (player.inhandItemId == itemId && player.inhandItemCount > 0) return true;
+			return player.package != null && player.package.GetItemCount(itemId) > 0;
 		}
 
 		private static EBuildCondition GetRealStationCondition(BuildTool_Click tool, BuildPreview buildPreview)

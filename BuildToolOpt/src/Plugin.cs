@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Reflection;
@@ -14,7 +14,7 @@ namespace BuildToolOpt
     {
         public const string GUID = "starfi5h.plugin.BuildToolOpt";
         public const string NAME = "BuildToolOpt";
-        public const string VERSION = "1.1.8";
+        public const string VERSION = "1.1.9";
 
         public static ManualLogSource Log;
         static Harmony harmony;
