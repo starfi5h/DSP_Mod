@@ -6,6 +6,7 @@ namespace BuildToolOpt
     class ReplaceStationLogic
     {
 		public static bool IsReplacing { get; private set; }
+		public static bool ReplacingGhost { get; private set; }
 		static int stationId;
 
 		[HarmonyPostfix, HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.CheckBuildConditions))]
@@ -23,12 +24,6 @@ namespace BuildToolOpt
 					int entityId = GetOverlapStationEntityId(__instance);
 					if (entityId > 0)
 					{
-						// Require a real tower item to replace, otherwise dismantling the old station
-						// refunds a free tower into the package while the hologram-built new one
-						// consumes nothing (BuildFinally does not charge itemRequired) -> infinite dupe.
-						if (!HasReplaceItem(__instance.player, buildPreview.item.ID))
-							return;
-
 						// Snap to the overlap station
 						ref var entityData = ref __instance.factory.entityPool[entityId];
 						stationId = entityData.stationId;
@@ -65,7 +60,9 @@ namespace BuildToolOpt
 		[HarmonyPrefix, HarmonyPatch(typeof(PlanetTransport), nameof(PlanetTransport.TakeBackItems_Station))]
 		public static void TakeBackItems_Station(PlanetTransport __instance, int stationId, ref bool __runOriginal)
         {
-			__runOriginal = !IsReplacing;
+			// Immediate rebuild: contents are transferred via SaveState/LoadState, suppress the refund.
+			// Ghost rebuild: let the vanilla refund put drones/ships/warpers/storage into the package.
+			__runOriginal = !(IsReplacing && !ReplacingGhost);
 			if (__runOriginal) return;
 
 			// When replacing the old station, don't put items into player package
@@ -104,15 +101,6 @@ namespace BuildToolOpt
 				i++;
 			}
 			return 0;
-		}
-
-		// The player must be able to actually pay one tower item for the replacement.
-		// Uses the REAL item count (storage grids + hand), so virtual-stock or
-		// architect-mode patches on GetItemCount cannot bypass the gate:
-		// no real tower in the package/hand means no replacement.
-		private static bool HasReplaceItem(Player player, int itemId)
-		{
-			return itemId > 0 && RealItemCount(player, itemId) > 0;
 		}
 
 		private static EBuildCondition GetRealStationCondition(BuildTool_Click tool, BuildPreview buildPreview)
@@ -181,6 +169,13 @@ namespace BuildToolOpt
 			int replaceItemId = tool.buildPreviews[0].item.ID;
 			int realBefore = RealItemCount(player, replaceItemId);
 
+			// No real tower owned -> the replacement becomes a hologram prebuild
+			// (the "missing item" state). The dismantle refund is taken back so the
+			// hologram's own item requirement (itemRequired = 1) charges the player
+			// exactly one tower on completion; the replace can never net a free tower.
+			bool ghost = realBefore < 1;
+			ReplacingGhost = ghost;
+
 			// Save status of old station
 			StationComponent oldStation = tool.factory.transport.stationPool[stationId];
 			BuildingParameters parameters = default;
@@ -189,34 +184,53 @@ namespace BuildToolOpt
 			SaveState(oldStation, out StationState state);
 			tool.actionBuild.DoDismantleObject(oldStation.entityId);
 
+			if (ghost)
+			{
+				// Take the refund back; the hologram will require one tower to complete.
+				int takeId = replaceItemId;
+				int takeCount = 1;
+				player.package.TakeTailItems(ref takeId, ref takeCount, out _);
+			}
+
 			// Create prebuild and apply config
 			tool.buildPreviews[0].parameters = parameters.parameters;
 			tool.buildPreviews[0].paramCount = parameters.parameters.Length;
 			tool.CreatePrebuilds();
 			int objId = tool.buildPreviews[0].objId;
+			if (objId == 0)
+			{
+				// Ghost mode requires the hologram feature (EnableHologram). Without it the
+				// vanilla path refuses to create the prebuild; the old station is already
+				// dismantled with a full refund (same as a manual dismantle), so just stop.
+				ReplacingGhost = false;
+				IsReplacing = false;
+				return;
+			}
 			ReconnectBelts(tool.factory, objId, slots);
 
-			// Build and apply state
-			stationId = tool.factory.transport.stationCursor;
-			if (tool.factory.transport.stationRecycleCursor > 0)
-				stationId = tool.factory.transport.stationRecycle[tool.factory.transport.stationRecycleCursor - 1];
-			tool.factory.BuildFinally(tool.player, -objId);
-			StationComponent newStation = tool.factory.transport.stationPool[stationId];
-			LoadState(newStation, state);
-
-			IsReplacing = false;
-
-			// Consumption reconciliation: dismantling refunds one real tower, but the
-			// item payment for the new one can be faked away by other mods (architect
-			// mode / virtual stock patch the takes to no-ops). If no real item was
-			// actually deducted, take one real tower back so replacing can never net
-			// a free tower.
-			if (RealItemCount(player, replaceItemId) > realBefore)
+			if (!ghost)
 			{
-				int takeId = replaceItemId;
-				int takeCount = 1;
-				player.package.TakeTailItems(ref takeId, ref takeCount, out _);
+				// Paid with a real tower -> build immediately and transfer the old state.
+				stationId = tool.factory.transport.stationCursor;
+				if (tool.factory.transport.stationRecycleCursor > 0)
+					stationId = tool.factory.transport.stationRecycle[tool.factory.transport.stationRecycleCursor - 1];
+				tool.factory.BuildFinally(tool.player, -objId);
+				StationComponent newStation = tool.factory.transport.stationPool[stationId];
+				LoadState(newStation, state);
+
+				// Consumption reconciliation: if the item payment was faked away by other
+				// mods (virtual stock patching the takes to no-ops), the dismantle refund
+				// would net a free tower -> take one real tower back.
+				if (RealItemCount(player, replaceItemId) > realBefore)
+				{
+					int takeId = replaceItemId;
+					int takeCount = 1;
+					player.package.TakeTailItems(ref takeId, ref takeCount, out _);
+				}
 			}
+
+			ReplacingGhost = false;
+			IsReplacing = false;
 		}
 
 		// Read the real item count straight from storage grids and hand fields.

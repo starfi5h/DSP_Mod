@@ -1,3 +1,6 @@
+### v1.1.12
+- Replacing a station without owning the tower now places a hologram prebuild (the "missing item" state) instead of being blocked. The dismantle refund is cancelled against the hologram's own one-tower requirement, so completing it costs exactly one tower and can never net a free one. The old station's drones/ships/warpers/storage are refunded to the package. The no-tower hologram path requires `EnableHologram`; without it the replacement falls back to a plain dismantle refund.  
+
 ### v1.1.11
 - Fix station replacement still granting a free tower when the player owns none (e.g. in sandbox mode): the item gate now counts real items directly from the package grids and hand, trusting neither sandbox flags nor patched item-count methods; after replacing, the dismantle refund is reconciled so a faked item payment can never net a free tower.  
 
