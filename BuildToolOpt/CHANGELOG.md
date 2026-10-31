@@ -1,3 +1,6 @@
+### v1.1.13
+- Station replacement now also works on hologram prebuilds: hover a station ghost with a tower in hand to replace it. The ghost's settings carry over to the new tower; with a real tower it is built immediately, without one a new hologram is placed. The ghost was never paid for, so the swap is always balance-neutral.  
+
 ### v1.1.12
 - Replacing a station without owning the tower now places a hologram prebuild (the "missing item" state) instead of being blocked. The dismantle refund is cancelled against the hologram's own one-tower requirement, so completing it costs exactly one tower and can never net a free one. The old station's drones/ships/warpers/storage are refunded to the package. The no-tower hologram path requires `EnableHologram`; without it the replacement falls back to a plain dismantle refund.  
 

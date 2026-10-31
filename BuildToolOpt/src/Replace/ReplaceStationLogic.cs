@@ -8,11 +8,13 @@ namespace BuildToolOpt
 		public static bool IsReplacing { get; private set; }
 		public static bool ReplacingGhost { get; private set; }
 		static int stationId;
+		static int stationPrebuildId;
 
 		[HarmonyPostfix, HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.CheckBuildConditions))]
 		public static void BuildTool_Click_CheckBuildConditions_Postfix(BuildTool_Click __instance, ref bool __result)
 		{
 			stationId = 0;
+			stationPrebuildId = 0;
 			if (__instance.buildPreviews.Count == 1)
 			{
 				BuildPreview buildPreview = __instance.buildPreviews[0];
@@ -39,6 +41,23 @@ namespace BuildToolOpt
 						__instance.actionBuild.model.cursorText = BuildPreview.GetConditionText(realCondition);
 						return;
 					}
+
+					// 白模也支持替换：悬停在站点预制备（蓝图虚影/待补塔虚影）上时同样触发
+					int prebuildId = GetOverlapStationPrebuildId(__instance);
+					if (prebuildId > 0)
+					{
+						ref var prebuildData = ref __instance.factory.prebuildPool[prebuildId];
+						stationPrebuildId = prebuildId;
+						buildPreview.lpos = prebuildData.pos;
+						buildPreview.lrot = prebuildData.rot;
+
+						buildPreview.condition = EBuildCondition.Ok;
+						if (!VFInput.onGUI) UICursor.SetCursor(ECursor.Default);
+						__result = true;
+						var realCondition = GetRealStationCondition(__instance, buildPreview);
+						__instance.actionBuild.model.cursorState = realCondition == EBuildCondition.Ok ? 0 : -1;
+						__instance.actionBuild.model.cursorText = BuildPreview.GetConditionText(realCondition);
+					}
 				}
 			}
 		}
@@ -51,6 +70,12 @@ namespace BuildToolOpt
 				if (stationId > 0)
 				{
 					ReplaceStation(__instance, stationId);
+					__result = false;
+					return;
+				}
+				if (stationPrebuildId > 0)
+				{
+					ReplaceStationPrebuild(__instance, stationPrebuildId);
 					__result = false;
 					return;
 				}
@@ -103,6 +128,83 @@ namespace BuildToolOpt
 			return 0;
 		}
 
+		// 物流塔替换对白模也生效：悬停在站点预制备上时返回其 id
+		private static int GetOverlapStationPrebuildId(BuildTool_Click tool)
+		{
+			PlanetPhysics physics = tool.player.planetData.physics;
+			int i = 0;
+			while (BuildTool._tmp_cols[i] != null)
+			{
+				if (physics.GetColliderData(BuildTool._tmp_cols[i], out ColliderData colliderData))
+				{
+					if (colliderData.objType == EObjectType.Prebuild)
+					{
+						int prebuildId = colliderData.objId;
+						PrebuildData prebuildData = tool.factory.prebuildPool[prebuildId];
+						if (prebuildData.id == prebuildId)
+						{
+							ItemProto proto = LDB.items.Select(prebuildData.protoId);
+							if (proto != null && proto.prefabDesc.isStation
+								&& !proto.prefabDesc.isVeinCollector && !proto.prefabDesc.isCollectStation)
+								return prebuildId;
+						}
+					}
+				}
+				i++;
+			}
+			return 0;
+		}
+
+		// 白模替换：移除旧站点预制备，放置手中塔（有塔立即建成并沿用旧白模设置；无塔则放置新的白模）。
+		// 旧白模未支付过物品（itemRequired = 1 未补），拆除不产生退款，因此本流程天然收支平衡。
+		public static void ReplaceStationPrebuild(BuildTool_Click tool, int prebuildId)
+		{
+			IsReplacing = true; // flag for other mods compat
+			ReplacingGhost = true; // 白模源替换没有旧站内容物需要转移
+
+			Player player = tool.player;
+			int replaceItemId = tool.buildPreviews[0].item.ID;
+			int realBefore = RealItemCount(player, replaceItemId);
+
+			// 沿用旧白模的设置参数
+			int[] parameters = tool.factory.prebuildPool[prebuildId].parameters;
+			int paramCount = parameters?.Length ?? 0;
+
+			// 移除旧白模（未支付的预制备 ObjectAssetValue = 0，无退款）
+			tool.actionBuild.DoDismantleObject(-prebuildId);
+
+			// 放置新塔（沿用旧白模参数；有真实塔则消耗并立即建成，无塔则放置新的白模）
+			tool.buildPreviews[0].parameters = parameters;
+			tool.buildPreviews[0].paramCount = paramCount;
+			tool.CreatePrebuilds();
+			int objId = tool.buildPreviews[0].objId;
+			if (objId == 0)
+			{
+				// 无塔且未开启 EnableHologram：无法放置白模，等同手动拆除了旧白模
+				ReplacingGhost = false;
+				IsReplacing = false;
+				return;
+			}
+
+			if (realBefore >= 1)
+			{
+				// Paid with a real tower -> build immediately (the ghost carried no runtime state).
+				tool.factory.BuildFinally(tool.player, -objId);
+
+				// 消费对账：支付被虚拟库存类补丁假扣时收回差额，防止白赚
+				if (RealItemCount(player, replaceItemId) > realBefore)
+				{
+					int takeId = replaceItemId;
+					int takeCount = 1;
+					player.package.TakeTailItems(ref takeId, ref takeCount, out _);
+				}
+			}
+			// 无塔：保持白模状态（itemRequired = 1），等待玩家补足物品后由建造系统完成
+
+			ReplacingGhost = false;
+			IsReplacing = false;
+		}
+
 		private static EBuildCondition GetRealStationCondition(BuildTool_Click tool, BuildPreview buildPreview)
         {
 			var stationPool = tool.factory.transport.stationPool;
@@ -134,6 +236,7 @@ namespace BuildToolOpt
 			}
 			for (int id = 1; id < prebuildCursor; id++)
 			{
+				if (id == stationPrebuildId) continue; // Skip the prebuild being replaced
 				if (prebuildPool[id].id == id)
 				{
 					var itemProto = LDB.items.Select(prebuildPool[id].protoId);
