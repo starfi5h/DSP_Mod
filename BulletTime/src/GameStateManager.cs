@@ -17,6 +17,9 @@ namespace BulletTime
         public static bool Interactable { get; private set; } = true; //gametick stop, disable interaction with world
         public static bool LockFactory { get; private set; } = false; // Lock all interaction on local planet
         public static float SkipRatio { get; private set; }
+        public static double LastFrameRate { get; set; } = 60; // 帧速率档的记忆速度（F/s，运行期更新）
+        public static bool FrameRateModeActive { get; set; } // 帧速率档是否为最后激活的速度模式（暂停恢复时用于精确回归）
+        public static float LastSliderSpeed { get; set; } = 100; // 滑块减速模式的记忆速度（百分比，运行期更新）
         public static Vector3 PlayerPosition { get; set; } // Lock player position in hotkey pause
 
         private static float timer;
@@ -36,6 +39,38 @@ namespace BulletTime
                 SkipRatio = 1 - value;
                 timer = 0;
             }
+        }
+
+        // 统一入口：帧速率档。F <= 60 走丢帧轨道（并停用加速轨道），F > 60 走加速轨道（并清除丢帧）
+        public static void ApplyFrameRate(double fps)
+        {
+            if (fps < 0.06) fps = 0.06; // 0.001x
+            if (fps > 6000.0) fps = 6000.0; // 100x
+            LastFrameRate = fps;
+            FrameRateModeActive = true;
+            if (BulletTimePlugin.FrameRate != null) BulletTimePlugin.FrameRate.Value = (float)fps; // 回写配置，跨存档保持
+            if (fps <= 60.0)
+            {
+                if (FPSController.instance != null && FPSController.instance.fixUPS > 0.0)
+                    FPSController.SetFixUPS(0.0); // 停用加速轨道，使有效速度等于 fps
+                SetSpeedRatio((float)(fps / 60.0));
+            }
+            else
+            {
+                if (Pause)
+                    SetPauseMode(false);
+                SkipRatio = 0f; // 清除丢帧比例，使有效速度等于 fps
+                timer = 0;
+                FPSController.SetFixUPS(fps);
+            }
+        }
+
+        // 退出游戏时重置帧速率档状态
+        public static void ResetFrameRateState()
+        {
+            FrameRateModeActive = false;
+            LastFrameRate = BulletTimePlugin.FrameRate != null ? BulletTimePlugin.FrameRate.Value : 60f;
+            LastSliderSpeed = BulletTimePlugin.SliderSpeed != null ? BulletTimePlugin.SliderSpeed.Value : 100f;
         }
 
         public static void SetPauseMode(bool value)

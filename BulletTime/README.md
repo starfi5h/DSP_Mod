@@ -26,6 +26,13 @@ You can also advance the game by a single frame using the `KeyStepOneFrame` hotk
   - **Best for:** Improving FPS in massive late-game factories by reducing the CPU's calculation load. It's also great for enjoying a "Sandevistan"-like experience where you have more time to react.
   - **If set to 0%:** This creates a unique time-stop where your factories halt, but you can still move around freely.
 
+#### 4\. Preset Speed Slots (Hotkeys)
+  - **What it does:** Four hotkeys switch between speed presets: `Pause` toggles the tactical pause, `Ctrl+Home` resets to standard 1x speed (100%) and memorizes the current slider value, `Ctrl+End` restores that memorized slider speed, and `Ctrl+Ins` restores the last frame-rate setting. All of them can be changed in the config (`KeyPause` / `KeyFullSpeed` / `KeySliderSpeed` / `KeyFrameRate`).
+  - **Note:** Pressing any non-pause preset key while in tactical pause first releases the pause. Pressing `Pause` again resumes exactly the speed that was active before the pause (frame-rate presets restore their exact value). The presets are unavailable during the background-autosave freeze, and in multiplayer they are host-only.
+
+#### 5\. Speed Indicator
+  - **What it does:** The bottom-right speed indicator shows the actual speed together with the frame speed below the speed buttons (for example `60F/s 1x`); it is hidden while paused.
+
 ## Other Utility Features
 
   - **Background Autosave:** Runs the autosave process on a background thread to prevent the game from freezing. The game will briefly enter the bullet-time pause mode (mecha can still move) to ensure data consistency during the save.  
@@ -43,6 +50,7 @@ It is recommended to install it through [r2modman](https://thunderstore.io/c/dys
   - **Speed Controls:** Use the buttons in the bottom-right corner to Pause, Resume (or reset to 1x), and Speed Up. You can also assign hotkeys (`KeySpeedUp` / `KeySpeedDown`) for the same actions.
   - **Tactical Pause:** Press the `Pause` / `Break` key to toggle.
   - **Bullet-Time Slider:** Open the Performance Statistics panel to find and adjust the World Speed slider.
+  - **Preset Speed Slots:** `Pause` tactical pause / `Ctrl+Home` 100% (memorize slider) / `Ctrl+End` memorized slider speed / `Ctrl+Ins` frame-rate preset.
   - **Background Autosave Toggle:** Open the Performance Statistics panel to enable background autosave on the top-right checkbox.  
   - **View Performance:** Press `Shift + F12` to see the real-time FPS and UPS in the top-left corner.
 
@@ -63,10 +71,15 @@ After running the game once with the mod installed, a config file will be genera
 | `KeySpeedDown` | Keyboard shortcut for speed down. | `None` |
 | `KeyPause` | Hotkey for toggling Tactical Pause mode. | `Pause`｜`Break` |
 | `KeyStepOneFrame` | Hotkey to advance 1 frame in pause mode. | `None` |
+| `KeyFullSpeed` | Hotkey for the 100% speed preset (standard 1x speed). | `Ctrl + Home` |
+| `KeyFrameRate` | Hotkey for the frame-rate preset (restore the last frame-rate setting). | `Ctrl + Ins` |
+| `KeySliderSpeed` | Hotkey to restore the memorized slider speed. | `Ctrl + End` |
 | `EnableMechaFunc` | If true, your mecha can move in Tactical Pause mode. | `false` |
 | `EnableBackgroundAutosave` | Run autosave in the background. | `false` |
 | `EnableHotkeyAutosave` | Enable hotkey to trigger autosave. | `false` |
 | `StartingSpeed` | Game speed (in percent) when the game begins. | `100` |
+| `FrameRate` | Actual speed of the frame-rate preset, in frames per second (0.06-6000 = 0.001x-100x); kept across saves. | `60` |
+| `SliderSpeed` | Memorized slider speed of the slider preset, in percent (1-100); updated automatically by Ctrl+Home. | `100` |
 | `EnableFastLoading` | Skip planet rendering on title screen for faster loading. | `true` |
 | `RemoveGC` | Remove force garbage collection of build tools to reduce stutter. | `true` |
 | `MaxSpeedupScale` | Maximum game speed multiplier for the speedup button. | `10` |
@@ -79,6 +92,7 @@ After running the game once with the mod installed, a config file will be genera
   - When a player is joining or the host is saving, the game will enter a pause mode (where players can only move) and resume automatically when finished.
   - If the game gets stuck in pause mode, the host can manually resume it by moving the World Speed slider.
   - Both host and clients can use the pause hotkey. Game speedup is only synced if the "SyncUPS" multiplayer option is enabled.
+  - The preset speed-slot hotkeys and the world speed slider are host-only.
   - Players can stop/resume Dyson Sphere rotation in the editor.
 
 ## Compatibility
@@ -119,6 +133,14 @@ After running the game once with the mod installed, a config file will be genera
   - **适用场景：** 在后期超大型工厂导致帧率（FPS）下降时，降低世界速度可以减轻 CPU 负担，让游戏运行更流畅。或是享受“黑客帝国”一般，周围一切慢动作的感觉。
   - **速度为 0 时：** 这会创造一个独特的时停效果，所有工厂都将停止运作，但你依然可以自由行动。
 
+#### 4\. 预设档位热键
+  - **功能介绍：** 四个热键在速度档位之间切换：`Pause` 切换战术暂停，`Ctrl+Home` 恢复标准 1 倍速（100%）并自动记忆当前滑块值，`Ctrl+End` 恢复记忆的滑块值，`Ctrl+Ins` 恢复上次帧速率设定值。所有按键都可在配置文件中修改（`KeyPause` / `KeyFullSpeed` / `KeySliderSpeed` / `KeyFrameRate`）。
+  - **暂停恢复：** 再次按下 `Pause` 解除暂停时，精确回到暂停前的速度——帧速率档恢复精确的帧速率设定值，不退化为滑块等效百分比。
+  - **请注意：** 在战术暂停中按下任意非暂停档热键，会先解除暂停再切换档位。后台自动存档时停期间预设档位不可用；联机时预设档位仅主机可用。
+
+#### 5\. 速度指示
+  - **功能介绍：** 右下角速度指示显示在加速按钮下方，同时显示实际速度与帧速度（例如 `60F/s 1x`）；暂停时隐藏。
+
 ## 其他实用功能
 
   - **后台自动存档：** 将自动存档功能放到后台线程执行，避免游戏存档时停止回应。为了确保数据一致，存档期间游戏会短暂进入时停模式（机甲可移动），阻止机甲和工厂的互动。这项功能有一定的风险，使用前建议先测试。  
@@ -135,6 +157,7 @@ After running the game once with the mod installed, a config file will be genera
   - **速度控制：** 点击屏幕右下角的按钮进行暂停、恢复（或重置为1倍速）和加速。你也可以为这些操作绑定热键（`KeySpeedUp` / `KeySpeedDown`）。  
   - **战术暂停：** 按下 `Pause` / `Break` 键切换。
   - **子弹时间滑块：** 打开游戏内的“性能测试”面板，即可在上方找到并调整“世界速度”滑块。
+  - **预设档位热键：** `Pause` 战术暂停 / `Ctrl+Home` 100%（记忆滑块）/ `Ctrl+End` 记忆的滑块速度 / `Ctrl+Ins` 帧速率档。
   - **后台自动保存**：打开性能统计面板，在右上角的选框上启用后台自动保存。
   - **查看性能：** 按 `Shift + F12` 可以在左上角查看实时的 FPS 和 UPS。
 
@@ -155,10 +178,15 @@ After running the game once with the mod installed, a config file will be genera
 | `KeySpeedDown` | 减速的热键。 | `None` |
 | `KeyPause` | 切换战术暂停模式的热键。 | `Pause`｜`Break` |
 | `KeyStepOneFrame` | 在暂停模式下，让游戏前进1帧的热键。 | `None` |
+| `KeyFullSpeed` | 切换到 100% 速度档（标准 1 倍速）的热键。 | `Ctrl + Home` |
+| `KeyFrameRate` | 切换到帧速率档的热键（恢复上次帧速率设定值）。 | `Ctrl + Ins` |
+| `KeySliderSpeed` | 切换到滑块减速模式的热键（恢复记忆的滑块值）。 | `Ctrl + End` |
 | `EnableMechaFunc` | 设为 true 时，你的机甲能在战术暂停模式中移动。 | `false` |
 | `EnableBackgroundAutosave` | 在后台执行自动存档。 | `false` |
 | `EnableHotkeyAutosave` | 允许用热键触发自动存档。 | `false` |
 | `StartingSpeed` | 游戏开始时的默认世界速度（百分比）。 | `100` |
+| `FrameRate` | 帧速率档的实际设定速率，单位为帧每秒（0.06-6000，对应 0.001x-100x）。游戏内调整后自动保存，跨存档保持。 | `60` |
+| `SliderSpeed` | 滑块减速模式的速度百分比（1-100）。按 Ctrl+Home 时自动记忆当前滑块值，自动保存，跨存档保持 | `100` |
 | `EnableFastLoading` | 跳过标题画面的星球渲染以加快载入。 | `true` |
 | `RemoveGC` | 移除建筑工具的强制内存回收以减少卡顿。 | `true` |
 | `MaxSpeedupScale` | 加速按钮的最大游戏速度倍率。 | `10` |
@@ -171,6 +199,7 @@ After running the game once with the mod installed, a config file will be genera
   - 当有玩家加入或主机存档时，游戏会自动进入时停模式（此模式下玩家只可移动），并在完成后自动恢复。
   - 如果游戏意外卡在时停模式，主机可以通过拖动世界速度滑块来手动恢复游戏运行。
   - 主机和客户端都可以使用暂停热键。加速功能只有在联机选项“SyncUPS”启用时才会同步。
+  - 预设档位热键与世界速度滑块仅主机可用。
   - 玩家可以在戴森球编辑器中暂停或恢复戴森球的旋转。
 
 ## 相容性
