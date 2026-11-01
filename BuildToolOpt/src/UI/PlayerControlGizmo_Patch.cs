@@ -45,7 +45,8 @@ namespace BuildToolOpt
                 if (GameMain.mainPlayer.inhandItemId != inhandItemId)
                 {
                     inhandItemId = GameMain.mainPlayer.inhandItemId;
-                    if (LDB.items.Select(inhandItemId)?.prefabDesc.isStation ?? false)
+                    var prefabDesc = LDB.items.Select(inhandItemId)?.prefabDesc;
+                    if (prefabDesc != null && (prefabDesc.isStation && !prefabDesc.isCollectStation))
                     {
                         sqrtRange0 = 841f + 225f; //冗餘量, 調整視覺大小
                         sqrtRange1 = 225f + 9f;

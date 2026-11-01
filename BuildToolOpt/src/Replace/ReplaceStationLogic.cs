@@ -166,9 +166,57 @@ namespace BuildToolOpt
 			int replaceItemId = tool.buildPreviews[0].item.ID;
 			int realBefore = RealItemCount(player, replaceItemId);
 
-			// 沿用旧白模的设置参数
-			int[] parameters = tool.factory.prebuildPool[prebuildId].parameters;
-			int paramCount = parameters?.Length ?? 0;
+			// 使用 BuildingParameters 從舊 Prebuild 複製完整物流站設定。
+			// 傳入負數代表來源是 Prebuild。
+			BuildingParameters stationParameters = default;
+
+			bool copied = stationParameters.CopyFromFactoryObject(
+				-prebuildId,
+				tool.factory,
+				copyInserters: false,
+				copyAllSettings: true);
+
+			if (!copied || stationParameters.type != BuildingType.Station)
+			{
+				ReplacingGhost = false;
+				IsReplacing = false;
+				return;
+			}
+
+			// 建立獨立的 2048 長度陣列，避免拆除舊 Prebuild
+			// 時影響原本的參數資料。
+			int[] parameters = new int[BuildingParameters.kStationParamsLength];
+
+			if (stationParameters.parameters != null)
+			{
+				Array.Copy(
+					stationParameters.parameters,
+					parameters,
+					Math.Min(
+						stationParameters.parameters.Length,
+						parameters.Length));
+			}
+
+			int paramCount = parameters.Length;
+
+
+			// 取得舊、新物流站的 PrefabDesc
+			PlanetFactory factory = tool.factory;
+			ref PrebuildData oldPrebuild = ref factory.prebuildPool[prebuildId];
+			ItemProto oldProto = LDB.items.Select(oldPrebuild.protoId);
+			PrefabDesc newDesc = tool.buildPreviews[0].desc;
+
+			// 取得舊、新物流站接口數量
+			int oldSlotCount = oldProto?.prefabDesc?.portPoses?.Length ?? 12;
+			int newSlotCount = newDesc?.portPoses?.Length ?? 12;
+
+			// 拆除舊 Prebuild 之前，先保存所有外部接口連線
+			StationObjectConn[] connections =
+				CapturePrebuildConnections(
+					factory,
+					prebuildId,
+					oldSlotCount);
+
 
 			// 移除旧白模（未支付的预制备 ObjectAssetValue = 0，无退款）
 			tool.actionBuild.DoDismantleObject(-prebuildId);
@@ -185,6 +233,14 @@ namespace BuildToolOpt
 				IsReplacing = false;
 				return;
 			}
+
+			// 新 Prebuild 建立成功後，立即恢復外部 Belt 連線。
+			// objId 保留 CreatePrebuilds() 回傳的原始正負號。
+			ReconnectPrebuildConnections(
+				factory,
+				objId,
+				connections,
+				newSlotCount);
 
 			if (realBefore >= 1)
 			{
@@ -282,18 +338,10 @@ namespace BuildToolOpt
 			// Save status of old station
 			StationComponent oldStation = tool.factory.transport.stationPool[stationId];
 			BuildingParameters parameters = default;
-			parameters.CopyFromFactoryObject(oldStation.entityId, tool.factory);
+			parameters.CopyFromFactoryObject(oldStation.entityId, tool.factory, copyInserters: false, copyAllSettings: true);
 			SlotData[] slots = oldStation.slots;
 			SaveState(oldStation, out StationState state);
 			tool.actionBuild.DoDismantleObject(oldStation.entityId);
-
-			if (ghost)
-			{
-				// Take the refund back; the hologram will require one tower to complete.
-				int takeId = replaceItemId;
-				int takeCount = 1;
-				player.package.TakeTailItems(ref takeId, ref takeCount, out _);
-			}
 
 			// Create prebuild and apply config
 			tool.buildPreviews[0].parameters = parameters.parameters;
@@ -357,6 +405,69 @@ namespace BuildToolOpt
 			if (player.inhandItemId == itemId)
 				count += player.inhandItemCount;
 			return count;
+		}
+
+		private struct StationObjectConn
+		{
+			public int slot;
+			public bool isOutput;
+			public int otherObjId;
+			public int otherSlot;
+		}
+
+		private static StationObjectConn[] CapturePrebuildConnections(
+			PlanetFactory factory,
+			int prebuildId,
+			int slotCount)
+		{
+			var connections = new StationObjectConn[slotCount];
+			int objId = -prebuildId;
+
+			for (int i = 0; i < slotCount; i++)
+			{
+
+				factory.ReadObjectConn( objId, i,
+					out bool isOutput,
+					out int otherObjId,
+					out int otherSlot);
+
+				if (otherObjId != 0)
+				{
+					connections[i] = new StationObjectConn
+					{
+						slot = i,
+						isOutput = isOutput,
+						otherObjId = otherObjId,
+						otherSlot = otherSlot
+					};
+				}
+			}
+			return connections;
+		}
+
+		private static void ReconnectPrebuildConnections(
+			PlanetFactory factory,
+			int newObjId,
+			StationObjectConn[] connections,
+			int newSlotCount)
+		{
+			if (connections == null) return;
+
+			int count = Math.Min(connections.Length, newSlotCount);
+
+			for (int i = 0; i < count; i++)
+			{
+				var conn = connections[i];
+
+				if (conn.otherObjId == 0) continue;
+
+				factory.WriteObjectConn(
+					newObjId,
+					conn.slot,
+					conn.isOutput,
+					conn.otherObjId,
+					conn.otherSlot);
+			}
 		}
 
 		private static void ReconnectBelts(PlanetFactory factory, int objId, SlotData[] slots)
