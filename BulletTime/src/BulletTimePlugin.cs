@@ -26,6 +26,7 @@ namespace BulletTime
         public static ConfigEntry<bool> EnableHotkeyAutosave;
         public static ConfigEntry<bool> EnableFastLoading;
         public static ConfigEntry<bool> RemoveGC;
+        public static ConfigEntry<bool> FixMechaAtSpeedUp;
         public static ConfigEntry<float> StartingSpeed;
         public static ConfigEntry<KeyboardShortcut> KeyAutosave;
         public static ConfigEntry<KeyboardShortcut> KeyImmediateSave;
@@ -67,6 +68,7 @@ namespace BulletTime
             EnableHotkeyAutosave = Config.Bind("Save", "EnableHotkeyAutosave", false, "Enable hotkey to trigger autosave\n允许用热键触发自动存档");
             EnableFastLoading = Config.Bind("Speed", "EnableFastLoading", true, "Increase main menu loading speed\n加快载入主选单");
             RemoveGC = Config.Bind("Speed", "RemoveGC", true, "Remove force garbage collection of build tools\n移除建筑工具的强制内存回收");
+            FixMechaAtSpeedUp = Config.Bind("Speed", "FixMechaAtSpeedUp", true, "Keep the mecha on real time when the game is sped up: double-tap take-off window, walking/flying energy cost, Shift+rotate speed of miners, climb when entering space. Not applied in multiplayer\n加速时让机甲保持真实时间：双击起飞的判定时间、行走/飞行耗能、Shift+旋转采矿机的速度、进入太空时的爬升。联机时不生效");
             StartingSpeed = Config.Bind("Speed", "StartingSpeed", 100f, new ConfigDescription("Game speed when the game begin (0-100)\n游戏开始时的游戏速度 (0-100)", new AcceptableValueRange<float>(0f, 100f)));
             FrameRate = Config.Bind("Speed", "FrameRate", 60f, new ConfigDescription("Actual speed of the frame-rate preset, in frames per second (0.06-6000 = 0.001x-100x). Adjusted in game, saved automatically and kept across saves\n帧速率档的实际设定速率，单位为帧每秒（0.06-6000，对应 0.001x-100x）。游戏内调整后自动保存，跨存档保持", new AcceptableValueRange<float>(0.06f, 6000f)));
             SliderSpeed = Config.Bind("Speed", "SliderSpeed", 100f, new ConfigDescription("Slider value of the slider preset in percent (1-100). Memorized automatically by Ctrl+Home, saved and kept across saves\n滑块减速模式的速度百分比（1-100）。按 Ctrl+Home 时自动记忆当前滑块值，自动保存，跨存档保持", new AcceptableValueRange<float>(1f, 100f)));
@@ -140,6 +142,10 @@ namespace BulletTime
                 if (RemoveGC.Value)
                 {
                     TryPatch(harmony, typeof(BuildTool_Patch), "BuildTool no GC patch didn't success!");
+                }
+                if (FixMechaAtSpeedUp.Value)
+                {
+                    TryPatch(harmony, typeof(Mecha_Patch), "Mecha speed-up fix patch didn't success!");
                 }
                 TryPatch(harmony, typeof(SimulateSpeed_Patch), "Simulate Tool shift-click fuction disable!");
             }
