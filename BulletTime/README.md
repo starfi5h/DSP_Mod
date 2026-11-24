@@ -82,6 +82,7 @@ After running the game once with the mod installed, a config file will be genera
 | `SliderSpeed` | Memorized slider speed of the slider preset, in percent (1-100); updated automatically by Ctrl+Home. | `100` |
 | `EnableFastLoading` | Skip planet rendering on title screen for faster loading. | `true` |
 | `RemoveGC` | Remove force garbage collection of build tools to reduce stutter. | `true` |
+| `FixMechaAtSpeedUp` | When sped up, keep the double-tap take-off window, walking/flying energy cost, Shift+rotate speed of miners and the climb into space as at 1x. Not applied in multiplayer. | `true` |
 | `MaxSpeedupScale` | Maximum game speed multiplier for the speedup button. | `10` |
 | `MaxSimulationSpeed` | In outer space, shift-click to set the simulation speed to this value. | `10.0` |
 | `StatusTextHeightOffset` | Height of Status text relative to auto save text. | `100` |
@@ -189,6 +190,7 @@ After running the game once with the mod installed, a config file will be genera
 | `SliderSpeed` | 滑块减速模式的速度百分比（1-100）。按 Ctrl+Home 时自动记忆当前滑块值，自动保存，跨存档保持 | `100` |
 | `EnableFastLoading` | 跳过标题画面的星球渲染以加快载入。 | `true` |
 | `RemoveGC` | 移除建筑工具的强制内存回收以减少卡顿。 | `true` |
+| `FixMechaAtSpeedUp` | 加速时让双击起飞的判定时间、行走/飞行耗能、Shift+旋转采矿机的速度和进入太空时的爬升保持与 1 倍速相同。联机时不生效。 | `true` |
 | `MaxSpeedupScale` | 加速按钮的最大游戏速度倍率。 | `10` |
 | `MaxSimulationSpeed` | 在外太空时,可以shift+点击快速达到此指定倍率 | `10.0` |
 | `StatusTextHeightOffset` | 状态提示相对于自动存档提示的高度。 | `100` |
